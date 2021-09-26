@@ -35,6 +35,8 @@ const MOUSE_CODE = {
 let keyState = {};
 let btnState = {};
 
+
+
 //
 //  Handled by PIXI
 //
@@ -117,6 +119,5 @@ window.onload = () => {
 //
 
 const gameLoop = () => {
-    console.log(keyState);
-    console.log(btnState);
+    
 }
