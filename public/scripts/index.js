@@ -2,12 +2,18 @@
 //  Assets directories
 //
 
+const LOADER_BASEURL = "../assets/"
+
 const ICON_DIR = "../assets/icons/";
 const IMAGE_DIR = "../assets/images/";
 const SPRITE_DIR = "../assets/sprites/";
+const SPRITESHEET_DIR = "../assets/spritesheets/";
 
 //  Constants
 const ROOT_DIV = document.querySelector("#root");
+
+//  Physical constants
+const GRAVITY = 9.81;
 
 //  In game used key codes
 
@@ -32,16 +38,25 @@ const MOUSE_CODE = {
 
 //  Represent the current state of the key
 //  true == down  /  false == up
-let keyState = {};
-let btnState = {};
-let cursorPos = [];
 
+const input = {
+    key: {},
+    btn: {},
+    cursorPos: { x: 0, y: 0 }
+}
+
+const parallaxBackground = {
+
+}
 
 //
 //  Handled by PIXI
 //
 const handlePointerMove = (event) => {
-    
+    let pos = event.data.global;
+
+    input.cursorPos.x = pos.x;
+    input.cursorPos.y = pos.y;
 }
 
 //
@@ -50,47 +65,48 @@ const handlePointerMove = (event) => {
 
 //  When some key is pressed down
 const handleKeyDown = (event) => {
-    keyState[event.keyCode] = true;
+    input.key[event.keyCode] = true;
 };
 
 //  When some key is released up
 const handleKeyUp = (event) => {
-    keyState[event.keyCode] = false;
+    input.key[event.keyCode] = false;
 };
 
 //  When some button is pressed down
 const handleMouseBtnDown = (event) => {
-    btnState[event.button] = true;
+    input.btn[event.button] = true;
 };
 
 //  When some button is released up
 const handleMouseBtnUp = (event) => {
-    btnState[event.button] = false;
+    input.btn[event.button] = false;
 };
 
 //  When mouse wheel is activated
 const handleMouseWheel = (event) => {
     let up = (event.wheelDelta > 0) ? true : false;
-
-    
 };
-
-let teste;
 
 //  Software entry point
 window.onload = () => {
+    
+    //  Create a PIXI application
     let app = new PIXI.Application({
         resolution: devicePixelRatio,
         backgroundColor: 0xAAAAAA,
         resizeTo: ROOT_DIV
     });
 
+    //  Attach the app view to root div in index.html
     ROOT_DIV.appendChild(app.view);
 
     let player = new PIXI.Sprite.from(SPRITE_DIR + "mage.png");
     player.anchor.set(0.5);
     player.x = app.view.width / 2;
     player.y = app.view.height / 2;
+
+    app.loader.add("lifebar", SPRITESHEET_DIR + "lifebar.png");
 
     app.stage.addChild(player);
 
@@ -112,10 +128,6 @@ window.onload = () => {
     window.addEventListener("mousedown", handleMouseBtnDown);
     window.addEventListener("mouseup", handleMouseBtnUp);
     window.addEventListener("wheel", handleMouseWheel);
-
-    teste = player;
-
-    app.ticker.add(gameLoop);
 };
 
 //
@@ -123,12 +135,29 @@ window.onload = () => {
 //
 
 const gameLoop = () => {
-    if (keyState[KEY_CODE.KEY_D] == true)
-        teste.x += 3;
-    if (keyState[KEY_CODE.KEY_A] == true)
-        teste.x -= 3;
-    if (keyState[KEY_CODE.KEY_W] == true)
-        teste.y -= 3;
-    if (keyState[KEY_CODE.KEY_S] == true)
-        teste.y += 3;
+    console.log(`PosX: ${input.cursorPos.x}, PosY: ${input.cursorPos.y}`);
+}
+
+//
+//  Collisions, physics and utils ...
+//
+
+const sysUpdateAcceleration = (entity) => {
+    
+}
+
+const sysUpdateVelocity = (entity) => {
+
+}
+
+const sysUpdatePosition = (entity) => {
+
+}
+
+const sysUpdateGravity = (entity) => {
+
+}
+
+const sysUpdateCollision = (entity) => {
+
 }
