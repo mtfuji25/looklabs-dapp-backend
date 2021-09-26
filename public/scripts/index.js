@@ -34,7 +34,7 @@ const MOUSE_CODE = {
 //  true == down  /  false == up
 let keyState = {};
 let btnState = {};
-
+let cursorPos = [];
 
 
 //
@@ -75,6 +75,8 @@ const handleMouseWheel = (event) => {
     
 };
 
+let teste;
+
 //  Software entry point
 window.onload = () => {
     let app = new PIXI.Application({
@@ -111,6 +113,8 @@ window.onload = () => {
     window.addEventListener("mouseup", handleMouseBtnUp);
     window.addEventListener("wheel", handleMouseWheel);
 
+    teste = player;
+
     app.ticker.add(gameLoop);
 };
 
@@ -119,5 +123,12 @@ window.onload = () => {
 //
 
 const gameLoop = () => {
-    
+    if (keyState[KEY_CODE.KEY_D] == true)
+        teste.x += 3;
+    if (keyState[KEY_CODE.KEY_A] == true)
+        teste.x -= 3;
+    if (keyState[KEY_CODE.KEY_W] == true)
+        teste.y -= 3;
+    if (keyState[KEY_CODE.KEY_S] == true)
+        teste.y += 3;
 }
