@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blossom of Night - 404</title>
+    <style>
+        * {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        html { 
+            background: url("assets/images/404_bg.jpg") no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        #notfound {
+            position: relative;
+            height: 100vh;
+        }
+
+        #notfound .notfound {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        .notfound {
+            max-width: 767px;
+            width: 100%;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .notfound .notfound-404 {
+            position: relative;
+            height: 180px;
+            margin-bottom: 20px;
+            z-index: -1;
+        }
+
+        .notfound .notfound-404 h1 {
+            font-family: 'Montserrat', sans-serif;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50% , -50%);
+            -ms-transform: translate(-50% , -50%);
+            transform: translate(-50% , -50%);
+            font-size: 224px;
+            font-weight: 900;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            margin-left: -12px;
+            color: #030005;
+            text-transform: uppercase;
+            letter-spacing: -20px;
+        }
+
+
+        .notfound .notfound-404 h2 {
+            font-family: 'Montserrat', sans-serif;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 110px;
+            font-size: 42px;
+            font-weight: 700;
+            color: #e1ebfd;
+            text-transform: uppercase;
+            letter-spacing: 13px;
+            margin: 0;
+        }
+
+        .notfound a {
+            font-family: 'Montserrat', sans-serif;
+            display: inline-block;
+            text-transform: uppercase;
+            color: #e1ebfd;
+            text-decoration: none;
+            border: 2px solid;
+            background: transparent;
+            padding: 10px 40px;
+            font-size: 14px;
+            font-weight: 700;
+            -webkit-transition: 0.2s all;
+            transition: 0.2s all;
+        }
+
+        .notfound a:hover {
+            background-color: #030005;
+            border-color: #030005;;
+        }
+
+        @media only screen and (max-width: 767px) {
+            .notfound .notfound-404 h2 {
+                font-size: 24px;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .notfound .notfound-404 h1 {
+                font-size: 182px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notfound">
+        <div class="notfound">
+            <div class="notfound-404">
+                <h1>404</h1>
+                <h2>Page Not Found</h2>
+            </div>
+            <a href="http://localhost:8080">HOMEPAGE</a>
+        </div>
+    </div>
+</body>
+</html>

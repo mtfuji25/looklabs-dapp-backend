@@ -1,0 +1,24 @@
+{
+  "name": "blossom-of-night",
+  "version": "1.0.0",
+  "description": "In this game you are going to explore an amazing world and create you own journey through the depths of a dark and frightening forest.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node_modules/.bin/http-server -c-1 -p 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/expertisesolutions/blossom-of-night.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/expertisesolutions/blossom-of-night/issues"
+  },
+  "homepage": "https://github.com/expertisesolutions/blossom-of-night#readme",
+  "dependencies": {
+    "http-server": "^13.0.2"
+  }
+}
