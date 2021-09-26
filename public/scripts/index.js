@@ -2,12 +2,42 @@
 //  Assets directories
 //
 
-const LOADER_BASEURL = "../assets/"
-
 const ICON_DIR = "../assets/icons/";
 const IMAGE_DIR = "../assets/images/";
 const SPRITE_DIR = "../assets/sprites/";
 const SPRITESHEET_DIR = "../assets/spritesheets/";
+const BGPACK_DIR = "../assets/bg-pack/"
+
+//
+//  Resources
+//
+
+const bgResources = [
+    {
+        "name": "bg-back",
+        "url": "../assets/bg-pack/bg-back.png"
+    },
+    {
+        "name": "bg-clouds",
+        "url": "../assets/bg-pack/bg-clouds.png"
+    },
+    {
+        "name": "bg-trees3",
+        "url": "../assets/bg-pack/bg-trees3.png"
+    },
+    {
+        "name": "bg-trees2",
+        "url": "../assets/bg-pack/bg-trees2.png"
+    },
+    {
+        "name": "bg-trees1",
+        "url": "../assets/bg-pack/bg-trees1.png"
+    },
+    {
+        "name": "bg-terrain",
+        "url": "../assets/bg-pack/bg-terrain.png"
+    }
+];
 
 //  Constants
 const ROOT_DIV = document.querySelector("#root");
@@ -45,8 +75,15 @@ const input = {
     cursorPos: { x: 0, y: 0 }
 }
 
-const parallaxBackground = {
-
+const bg = {
+    bgBack: {},
+    bgClouds: {},
+    bgTrees3: {},
+    bgTrees2: {},
+    bgTrees1: {},
+    bgTerrain: {},
+    speed: 1.5,
+    bgX: 0.0
 }
 
 //
@@ -101,6 +138,15 @@ window.onload = () => {
     //  Attach the app view to root div in index.html
     ROOT_DIV.appendChild(app.view);
 
+
+    app.loader
+        .add(bgResources);
+
+
+    app.loader.onComplete.add(() => {
+        initLevel(app);
+    });
+
     let player = new PIXI.Sprite.from(SPRITE_DIR + "mage.png");
     player.anchor.set(0.5);
     player.x = app.view.width / 2;
@@ -129,6 +175,28 @@ window.onload = () => {
     window.addEventListener("mouseup", handleMouseBtnUp);
     window.addEventListener("wheel", handleMouseWheel);
 };
+
+const createBg = (texture, app) => {
+    let tiling = new PIXI.TilingSprite(texture, app.view.width, app.view.height);
+    tiling.position.set(0.0);
+    app.stage.addChild(tiling);
+
+    return tiling;
+}
+
+const initBg = (app) => {
+    bg.bgBack = createBg(app.loader.resources["bg-back"].texture, app);
+    bg.bgClouds = createBg(app.loader.resources["bg-clouds"].texture, app);
+    bg.bgTrees3 = createBg(app.loader.resources["bg-trees3"].texture, app);
+    bg.bgTrees2 = createBg(app.loader.resources["bg-trees2"].texture, app);
+    bg.bgTrees1 = createBg(app.loader.resources["bg-trees1"].texture, app);
+    bg.bgTerrain = createBg(app.loader.resources["bg-terrain"].texture, app);
+}
+
+const initLevel = (app) => {
+    initBg(app);
+    app.ticker.add(gameLoop);
+}
 
 //
 //  Main game loop
