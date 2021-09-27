@@ -8,36 +8,6 @@ const SPRITE_DIR = "../assets/sprites/";
 const SPRITESHEET_DIR = "../assets/spritesheets/";
 const BGPACK_DIR = "../assets/bg-pack/"
 
-//
-//  Resources
-//
-
-const bgResources = [
-    {
-        "name": "bg-back",
-        "url": "../assets/bg-pack/bg-back.png"
-    },
-    {
-        "name": "bg-clouds",
-        "url": "../assets/bg-pack/bg-clouds.png"
-    },
-    {
-        "name": "bg-trees3",
-        "url": "../assets/bg-pack/bg-trees3.png"
-    },
-    {
-        "name": "bg-trees2",
-        "url": "../assets/bg-pack/bg-trees2.png"
-    },
-    {
-        "name": "bg-trees1",
-        "url": "../assets/bg-pack/bg-trees1.png"
-    },
-    {
-        "name": "bg-terrain",
-        "url": "../assets/bg-pack/bg-terrain.png"
-    }
-];
 
 //  Constants
 const ROOT_DIV = document.querySelector("#root");
@@ -82,7 +52,7 @@ const bg = {
     bgTrees2: {},
     bgTrees1: {},
     bgTerrain: {},
-    speed: 1.5,
+    speed: 0.5,
     bgX: 0.0
 }
 
@@ -138,23 +108,27 @@ window.onload = () => {
     //  Attach the app view to root div in index.html
     ROOT_DIV.appendChild(app.view);
 
-
     app.loader
-        .add(bgResources);
-
+        .add("bg-back", BGPACK_DIR + "bg-back.png")
+        .add("bg-clouds", BGPACK_DIR + "bg-clouds.png")
+        .add("bg-trees3", BGPACK_DIR + "bg-trees3.png")
+        .add("bg-trees2", BGPACK_DIR + "bg-trees2.png")
+        .add("bg-trees1", BGPACK_DIR + "bg-trees1.png")
+        .add("bg-terrain", BGPACK_DIR + "bg-terrain.png")
 
     app.loader.onComplete.add(() => {
         initLevel(app);
     });
+    app.loader.load();
 
-    let player = new PIXI.Sprite.from(SPRITE_DIR + "mage.png");
-    player.anchor.set(0.5);
-    player.x = app.view.width / 2;
-    player.y = app.view.height / 2;
+    // let player = new PIXI.Sprite.from(SPRITE_DIR + "mage.png");
+    // player.anchor.set(0.5);
+    // player.x = app.view.width / 2;
+    // player.y = app.view.height / 2;
 
-    app.loader.add("lifebar", SPRITESHEET_DIR + "lifebar.png");
+    // app.loader.add("lifebar", SPRITESHEET_DIR + "lifebar.png");
 
-    app.stage.addChild(player);
+    // app.stage.addChild(player);
 
     // Allow the interactive mode of PIXI
     app.stage.interactive = true;
@@ -179,6 +153,10 @@ window.onload = () => {
 const createBg = (texture, app) => {
     let tiling = new PIXI.TilingSprite(texture, app.view.width, app.view.height);
     tiling.position.set(0.0);
+    let scaleFactorX = app.view.width / 560.0;
+    let scaleFactorY = app.view.height / 315.0;
+    tiling.tileScale.x = scaleFactorX;
+    tiling.tileScale.y = scaleFactorY;
     app.stage.addChild(tiling);
 
     return tiling;
@@ -204,11 +182,23 @@ const initLevel = (app) => {
 
 const gameLoop = () => {
     console.log(`PosX: ${input.cursorPos.x}, PosY: ${input.cursorPos.y}`);
+    sysUpdateBg();
 }
 
 //
 //  Collisions, physics and utils ...
 //
+
+const sysUpdateBg = () => {
+    bg.bgX = (bg.bgX + bg.speed);
+
+    bg.bgBack.tilePosition.x = bg.bgX / 5;
+    bg.bgClouds.tilePosition.x = bg.bgX / 4;
+    bg.bgTrees3.tilePosition.x = bg.bgX / 3;
+    bg.bgTrees2.tilePosition.x = bg.bgX / 2;
+    bg.bgTrees1.tilePosition.x = bg.bgX;
+    bg.bgTerrain.tilePosition.x = bg.bgX;
+}
 
 const sysUpdateAcceleration = (entity) => {
     
