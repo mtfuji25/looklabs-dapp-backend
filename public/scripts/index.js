@@ -23,7 +23,8 @@ const resources = {
     ],
     "player-pack": [
         { "name": "player", "url": "../assets/player-pack/player.png" },
-        { "name": "shots", "url": "../assets/player-pack/shots.png" }
+        { "name": "shots", "url": "../assets/player-pack/shots.png" },
+        { "name": "bullets", "url": "../assets/player-pack/bullet.png" }
     ]
 }
 
@@ -31,7 +32,7 @@ const resources = {
 const ROOT_DIV = document.querySelector("#root");
 
 //  Physical constants
-const GRAVITY = 9.81;
+const GRAVITY = 15.8;
 
 //  In game used key codes
 
@@ -80,13 +81,6 @@ const world = {
     height: 0.0
 }
 
-const PLAYER_MOVES = {
-    RIGHT: 0,
-    LEFT: 1,
-    SHOT_RIGHT: 2,
-    SHOT_LEFT: 3
-}
-
 const player = {
     sheet: {},
     shotSheet: {},
@@ -102,6 +96,16 @@ const player = {
     velocityY: 0.0,
     jumping: false,
     shoting: false,
+}
+
+//  Bullets control
+
+const bullets = {
+    sheet: [],
+    number: 0,
+    sprites: [],
+    velocitys: [],
+    appInstance: {}
 }
 
 //
@@ -309,7 +313,7 @@ const initPlayer = (app) => {
 
 const playerJump = () => {
     if (!player.jumping) {
-        player.velocityY = 5.0;
+        player.velocityY = 10.0;
         player.jumping = true;
     }
 }
@@ -354,6 +358,7 @@ const updatePlayer = () => {
     if (input.btn['0']) {
         player.shoting = true;
         player.shotSprite.visible = true;
+        createShot();
     }
 
     if (player.shoting) {
@@ -368,11 +373,49 @@ const updatePlayer = () => {
     }
 
     updatePlayerJump();
+};
+
+const initBullets = (app) => {
+    let ssheet = new PIXI.BaseTexture.from(app.loader.resources["bullets"].url);
+    let w = 21;
+    let h = 21;
+
+    for (i = 0; i < 15; ++i) {
+        bullets.sheet.push(new PIXI.Texture(ssheet, new PIXI.Rectangle(i * w, 0, w, h)));
+    }
+
+    bullets.appInstance = app;
 }
+
+const createShot = (app) => {
+    let sprite = new PIXI.AnimatedSprite(bullets.sheet);
+    sprite.animationSpeed = 1.0;
+    sprite.loop = false;
+    sprite.anchor.set(0.5);
+    sprite.x = player.sprite.x;
+    sprite.y = Math.round(player.sprite.y - player.sheetHeight);
+
+    let difX = input.cursorPos.x - sprite.x;
+    let difY = input.cursorPos.y - sprite.y;
+    let length = Math.sqrt((difX ** 2) + (difY ** 2));
+
+    difX /= length;
+    difY /= length;
+
+    bullets.appInstance.stage.addChild(sprite);
+    sprite.play();
+    bullets.sprites.push(sprite);
+    bullets.velocitys.push({x: difX, y: difY});
+
+    bullets.number++;
+};
 
 const updateShot = () => {
-
-}
+    for (i = 0; i < bullets.number; ++i) {
+        bullets.sprites[i].x += bullets.velocitys[i].x * 10;
+        bullets.sprites[i].y += bullets.velocitys[i].y * 10;
+    }
+};
 
 //
 //  Main game loop and level initialization
@@ -382,6 +425,7 @@ const initLevel = (app) => {
     initBg(app);
     initWorld(app);
     initPlayer(app);
+    initBullets(app);
     app.ticker.add(gameLoop);
 };
 
@@ -389,28 +433,5 @@ const gameLoop = () => {
     console.log(`PosX: ${input.cursorPos.x}, PosY: ${input.cursorPos.y}`);
     updateBg();
     updatePlayer();
-};
-
-//
-//  Collisions, physics and utils ...
-//
-
-const sysUpdateAcceleration = (entity) => {
-    
-};
-
-const sysUpdateVelocity = (entity) => {
-
-};
-
-const sysUpdatePosition = (entity) => {
-
-};
-
-const sysUpdateGravity = (entity) => {
-
-};
-
-const sysUpdateCollision = (entity) => {
-
+    updateShot();
 };
