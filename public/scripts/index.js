@@ -25,6 +25,10 @@ const resources = {
         { "name": "player", "url": "../assets/player-pack/player.png" },
         { "name": "shots", "url": "../assets/player-pack/shots.png" },
         { "name": "bullets", "url": "../assets/player-pack/bullet.png" }
+    ],
+    "tutorial-pack": [
+        { "name": "mage", "url": "../assets/sprites/mage.png" },
+        { "name": "paper", "url": "../assets/sprites/paperscroll.png" }
     ]
 }
 
@@ -105,7 +109,9 @@ const bullets = {
     number: 0,
     sprites: [],
     velocitys: [],
-    appInstance: {}
+    times: [],
+    appInstance: {},
+    lastShot: 0.0
 }
 
 //
@@ -125,6 +131,8 @@ const handlePointerMove = (event) => {
 //  When some key is pressed down
 const handleKeyDown = (event) => {
     input.key[event.keyCode] = true;
+    if (event.keyCode == KEY_CODE.KEY_ESC)
+        closeTutorial();
 };
 
 //  When some key is released up
@@ -147,6 +155,41 @@ const handleMouseWheel = (event) => {
     let up = (event.wheelDelta > 0) ? true : false;
 };
 
+//
+//  Tutorial
+//
+
+const tutorial = {
+    mage: {},
+    paper: {},
+    text: {},
+    appInstance: {}
+}
+
+const closeTutorial = () => {
+    tutorial.appInstance.stage.removeChild(tutorial.mage);
+    tutorial.appInstance.stage.removeChild(tutorial.paper);
+    tutorial.appInstance.stage.removeChild(tutorial.text);
+}
+
+const showTutorial = (app) => {
+    tutorial.mage = new PIXI.Sprite(app.loader.resources["mage"].texture);
+    tutorial.paper = new PIXI.Sprite(app.loader.resources["paper"].texture);
+
+    tutorial.mage.x = 700;
+
+    tutorial.text = new PIXI.Text("Use as teclas [ a, d, space ] para se mexer.\nE utilize o botão diretio do mouse para atirar\n*ESC para fechar o tutorial*.");
+    tutorial.text.anchor.set(0.5);
+    tutorial.text.x = 350;
+    tutorial.text.y = 150;
+
+    app.stage.addChild(tutorial.mage);
+    app.stage.addChild(tutorial.paper);
+    app.stage.addChild(tutorial.text);
+
+    tutorial.appInstance = app;
+}
+
 //  Software entry point
 window.onload = () => {
     
@@ -163,10 +206,12 @@ window.onload = () => {
     app.loader
         .add(resources["bg-pack"])
         .add(resources["ui-pack"])
-        .add(resources["player-pack"]);
+        .add(resources["player-pack"])
+        .add(resources["tutorial-pack"]);
 
     app.loader.onComplete.add(() => {
         initLevel(app);
+        showTutorial(app);
     });
     app.loader.load();
 
@@ -388,11 +433,18 @@ const initBullets = (app) => {
 }
 
 const createShot = (app) => {
+    if (bullets.lastShot <= 0.1)
+        return;
+
     let sprite = new PIXI.AnimatedSprite(bullets.sheet);
     sprite.animationSpeed = 1.0;
     sprite.loop = false;
     sprite.anchor.set(0.5);
-    sprite.x = player.sprite.x;
+    if (player.right) {
+        sprite.x = player.sprite.x;
+    } else {
+        sprite.x = player.sprite.x - player.sheetWidth;
+    }
     sprite.y = Math.round(player.sprite.y - player.sheetHeight);
 
     let difX = input.cursorPos.x - sprite.x;
@@ -406,15 +458,28 @@ const createShot = (app) => {
     sprite.play();
     bullets.sprites.push(sprite);
     bullets.velocitys.push({x: difX, y: difY});
+    bullets.times.push(0.0);
 
     bullets.number++;
+    bullets.lastShot = 0.0;
 };
 
 const updateShot = () => {
     for (i = 0; i < bullets.number; ++i) {
         bullets.sprites[i].x += bullets.velocitys[i].x * 10;
         bullets.sprites[i].y += bullets.velocitys[i].y * 10;
+
+        if (bullets.times[i] >= 1.0 || bullets.sprites[i].y >= Math.round(world.height - world.down) + 1) {
+            bullets.appInstance.stage.removeChild(bullets.sprites[i]);
+            bullets.sprites.splice(i, 1);
+            bullets.velocitys.splice(i, 1);
+            bullets.times.splice(i, 1);
+            bullets.number--;
+        } else {
+            bullets.times[i] += 0.016;
+        }
     }
+    bullets.lastShot += 0.016;
 };
 
 //
@@ -430,7 +495,6 @@ const initLevel = (app) => {
 };
 
 const gameLoop = () => {
-    console.log(`PosX: ${input.cursorPos.x}, PosY: ${input.cursorPos.y}`);
     updateBg();
     updatePlayer();
     updateShot();
