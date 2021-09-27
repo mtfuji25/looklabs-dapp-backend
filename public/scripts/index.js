@@ -22,7 +22,8 @@ const resources = {
         { "name": "lifebar", "url": "../assets/ui-pack/teste.png" }
     ],
     "player-pack": [
-        { "name": "player", "url": "../assets/player-pack/player.png" }
+        { "name": "player", "url": "../assets/player-pack/player.png" },
+        { "name": "shots", "url": "../assets/player-pack/shots.png" }
     ]
 }
 
@@ -45,8 +46,8 @@ const KEY_CODE = {
 
 const MOUSE_CODE = {
     MOUSE_LEFT: 0,
+    MOUSE_MIDDLE: 1,
     MOUSE_RIGTH: 2,
-    MOUSE_MIDDLE: 1
 };
 
 //
@@ -88,14 +89,19 @@ const PLAYER_MOVES = {
 
 const player = {
     sheet: {},
+    shotSheet: {},
     sprite: {},
+    shotSprite: {},
     texWidth: 492,
     texHeight: 400,
+    shotWidth: 492,
+    shotHeight: 200,
     sheetWidth: 82,
     sheetHeight: 100,
     right: true,
     velocityY: 0.0,
-    jumping: false
+    jumping: false,
+    shoting: false,
 }
 
 //
@@ -214,7 +220,7 @@ const initBg = (app) => {
 const updateBg = () => {
     if (input.key[KEY_CODE.KEY_A])
         background.currentX += background.parallax;
-    if (input.key[KEY_CODE.KEY_D])
+    else if (input.key[KEY_CODE.KEY_D])
         background.currentX -= background.parallax;
 
     background.layers[0].tilePosition.x = background.currentX / 6;
@@ -227,6 +233,7 @@ const updateBg = () => {
 
 const initPlayer = (app) => {
     let ssheet = new PIXI.BaseTexture.from(app.loader.resources["player"].url);
+    let shotSshet = new PIXI.BaseTexture.from(app.loader.resources["shots"].url);
     let w = player.sheetWidth;
     let h = player.sheetHeight;
 
@@ -256,22 +263,22 @@ const initPlayer = (app) => {
         new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, h, w, h)),
     ]
 
-    player.sheet["shotright"] = [
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, 2 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, 2 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, 2 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, 2 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, 2 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 2 * h, w, h)),
+    player.shotSheet["shotright"] = [
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(0 * w, 0, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(1 * w, 0, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(2 * w, 0, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(3 * w, 0, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(4 * w, 0, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(5 * w, 0, w, h)),
     ]
 
-    player.sheet["shotleft"] = [
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, 3 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, 3 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, 3 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, 3 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, 3 * h, w, h)),
-        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 3 * h, w, h)),
+    player.shotSheet["shotleft"] = [
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(0 * w, h, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(1 * w, h, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(2 * w, h, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(3 * w, h, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(4 * w, h, w, h)),
+        new PIXI.Texture(shotSshet, new PIXI.Rectangle(5 * w, h, w, h)),
     ]
 
     player.sprite = new PIXI.AnimatedSprite(player.sheet["right"]);
@@ -282,7 +289,22 @@ const initPlayer = (app) => {
     player.sprite.x = app.view.width / 2;
     player.sprite.y = Math.round(app.view.height - world.down) + 1;
 
+    player.shotSprite = new PIXI.AnimatedSprite(player.shotSheet["shotright"]);
+    player.shotSprite.animationSpeed = 1.0;
+    player.shotSprite.loop = false;
+    player.shotSprite.visible = false;
+
+    player.shotSprite.anchor.set(1.0);
+    player.shotSprite.x = app.view.width / 2;
+    player.shotSprite.y = Math.round(app.view.height - world.down) + 1;
+
+    player.shotSprite.onComplete = () => {
+        player.shoting = false;
+        player.shotSprite.visible = false;
+    }
+
     app.stage.addChild(player.sprite);
+    app.stage.addChild(player.shotSprite);
 }
 
 const playerJump = () => {
@@ -301,6 +323,7 @@ const updatePlayerJump = () => {
         velocityY = 0.0;
         player.jumping = false;
     }
+    player.shotSprite.y = player.sprite.y;
 }
 
 const updatePlayer = () => {
@@ -312,8 +335,7 @@ const updatePlayer = () => {
         }
         player.right = false;
         player.sprite.x -= 2;
-    }
-    if (input.key[KEY_CODE.KEY_D])
+    } else if (input.key[KEY_CODE.KEY_D])
     {
         if (!player.sprite.playing) {
             player.sprite.textures = player.sheet["walkright"];
@@ -322,12 +344,34 @@ const updatePlayer = () => {
         player.right = true;
         player.sprite.x += 2;
     }
+
     if (input.key[KEY_CODE.KEY_SPACE])
     {
         playerJump();
     }
+    player.shotSprite.x = player.sprite.x;
+
+    if (input.btn['0']) {
+        player.shoting = true;
+        player.shotSprite.visible = true;
+    }
+
+    if (player.shoting) {
+        if (!player.shotSprite.playing && player.right) {
+            player.shotSprite.textures = player.shotSheet["shotright"];
+            player.shotSprite.play();
+        }
+        if ((!player.shotSprite.playing) && (!player.right)) {
+            player.shotSprite.textures = player.shotSheet["shotleft"];
+            player.shotSprite.play();
+        }
+    }
 
     updatePlayerJump();
+}
+
+const updateShot = () => {
+
 }
 
 //
