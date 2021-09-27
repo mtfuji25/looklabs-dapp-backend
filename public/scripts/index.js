@@ -73,7 +73,7 @@ const background = {
     number: 6,
     texWidth: 560,
     texHeight: 315,
-    parallax: 1.5,
+    parallax: 2.0,
     currentX: 0.0,
     terrainFactor: 0.86984
 }
@@ -99,6 +99,8 @@ const player = {
     right: true,
     velocityY: 0.0,
     jumping: false,
+    doubleJumping: false,
+    lastJump: 0.0,
     shoting: false,
 }
 
@@ -178,7 +180,7 @@ const showTutorial = (app) => {
 
     tutorial.mage.x = 700;
 
-    tutorial.text = new PIXI.Text("Use as teclas [ a, d, space ] para se mexer.\nE utilize o botão diretio do mouse para atirar\n*ESC para fechar o tutorial*.");
+    tutorial.text = new PIXI.Text("Use as teclas [ a, d, space ] para se mexer.\nE utilize o botão diretio do mouse para atirar\n-ESC para fechar o tutorial-");
     tutorial.text.anchor.set(0.5);
     tutorial.text.x = 350;
     tutorial.text.y = 150;
@@ -358,8 +360,13 @@ const initPlayer = (app) => {
 
 const playerJump = () => {
     if (!player.jumping) {
-        player.velocityY = 10.0;
+        player.velocityY = 12.0;
         player.jumping = true;
+        player.lastJump = 0.0;
+    } else if ((!player.doubleJumping) && (player.lastJump >= 0.5)) {
+        player.velocityY += 12.0;
+        player.doubleJumping = true;
+        player.lastJump = 0.0;
     }
 }
 
@@ -371,8 +378,10 @@ const updatePlayerJump = () => {
     if (player.sprite.y >= Math.round(world.height - world.down) + 1) {
         velocityY = 0.0;
         player.jumping = false;
+        player.doubleJumping = false;
     }
     player.shotSprite.y = player.sprite.y;
+    player.lastJump += 0.016;
 }
 
 const updatePlayer = () => {
@@ -383,7 +392,7 @@ const updatePlayer = () => {
             player.sprite.play();
         }
         player.right = false;
-        player.sprite.x -= 2;
+        player.sprite.x -= 1.7;
     } else if (input.key[KEY_CODE.KEY_D])
     {
         if (!player.sprite.playing) {
@@ -391,7 +400,7 @@ const updatePlayer = () => {
             player.sprite.play();
         }
         player.right = true;
-        player.sprite.x += 2;
+        player.sprite.x += 1.7;
     }
 
     if (input.key[KEY_CODE.KEY_SPACE])
@@ -438,7 +447,7 @@ const createShot = (app) => {
 
     let sprite = new PIXI.AnimatedSprite(bullets.sheet);
     sprite.animationSpeed = 1.0;
-    sprite.loop = false;
+    sprite.loop = true;
     sprite.anchor.set(0.5);
     if (player.right) {
         sprite.x = player.sprite.x;
@@ -469,7 +478,7 @@ const updateShot = () => {
         bullets.sprites[i].x += bullets.velocitys[i].x * 10;
         bullets.sprites[i].y += bullets.velocitys[i].y * 10;
 
-        if (bullets.times[i] >= 1.0 || bullets.sprites[i].y >= Math.round(world.height - world.down) + 1) {
+        if (bullets.times[i] >= 1.2 || bullets.sprites[i].y >= Math.round(world.height - world.down) + 1) {
             bullets.appInstance.stage.removeChild(bullets.sprites[i]);
             bullets.sprites.splice(i, 1);
             bullets.velocitys.splice(i, 1);
