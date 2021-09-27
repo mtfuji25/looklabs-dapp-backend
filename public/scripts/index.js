@@ -9,6 +9,23 @@ const SPRITESHEET_DIR = "../assets/spritesheets/";
 const BGPACK_DIR = "../assets/bg-pack/"
 
 
+const resources = {
+    "bg-pack": [
+        { "name": "bg1", "url": "../assets/bg-pack/bg-back.png" },
+        { "name": "bg2", "url": "../assets/bg-pack/bg-clouds.png" },
+        { "name": "bg3", "url": "../assets/bg-pack/bg-trees3.png" },
+        { "name": "bg4", "url": "../assets/bg-pack/bg-trees2.png" },
+        { "name": "bg5", "url": "../assets/bg-pack/bg-trees1.png" },
+        { "name": "bg6", "url": "../assets/bg-pack/bg-terrain.png" }
+    ],
+    "ui-pack": [
+        { "name": "lifebar", "url": "../assets/ui-pack/teste.png" }
+    ],
+    "player-pack": [
+        { "name": "player", "url": "../assets/player-pack/player.png" }
+    ]
+}
+
 //  Constants
 const ROOT_DIV = document.querySelector("#root");
 
@@ -38,22 +55,36 @@ const MOUSE_CODE = {
 
 //  Represent the current state of the key
 //  true == down  /  false == up
-
 const input = {
     key: {},
     btn: {},
     cursorPos: { x: 0, y: 0 }
 }
 
-const bg = {
-    bgBack: {},
-    bgClouds: {},
-    bgTrees3: {},
-    bgTrees2: {},
-    bgTrees1: {},
-    bgTerrain: {},
-    speed: 0.5,
-    bgX: 0.0
+//  Parallax background data
+const background = {
+    layers: [],
+    number: 6,
+    texWidth: 560,
+    texHeight: 315,
+    parallax: 1.5,
+    currentX: 0.0
+}
+
+const PLAYER_MOVES = {
+    RIGHT: 0,
+    LEFT: 1,
+    SHOT_RIGHT: 2,
+    SHOT_LEFT: 3
+}
+
+const player = {
+    sheet: {},
+    sprite: {},
+    texWidth: 492,
+    texHeight: 400,
+    sheetWidth: 82,
+    sheetHeight: 100,
 }
 
 //
@@ -109,26 +140,14 @@ window.onload = () => {
     ROOT_DIV.appendChild(app.view);
 
     app.loader
-        .add("bg-back", BGPACK_DIR + "bg-back.png")
-        .add("bg-clouds", BGPACK_DIR + "bg-clouds.png")
-        .add("bg-trees3", BGPACK_DIR + "bg-trees3.png")
-        .add("bg-trees2", BGPACK_DIR + "bg-trees2.png")
-        .add("bg-trees1", BGPACK_DIR + "bg-trees1.png")
-        .add("bg-terrain", BGPACK_DIR + "bg-terrain.png")
+        .add(resources["bg-pack"])
+        .add(resources["ui-pack"])
+        .add(resources["player-pack"]);
 
     app.loader.onComplete.add(() => {
         initLevel(app);
     });
     app.loader.load();
-
-    // let player = new PIXI.Sprite.from(SPRITE_DIR + "mage.png");
-    // player.anchor.set(0.5);
-    // player.x = app.view.width / 2;
-    // player.y = app.view.height / 2;
-
-    // app.loader.add("lifebar", SPRITESHEET_DIR + "lifebar.png");
-
-    // app.stage.addChild(player);
 
     // Allow the interactive mode of PIXI
     app.stage.interactive = true;
@@ -150,72 +169,167 @@ window.onload = () => {
     window.addEventListener("wheel", handleMouseWheel);
 };
 
+//
+//  Parallax Background functions
+//
+
 const createBg = (texture, app) => {
     let tiling = new PIXI.TilingSprite(texture, app.view.width, app.view.height);
     tiling.position.set(0.0);
-    let scaleFactorX = app.view.width / 560.0;
-    let scaleFactorY = app.view.height / 315.0;
-    tiling.tileScale.x = scaleFactorX;
-    tiling.tileScale.y = scaleFactorY;
+
+    let factorX = app.view.width / background.texWidth;
+    let factorY = app.view.height / background.texHeight;
+
+    tiling.tileScale.x = factorX;
+    tiling.tileScale.y = factorY;
     app.stage.addChild(tiling);
 
     return tiling;
-}
+};
 
 const initBg = (app) => {
-    bg.bgBack = createBg(app.loader.resources["bg-back"].texture, app);
-    bg.bgClouds = createBg(app.loader.resources["bg-clouds"].texture, app);
-    bg.bgTrees3 = createBg(app.loader.resources["bg-trees3"].texture, app);
-    bg.bgTrees2 = createBg(app.loader.resources["bg-trees2"].texture, app);
-    bg.bgTrees1 = createBg(app.loader.resources["bg-trees1"].texture, app);
-    bg.bgTerrain = createBg(app.loader.resources["bg-terrain"].texture, app);
+    for (i = 1; i <= background.number; ++i) {
+        background.layers.push(createBg(app.loader.resources[`bg${i}`].texture, app));
+    }
+};
+
+const updateBg = () => {
+    if (input.key[KEY_CODE.KEY_A])
+        background.currentX += background.parallax;
+    if (input.key[KEY_CODE.KEY_D])
+        background.currentX -= background.parallax;
+
+    background.layers[0].tilePosition.x = background.currentX / 6;
+    background.layers[1].tilePosition.x = background.currentX / 5;
+    background.layers[2].tilePosition.x = background.currentX / 4;
+    background.layers[3].tilePosition.x = background.currentX / 3;
+    background.layers[4].tilePosition.x = background.currentX / 2;
+    background.layers[5].tilePosition.x = background.currentX / 1;
+};
+
+const initPlayer = (app) => {
+    let ssheet = new PIXI.BaseTexture.from(app.loader.resources["player"].url);
+    let w = player.sheetWidth;
+    let h = player.sheetHeight;
+
+    player.sheet["right"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0, 0, w, h))
+    ];
+
+    player.sheet["left"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0, h, w, h))
+    ];
+
+    player.sheet["walkright"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, 0, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, 0, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, 0, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, 0, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, 0, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 0, w, h)),
+    ]
+
+    player.sheet["walkleft"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, h, w, h)),
+    ]
+
+    player.sheet["shotright"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, 2 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, 2 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, 2 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, 2 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, 2 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 2 * h, w, h)),
+    ]
+
+    player.sheet["shotleft"] = [
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(0 * w, 3 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(1 * w, 3 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(2 * w, 3 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(3 * w, 3 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(4 * w, 3 * h, w, h)),
+        new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 3 * h, w, h)),
+    ]
+
+    player.sprite = new PIXI.AnimatedSprite(player.sheet["walkleft"]);
+    player.sprite.anchor.set(0.5);
+    player.sprite.animationSpeed = 0.5;
+    player.sprite.loop = false;
+    player.sprite.x = app.view.width / 2;
+    player.sprite.y= app.view.height / 2;
+    app.stage.addChild(player.sprite);
 }
+
+const updatePlayer = () => {
+    if (input.key[KEY_CODE.KEY_A])
+    {
+        if (!player.sprite.playing) {
+            player.sprite.textures = player.sheet["walkleft"];
+            player.sprite.play();
+        }
+        player.sprite.x -= 2;
+    }
+    if (input.key[KEY_CODE.KEY_D])
+    {
+        if (!player.sprite.playing) {
+            player.sprite.textures = player.sheet["walkright"];
+            player.sprite.play();
+        }
+        player.sprite.x += 2;
+    }
+    if (input.key[KEY_CODE.KEY_SPACE])
+    {
+        if (!player.sprite.playing) {
+            player.sprite.textures = player.sheet["shotleft"];
+            player.sprite.play();
+        }
+    }
+    if (input.key[KEY_CODE.KEY_S])
+    {
+    }
+}
+
+//
+//  Main game loop and level initialization
+//
 
 const initLevel = (app) => {
     initBg(app);
+    initPlayer(app);
     app.ticker.add(gameLoop);
-}
-
-//
-//  Main game loop
-//
+};
 
 const gameLoop = () => {
     console.log(`PosX: ${input.cursorPos.x}, PosY: ${input.cursorPos.y}`);
-    sysUpdateBg();
-}
+    updateBg();
+    updatePlayer();
+};
 
 //
 //  Collisions, physics and utils ...
 //
 
-const sysUpdateBg = () => {
-    bg.bgX = (bg.bgX + bg.speed);
-
-    bg.bgBack.tilePosition.x = bg.bgX / 5;
-    bg.bgClouds.tilePosition.x = bg.bgX / 4;
-    bg.bgTrees3.tilePosition.x = bg.bgX / 3;
-    bg.bgTrees2.tilePosition.x = bg.bgX / 2;
-    bg.bgTrees1.tilePosition.x = bg.bgX;
-    bg.bgTerrain.tilePosition.x = bg.bgX;
-}
-
 const sysUpdateAcceleration = (entity) => {
     
-}
+};
 
 const sysUpdateVelocity = (entity) => {
 
-}
+};
 
 const sysUpdatePosition = (entity) => {
 
-}
+};
 
 const sysUpdateGravity = (entity) => {
 
-}
+};
 
 const sysUpdateCollision = (entity) => {
 
-}
+};
