@@ -208,7 +208,7 @@ const showTutorial = (app) => {
 
     tutorial.mage.x = 700;
 
-    tutorial.text = new PIXI.Text("Use as teclas [ a, d, space ] para se mexer.\nE utilize o botão diretio do mouse para atirar\n-ESC para fechar o tutorial-");
+    tutorial.text = new PIXI.Text("Use as teclas [ a, d, space ] para se mexer.\nE utilize o botão esquerdo do mouse para atirar\n-ESC para fechar o tutorial-");
     tutorial.text.anchor.set(0.5);
     tutorial.text.x = 350;
     tutorial.text.y = 150;
@@ -437,9 +437,11 @@ const updatePlayer = () => {
     player.shotSprite.x = player.sprite.x;
 
     if (input.btn['0']) {
-        player.shoting = true;
-        player.shotSprite.visible = true;
-        createShot();
+        if (bullets.lastShot >= 0.5) {
+            player.shoting = true;
+            player.shotSprite.visible = true;
+            createShot();
+        }
     }
 
     if (player.shoting) {
@@ -472,9 +474,6 @@ const initBullets = (app) => {
 }
 
 const createShot = (app) => {
-    if (bullets.lastShot <= 0.1)
-        return;
-
     let sprite = new PIXI.AnimatedSprite(bullets.sheet);
     sprite.animationSpeed = 0.8;
     sprite.loop = true;
@@ -544,6 +543,9 @@ const updateEnemyShot = () => {
     difY /= length;
 
     for (i = 0; i < enemyBullets.number; ++i) {
+        if (shotIntersectRect(enemyBullets.sprites[i], player))
+            player.hits++;
+
         enemyBullets.velocitys[i].x = difX;
         enemyBullets.velocitys[i].y = difY;
 
@@ -565,6 +567,9 @@ const updateEnemyShot = () => {
 
 const updateShot = () => {
     for (i = 0; i < bullets.number; ++i) {
+        if (shotIntersectRect(bullets.sprites[i], enemy))
+            enemy.hits++;
+
         bullets.sprites[i].x += bullets.velocitys[i].x * 15;
         bullets.sprites[i].y += bullets.velocitys[i].y * 15;
 
@@ -675,8 +680,15 @@ const updateEnemy = (follow) => {
     updateEnemyJump();
 }
 
-const recsIntersect = (a, b) => {
+const shotIntersectRect = (a, b) => {
+    let aPosX = a.x;
+    let aPosY = a.y;
+    let bPosX = b.sprite.x;
+    let bPosY = b.sprite.y;
+    let bWidth = b.sprite.width;
+    let bHeight = b.sprite.height;
 
+    return (((bPosX - bWidth) < aPosX) && (aPosX < bPosX) && ((bPosY - bHeight) < aPosY) && (aPosY < bPosY));
 }
 
 //
@@ -698,12 +710,10 @@ let follow = false;
 const gameLoop = () => {
 
     const setRand = () => {
-
         if (lastRand >= 1.0) {
             follow = (Math.random() < 0.2);
             lastRand = 0.0;
         }
-
         lastRand += 0.016;
     }
 
@@ -713,4 +723,7 @@ const gameLoop = () => {
     updatePlayer();
     updateShot();
     updateEnemyShot();
+
+    console.log(player.hits);
+    console.log(enemy.hits);
 };
