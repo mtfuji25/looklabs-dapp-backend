@@ -68,7 +68,15 @@ const background = {
     texWidth: 560,
     texHeight: 315,
     parallax: 1.5,
-    currentX: 0.0
+    currentX: 0.0,
+    terrainFactor: 0.86984
+}
+
+const world = {
+    down: 0.0,
+    up: 0.0,
+    width: 0.0,
+    height: 0.0
 }
 
 const PLAYER_MOVES = {
@@ -85,6 +93,9 @@ const player = {
     texHeight: 400,
     sheetWidth: 82,
     sheetHeight: 100,
+    right: true,
+    velocityY: 0.0,
+    jumping: false
 }
 
 //
@@ -173,6 +184,13 @@ window.onload = () => {
 //  Parallax Background functions
 //
 
+const initWorld = (app) => {
+    world.width = app.view.width;
+    world.height = app.view.height;
+    world.down = (app.view.height - (app.view.height * background.terrainFactor));
+    world.up = app.view.height;
+}
+
 const createBg = (texture, app) => {
     let tiling = new PIXI.TilingSprite(texture, app.view.width, app.view.height);
     tiling.position.set(0.0);
@@ -256,13 +274,33 @@ const initPlayer = (app) => {
         new PIXI.Texture(ssheet, new PIXI.Rectangle(5 * w, 3 * h, w, h)),
     ]
 
-    player.sprite = new PIXI.AnimatedSprite(player.sheet["walkleft"]);
-    player.sprite.anchor.set(0.5);
+    player.sprite = new PIXI.AnimatedSprite(player.sheet["right"]);
     player.sprite.animationSpeed = 0.5;
     player.sprite.loop = false;
+
+    player.sprite.anchor.set(1.0);
     player.sprite.x = app.view.width / 2;
-    player.sprite.y= app.view.height / 2;
+    player.sprite.y = Math.round(app.view.height - world.down) + 1;
+
     app.stage.addChild(player.sprite);
+}
+
+const playerJump = () => {
+    if (!player.jumping) {
+        player.velocityY = 5.0;
+        player.jumping = true;
+    }
+}
+
+const updatePlayerJump = () => {
+    if (player.jumping) {
+        player.sprite.y = Math.round(player.sprite.y - player.velocityY);
+        player.velocityY -= GRAVITY * 0.030
+    }
+    if (player.sprite.y >= Math.round(world.height - world.down) + 1) {
+        velocityY = 0.0;
+        player.jumping = false;
+    }
 }
 
 const updatePlayer = () => {
@@ -272,6 +310,7 @@ const updatePlayer = () => {
             player.sprite.textures = player.sheet["walkleft"];
             player.sprite.play();
         }
+        player.right = false;
         player.sprite.x -= 2;
     }
     if (input.key[KEY_CODE.KEY_D])
@@ -280,18 +319,15 @@ const updatePlayer = () => {
             player.sprite.textures = player.sheet["walkright"];
             player.sprite.play();
         }
+        player.right = true;
         player.sprite.x += 2;
     }
     if (input.key[KEY_CODE.KEY_SPACE])
     {
-        if (!player.sprite.playing) {
-            player.sprite.textures = player.sheet["shotleft"];
-            player.sprite.play();
-        }
+        playerJump();
     }
-    if (input.key[KEY_CODE.KEY_S])
-    {
-    }
+
+    updatePlayerJump();
 }
 
 //
@@ -300,6 +336,7 @@ const updatePlayer = () => {
 
 const initLevel = (app) => {
     initBg(app);
+    initWorld(app);
     initPlayer(app);
     app.ticker.add(gameLoop);
 };
