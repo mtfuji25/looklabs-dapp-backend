@@ -91,6 +91,7 @@ class Map {
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
+                            rectangle.invisible = true;
                             sprite.setScale(
                                 0.5, 0.5
                             )

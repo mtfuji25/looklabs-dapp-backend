@@ -143,6 +143,7 @@ class Rectangle {
         this.width = 0.0;
         this.height = 0.0;
         this.needCheck = false;
+        this.invisible = false;
     }
 
     getBounds() {
