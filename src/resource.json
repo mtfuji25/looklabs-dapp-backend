@@ -24,6 +24,10 @@
         {
             "name": "wy",
             "url": "./assets/test-pack/wy.png"
+        },
+        {
+            "name": "mogus",
+            "url": "./assets/test-pack/21.png"
         }
     ],
     "bg-pack": [

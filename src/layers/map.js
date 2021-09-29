@@ -126,6 +126,16 @@ class Map {
                             rectangle.width = 100;
                             rectangle.height = 100;
                             break;
+                        case 11:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setImg(this.app.loader.resources["mogus"]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
                         case 6:
                             entity = ECS.createEntity(x, y, ECS.ANIMSPRITE | ECS.RECTANGLE);
                             this.map.push(entity);
@@ -133,6 +143,7 @@ class Map {
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
                             sprite.loadFromConfig(this.app, resources["sprite-sheet-enemy"]);
                             sprite.animate(resources["sprite-sheet-enemy"]["animations"][0]);
+                            sprite.loop = true;
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
