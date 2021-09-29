@@ -1,0 +1,55 @@
+{
+    "packs": [ "test-pack", "bg-pack" ],
+    "test-pack": [
+        {
+            "name": "bw",
+            "url": "./assets/test-pack/bw.png"
+        },
+        {
+            "name": "wb",
+            "url": "./assets/test-pack/wb.png"
+        },
+        {
+            "name": "wg",
+            "url": "./assets/test-pack/wg.png"
+        },
+        {
+            "name": "wp",
+            "url": "./assets/test-pack/wp.png"
+        },
+        {
+            "name": "wr",
+            "url": "./assets/test-pack/wr.png"
+        },
+        {
+            "name": "wy",
+            "url": "./assets/test-pack/wy.png"
+        }
+    ],
+    "bg-pack": [
+        {
+            "name": "bg-1",
+            "url": "./assets/bg-pack/bg-1.png"
+        },
+        {
+            "name": "bg-2",
+            "url": "./assets/bg-pack/bg-2.png"
+        },
+        {
+            "name": "bg-3",
+            "url": "./assets/bg-pack/bg-3.png"
+        },
+        {
+            "name": "bg-4",
+            "url": "./assets/bg-pack/bg-4.png"
+        },
+        {
+            "name": "bg-5",
+            "url": "./assets/bg-pack/bg-5.png"
+        },
+        {
+            "name": "bg-6",
+            "url": "./assets/bg-pack/bg-6.png"
+        }
+    ]
+}
