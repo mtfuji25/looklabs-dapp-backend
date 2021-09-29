@@ -10,7 +10,7 @@ class BgLayer {
         this.number = 6;
         this.texWidth = 560;
         this.texHeight = 315;
-        this.parallax = 3.0;
+        this.parallax = 1.0;
         this.currentX = 0.0;
     }
 

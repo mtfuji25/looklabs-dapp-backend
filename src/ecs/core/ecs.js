@@ -165,7 +165,7 @@ const ECS = {
             let rectangle = new Rectangle(transform);
     
             // Store it in the container
-            container.RECTANGLE.push(rectangle);
+            container.rectangles.push(rectangle);
     
             // Get the current index of the component and make it as the id
             entity.ids[RECTANGLE] = (container.rectangles.length - 1);

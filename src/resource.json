@@ -1,5 +1,5 @@
 {
-    "packs": [ "test-pack", "bg-pack", "player-pack" ],
+    "packs": [ "test-pack", "bg-pack", "player-pack", "itens-pack", "enemy-pack" ],
     "test-pack": [
         {
             "name": "bw",
@@ -88,7 +88,19 @@
             "url": "./assets/player-pack/sheet-1.png"
         }
     ],
-    "sheets": [ "sprite-sheet1" ],
+    "itens-pack": [
+        {
+            "name": "coin",
+            "url": "./assets/itens-pack/coin.png"
+        }
+    ],
+    "enemy-pack": [
+        {
+            "name": "enemy",
+            "url": "./assets/enemy-pack/enemy.png"
+        }
+    ],
+    "sheets": [ "sprite-sheet1", "sprite-sheet-coin", "sprite-sheet-enemy" ],
     "sprite-sheet1": {
         "resource": "sheet-1",
         "speed": 0.5,
@@ -100,5 +112,29 @@
         "animations": [ "walkleft", "walkright" ],
         "walkleft": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
         "walkright": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ]
+    },
+    "sprite-sheet-coin": {
+        "resource": "coin",
+        "speed": 0.2,
+        "loop": true,
+        "texWidth": 600,
+        "texHeight": 100,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "spin" ],
+        "spin": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5] ]
+    },
+    "sprite-sheet-enemy": {
+        "resource": "enemy",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 500,
+        "texHeight": 300,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "idle", "angry", "explode" ],
+        "idle": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
+        "angry": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ],
+        "explode": [ [2, 0], [2, 1], [2, 2], [2, 3], [2, 4] ]
     }
 }

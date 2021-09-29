@@ -10,13 +10,21 @@ class PlayerLayer {
         this.state = false;
     }
 
+    setRec() {
+        let rec = ECS.getComponent(this.player, ECS.RECTANGLE);
+        rec.width = 100;
+        rec.height = 100;
+        rec.needCheck = true;
+    }
+
     onAttach() {
-        this.player = ECS.createEntity(300, 400, ECS.ANIMSPRITE | ECS.RIGIDBODY);
+        this.player = ECS.createEntity(300, 400, ECS.ANIMSPRITE | ECS.RIGIDBODY | ECS.RECTANGLE);
         let sprite = ECS.getComponent(this.player, ECS.ANIMSPRITE);
         sprite.loadFromConfig(this.app, resources["sprite-sheet1"]);
         sprite.transform.pos.x = 500;
         sprite.transform.pos.y = 500;
         sprite.addStage(this.app);
+        this.setRec();
     }
 
     onUpdate(deltaTime) {

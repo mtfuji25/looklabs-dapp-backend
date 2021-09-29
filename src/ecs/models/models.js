@@ -139,8 +139,21 @@ class Rectangle {
         this.needCheck = false;
     }
 
-    checkCollision() {
-        
+    getBounds() {
+        return {
+            minX: this.transform.pos.x - this.width / 2.0,
+            maxX: this.transform.pos.x + this.width / 2.0,
+            minY: this.transform.pos.y - this.height / 2.0,
+            maxY: this.transform.pos.y + this.height / 2.0,
+        };
+    }
+
+    checkCollision(rec) {
+        let a = this.getBounds();
+        let b = rec.getBounds();
+
+        return (a.minX <= b.maxX && a.maxX >= b.minX) &&
+               (a.minY <= b.maxY && a.maxY >= b.minY) 
     }
 
     update() {}

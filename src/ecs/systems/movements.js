@@ -17,8 +17,7 @@ const sysUpdatePos = (data, deltaTime) => {
 
 const sysUpdateFloor = (data, deltaTime) => {
     data[ECS_CORE.RIGIDBODY].forEach((body) => {
-        const FLOOR = ECS_CORE.getGlobal("app-height");
-        console.log(FLOOR);
+        const FLOOR = ECS_CORE.getGlobal("app-height") - 170;
         if (body.transform.pos.y > FLOOR) {
             body.transform.pos.y = FLOOR;
             body.velocity.y = 0;
