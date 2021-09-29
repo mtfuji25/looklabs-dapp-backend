@@ -86,8 +86,8 @@
             "url": "./assets/terrain-pack/pedra-jm.png"
         },
         {
-            "name": "cenario",
-            "url": "./assets/terrain-pack/cenario.png"
+            "name": "cena",
+            "url": "./assets/terrain-pack/cena.png"
         },
         {
             "name": "terra",
@@ -96,6 +96,22 @@
         {
             "name": "terra-main",
             "url": "./assets/terrain-pack/terra-main.png"
+        },
+        {
+            "name": "agua",
+            "url": "./assets/terrain-pack/aguacima.png"
+        },
+        {
+            "name": "water-base",
+            "url": "./assets/terrain-pack/water-base.png"
+        },
+        {
+            "name": "grama",
+            "url": "./assets/terrain-pack/grama.png"
+        },
+        {
+            "name": "caixa",
+            "url": "./assets/terrain-pack/caixa.png"
         }
     ],
     "player-pack": [

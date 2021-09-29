@@ -34,6 +34,9 @@ class Map {
         let sprite;
         let rectangle;
         for (let i = 0; i < this.rows; ++i) {
+            entity = 0;
+            sprite = 0;
+            rectangle = 0;
             for (let j = 0; j < this.colums; ++j) {
                 let currentSheet = fase["layout"][i][j];
                 if (currentSheet != 0) {
@@ -53,7 +56,7 @@ class Map {
                             this.map.push(entity);
                             sprite = ECS.getComponent(entity, ECS.SPRITE);
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
-                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 0, 100, 100);
+                            sprite.setImg(this.app.loader.resources["grama"]);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
@@ -63,7 +66,7 @@ class Map {
                             this.map.push(entity);
                             sprite = ECS.getComponent(entity, ECS.SPRITE);
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
-                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 500, 100, 100);
+                            sprite.setCustomImg(this.app.loader.resources["cena"], 0, 500, 100, 100);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
@@ -73,7 +76,7 @@ class Map {
                             this.map.push(entity);
                             sprite = ECS.getComponent(entity, ECS.SPRITE);
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
-                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 600, 100, 100);
+                            sprite.setCustomImg(this.app.loader.resources["cena"], 0, 600, 100, 100);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
@@ -85,6 +88,16 @@ class Map {
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
                             sprite.loadFromConfig(this.app, resources["sprite-sheet-coin"]);
                             sprite.animate(resources["sprite-sheet-coin"]["animations"][0]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 7:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setImg(this.app.loader.resources["caixa"]);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;

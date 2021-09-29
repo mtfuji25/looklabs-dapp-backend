@@ -109,7 +109,6 @@ class Sprite {
 
     setCustomImg(img, w, h, pw, ph) {
         let ssheet = new PIXI.BaseTexture.from(img.url);
-        console.log(ssheet);
         let texture = new PIXI.Texture(ssheet, new PIXI.Rectangle(pw, ph, w, h));
         this.sprite.texture = texture;
     }
