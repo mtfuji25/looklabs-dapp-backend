@@ -28,15 +28,7 @@ class BgLayer {
     }
 
     onUpdate(deltaTime) {
-        if (inputs.key[KEYS.A])
-            this.currentX += this.parallax;
-        if (inputs.key[KEYS.D])
-            this.currentX -= this.parallax;
-
-        this.layers.forEach((layer, i) => {
-            let sprite = ECS.getComponent(layer, ECS.TILISPRITE);
-            sprite.sprite.tilePosition.x = (this.currentX / (this.number - i));
-        });
+        
     }
 }
 

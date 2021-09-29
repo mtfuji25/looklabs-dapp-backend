@@ -66,7 +66,7 @@ class Map {
                             this.map.push(entity);
                             sprite = ECS.getComponent(entity, ECS.SPRITE);
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
-                            sprite.setCustomImg(this.app.loader.resources["cena"], 0, 500, 100, 100);
+                            sprite.setImg(this.app.loader.resources["flte"]);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
@@ -76,7 +76,7 @@ class Map {
                             this.map.push(entity);
                             sprite = ECS.getComponent(entity, ECS.SPRITE);
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
-                            sprite.setCustomImg(this.app.loader.resources["cena"], 0, 600, 100, 100);
+                            sprite.setImg(this.app.loader.resources["fld"]);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
@@ -88,6 +88,29 @@ class Map {
                             rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
                             sprite.loadFromConfig(this.app, resources["sprite-sheet-coin"]);
                             sprite.animate(resources["sprite-sheet-coin"]["animations"][0]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            sprite.setScale(
+                                0.5, 0.5
+                            )
+                            break;
+                        case 8:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setImg(this.app.loader.resources["agua"]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 9:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setImg(this.app.loader.resources["water-base"]);
                             sprite.addStage(this.app);
                             rectangle.width = 100;
                             rectangle.height = 100;
