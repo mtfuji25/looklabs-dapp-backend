@@ -1,4 +1,4 @@
-import { ECS_CORE } from "../core/ecs";
+import { ECS, ECS_CORE } from "../core/ecs";
 
 const sysUpdateVel = (data, deltaTime) => {
     data[ECS_CORE.RIGIDBODY].forEach((body) => {
@@ -17,8 +17,9 @@ const sysUpdatePos = (data, deltaTime) => {
 
 const sysUpdateFloor = (data, deltaTime) => {
     data[ECS_CORE.RIGIDBODY].forEach((body) => {
-        const FLOOR = ECS_CORE.getGlobal("app-height") - 170;
+        const FLOOR = ECS_CORE.getGlobal("app-height") - 200;
         if (body.transform.pos.y > FLOOR) {
+            ECS.setGlobal("jumping", false);
             body.transform.pos.y = FLOOR;
             body.velocity.y = 0;
         }

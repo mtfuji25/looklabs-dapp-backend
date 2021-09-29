@@ -266,7 +266,7 @@ const ECS = {
     },
 
     getGlobal: (key) => {
-        return container.globals[key].value;
+        return container.globals[key];
     }
 };
 

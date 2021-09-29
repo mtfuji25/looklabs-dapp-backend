@@ -147,35 +147,11 @@ class Map {
     }
 
     onAttach() {
-        this.test = ECS.createEntity(300, 400, ECS.ANIMSPRITE | ECS.RECTANGLE);
-        let sprite = ECS.getComponent(this.test, ECS.ANIMSPRITE);
-        sprite.loadFromConfig(this.app, resources["sprite-sheet-enemy"]);
-        sprite.transform.pos.x = 500;
-        sprite.transform.pos.y = 500;
-        sprite.addStage(this.app);
-        let rec = ECS.getComponent(this.test, ECS.RECTANGLE);
-        rec.width = 100;
-        rec.height = 100;
-        rec.needCheck = true;
-
         this.initConst();
     }
 
     onUpdate(deltaTime) {
-        let transf = ECS.getComponent(this.test, ECS.TRANSFORM);
-        let sprite = ECS.getComponent(this.test, ECS.ANIMSPRITE);
-        transf.pos.x = inputs.cursor.x;
-        transf.pos.y = inputs.cursor.y;
-
-        if (inputs.key[KEYS.W]) {
-            sprite.animate(resources["sprite-sheet-enemy"]["animations"][0]);
-        }
-        if (inputs.key[KEYS.S]) {
-            sprite.animate(resources["sprite-sheet-enemy"]["animations"][1]);
-        }
-        if (inputs.key[KEYS.A]) {
-            sprite.animate(resources["sprite-sheet-enemy"]["animations"][2]);
-        }
+        
     }
 }
 
