@@ -1,5 +1,5 @@
 {
-    "packs": [ "test-pack", "bg-pack", "player-pack", "itens-pack", "enemy-pack" ],
+    "packs": [ "test-pack", "bg-pack", "player-pack", "itens-pack", "enemy-pack", "terrain-pack" ],
     "test-pack": [
         {
             "name": "bw",
@@ -29,7 +29,7 @@
     "bg-pack": [
         {
             "name": "bg-1",
-            "url": "./assets/bg-pack/bg-7.png"
+            "url": "./assets/bg-pack/bg-23.png"
         },
         {
             "name": "bg-2",
@@ -80,6 +80,22 @@
         {
             "name": "rtop",
             "url": "./assets/terrain-pack/rtop.png"
+        },
+        {
+            "name": "pedra",
+            "url": "./assets/terrain-pack/pedra-jm.png"
+        },
+        {
+            "name": "cenario",
+            "url": "./assets/terrain-pack/cenario.png"
+        },
+        {
+            "name": "terra",
+            "url": "./assets/terrain-pack/terra-jm.png"
+        },
+        {
+            "name": "terra-main",
+            "url": "./assets/terrain-pack/terra-main.png"
         }
     ],
     "player-pack": [
@@ -127,7 +143,7 @@
     "sprite-sheet-enemy": {
         "resource": "enemy",
         "speed": 0.3,
-        "loop": false,
+        "loop": true,
         "texWidth": 500,
         "texHeight": 300,
         "frameWidth": 100,

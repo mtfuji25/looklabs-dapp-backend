@@ -4,6 +4,8 @@ import { inputs, KEYS, BTNS } from "../inputs/inputs";
 
 import resources from "../resource.json";
 
+import fase from "../fase.json";
+
 const FLOOR_SPIRTE_SIZE = 100.0;
 
 class Map {
@@ -28,19 +30,84 @@ class Map {
         let x = 0.0;
         let y = 0.0;
 
-        // for (let i = 0; i < this.rows; ++i) {
-        //     for (let j = 0; j < this.colums; ++j) {
-        //         let entity = ECS.createEntity(x, y, ECS.SPRITE);
-        //         this.map.push(entity);
-        //         let sprite = ECS.getComponent(entity, ECS.SPRITE);
-        //         sprite.setImg(this.app.loader.resources[test[counter]]);
-        //         sprite.addStage(this.app);
-        //         x += 100;
-        //         if (counter == 4)
-
-        //     }
-        //     y += 100;
-        // }
+        let entity;
+        let sprite;
+        let rectangle;
+        for (let i = 0; i < this.rows; ++i) {
+            for (let j = 0; j < this.colums; ++j) {
+                let currentSheet = fase["layout"][i][j];
+                if (currentSheet != 0) {
+                    switch (currentSheet) {
+                        case 1:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setImg(this.app.loader.resources["terra-main"]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 2:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 0, 100, 100);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 3:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 500, 100, 100);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 4:
+                            entity = ECS.createEntity(x, y, ECS.SPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.SPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.setCustomImg(this.app.loader.resources["cenario"], 0, 600, 100, 100);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 5:
+                            entity = ECS.createEntity(x, y, ECS.ANIMSPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.ANIMSPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.loadFromConfig(this.app, resources["sprite-sheet-coin"]);
+                            sprite.animate(resources["sprite-sheet-coin"]["animations"][0]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                        case 6:
+                            entity = ECS.createEntity(x, y, ECS.ANIMSPRITE | ECS.RECTANGLE);
+                            this.map.push(entity);
+                            sprite = ECS.getComponent(entity, ECS.ANIMSPRITE);
+                            rectangle = ECS.getComponent(entity, ECS.RECTANGLE);
+                            sprite.loadFromConfig(this.app, resources["sprite-sheet-enemy"]);
+                            sprite.animate(resources["sprite-sheet-enemy"]["animations"][0]);
+                            sprite.addStage(this.app);
+                            rectangle.width = 100;
+                            rectangle.height = 100;
+                            break;
+                    }
+                }
+                x += 100;
+            }
+            x = 0;
+            y += 100;
+        }
+        
     }
 
     onAttach() {

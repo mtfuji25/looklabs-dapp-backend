@@ -8,8 +8,8 @@ class BgLayer {
         this.app = app;
         this.layers = [];
         this.number = 6;
-        this.texWidth = 560;
-        this.texHeight = 315;
+        this.texWidth = 1920;
+        this.texHeight = 1080;
         this.parallax = 1.0;
         this.currentX = 0.0;
     }
@@ -21,10 +21,7 @@ class BgLayer {
             sprite.setImg(this.app.loader.resources[BG_RES_NAME + i]);
             sprite.sprite.width = this.texWidth;
             sprite.sprite.height = this.texHeight;
-            sprite.setScale(
-                this.app.view.width / this.texWidth,
-                this.app.view.height / this.texHeight
-            )
+            
             sprite.addStage(this.app);
             this.layers.push(entity);
         }
