@@ -26,4 +26,4 @@ const gameLoop = () => {
     });
 };
 
-export { gameLoop };
+export { gameLoop, stats };

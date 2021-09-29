@@ -1,5 +1,5 @@
 {
-    "packs": [ "test-pack", "bg-pack" ],
+    "packs": [ "test-pack", "bg-pack", "player-pack" ],
     "test-pack": [
         {
             "name": "bw",
@@ -29,27 +29,76 @@
     "bg-pack": [
         {
             "name": "bg-1",
-            "url": "./assets/bg-pack/bg-1.png"
+            "url": "./assets/bg-pack/bg-7.png"
         },
         {
             "name": "bg-2",
-            "url": "./assets/bg-pack/bg-2.png"
+            "url": "./assets/bg-pack/bg-8.png"
         },
         {
             "name": "bg-3",
-            "url": "./assets/bg-pack/bg-3.png"
+            "url": "./assets/bg-pack/bg-9.png"
         },
         {
             "name": "bg-4",
-            "url": "./assets/bg-pack/bg-4.png"
+            "url": "./assets/bg-pack/bg-10.png"
         },
         {
             "name": "bg-5",
-            "url": "./assets/bg-pack/bg-5.png"
+            "url": "./assets/bg-pack/bg-11.png"
         },
         {
             "name": "bg-6",
-            "url": "./assets/bg-pack/bg-6.png"
+            "url": "./assets/bg-pack/bg-12.png"
         }
-    ]
+    ],
+    "terrain-pack": [
+        {
+            "name": "ldown",
+            "url": "./assets/terrain-pack/ldown.png"
+        },
+        {
+            "name": "ltop",
+            "url": "./assets/terrain-pack/ltop.png"
+        },
+        {
+            "name": "mdown",
+            "url": "./assets/terrain-pack/mdown.png"
+        },
+        {
+            "name": "middle",
+            "url": "./assets/terrain-pack/middle.png"
+        },
+        {
+            "name": "mtop",
+            "url": "./assets/terrain-pack/mtop.png"
+        },
+        {
+            "name": "rdown",
+            "url": "./assets/terrain-pack/rdown.png"
+        },
+        {
+            "name": "rtop",
+            "url": "./assets/terrain-pack/rtop.png"
+        }
+    ],
+    "player-pack": [
+        {
+            "name": "sheet-1",
+            "url": "./assets/player-pack/sheet-1.png"
+        }
+    ],
+    "sheets": [ "sprite-sheet1" ],
+    "sprite-sheet1": {
+        "resource": "sheet-1",
+        "speed": 0.5,
+        "loop": false,
+        "texWidth": 500,
+        "texHeight": 200,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "walkleft", "walkright" ],
+        "walkleft": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
+        "walkright": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ]
+    }
 }

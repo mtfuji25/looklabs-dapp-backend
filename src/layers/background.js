@@ -8,9 +8,9 @@ class BgLayer {
         this.app = app;
         this.layers = [];
         this.number = 6;
-        this.texWidth = 1920;
-        this.texHeight = 1080;
-        this.parallax = 2.0;
+        this.texWidth = 560;
+        this.texHeight = 315;
+        this.parallax = 3.0;
         this.currentX = 0.0;
     }
 
@@ -33,7 +33,7 @@ class BgLayer {
     onUpdate(deltaTime) {
         if (inputs.key[KEYS.A])
             this.currentX += this.parallax;
-        else if (inputs.key[KEYS.D])
+        if (inputs.key[KEYS.D])
             this.currentX -= this.parallax;
 
         this.layers.forEach((layer, i) => {

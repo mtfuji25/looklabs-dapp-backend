@@ -8,7 +8,6 @@ import { gameLoop } from "./game-loop";
 
 // Require the resources.json
 import resource from "./resource.json";
-import { ECS } from "./ecs/core/ecs";
 
 const $ = (name) => {
     return document.querySelector(name);

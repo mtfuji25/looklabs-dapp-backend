@@ -1,6 +1,4 @@
 
-import { ECS } from "../ecs/core/ecs";
-
 // Keys definitions
 const KEYS = {
     // Player controls
@@ -15,7 +13,7 @@ const KEYS = {
 
 // Mouse definitions
 const BTNS = {
-    LEFT: 0, RIGHT: 1, MIDDLE: 2
+    LEFT: 0, MIDDLE: 1, RIGHT: 2
 }
 
 // Current inputs

@@ -13,6 +13,7 @@ const container = {
     entities: [],
     // Store all systems
     systems: [],
+    globals: {},
 }
 
 const ENTITY_SYS    = 0b01;
@@ -75,6 +76,14 @@ const ECS_CORE = {
             fn: system,
             type: sysType
         });
+    },
+
+    setGlobal: (key, value) => {
+        container.globals[key] = { value };
+    },
+
+    getGlobal: (key) => {
+        return container.globals[key].value;
     }
 }
 
@@ -250,6 +259,14 @@ const ECS = {
         entity.ids["entity"] = (container.entities.length - 1)
     
         return entity;
+    },
+
+    setGlobal: (key, value) => {
+        container.globals[key] = { value };
+    },
+
+    getGlobal: (key) => {
+        return container.globals[key].value;
     }
 };
 
