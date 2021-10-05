@@ -24,6 +24,8 @@ const gameLoop = () => {
     layers.forEach((layer) => {
         layer.onUpdate(stats.deltaTime);
     });
+
+    console.log("Framerate " + stats.fps);
 };
 
 export { gameLoop, stats };

@@ -1,5 +1,5 @@
 {
-    "packs": [ "test-pack", "bg-pack", "player-pack", "itens-pack", "enemy-pack", "terrain-pack" ],
+    "packs": [ "test-pack", "bg-pack", "player-pack", "itens-pack", "enemy-pack", "terrain-pack", "ui-pack" ],
     "test-pack": [
         {
             "name": "bw",
@@ -33,7 +33,7 @@
     "bg-pack": [
         {
             "name": "bg-1",
-            "url": "./assets/bg-pack/bg-23.png"
+            "url": "./assets/bg-pack/bg-20.jpg"
         },
         {
             "name": "bg-2",
@@ -152,7 +152,17 @@
             "url": "./assets/enemy-pack/enemy.png"
         }
     ],
-    "sheets": [ "sprite-sheet1", "sprite-sheet-coin", "sprite-sheet-enemy", "sprite-sheet-player", "sprite-pulando" ],
+    "ui-pack": [
+        {
+            "name": "load",
+            "url": "./assets/ui-pack/load.png"
+        },
+        {
+            "name": "lifebar",
+            "url": "./assets/ui-pack/lifebar.png"
+        }
+    ],
+    "sheets": [ "sprite-sheet1", "sprite-sheet-coin", "sprite-sheet-enemy", "sprite-sheet-player", "sprite-pulando", "lifebar-ssheet" ],
     "sprite-sheet1": {
         "resource": "sheet-1",
         "speed": 0.5,
@@ -169,8 +179,8 @@
         "resource": "andando",
         "speed": 0.5,
         "loop": false,
-        "texWidth": 400,
-        "texHeight": 200,
+        "texWidth": 500,
+        "texHeight": 300,
         "frameWidth": 100,
         "frameHeigth": 100,
         "animations": [ "walkleft", "walkright", "pular" ],
@@ -201,5 +211,37 @@
         "idle": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
         "angry": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ],
         "explode": [ [2, 0], [2, 1], [2, 2], [2, 3], [2, 4] ]
+    },
+    "sprite-sheet-load": {
+        "resource": "load",
+        "speed": 0.2,
+        "loop": false,
+        "texWidth": 400,
+        "texHeight": 100,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "running" ],
+        "running": [ [0, 0], [0, 1], [0, 2], [0, 3] ]
+    },
+    "lifebar-ssheet": {
+        "resource": "lifebar",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 1100,
+        "texHeight": 100,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "100", "90", "80", "70", "60", "50", "40", "30", "20", "10", "0"],
+        "100": [ [0, 0] ],
+        "90": [ [0, 1] ],
+        "80": [ [0, 2] ],
+        "70": [ [0, 3] ],
+        "60": [ [0, 4] ],
+        "50": [ [0, 5] ],
+        "40": [ [0, 6] ],
+        "30": [ [0, 7] ],
+        "20": [ [0, 8] ],
+        "10": [ [0, 9] ],
+        "0": [ [0, 10] ]
     }
 }

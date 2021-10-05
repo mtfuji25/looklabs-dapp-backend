@@ -8,9 +8,9 @@ class BgLayer {
         this.app = app;
         this.layers = [];
         this.number = 6;
-        this.texWidth = 1920;
-        this.texHeight = 1080;
-        this.parallax = 1.0;
+        this.texWidth = 1200;
+        this.texHeight = 659;
+        this.parallax = 0.0;
         this.currentX = 0.0;
     }
 
@@ -22,13 +22,26 @@ class BgLayer {
             sprite.sprite.width = this.texWidth;
             sprite.sprite.height = this.texHeight;
             
+            sprite.setScale(
+                this.app.view.width / this.texWidth,
+                this.app.view.height / this.texHeight
+            );
+
             sprite.addStage(this.app);
             this.layers.push(entity);
         }
     }
 
     onUpdate(deltaTime) {
-        
+        if (inputs.key[KEYS.A])
+            this.currentX += this.parallax;
+        if (inputs.key[KEYS.D])
+            this.currentX -= this.parallax;
+
+        this.layers.forEach((layer, i) => {
+            let sprite = ECS.getComponent(layer, ECS.TILISPRITE);
+            sprite.sprite.tilePosition.x = this.currentX / (6 - i);
+        });
     }
 }
 

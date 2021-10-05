@@ -22,6 +22,12 @@ const sysUpdateFloor = (data, deltaTime) => {
             ECS.setGlobal("jumping", false);
             body.transform.pos.y = FLOOR;
             body.velocity.y = 0;
+            if (body.velocity.x < 0.0) {
+                body.velocity.x += 0.5;
+            }
+            if (body.velocity.x > 0.0) {
+                body.velocity.x -= 0.5;
+            }
         }
     });
 }

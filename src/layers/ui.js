@@ -3,27 +3,27 @@ import { inputs, KEYS, BTNS } from "../inputs/inputs";
 
 import resources from "../resource.json";
 
-class Batata {
-    constructor(app) {
+class Ui {
+    constructor(app, statusFn, statusFn2, statusFn3, statusFn4) {
         this.app = app;
-        this.entity = {};
+        this.statusFns = [ statusFn, statusFn2, statusFn3, statusFn4 ]
+        this.lifeBar = {
+            entity: {},
+            value: 0
+        };
+        this.playerSelected = 0;
     }
 
     onAttach() {
-        this.entity = ECS.createEntity(500, 200, ECS.ANIMSPRITE | ECS.RIGIDBODY);
+        this.entity = ECS.createEntity(500, 500, ECS.ANIMSPRITE | ECS.RIGIDBODY);
         let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
-
-        sprite.loadFromConfig(this.app, resources["sprite-sheet-load"]);
+        sprite.loadFromConfig(this.app, resources["sprite-sheet-enemy"]);
         sprite.addStage(this.app);
+        sprite.animate(resources["sprite-sheet-enemy"]["animations"][2]);
     }
 
     onUpdate(deltaTime) {
-        let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
         let rigidibody = ECS.getComponent(this.entity, ECS.RIGIDBODY);
-
-        if (inputs.key[KEYS.W]) {
-            sprite.animate(resources["sprite-sheet-load"]["animations"][0]);
-        }
 
         if (inputs.btn[BTNS.LEFT]) {
             let difX = inputs.cursor.x - rigidibody.transform.pos.x;
@@ -44,4 +44,4 @@ class Batata {
     }
 }
 
-export { Batata };
+export { Ui };
