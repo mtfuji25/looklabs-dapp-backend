@@ -1,0 +1,42 @@
+{
+    "packs": [  ],
+    "test-pack": [
+        {
+            "name": "bw",
+            "url": "./assets/test-pack/bw.png"
+        },
+        {
+            "name": "wb",
+            "url": "./assets/test-pack/wb.png"
+        },
+        {
+            "name": "wg",
+            "url": "./assets/test-pack/wg.png"
+        },
+        {
+            "name": "wp",
+            "url": "./assets/test-pack/wp.png"
+        },
+        {
+            "name": "wr",
+            "url": "./assets/test-pack/wr.png"
+        },
+        {
+            "name": "wy",
+            "url": "./assets/test-pack/wy.png"
+        }
+    ],
+    "sheets": [  ],
+    "sprite-sheet1": {
+        "resource": "sheet-1",
+        "speed": 0.5,
+        "loop": false,
+        "texWidth": 500,
+        "texHeight": 200,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "walkleft", "walkright" ],
+        "walkleft": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
+        "walkright": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ]
+    }
+}
