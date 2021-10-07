@@ -2,49 +2,46 @@ import { ECS } from "../ecs/core/ecs";
 
 import resources from "../resource.json";
 import level from "../level.json";
+import { inputs, KEYS } from "../inputs/inputs";
 
 class Enemy {
     constructor(app) {
         this.app = app;
         this.entities = [];
+        this.entity;
     }
 
     createEnemy() {
-        
+
     }
 
     onAttach() {
-        let rows = level["layer0"]["height"];
-        let cols = level["layer0"]["width"];
-
-        let x = 0.0;
-        let y = 0.0;
-
-        let entity;
-        let sprite;
-        for (let i = 0; i < rows; ++i) {
-            for (let j = 0; j < cols; ++j) {
-                let currentSheet = level["layer0"]["mappings"][level["layer0"]["data"][i][j]];
-
-                entity = ECS.createEntity(x, y, ECS.SPRITE);
-                this.entities.push(entity);
-                sprite = ECS.getComponent(entity, ECS.SPRITE);
-                sprite.setImg(this.app.loader.resources[currentSheet]);
-                sprite.addStage(this.app);
-
-                x += 32;
-            }
-            x = 0;
-            y += 32;
-        }
+        this.entity = ECS.createEntity(500, 500, ECS.ANIMSPRITE);
+        let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
+        sprite.loadFromConfig(this.app, resources["enemy-sheet"]);
+        sprite.addStage(this.app);
     }
 
     onServerMsg(msg) {
-        // Get data from server here
+        // Get data from server here and dispatch
+        // msg type should assume create update or delete
+        // content should be the informations about the operation
     }
 
     onUpdate(deltaTime) {
-        
+        let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
+        if (inputs.key[KEYS.W]) {
+            sprite.animate(resources["enemy-sheet"]["animations"][6]);
+        }
+        if (inputs.key[KEYS.S]) {
+            sprite.animate(resources["enemy-sheet"]["animations"][7]);
+        }
+        if (inputs.key[KEYS.A]) {
+            sprite.animate(resources["enemy-sheet"]["animations"][5]);
+        }
+        if (inputs.key[KEYS.D]) {
+            sprite.animate(resources["enemy-sheet"]["animations"][4]);
+        }
     }
 }
 
