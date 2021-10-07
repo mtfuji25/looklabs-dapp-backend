@@ -3,13 +3,17 @@ import { ECS } from "../ecs/core/ecs";
 import resources from "../resource.json";
 import level from "../level.json";
 import { inputs, KEYS } from "../inputs/inputs";
-import * as util from "../utils/utils";
+import { wordToView } from "../utils/utils";
 
 class Enemy {
     constructor(app) {
         this.app = app;
         this.entities = {};
         this.entity;
+        this.props = {
+            width: this.app.view.width,
+            height: this.app.view.height,
+        };
     }
 
     createEnemy(id, x, y) {
@@ -69,7 +73,20 @@ class Enemy {
     }
 
     onServerMsg(msg) {
-        
+        let pos;
+        switch (msg.type) {
+            case "create-enemy":
+                pos = wordToView({ x: msg.content.pos.x, y: msg.content.pos.y }, this.props);
+                this.createEnemy(msg.content.id, pos.x, pos.y);
+                break;
+            case "update-enemy":
+                pos = wordToView({ x: msg.content.pos.x, y: msg.content.pos.y }, this.props);
+                this.updateEnemy(msg.content.id, msg.content.action, pos);
+                break;
+            case "delete-enemy":
+                this.deleteEnemy(msg.content.id);
+                break;
+        }
     }
 
     onUpdate(deltaTime) {

@@ -59,35 +59,62 @@ wss.on("connection", ws => {
     ws.on("message", message => {
         const data = JSON.parse(message.toString());
         console.log("Message")
+        ws.send(JSON.stringify({
+            type: "create-enemy",
+            content: {
+                id: 0,
+                pos: {
+                    x: 0.0,
+                    y: 0.0
+                }
+            }
+        }));
+        ws.send(JSON.stringify({
+            type: "update-enemy",
+            content: {
+                id: 0,
+                action: 3,
+                pos: {
+                    x: 0.5,
+                    y: 0.0
+                }
+            }
+        }));
+        ws.send(JSON.stringify({
+            type: "delete-enemy",
+            content: {
+                id: 0
+            }
+        }));
     });
 });
 
 let start = Date.now();
 
-const loop = () => {
-    while (true) {
-        let current = Date.now();
-        let deltaTime = (current - start) / 1000.0;
-        start = current;
+// const loop = () => {
+//     while (true) {
+//         let current = Date.now();
+//         let deltaTime = (current - start) / 1000.0;
+//         start = current;
 
 
-    }
-};
+//     }
+// };
 
-let entities = [];
+// let entities = [];
 
-const initGame = () => {
-    let x = 0.0;
-    let y = 0.0;
+// const initGame = () => {
+//     let x = 0.0;
+//     let y = 0.0;
 
-    for (let i = 0; i < UNIT_WIDTH; ++i) {
-        for (let j = 0; j < UNIT_HEIGTH; ++j) {
+//     for (let i = 0; i < UNIT_WIDTH; ++i) {
+//         for (let j = 0; j < UNIT_HEIGTH; ++j) {
             
-        }
-    }
+//         }
+//     }
 
-    loop();
-}
+//     loop();
+// }
 
 const UNIT_WIDTH = 60;
 const UNIT_HEIGTH = 32;
