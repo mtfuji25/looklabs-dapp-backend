@@ -107,7 +107,7 @@ class Sprite {
         this.sprite.anchor.set(0.5);
     }
 
-    setCustomImg(img, w, h, pw, ph) {
+    setCustomImg(img, pw, ph, w, h) {
         let ssheet = new PIXI.BaseTexture.from(img.url);
         let texture = new PIXI.Texture(ssheet, new PIXI.Rectangle(pw, ph, w, h));
         this.sprite.texture = texture;

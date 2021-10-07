@@ -8,6 +8,8 @@ import { gameLoop } from "./game-loop";
 
 // Require the resources.json
 import resource from "./resource.json";
+import { initLayers } from "./layers";
+import { initSystems } from "./ecs/systems";
 
 const $ = (name) => {
     return document.querySelector(name);
@@ -17,6 +19,7 @@ const ROOT = $("#root");
 
 // Current application
 let app;
+let client;
 
 const main = () => {
     
@@ -40,24 +43,21 @@ const main = () => {
 
     // Set callback funtion to call when resources were loaded
     app.loader.onComplete.add(() => {
-        initGame(app);
+        initGame(app, client);
     });
 
     // Effectlly load all the resources
     app.loader.load();
-
-    const ws = new WebSocket("ws://localhost:8082");
-
-    ws.addEventListener("open", () => {
-        console.log("Connected to the backend");
-    });
-
 }
 
 const initGame = (app) => {
 
     // Start the event listeners and inti the input system
     initInputs(app);
+
+    initLayers(app);
+
+    initSystems();
 
     // Start the game loop
     app.ticker.add(gameLoop);

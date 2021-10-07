@@ -1,5 +1,5 @@
 {
-    "packs": [  ],
+    "packs": [ "test-pack", "terrain-pack" ],
     "test-pack": [
         {
             "name": "bw",
@@ -26,17 +26,74 @@
             "url": "./assets/test-pack/wy.png"
         }
     ],
-    "sheets": [  ],
-    "sprite-sheet1": {
-        "resource": "sheet-1",
-        "speed": 0.5,
-        "loop": false,
-        "texWidth": 500,
-        "texHeight": 200,
-        "frameWidth": 100,
-        "frameHeigth": 100,
-        "animations": [ "walkleft", "walkright" ],
-        "walkleft": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
-        "walkright": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ]
-    }
+    "terrain-pack": [
+        {
+            "name": "basalt1",
+            "url": "./assets/terrain-pack/basalt1.png"
+        },
+        {
+            "name": "char1",
+            "url": "./assets/terrain-pack/char1.png"
+        },
+        {
+            "name": "dirt-wall1",
+            "url": "./assets/terrain-pack/dirt-wall1.png"
+        },
+        {
+            "name": "dirt-wall2",
+            "url": "./assets/terrain-pack/dirt-wall2.png"
+        },
+        {
+            "name": "dirt1",
+            "url": "./assets/terrain-pack/dirt1.png"
+        },
+        {
+            "name": "dirt2",
+            "url": "./assets/terrain-pack/dirt2.png"
+        },
+        {
+            "name": "dune-wall1",
+            "url": "./assets/terrain-pack/dune-wall1.png"
+        },
+        {
+            "name": "dune-wall2",
+            "url": "./assets/terrain-pack/dune-wall2.png"
+        },
+        {
+            "name": "grass1",
+            "url": "./assets/terrain-pack/grass1.png"
+        },
+        {
+            "name": "grass2",
+            "url": "./assets/terrain-pack/grass2.png"
+        },
+        {
+            "name": "ice-snow1",
+            "url": "./assets/terrain-pack/ice-snow1.png"
+        },
+        {
+            "name": "ice-wall1",
+            "url": "./assets/terrain-pack/ice-wall1.png"
+        },
+        {
+            "name": "ice-wall2",
+            "url": "./assets/terrain-pack/ice-wall2.png"
+        },
+        {
+            "name": "salt-wall1",
+            "url": "./assets/terrain-pack/salt-wall1.png"
+        },
+        {
+            "name": "salt-wall2",
+            "url": "./assets/terrain-pack/salt-wall2.png"
+        },
+        {
+            "name": "sand1",
+            "url": "./assets/terrain-pack/sand1.png"
+        },
+        {
+            "name": "sand2",
+            "url": "./assets/terrain-pack/sand2.png"
+        }
+    ]
 }

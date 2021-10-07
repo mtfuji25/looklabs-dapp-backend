@@ -1,3 +1,6 @@
+import { ECS_CORE } from "./ecs/core/ecs";
+import { layers } from "./layers";
+
 // Base stats of application loop
 const stats = {
     fps: 60.0,
@@ -16,7 +19,12 @@ const gameLoop = () => {
     stats.start = current;
     stats.fps = 1 / stats.deltaTime;
 
-    // Make reder logic and requests
+    // Make render logic and requests
+    ECS_CORE.update(stats.deltaTime);
+
+    layers.forEach((layer) => {
+        layer.onUpdate(stats.deltaTime);
+    });
 };
 
 export { gameLoop, stats };
