@@ -10,6 +10,7 @@ import { gameLoop } from "./game-loop";
 import resource from "./resource.json";
 import { initLayers } from "./layers";
 import { initSystems } from "./ecs/systems";
+import { initClient } from "./server/client";
 
 const $ = (name) => {
     return document.querySelector(name);
@@ -58,6 +59,8 @@ const initGame = (app) => {
     initLayers(app);
 
     initSystems();
+
+    initClient();
 
     // Start the game loop
     app.ticker.add(gameLoop);

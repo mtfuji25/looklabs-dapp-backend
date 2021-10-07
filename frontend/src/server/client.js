@@ -13,6 +13,10 @@ const initClient = (msgQueue) => {
             content: "layer0"
         }))
     })
+
+    ws.addEventListener("message", msg => {
+        console.log(msg);
+    });
 }
 
 export { initClient }
