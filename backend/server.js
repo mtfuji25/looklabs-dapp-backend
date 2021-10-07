@@ -53,10 +53,14 @@ const wss = new WebSocket.Server({ port: 8082 });
 
 let msgs = [];
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 wss.on("connection", ws => {
     console.log("New client connected");
 
-    ws.on("message", message => {
+    ws.on("message", async (message) => {
         const data = JSON.parse(message.toString());
         console.log("Message")
         ws.send(JSON.stringify({
@@ -72,34 +76,50 @@ wss.on("connection", ws => {
         ws.send(JSON.stringify({
             type: "update-enemy",
             content: {
-                id: 0,
-                action: 3,
-                pos: {
-                    x: 0.5,
-                    y: 0.0
-                }
+            id: 0,
+            action: 6,
+            pos: {
+                x: 0.5,
+                y: 0.0
             }
+        }
         }));
-        ws.send(JSON.stringify({
-            type: "delete-enemy",
-            content: {
-                id: 0
-            }
-        }));
+        // ws.send(JSON.stringify({
+        //     type: "delete-enemy",
+        //     content: {
+        //         id: 0
+        //     }
+        // }));
     });
 });
 
 let start = Date.now();
 
-// const loop = () => {
-//     while (true) {
-//         let current = Date.now();
-//         let deltaTime = (current - start) / 1000.0;
-//         start = current;
+const loop = async () => {
+    while (true) {
+        let current = Date.now();
+        let deltaTime = (current - start) / 1000.0;
+        start = current;
 
+        wss.clients.forEach(client => {
+            client.send(JSON.stringify({
+                type: "update-enemy",
+                content: {
+                id: 0,
+                action: 6,
+                pos: {
+                    x: 0.5,
+                    y: 0.0
+                }
+            }
+            }));
+        });
 
-//     }
-// };
+        await sleep(1);
+    }
+}
+
+loop();
 
 // let entities = [];
 

@@ -9,7 +9,6 @@ class Enemy {
     constructor(app) {
         this.app = app;
         this.entities = {};
-        this.entity;
         this.props = {
             width: this.app.view.width,
             height: this.app.view.height,
@@ -66,10 +65,6 @@ class Enemy {
     }
 
     onAttach() {
-        this.entity = ECS.createEntity(500, 500, ECS.ANIMSPRITE);
-        let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
-        sprite.loadFromConfig(this.app, resources["enemy-sheet"]);
-        sprite.addStage(this.app);
     }
 
     onServerMsg(msg) {
@@ -90,19 +85,7 @@ class Enemy {
     }
 
     onUpdate(deltaTime) {
-        let sprite = ECS.getComponent(this.entity, ECS.ANIMSPRITE);
-        if (inputs.key[KEYS.W]) {
-            sprite.animate(resources["enemy-sheet"]["animations"][6]);
-        }
-        if (inputs.key[KEYS.S]) {
-            sprite.animate(resources["enemy-sheet"]["animations"][7]);
-        }
-        if (inputs.key[KEYS.A]) {
-            sprite.animate(resources["enemy-sheet"]["animations"][5]);
-        }
-        if (inputs.key[KEYS.D]) {
-            sprite.animate(resources["enemy-sheet"]["animations"][4]);
-        }
+        
     }
 }
 

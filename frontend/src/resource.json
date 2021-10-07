@@ -32,6 +32,14 @@
             "url": "./assets/terrain-pack/basalt1.png"
         },
         {
+            "name": "basalt2",
+            "url": "./assets/terrain-pack/basalt2.png"
+        },
+        {
+            "name": "basalt3",
+            "url": "./assets/terrain-pack/basalt3.png"
+        },
+        {
             "name": "char1",
             "url": "./assets/terrain-pack/char1.png"
         },
