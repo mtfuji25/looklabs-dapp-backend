@@ -1,6 +1,40 @@
 const WebSocket = require("ws");
 const fs = require("fs");
 
+/*
+    // Enemy msgs control models
+
+    {
+        type: "create-enemy",
+        content: {
+            id: ...,
+            pos: {
+                x: ...,
+                y: ...
+            }
+        }
+    }
+
+    {
+        type: "update-enemy",
+        content: {
+            id: ...,
+            action: ...,
+            pos: {
+                x: ...,
+                y: ...
+            }
+        }
+    }
+
+    {
+        type: "delete-enemy",
+        content: {
+            id: ...
+        }
+    }
+*/
+
 let resources;
 
 // fs.readFile("./resources.json", "utf-8", (err, jsonString) => {

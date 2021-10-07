@@ -131,7 +131,7 @@ const ECS = {
             return -1;
     
         if (layout & RECTANGLE) {
-            container.RECTANGLE.slice(entity.ids[RECTANGLE], 1);
+            container.rectangles.slice(entity.ids[RECTANGLE], 1);
             entity.layout &= (~RECTANGLE);
         }
         if (layout & RIGIDBODY) {
