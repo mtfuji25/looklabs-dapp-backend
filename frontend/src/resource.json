@@ -95,5 +95,24 @@
             "name": "sand2",
             "url": "./assets/terrain-pack/sand2.png"
         }
-    ]
+    ],
+    "enemy-pack": [
+        {
+            "name": "enemy",
+            "url": "./assets/test-pack/enemy.png"
+        }
+    ],
+    "sheets": [ "enemy-sheet" ],
+    "enemy-sheet": {
+        "resource": "sheet-1",
+        "speed": 0.5,
+        "loop": false,
+        "texWidth": 500,
+        "texHeight": 200,
+        "frameWidth": 100,
+        "frameHeigth": 100,
+        "animations": [ "walkleft", "walkright" ],
+        "walkleft": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4] ],
+        "walkright": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4] ]
+    }
 }

@@ -40,9 +40,22 @@ const loop = () => {
     }
 };
 
-loop();
+let entities = [];
 
-const UNIT_WIDTH = 32;
+const initGame = () => {
+    let x = 0.0;
+    let y = 0.0;
+
+    for (let i = 0; i < UNIT_WIDTH; ++i) {
+        for (let j = 0; j < UNIT_HEIGTH; ++j) {
+            
+        }
+    }
+
+    loop();
+}
+
+const UNIT_WIDTH = 60;
 const UNIT_HEIGTH = 32;
 
 class Rectangle {
@@ -164,32 +177,4 @@ const recIntersectRec = (a, b, deltaTime, res) => {
     }
 
     return false;
-}
-
-const wordToView = (pos, props) => {
-    return {
-        x: (pos.x * props.width + props.width) / 2.0,
-        y: props.height - (pos.y * props.height + props.height) / 2.0
-    }
-}
-
-const viewToWord = (pos, props) => {
-    return {
-        x: (pos.x / props.width * 2.0) - 1.0,
-        y: ((props.height - pos.y) / props.height * 2.0) - 1.0
-    }
-}
-
-const resToNdc = (res, props) => {
-    return {
-        x: (res.x / props.width) * 2.0,
-        y: (res.y / props.height) * 2.0
-    }
-}
-
-const ndcToRes = (ndc, props) => {
-    return {
-        x: (ndc.x * props.width) / 2.0,
-        y: (ndc.y * props.height) / 2.0
-    }
 }
