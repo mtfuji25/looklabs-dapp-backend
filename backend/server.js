@@ -63,27 +63,27 @@ wss.on("connection", ws => {
     ws.on("message", async (message) => {
         const data = JSON.parse(message.toString());
         console.log("Message")
-        ws.send(JSON.stringify({
-            type: "create-enemy",
-            content: {
-                id: 0,
-                pos: {
-                    x: 0.0,
-                    y: 0.0
-                }
-            }
-        }));
-        ws.send(JSON.stringify({
-            type: "update-enemy",
-            content: {
-            id: 0,
-            action: 6,
-            pos: {
-                x: 0.5,
-                y: 0.0
-            }
-        }
-        }));
+        // ws.send(JSON.stringify({
+        //     type: "create-enemy",
+        //     content: {
+        //         id: 0,
+        //         pos: {
+        //             x: 0.0,
+        //             y: 0.0
+        //         }
+        //     }
+        // }));
+        // ws.send(JSON.stringify({
+        //     type: "update-enemy",
+        //     content: {
+        //     id: 0,
+        //     action: 6,
+        //     pos: {
+        //         x: 0.5,
+        //         y: 0.0
+        //     }
+        // }
+        // }));
         // ws.send(JSON.stringify({
         //     type: "delete-enemy",
         //     content: {
@@ -119,7 +119,7 @@ const loop = async () => {
     }
 }
 
-loop();
+//loop();
 
 // let entities = [];
 
