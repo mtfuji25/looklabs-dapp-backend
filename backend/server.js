@@ -14,21 +14,10 @@ const wss = new WebSocket.Server({ port: 8082 });
 
 let msgs = [];
 
-
-
 wss.on("connection", ws => {
     console.log("New client connected");
 
-    ws.send(JSON.stringify({
-        type: "create-enemy",
-        content: {
-            id: 0,
-            pos: {
-                x: 0.0,
-                y: 0.0
-            }
-        }
-    }));
+    ws.send(JSON.stringify({ type: "create-enemy", content: {id: 0, pos: { x: 0.0, y: 0.0 } } }));
 
     ws.on("message", async (message) => {
         const data = JSON.parse(message.toString());
@@ -45,10 +34,10 @@ const loop = async () => {
         start = current;
 
         wss.clients.forEach(client => {
-            
+            client.send(JSON.stringify({ type: "update-enemy", content: { id: 0, action: 4,  pos: { x: 0.5, y: 0.0 } } }));
         });
 
-        await sleep(1000);
+        await sleep(200);
     }
 }
 

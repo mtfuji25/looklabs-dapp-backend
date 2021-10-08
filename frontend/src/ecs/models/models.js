@@ -60,8 +60,20 @@ class AnimatedSprite {
 
     update(dealtaTime, view) {
         if (this.applyView) {
-            this.sprite.x = this.transform.pos.x + view.value.xOffset;
-            this.sprite.y = this.transform.pos.y + view.value.yOffset;
+            let centerFactorX = ((this.transform.pos.x * (1 - view.value.zoom)) - 2400) / 2400;
+            let centerFactorY = ((this.transform.pos.y * (1 - view.value.zoom)) - 2400) / 2400;
+            let fixFactorX = (this.transform.pos.x - (this.transform.pos.x * (1 - view.value.zoom))) / 2.0;
+            let fixFactorY = (this.transform.pos.y - (this.transform.pos.y * (1 - view.value.zoom))) / 2.0;
+            console.log("=============");
+            console.log("Fator X: ", centerFactorX);
+            console.log("Fator Y: ", centerFactorY);
+            console.log("PosX: ", this.transform.pos.x);
+            console.log("PosY: ", this.transform.pos.y);
+            console.log("SpriteX: ", this.sprite.x);
+            console.log("SpriteY: ", this.sprite.y);
+            
+            this.sprite.x = this.transform.pos.x + view.value.xOffset - (fixFactorX * centerFactorX);
+            this.sprite.y = this.transform.pos.y + view.value.yOffset - (fixFactorY * centerFactorY);
             this.setScale(1 - view.value.zoom, 1 - view.value.zoom);
         } else {
             this.sprite.x = this.transform.pos.x;
@@ -107,8 +119,10 @@ class Sprite {
 
     update(dealtaTime, view) {
         if (this.applyView) {
-            this.sprite.x = this.transform.pos.x + view.value.xOffset;
-            this.sprite.y = this.transform.pos.y + view.value.yOffset;
+            let fixFactorX = (this.transform.pos.x - (this.transform.pos.x * (1 - view.value.zoom))) / 2.0;
+            let fixFactorY = (this.transform.pos.y - (this.transform.pos.y * (1 - view.value.zoom))) / 2.0;
+            this.sprite.x = this.transform.pos.x + view.value.xOffset + fixFactorX;
+            this.sprite.y = this.transform.pos.y + view.value.yOffset + fixFactorY;
             this.setScale(1 - view.value.zoom, 1 - view.value.zoom);
         } else {
             this.sprite.x = this.transform.pos.x;
