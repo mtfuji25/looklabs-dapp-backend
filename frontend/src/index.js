@@ -1,15 +1,17 @@
 import * as PIXI from "pixi.js";
 
-// Initialization systems
-import { initInputs } from "./inputs/inputs";
-
 // Main game loop
 import { gameLoop } from "./game-loop";
 
 // Require the resources.json
 import resource from "./resource.json";
+
+// Init fns
 import { initLayers } from "./layers";
 import { initSystems } from "./ecs/systems";
+import { initInputs } from "./inputs/inputs";
+
+// To connect with server
 import { initClient } from "./server/client";
 
 const $ = (name) => {
@@ -53,14 +55,15 @@ const main = () => {
 
 const initGame = (app) => {
 
+    // Connect with the server
+    initClient();
+
     // Start the event listeners and inti the input system
     initInputs(app);
 
     initLayers(app);
 
     initSystems();
-
-    initClient();
 
     // Start the game loop
     app.ticker.add(gameLoop);

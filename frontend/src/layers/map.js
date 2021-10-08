@@ -3,10 +3,14 @@ import { ECS } from "../ecs/core/ecs";
 import resources from "../resource.json";
 import level from "../level.json";
 
+import * as PIXI from "pixi.js";
+import { BTNS, inputs } from "../inputs/inputs";
+
 class Map {
     constructor(app) {
         this.app = app;
         this.entities = [];
+        this.container = new PIXI.Container();
     }
 
     onAttach() {
@@ -26,17 +30,18 @@ class Map {
                 this.entities.push(entity);
                 sprite = ECS.getComponent(entity, ECS.SPRITE);
                 sprite.setImg(this.app.loader.resources[currentSheet]);
-                sprite.addStage(this.app);
+                this.container.addChild(sprite.sprite);
 
                 x += 32;
             }
             x = 0;
             y += 32;
         }
+        this.container.filters = [ new PIXI.filters.BlurFilter(1, 8) ];
+        this.app.stage.addChild(this.container);
     }
 
     onUpdate(deltaTime) {
-        
     }
 }
 

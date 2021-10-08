@@ -1,4 +1,5 @@
 import { ECS_CORE } from "./ecs/core/ecs";
+import { WS } from "./server/client";
 import { layers } from "./layers";
 
 // Base stats of application loop
@@ -25,6 +26,11 @@ const gameLoop = () => {
     layers.forEach((layer) => {
         layer.onUpdate(stats.deltaTime);
     });
+
+    WS.request({
+        type: "hello",
+        content: "front want something!"
+    })
 };
 
 export { gameLoop, stats };

@@ -1,29 +1,55 @@
 
-let fns = [];
+const listeners = [];
+let connection;
 
-const dispatchFns = (msg) => {
+const WS = {
+
+    connected: false,
+
+    request(msg) {
+        if (WS.connected)
+            connection.send(JSON.stringify(msg));
+    },
+
+    addListener(listener) {
+        listeners.push(listener);
+        return {
+            id: listeners.length - 1,
+            body: listener
+        }
+    },
+
+    removeListener(listener) {
+        listeners.slice(listener.id, 1);
+    }
+}
+
+const dispatchMsgs = (msg) => {
     let data = JSON.parse(msg.data);
-    console.log(data);
-    fns.forEach(fn => {
-        fn.onServerMsg(data);
+    listeners.forEach(listener => {
+        listener.onServerMsg(data);
     })
 }
 
-const addServerListener = (callback) => {
-    fns.push(callback);
-};
-
 const initClient = () => {
-    let ws = new WebSocket("ws:localhost:8082");
-    ws.addEventListener("open", (e) => {
-        console.log("Connected to backend");
-        ws.addEventListener("message", (msg) => {
-            dispatchFns(msg);
+    connection = new WebSocket("ws:localhost:8082");
+
+    connection.addEventListener("open", e => {
+        console.log("Connected to backend.");
+        WS.connected = true;
+
+        connection.addEventListener("message", (message) => {
+            dispatchMsgs(message);
         });
-        ws.send(JSON.stringify({
-            hey: 23
-        }));
+    });
+
+    connection.addEventListener("close", e => {
+        WS.connected = false;
+        setTimeout(() => {
+            console.log("Trying to reconnect...");
+            initClient();
+        }, 1000);
     });
 }
 
-export { initClient, addServerListener }
+export { initClient, WS }

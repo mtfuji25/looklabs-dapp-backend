@@ -1,14 +1,11 @@
 // Import all necessary models
-import { Transform, Rectangle, RigidBody, Sprite, AnimatedSprite, TilingSprite } from "../models/models";
+import { Transform, Sprite, AnimatedSprite } from "../models/models";
 
 // It hold the data of all components
 const container = {
     sprites: [],
-    rectangles: [],
     transforms: [],
-    rigidbodys: [],
     animatedSprites: [],
-    tilingSprites: [],
     // Store all entities identification in the system
     entities: [],
     // Store all systems
@@ -16,49 +13,39 @@ const container = {
     globals: {},
 }
 
+// ECS_CORE features only
 const ENTITY_SYS    = 0b01;
 const CONTAINER_SYS = 0b10;
+
+// ECS features
 const TRANSFORM     = 0b000001;
-const RECTANGLE     = 0b000010;
-const ANIMSPRITE    = 0b000100;
-const SPRITE        = 0b001000;
-const RIGIDBODY     = 0b010000;
-const TILISPRITE    = 0b100000;
+const ANIMSPRITE    = 0b000010;
+const SPRITE        = 0b000100;
 
 const ECS_CORE = {
     ENTITY_SYS: ENTITY_SYS,
     CONTAINER_SYS: CONTAINER_SYS,
     TRANSFORM      : TRANSFORM,
-    RECTANGLE      : RECTANGLE,
     ANIMSPRITE     : ANIMSPRITE,
     SPRITE         : SPRITE,
-    RIGIDBODY      : RIGIDBODY,
-    TILISPRITE     : TILISPRITE,
 
     update: (deltaTime) => {
-        container.sprites.forEach((comp) => {
-            comp.update(deltaTime);
-        });
-        container.rectangles.forEach((comp) => {
-            comp.update(deltaTime);
-        });
+        // Call each model update fn
         container.transforms.forEach((comp) => {
             comp.update(deltaTime);
         });
-        container.rigidbodys.forEach((comp) => {
+        container.sprites.forEach((comp) => {
             comp.update(deltaTime);
         });
         container.animatedSprites.forEach((comp) => {
             comp.update(deltaTime);
         });
 
+        
         let data = {};
         data[TRANSFORM] = container.transforms;
-        data[RECTANGLE] = container.rectangles;
         data[ANIMSPRITE] = container.animatedSprites;
         data[SPRITE] = container.sprites;
-        data[RIGIDBODY] = container.rigidbodys;
-        data[TILISPRITE] = container.tilingSprites;
 
         container.systems.forEach((system) => {
             if (system.type & ENTITY_SYS) {
@@ -71,11 +58,21 @@ const ECS_CORE = {
         });
     },
 
-    registerSystem: (system, sysType) => {
+    addSystem: (system, sysType) => {
         container.systems.push({
             fn: system,
             type: sysType
         });
+
+        return {
+            id: container.systems.length - 1,
+            fn: system,
+            type: sysType
+        };;
+    },
+
+    removeSystem: (system) => {
+        container.systems.slice(system.id, 1);
     },
 
     setGlobal: (key, value) => {
@@ -90,11 +87,8 @@ const ECS_CORE = {
 const ECS = {
     // Components masks
     TRANSFORM      : TRANSFORM,
-    RECTANGLE      : RECTANGLE,
     ANIMSPRITE     : ANIMSPRITE,
     SPRITE         : SPRITE,
-    RIGIDBODY      : RIGIDBODY,
-    TILISPRITE     : TILISPRITE,
 
     getComponent: (entity, layout) => {
         let components = {};
@@ -102,23 +96,14 @@ const ECS = {
         if (entity.layout & TRANSFORM) {
             components[TRANSFORM] = container.transforms[entity.ids[TRANSFORM]];
         }
-        if (entity.layout & RECTANGLE) {
-            components[RECTANGLE] = container.rectangles[entity.ids[RECTANGLE]];
-        }
-        if (entity.layout & RIGIDBODY) {
-            components[RIGIDBODY] = container.rigidbodys[entity.ids[RIGIDBODY]];
-        }
         if (entity.layout & SPRITE) {
             components[SPRITE] = container.sprites[entity.ids[SPRITE]];
         }
         if (entity.layout & ANIMSPRITE) {
             components[ANIMSPRITE] = container.animatedSprites[entity.ids[ANIMSPRITE]];
         }
-        if (entity.layout & TILISPRITE) {
-            components[TILISPRITE] = container.tilingSprites[entity.ids[TILISPRITE]];
-        }
     
-        if ([TRANSFORM, SPRITE, ANIMSPRITE, RIGIDBODY, RECTANGLE, TILISPRITE].some((i) => (i == layout))) {
+        if ([TRANSFORM, SPRITE, ANIMSPRITE].some((i) => (i == layout))) {
             return components[layout];
         } else {
             return components;
@@ -130,14 +115,6 @@ const ECS = {
         if (layout & TRANSFORM)
             return -1;
     
-        if (layout & RECTANGLE) {
-            container.rectangles.slice(entity.ids[RECTANGLE], 1);
-            entity.layout &= (~RECTANGLE);
-        }
-        if (layout & RIGIDBODY) {
-            container.rigidbodys.slice(entity.ids[RIGIDBODY], 1);
-            entity.layout &= (~RIGIDBODY);
-        }
         if (layout & SPRITE) {
             container.sprites.slice(entity.ids[SPRITE], 1);
             entity.layout &= (~SPRITE);
@@ -145,10 +122,6 @@ const ECS = {
         if (layout & ANIMSPRITE) {
             container.animatedSprites.slice(entity.ids[ANIMSPRITE], 1);
             entity.layout &= (~ANIMSPRITE);
-        }
-        if (layout & TILISPRITE) {
-            container.tilingSprites.slice(entity.ids[TILISPRITE], 1);
-            entity.layout &= (~TILISPRITE);
         }
     },
     
@@ -160,31 +133,6 @@ const ECS = {
         if (entity.layout & layout)
             return -1;
     
-        if (layout & RECTANGLE) {
-            // Creates the nem component
-            let rectangle = new Rectangle(transform);
-    
-            // Store it in the container
-            container.rectangles.push(rectangle);
-    
-            // Get the current index of the component and make it as the id
-            entity.ids[RECTANGLE] = (container.rectangles.length - 1);
-    
-            // Add the component kind to the mask
-            entity.layout |= RECTANGLE;
-    
-            // Add the current component to the dictionary
-            components[RECTANGLE] = rectangle;
-        }
-    
-        // All other components follow the same logic as the shown above
-        if (layout & RIGIDBODY) {
-            let rigidbody = new RigidBody(transform);
-            container.rigidbodys.push(rigidbody);
-            entity.ids[RIGIDBODY] = (container.rigidbodys.length - 1);
-            entity.layout |= RIGIDBODY;
-            components[RIGIDBODY] = rigidbody;
-        }
         if (layout & SPRITE) {
             let sprite = new Sprite(transform);
             container.sprites.push(sprite);
@@ -199,15 +147,8 @@ const ECS = {
             entity.layout |= ANIMSPRITE;
             components[ANIMSPRITE] = animatedSprite;
         }
-        if (layout & TILISPRITE) {
-            let tilingSprite = new TilingSprite(transform);
-            container.tilingSprites.push(tilingSprite);
-            entity.ids[TILISPRITE] = (container.tilingSprites.length - 1);
-            entity.layout |= TILISPRITE;
-            components[TILISPRITE] = tilingSprite;
-        }
     
-        if ([TRANSFORM, SPRITE, ANIMSPRITE, RIGIDBODY, RECTANGLE, TILISPRITE].some((i) => (i == layout))) {
+        if ([TRANSFORM, SPRITE, ANIMSPRITE].some((i) => (i == layout))) {
             return components[layout];
         } else {
             return components;
@@ -221,7 +162,7 @@ const ECS = {
         if (entity.layout & TRANSFORM) {
             container.transforms.slice(entity.ids[TRANSFORM], 1);
         }
-        ECS.removeComponent(entity, RECTANGLE | ANIMSPRITE | SPRITE | RIGIDBODY | TILISPRITE);
+        ECS.removeComponent(entity, ANIMSPRITE | SPRITE);
     
         // Remove the entity itself from the array
         container.entities.slice(entity.ids["entity"], 1);
