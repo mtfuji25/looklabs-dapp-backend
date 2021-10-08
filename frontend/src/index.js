@@ -29,7 +29,7 @@ const main = () => {
     // Create a PIXI application
     app = new PIXI.Application({
         resolution: devicePixelRatio,
-        backgroundColor: 0xAAAAAA,
+        backgroundColor: 0x1e272e,
         resizeTo: ROOT
     });
 

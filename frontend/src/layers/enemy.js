@@ -1,8 +1,6 @@
 import { ECS } from "../ecs/core/ecs";
 
 import resources from "../resource.json";
-import level from "../level.json";
-import { inputs, KEYS } from "../inputs/inputs";
 import { wordToView } from "../utils/utils";
 
 class Enemy {
