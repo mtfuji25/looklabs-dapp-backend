@@ -1,28 +1,30 @@
+import { CONTAINER_DIM } from "../constants/constants";
+
 const wordToView = (pos, props) => {
     return {
-        x: (pos.x * props.width + props.width) / 2.0,
-        y: props.height - (pos.y * props.height + props.height) / 2.0
+        x: (pos.x * CONTAINER_DIM + CONTAINER_DIM) / 2.0,
+        y: CONTAINER_DIM - (pos.y * CONTAINER_DIM + CONTAINER_DIM) / 2.0
     }
 }
 
 const viewToWord = (pos, props) => {
     return {
-        x: (pos.x / props.width * 2.0) - 1.0,
-        y: ((props.height - pos.y) / props.height * 2.0) - 1.0
+        x: (pos.x / CONTAINER_DIM * 2.0) - 1.0,
+        y: ((CONTAINER_DIM - pos.y) / CONTAINER_DIM * 2.0) - 1.0
     }
 }
 
 const resToNdc = (res, props) => {
     return {
-        x: (res.x / props.width) * 2.0,
-        y: (res.y / props.height) * 2.0
+        x: (res.x / CONTAINER_DIM) * 2.0,
+        y: (res.y / CONTAINER_DIM) * 2.0
     }
 }
 
 const ndcToRes = (ndc, props) => {
     return {
-        x: (ndc.x * props.width) / 2.0,
-        y: (ndc.y * props.height) / 2.0
+        x: (ndc.x * CONTAINER_DIM) / 2.0,
+        y: (ndc.y * CONTAINER_DIM) / 2.0
     }
 }
 

@@ -1,95 +1,38 @@
 const WebSocket = require("ws");
 const fs = require("fs");
 
-/*
-    // Enemy msgs control models
+//
+//  *** Utils sector ***  
+//
 
-    {
-        type: "create-enemy",
-        content: {
-            id: ...,
-            pos: {
-                x: ...,
-                y: ...
-            }
-        }
-    }
+const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
 
-    {
-        type: "update-enemy",
-        content: {
-            id: ...,
-            action: ...,
-            pos: {
-                x: ...,
-                y: ...
-            }
-        }
-    }
-
-    {
-        type: "delete-enemy",
-        content: {
-            id: ...
-        }
-    }
-*/
-
-let resources;
-
-// fs.readFile("./resources.json", "utf-8", (err, jsonString) => {
-//     if (err) {
-//         console.log(err);
-//     } else {
-//         try {
-//             resources = JSON.parse(jsonString);
-//         } catch (e) {
-//             console.log("Error while parsing json", e);
-//         }
-//     }
-// });
 
 const wss = new WebSocket.Server({ port: 8082 });
 
 let msgs = [];
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 wss.on("connection", ws => {
     console.log("New client connected");
 
+    ws.send(JSON.stringify({
+        type: "create-enemy",
+        content: {
+            id: 0,
+            pos: {
+                x: 0.0,
+                y: 0.0
+            }
+        }
+    }));
+
     ws.on("message", async (message) => {
         const data = JSON.parse(message.toString());
         console.log("Message")
-        // ws.send(JSON.stringify({
-        //     type: "create-enemy",
-        //     content: {
-        //         id: 0,
-        //         pos: {
-        //             x: 0.0,
-        //             y: 0.0
-        //         }
-        //     }
-        // }));
-        // ws.send(JSON.stringify({
-        //     type: "update-enemy",
-        //     content: {
-        //     id: 0,
-        //     action: 6,
-        //     pos: {
-        //         x: 0.5,
-        //         y: 0.0
-        //     }
-        // }
-        // }));
-        // ws.send(JSON.stringify({
-        //     type: "delete-enemy",
-        //     content: {
-        //         id: 0
-        //     }
-        // }));
     });
 });
 
@@ -102,42 +45,18 @@ const loop = async () => {
         start = current;
 
         wss.clients.forEach(client => {
-            client.send(JSON.stringify({
-                type: "update-enemy",
-                content: {
-                id: 0,
-                action: 6,
-                pos: {
-                    x: 0.5,
-                    y: 0.0
-                }
-            }
-            }));
+            
         });
 
-        await sleep(1);
+        await sleep(1000);
     }
 }
 
-//loop();
+loop();
 
-// let entities = [];
-
-// const initGame = () => {
-//     let x = 0.0;
-//     let y = 0.0;
-
-//     for (let i = 0; i < UNIT_WIDTH; ++i) {
-//         for (let j = 0; j < UNIT_HEIGTH; ++j) {
-            
-//         }
-//     }
-
-//     loop();
-// }
-
-const UNIT_WIDTH = 60;
-const UNIT_HEIGTH = 32;
+//
+//  *** Rectangle and collision sector ***
+//
 
 class Rectangle {
     constructor(x, y, width, heigth) {
@@ -259,3 +178,18 @@ const recIntersectRec = (a, b, deltaTime, res) => {
 
     return false;
 }
+
+
+//
+//  *** Protocol description ***
+//
+
+/*
+*   Enemy msgs protocol - All position should be sent using NDC
+*
+*   { type: "create-enemy", content: { id: ..., pos: { x: ..., y: ... } } }
+*
+*   { type: "update-enemy", content: { id: ..., action: ..., pos: { x: ..., y: ... } } }
+*
+*   { type: "delete-enemy", content: { id: ... } }
+*/

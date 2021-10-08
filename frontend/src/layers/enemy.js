@@ -4,13 +4,17 @@ import resources from "../resource.json";
 import { wordToView } from "../utils/utils";
 
 class Enemy {
-    constructor(app) {
+    constructor(app, ws) {
         this.app = app;
+        this.connection = ws;
+
         this.entities = {};
         this.props = {
             width: this.app.view.width,
             height: this.app.view.height,
         };
+
+        this.listener = ws.addListener(this);
     }
 
     createEnemy(id, x, y) {
@@ -66,10 +70,12 @@ class Enemy {
     }
 
     onServerMsg(msg) {
+        console.log("Hey, msg");
         let pos;
         switch (msg.type) {
             case "create-enemy":
                 pos = wordToView({ x: msg.content.pos.x, y: msg.content.pos.y }, this.props);
+                console.log(pos)
                 this.createEnemy(msg.content.id, pos.x, pos.y);
                 break;
             case "update-enemy":
@@ -83,7 +89,6 @@ class Enemy {
     }
 
     onUpdate(deltaTime) {
-        
     }
 }
 

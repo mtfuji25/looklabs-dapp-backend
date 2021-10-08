@@ -23,11 +23,11 @@ const ANIMSPRITE    = 0b000010;
 const SPRITE        = 0b000100;
 
 const ECS_CORE = {
-    ENTITY_SYS: ENTITY_SYS,
-    CONTAINER_SYS: CONTAINER_SYS,
-    TRANSFORM      : TRANSFORM,
-    ANIMSPRITE     : ANIMSPRITE,
-    SPRITE         : SPRITE,
+    ENTITY_SYS      : ENTITY_SYS,
+    CONTAINER_SYS   : CONTAINER_SYS,
+    TRANSFORM       : TRANSFORM,
+    ANIMSPRITE      : ANIMSPRITE,
+    SPRITE          : SPRITE,
 
     update: (deltaTime) => {
         // Call each model update fn
@@ -35,10 +35,10 @@ const ECS_CORE = {
             comp.update(deltaTime);
         });
         container.sprites.forEach((comp) => {
-            comp.update(deltaTime);
+            comp.update(deltaTime, container.globals["view"]);
         });
         container.animatedSprites.forEach((comp) => {
-            comp.update(deltaTime);
+            comp.update(deltaTime, container.globals["view"]);
         });
 
         
@@ -80,7 +80,7 @@ const ECS_CORE = {
     },
 
     getGlobal: (key) => {
-        return container.globals[key].value;
+        return container.globals[key];
     }
 }
 

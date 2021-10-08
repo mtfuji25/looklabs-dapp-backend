@@ -26,11 +26,6 @@ const gameLoop = () => {
     layers.forEach((layer) => {
         layer.onUpdate(stats.deltaTime);
     });
-
-    WS.request({
-        type: "hello",
-        content: "front want something!"
-    })
 };
 
 export { gameLoop, stats };

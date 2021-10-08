@@ -1,8 +1,10 @@
 import { ECS } from "../ecs/core/ecs";
 import { BTNS, inputs } from "../inputs/inputs";
 
+import { CONTAINER_DIM } from "../constants/constants";
+
 class View {
-    constructor(app) {
+    constructor(app, ws) {
         this.app = app;
 
         // View zoom of the app
@@ -11,7 +13,7 @@ class View {
 
         // Current offset from orgin
         this.xOffset = 0.0;
-        this.yOffset = 0.0;
+        this.yOffset = this.app.view.height - CONTAINER_DIM;
 
         // Used for calculus purpose
         this.lastX = 0.0;
@@ -59,7 +61,7 @@ class View {
         this.lastZoom = inputs.wheel;
 
         if (this.zoom < -25.0) this.zoom = -25.0;
-        if (this.zoom >  25.0) this.zoom =  10.0;
+        if (this.zoom >  10.0) this.zoom =  10.0;
 
         ECS.setGlobal("view", {
             zoom: this.zoom / 25,

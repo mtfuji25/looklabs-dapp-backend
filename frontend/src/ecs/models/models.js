@@ -10,6 +10,7 @@ class AnimatedSprite {
         this.texHeight = 0;
         this.frameWidth = 0;
         this.frameHeight = 0;
+        this.applyView = true;
     }
 
     loadFromConfig(app, config) {
@@ -57,9 +58,15 @@ class AnimatedSprite {
         this.sprite.scale.y = y;
     }
 
-    update() {
-        this.sprite.x = this.transform.pos.x;
-        this.sprite.y = this.transform.pos.y;
+    update(dealtaTime, view) {
+        if (this.applyView) {
+            this.sprite.x = this.transform.pos.x + view.value.xOffset;
+            this.sprite.y = this.transform.pos.y + view.value.yOffset;
+            this.setScale(1 - view.value.zoom, 1 - view.value.zoom);
+        } else {
+            this.sprite.x = this.transform.pos.x;
+            this.sprite.y = this.transform.pos.y;
+        }
     }
 };
 
@@ -71,6 +78,7 @@ class Sprite {
         this.sprite.x = transform.pos.x;
         this.sprite.y = transform.pos.y;
         this.sprite.anchor.set(0.5);
+        this.applyView = true;
     }
 
     setCustomImg(img, pw, ph, w, h) {
@@ -97,9 +105,15 @@ class Sprite {
         this.sprite.scale.y = y;
     }
 
-    update() {
-        this.sprite.x = this.transform.pos.x;
-        this.sprite.y = this.transform.pos.y;
+    update(dealtaTime, view) {
+        if (this.applyView) {
+            this.sprite.x = this.transform.pos.x + view.value.xOffset;
+            this.sprite.y = this.transform.pos.y + view.value.yOffset;
+            this.setScale(1 - view.value.zoom, 1 - view.value.zoom);
+        } else {
+            this.sprite.x = this.transform.pos.x;
+            this.sprite.y = this.transform.pos.y;
+        }
     }
 };
 
