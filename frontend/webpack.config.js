@@ -1,22 +1,27 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.ts',
+
+  // For development purpose only
   watch: true,
   mode: "development",
-  output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'public'),
-  },
+  // ! For development purpose only
+
   module: {
     rules: [
       {
-        test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
-        options: {
-          name: './public/images/[name].[ext]',
-        },
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
+  output: {
+    filename: 'engine.js',
+    path: path.resolve(__dirname, 'public'),
   },
 };
