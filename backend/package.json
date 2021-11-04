@@ -2,16 +2,24 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon",
+    "build": "tsc",
+    "serve": "node dist/index.js",
+    "clean": "rm -rf ./dist/*.js && rm -rf ./dist/*.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "nodemon": "^2.0.14",
+    "typescript": "^4.4.4",
+    "typescript-loader": "^1.1.3"
+  },
   "dependencies": {
-    "nodemon": "^2.0.13",
-    "ws": "^8.2.3"
+    "dotenv": "^10.0.0"
   }
 }
