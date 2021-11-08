@@ -26,7 +26,9 @@ class BaseMap {
         let entity;
         let sprite;
         for (let i = 0; i < rows; ++i) {
+            y += 16;
             for (let j = 0; j < cols; ++j) {
+                x += 16;
                 let currentSheet = level_soil["mappings"][level_soil["data"][i][j]];
                 if (currentSheet != "empty") {
                     entity = ECS.createEntity(x, y, ECS.SPRITE);
@@ -36,10 +38,10 @@ class BaseMap {
                     sprite.setImg(this.app.loader.resources[currentSheet]);
                     this.soilContainer.addChild(sprite.sprite);
                 }
-                x += 32;
+                x += 16;
             }
             x = 0;
-            y += 32;
+            y += 16;
         }
     }
 
@@ -53,7 +55,9 @@ class BaseMap {
         let entity;
         let sprite;
         for (let i = 0; i < rows; ++i) {
+            y += 16;
             for (let j = 0; j < cols; ++j) {
+                x += 16;
                 let currentSheet = level_wall["mappings"][level_wall["data"][i][j]];
                 if (currentSheet != "empty") {
                     entity = ECS.createEntity(x, y, ECS.SPRITE);
@@ -63,10 +67,10 @@ class BaseMap {
                     sprite.setImg(this.app.loader.resources[currentSheet]);
                     this.wallContainer.addChild(sprite.sprite);
                 }
-                x += 32;
+                x += 16;
             }
             x = 0;
-            y += 32;
+            y += 16;
         }
     }
 

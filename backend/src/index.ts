@@ -1,26 +1,32 @@
 import { Engine } from "./core/engine"
 import { WSClient } from "./clients/websocket";
+import { StrapiClient } from "./clients/strapi";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 
-type BitMaskedId = Record<number, number>;
+const STRAPI_PORT = Number(process.env.STRAPI_SERVER_PORT);
+const EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
+const WS_PORT = Number(process.env.WS_SERVER_PORT);
 
 const main = async () => {
 
-    // Start websocket client
-    const wsClient = new WSClient(Number(process.env.WS_SERVER_PORT));
+    // Start strapi client
+    const strapiClient = new StrapiClient(STRAPI_PORT, EXPRESS_PORT);
 
-    const engine = new Engine(wsClient);
+    // Start websocket client
+    const wsClient = new WSClient(WS_PORT);
+
+    const engine = new Engine(wsClient, strapiClient);
 
     // Start the engine systems
     engine.start();
 
     // Start the engine game loop
-    engine.loop();
+    await engine.loop();
 
     // Properly close the engine
     engine.close();
 }
 
-main()
+main();

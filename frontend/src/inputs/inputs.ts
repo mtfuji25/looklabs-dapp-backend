@@ -72,7 +72,7 @@ const handleMouseBtnUp = (event: MouseEvent) => {
 
 //  When mouse wheel is activated
 const handleMouseWheel = (event: WheelEvent) => {
-    inputs.wheel += (event.deltaY > 0) ? -1 : 1;
+    inputs.wheel += (event.deltaY < 0) ? -1 : 1;
 };
 
 const initInputs = (app: Application) => {

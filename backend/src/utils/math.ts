@@ -9,68 +9,68 @@ class Vec2 {
         this.y = y;
     }
 
-    add(ohter: Vec2): Vec2 {
+    add(other: Vec2): Vec2 {
         return new Vec2(
-            this.x + ohter.x,
-            this.y + ohter.y
+            this.x + other.x,
+            this.y + other.y
         );
     }
 
-    adds(ohter: number): Vec2 {
+    adds(other: number): Vec2 {
         return new Vec2(
-            this.x + ohter,
-            this.y + ohter
+            this.x + other,
+            this.y + other
         );
     }
 
-    sub(ohter: Vec2): Vec2 {
+    sub(other: Vec2): Vec2 {
         return new Vec2(
-            this.x - ohter.x,
-            this.y - ohter.y
+            this.x - other.x,
+            this.y - other.y
         );
     }
 
-    subs(ohter: number): Vec2 {
+    subs(other: number): Vec2 {
         return new Vec2(
-            this.x - ohter,
-            this.y - ohter
+            this.x - other,
+            this.y - other
         );
     }
 
-    mul(ohter: Vec2): Vec2 {
+    mul(other: Vec2): Vec2 {
         return new Vec2(
-            this.x * ohter.x,
-            this.y * ohter.y
+            this.x * other.x,
+            this.y * other.y
         );
     }
 
-    muls(ohter: number): Vec2 {
+    muls(other: number): Vec2 {
         return new Vec2(
-            this.x * ohter,
-            this.y * ohter
+            this.x * other,
+            this.y * other
         );
     }
 
-    div(ohter: Vec2): Vec2 {
+    div(other: Vec2): Vec2 {
         return new Vec2(
-            this.x / ohter.x,
-            this.y / ohter.y
+            this.x / other.x,
+            this.y / other.y
         );
     }
 
-    divs(ohter: number): Vec2 {
+    divs(other: number): Vec2 {
         return new Vec2(
-            this.x / ohter,
-            this.y / ohter
+            this.x / other,
+            this.y / other
         );
     }
 
     equal(other: Vec2): boolean {
-        return this.x == other.x && this.y == other.y;
+        return (this.x == other.x && this.y == other.y);
     }
 
-    dot(ohter: Vec2): number {
-        return this.x * ohter.x + this.y * ohter.y;
+    dot(other: Vec2): number {
+        return this.x * other.x + this.y * other.y;
     }
 
     length(): number {
@@ -98,3 +98,5 @@ const rad2deg = (rad: number): number => {
 const lerp = (a: number, b: number, t: number): number => {
     return (1 - t) * a + t * b;
 }
+
+export { Vec2, deg2rad, rad2deg, lerp };

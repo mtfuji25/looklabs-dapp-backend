@@ -1,3 +1,4 @@
+import { Vec2 } from "../../../utils/math";
 
 class TransformComponent {
 

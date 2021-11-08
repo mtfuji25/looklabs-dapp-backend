@@ -1,3 +1,4 @@
+import { Vec2 } from "../../../utils/math";
 import { TransformComponent } from "./transform";
 
 class RectangleComponent {

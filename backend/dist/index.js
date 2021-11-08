@@ -57,23 +57,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var engine_1 = require("./core/engine");
 var websocket_1 = require("./clients/websocket");
+var strapi_1 = require("./clients/strapi");
 var dotenv = __importStar(require("dotenv"));
 dotenv.config();
+var STRAPI_PORT = Number(process.env.STRAPI_SERVER_PORT);
+var EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
+var WS_PORT = Number(process.env.WS_SERVER_PORT);
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var test, test2, wsClient, engine;
+    var strapiClient, wsClient, engine;
     return __generator(this, function (_a) {
-        test = 0;
-        test2 = 0;
-        console.log(test & test2);
-        wsClient = new websocket_1.WSClient(Number(process.env.WS_SERVER_PORT));
-        engine = new engine_1.Engine(wsClient);
-        // Start the engine systems
-        engine.start();
-        // Start the engine game loop
-        engine.loop();
-        // Properly close the engine
-        engine.close();
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0:
+                strapiClient = new strapi_1.StrapiClient(STRAPI_PORT, EXPRESS_PORT);
+                wsClient = new websocket_1.WSClient(WS_PORT);
+                engine = new engine_1.Engine(wsClient, strapiClient);
+                // Start the engine systems
+                engine.start();
+                // Start the engine game loop
+                return [4 /*yield*/, engine.loop()];
+            case 1:
+                // Start the engine game loop
+                _a.sent();
+                // Properly close the engine
+                engine.close();
+                return [2 /*return*/];
+        }
     });
 }); };
 main();

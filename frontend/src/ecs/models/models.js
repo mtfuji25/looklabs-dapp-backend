@@ -60,8 +60,8 @@ class AnimatedSprite {
 
     update(dealtaTime, view) {
         if (this.applyView) {
-            let centerFactorX = ((this.transform.pos.x * (1 - view.value.zoom)) - 2400) / 2400;
-            let centerFactorY = ((this.transform.pos.y * (1 - view.value.zoom)) - 2400) / 2400;
+            let centerFactorX = (this.transform.pos.x - 2400) / 2400;
+            let centerFactorY = (this.transform.pos.y - 2400) / 2400;
             let fixFactorX = (this.transform.pos.x - (this.transform.pos.x * (1 - view.value.zoom))) / 2.0;
             let fixFactorY = (this.transform.pos.y - (this.transform.pos.y * (1 - view.value.zoom))) / 2.0;
             console.log("=============");

@@ -26,6 +26,8 @@ const WS = {
 
 const dispatchMsgs = (msg) => {
     let data = JSON.parse(msg.data);
+    console.log("New message from server:");
+    console.log(data);
     listeners.forEach(listener => {
         listener.onServerMsg(data);
     })

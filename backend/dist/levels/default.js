@@ -17,15 +17,17 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultLevel = void 0;
 var level_1 = require("../core/level");
+var await_1 = require("./await");
 var DefaultLevel = /** @class */ (function (_super) {
     __extends(DefaultLevel, _super);
     function DefaultLevel() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     DefaultLevel.prototype.onStart = function () {
+        this.context.engine.loadLevel(new await_1.AwaitLevel(this.context, "Await"));
     };
-    DefaultLevel.prototype.onClose = function () {
-    };
+    DefaultLevel.prototype.onUpdate = function (deltaTime) { };
+    DefaultLevel.prototype.onClose = function () { };
     return DefaultLevel;
 }(level_1.Level));
 exports.DefaultLevel = DefaultLevel;
