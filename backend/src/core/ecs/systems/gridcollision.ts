@@ -88,6 +88,13 @@ const sysGridCollision = (data: EcsData, deltaTime: number): void => {
 
             // Solves the collison
             sortedEntities.forEach(({ other, result }) => {
+                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
+                    rigidbody.velocity.x = 0;
+                    rigidbody.velocity.y = 0;
+                    other.velocity.x = 0;
+                    other.velocity.y = 0;
+                }
+
                 // Fix for current entity
                 rigidbody.velocity.x += result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime);
                 rigidbody.velocity.y += result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime);
@@ -140,6 +147,10 @@ const sysGridCollision = (data: EcsData, deltaTime: number): void => {
 
             // Solves the collison
             sortedStatics.forEach((result) => {
+                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
+                    rigidbody.velocity.x = 0;
+                    rigidbody.velocity.y = 0;
+                }
                 // Fix for current entity
                 rigidbody.velocity.x += result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime);
                 rigidbody.velocity.y += result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime);
