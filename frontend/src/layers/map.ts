@@ -90,8 +90,6 @@ class MapLayer extends Layer {
         // Translate and scale soil
         this.mapContainer.x = transform.offsetX + fixFactorX;
         this.mapContainer.y = transform.offsetY + fixFactorY;
-        console.log("MapaX: ", this.mapContainer.x)
-        console.log("MapaY: ", this.mapContainer.y)
         this.mapContainer.scale.x = 1 - transform.zoom;
         this.mapContainer.scale.y = 1 - transform.zoom;
     }
