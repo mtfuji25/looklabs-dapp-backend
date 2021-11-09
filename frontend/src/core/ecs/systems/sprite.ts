@@ -4,7 +4,7 @@ import { EcsData, EngineContext } from "../../interfaces";
 const sysUpdateSpritePos = (data: EcsData, context: EngineContext, deltaTime: number): void => {
     // Iterates through all sprites in system
     data.sprites.forEach((sprite) => {
-        if (sprite.useView) {
+        if (true) {
             const centerFactorX = (sprite.transform.pos.x - (CONTAINER_DIM / 2.0)) / (CONTAINER_DIM / 2.0);
             const centerFactorY = (sprite.transform.pos.y - (CONTAINER_DIM / 2.0)) / (CONTAINER_DIM / 2.0);
             const fixFactorX = (sprite.transform.pos.x - (sprite.transform.pos.x * (1 - sprite.transform.zoom))) / 2.0;

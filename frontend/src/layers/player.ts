@@ -36,7 +36,9 @@ class PlayerLayer extends Layer {
 
     onAttach() {}
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        
+    }
 
     onDetach() {
         this.wsClient.remMsgListener(this.listenerId);
@@ -48,6 +50,7 @@ class PlayerLayer extends Layer {
         const entity = this.ecs.createEntity(x, y);
         this.entities[id] = entity;
         const sprite = entity.addComponent[AnimSprite]() as AnimSpriteComponent;
+        sprite.useView = true;
         sprite.loadFromConfig(this.app, this.res["enemy-sheet"]);
         sprite.addStage(this.app);
     }

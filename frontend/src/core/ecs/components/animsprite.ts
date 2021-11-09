@@ -31,8 +31,7 @@ class AnimSpriteComponent {
     private frameWidth: number = 0;
     private frameHeight: number = 0;
 
-    public applyView: boolean = true;
-
+    public useView: boolean = true;
 
     constructor(transform: TransformComponent) {
         this.transform = transform;
@@ -84,6 +83,11 @@ class AnimSpriteComponent {
 
     remStage(app: Application) {
         app.stage.removeChild(this.sprite);
+    }
+
+    setScale(x: number, y: number) {
+        this.sprite.scale.x = x;
+        this.sprite.scale.y = y;
     }
 
 }

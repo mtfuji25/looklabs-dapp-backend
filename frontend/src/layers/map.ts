@@ -86,7 +86,8 @@ class MapLayer extends Layer {
 
         let fixFactorX = (this.dim.x - (this.dim.x * (1 - transform.zoom))) / 2.0;
         let fixFactorY = (this.dim.y - (this.dim.y * (1 - transform.zoom))) / 2.0;
-
+        console.log("Mapa: ", transform.offsetX)
+        console.log("Mapa: ", transform.offsetY)
         // Translate and scale soil
         this.mapContainer.x = transform.offsetX + fixFactorX;
         this.mapContainer.y = transform.offsetY + fixFactorY;

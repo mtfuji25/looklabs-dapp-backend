@@ -21,14 +21,14 @@ var layer_1 = require("../core/layer");
 var math_1 = require("../utils/math");
 // Fixed spawn points
 var spawnPos = [
-    new math_1.Vec2(0.75, 0.0),
-    new math_1.Vec2(0.5, 0.3),
-    new math_1.Vec2(0.75, 0.7),
-    new math_1.Vec2(-0.1, 0.53),
-    new math_1.Vec2(0.75, 0.3),
-    new math_1.Vec2(0.6, -0.4),
-    new math_1.Vec2(-0.7, 0.6),
-    new math_1.Vec2(-0.5, -0.4),
+    new math_1.Vec2(0.8, 0.0),
+    new math_1.Vec2(0.0, 0.8),
+    new math_1.Vec2(-0.8, 0.0),
+    new math_1.Vec2(0.0, -0.8),
+    new math_1.Vec2(-0.3, 0.3),
+    new math_1.Vec2(0.3, -0.2),
+    new math_1.Vec2(0.3, 0.3),
+    new math_1.Vec2(-0.5, -0.1),
     new math_1.Vec2(-0.2, -0.6),
     new math_1.Vec2(0.2, -0.6),
 ];

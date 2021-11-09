@@ -24,7 +24,6 @@ const viewProperties: ViewProperties = {
 }
 
 const initSysUpdateView = (context: EngineContext) => {
-    viewProperties.offsetY = context.app.view.height - CONTAINER_DIM;
     viewProperties.lastX = context.inputs.cursor.x;
     viewProperties.lastY = context.inputs.cursor.y;
     viewProperties.lastZoom = context.inputs.wheel;
@@ -56,8 +55,8 @@ const sysUpdateView = (data: EcsData, context: EngineContext, deltaTime: number)
     viewProperties.zoom += context.inputs.wheel - viewProperties.lastZoom;
     viewProperties.lastZoom = context.inputs.wheel;
 
-    if (viewProperties.zoom < -25.0) viewProperties.zoom = -25.0;
-    if (viewProperties.zoom >  10.0) viewProperties.zoom =  10.0;
+    if (viewProperties.zoom < -10.0) viewProperties.zoom = -10.0;
+    if (viewProperties.zoom >  5.0) viewProperties.zoom =  5.0;
 
     data.transforms.map((transform) => {
         transform.zoom = viewProperties.zoom / 25.0;

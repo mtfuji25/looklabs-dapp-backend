@@ -22,14 +22,14 @@ type GetTargetFn = (player: PlayerLayer) => (Entity | null);
 
 // Fixed spawn points
 const spawnPos: Vec2[] = [
-    new Vec2( 0.75, 0.0),
-    new Vec2( 0.5,  0.3),
-    new Vec2( 0.75, 0.7),
-    new Vec2(-0.1,  0.53),
-    new Vec2( 0.75, 0.3),
-    new Vec2( 0.6, -0.4),
-    new Vec2(-0.7,  0.6),
-    new Vec2(-0.5, -0.4),
+    new Vec2( 0.8, 0.0),
+    new Vec2( 0.0, 0.8),
+    new Vec2( -0.8, 0.0),
+    new Vec2( 0.0,  -0.8),
+    new Vec2( -0.3, 0.3),
+    new Vec2( 0.3, -0.2),
+    new Vec2( 0.3,  0.3),
+    new Vec2(-0.5, -0.1),
     new Vec2(-0.2, -0.6),
     new Vec2( 0.2, -0.6),
 ];
