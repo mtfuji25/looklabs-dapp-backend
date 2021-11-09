@@ -85,7 +85,6 @@ var LobbyLevel = /** @class */ (function (_super) {
                 _this.layerStack.popLayer(data);
                 // Removes dead player from fighters
                 _this.fighters = _this.fighters.filter(function (item) { return item !== data; });
-                console.log("Morreu: ", _this.fighters);
                 // this.context.strapiClient.createParticipantResult({
                 //     scheduled_game_participant: data.playerID,
                 //     result: "died"

@@ -27,7 +27,9 @@ class WSClient {
 
     private handleConnection(ws: WebSocket) {
         console.log("New client connected in WebSocketServer.");
-        
+        this.broadcast(
+            { type: "create-enemy", content: {id: 1, pos: { x: 0.0, y: 0.0 } } }
+        );
         for (let listener of this.conListeners) {
             if (listener(ws))
                 break;

@@ -1,8 +1,0 @@
-
-const sysUpdateZoom = () => {
-
-}
-
-const sysUpdateTransform = () => {
-    
-}

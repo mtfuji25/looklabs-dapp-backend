@@ -1,74 +1,44 @@
+import { Engine } from "./core/engine";
+import { WSClient } from "./clients/websocket";
+
 import { Application } from "pixi.js";
+import { MAIN_BG_COLOR, ROOT_DIV_ID, WS_SERVER_HOST } from "./constants/constants";
 
-// Main game loop
-import { gameLoop } from "./game-loop";
-
-// Require the resources.json
-import resourceFile from "./resource.json";
-// Cast to something that typescript can understand
-const resource: Record<string, any> = resourceFile;
-
-// Init fns
-import { initLayers } from "./layers";
-import { initSystems } from "./ecs/systems";
-import { initInputs } from "./inputs/inputs";
-
-// To connect with server
-import { initClient } from "./server/client";
-
+// Jquery like query selector
 const $ = (name: string) => {
     return document.querySelector(name) as HTMLElement;
-}
+};
 
-const ROOT = $("#root");
-
-// Current application
-let app: Application;
+// Root div to append engine's view
+const ROOT = $(ROOT_DIV_ID);
 
 const main = () => {
-    
-    // Create a PIXI application
-    app = new Application({
+
+    // Creates PIXI application
+    const app = new Application({
         resolution: devicePixelRatio,
-        backgroundColor: 0x1e272e,
+        backgroundColor: MAIN_BG_COLOR,
         resizeTo: ROOT
     });
 
-    // Append the base application to the root div of index.html
-    ROOT.appendChild(app.view);
+    // Start websocket client
+    const wsClient = new WSClient(WS_SERVER_HOST);
 
-    // Make sure that the application is able to listen to events
-    app.stage.interactive = true;
+    // Start engine itself
+    const engine = new Engine(wsClient, app, ROOT);
 
-    // Add all resources to loader queue
-    resource["packs"].forEach((pack: string) => {
-        app.loader.add(resource[pack]);
+    // Start the engine systems
+    engine.start(() => {
+        // Start the engine game loop
+        engine.loop().then(() => {
+                // Properly close the engine
+                engine.close();
+                console.log("Close");
+            }
+        );
     });
 
-    // Set callback funtion to call when resources were loaded
-    app.loader.onComplete.add(() => {
-        initGame(app);
-    });
-
-    // Effectlly load all the resources
-    app.loader.load();
+    console.log("Teste");
 }
 
-const initGame = (app: Application) => {
-
-    // Connect with the server
-    initClient();
-
-    // Start the event listeners and inti the input system
-    initInputs(app);
-
-    initLayers(app);
-
-    initSystems();
-
-    // Start the game loop
-    app.ticker.add(gameLoop);
-}
-
-// Call the main function and start the app.
 main();
