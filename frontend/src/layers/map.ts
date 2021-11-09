@@ -77,7 +77,7 @@ class MapLayer extends Layer {
         // Apply a ligth blur on the soil
         this.mapContainer.filters = [ new filters.BlurFilter(1, 8) ];
 
-        // Add both layers to render stage
+        // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
     }
 
@@ -86,11 +86,12 @@ class MapLayer extends Layer {
 
         let fixFactorX = (this.dim.x - (this.dim.x * (1 - transform.zoom))) / 2.0;
         let fixFactorY = (this.dim.y - (this.dim.y * (1 - transform.zoom))) / 2.0;
-        console.log("Mapa: ", transform.offsetX)
-        console.log("Mapa: ", transform.offsetY)
+        
         // Translate and scale soil
         this.mapContainer.x = transform.offsetX + fixFactorX;
         this.mapContainer.y = transform.offsetY + fixFactorY;
+        console.log("MapaX: ", this.mapContainer.x)
+        console.log("MapaY: ", this.mapContainer.y)
         this.mapContainer.scale.x = 1 - transform.zoom;
         this.mapContainer.scale.y = 1 - transform.zoom;
     }

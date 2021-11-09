@@ -10,11 +10,10 @@ const sysUpdateAnimSpritePos = (data: EcsData, context: EngineContext, deltaTime
             const fixFactorX = (animsprite.transform.pos.x - (animsprite.transform.pos.x * (1 - animsprite.transform.zoom))) / 2.0;
             const fixFactorY = (animsprite.transform.pos.y - (animsprite.transform.pos.y * (1 - animsprite.transform.zoom))) / 2.0;
             
-            console.log("Anim: ", animsprite.transform.offsetX)
-            console.log("Anim: ", animsprite.transform.offsetY)
             animsprite.sprite.x = animsprite.transform.pos.x + animsprite.transform.offsetX;
             animsprite.sprite.y = animsprite.transform.pos.y + animsprite.transform.offsetY;
-            
+            console.log("AnimXf: ", animsprite.sprite.x)
+            console.log("AnimYf: ", animsprite.sprite.y)
             animsprite.setScale(1.0 - animsprite.transform.zoom, 1.0 - animsprite.transform.zoom);
         } else {
             animsprite.sprite.x = animsprite.transform.pos.x;

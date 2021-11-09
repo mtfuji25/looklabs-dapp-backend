@@ -21,7 +21,6 @@ var WSClient = /** @class */ (function () {
     WSClient.prototype.handleConnection = function (ws) {
         var _this = this;
         console.log("New client connected in WebSocketServer.");
-        this.broadcast({ type: "create-enemy", content: { id: 1, pos: { x: 0.0, y: 0.0 } } });
         for (var _i = 0, _a = this.conListeners; _i < _a.length; _i++) {
             var listener = _a[_i];
             if (listener(ws))
