@@ -1,0 +1,68 @@
+name: "[development] Build and Deploy"
+on:
+  push:
+    branches:
+      - development
+jobs:
+  build:
+    name: Clean
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Yarn cache
+        uses: actions/cache@v1
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # In order to make gatsby incremental build works, it's necessary .cache
+      # and public folder.
+      - name: Gatsby Cache Folder
+        uses: actions/cache@v1
+        id: gatsby-cache-folder
+        with:
+          path: .cache
+          key: ${{ runner.os }}-cache-gatsby
+          restore-keys: |
+            ${{ runner.os }}-cache-gatsby
+
+      - name: Gatsby Public Folder
+        uses: actions/cache@v1
+        id: gatsby-public-folder
+        with:
+          path: public/
+          key: ${{ runner.os }}-public-gatsby
+          restore-keys: |
+            ${{ runner.os }}-public-gatsby
+
+      - run: yarn install --pure-lockfile
+        name: Install dependencies
+
+      - name: Build
+        run: yarn build --log-pages
+        env:
+          GATSBY_ACTIVE_ENV: staging
+          GATSBY_EXPERIMENTAL_PAGE_BUILD_ON_DATA_CHANGES: true
+          NODE_ENV: production
+
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting:game --project default
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
