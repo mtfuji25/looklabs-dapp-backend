@@ -9,6 +9,7 @@
     "devlop": "webpack --config webpack.development.config.js",
     "build": "webpack --config webpack.production.config.js",
     "server": "./node_modules/.bin/http-server -c-1 -p 8080 &",
+    "deploy": "firebase deploy --only hosting:game --project default",
     "stop": "pkill -f http-server",
     "clean": "rm -f ./public/*.js"
   },
