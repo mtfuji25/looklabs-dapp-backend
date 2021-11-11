@@ -2,6 +2,8 @@
 
 ## Running the frontend
 
+Hosted on Firebase Static Hosting
+
 ```
 cd frontend
 npm install
