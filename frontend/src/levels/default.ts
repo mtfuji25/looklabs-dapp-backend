@@ -1,16 +1,15 @@
 import { Level } from "../core/level";
-import { PlayerLayer } from "../layers/player";
-import { MapLayer } from "../layers/map";
+import { AwaitingLevel } from "./awaiting";
+
 
 class DefaultLevel extends Level {
 
     onStart(): void {
-        this.layerStack.pushLayer(new MapLayer(
-            this.ecs, this.context.app, this.context.resources
-        ));
-        this.layerStack.pushLayer(new PlayerLayer(
-            this.ecs, this.context.app, this.context.wsClient, this.context.resources
-        ));
+        //
+        //  Put load logic
+        //
+
+        this.context.engine.loadLevel(new AwaitingLevel(this.context, "Awaiting"));
     }
 
     onUpdate(deltaTime: number) {

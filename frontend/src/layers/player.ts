@@ -1,13 +1,16 @@
-import { SpriteComponent } from "../core/ecs/components/sprite";
-import { AnimSprite, ECS, Entity, Sprite, Transform } from "../core/ecs/core/ecs";
 import { Layer } from "../core/layer";
-
 import { Application } from "pixi.js";
-import { AnimSpriteComponent } from "../core/ecs/components/animsprite";
-import { WSClient } from "../clients/websocket";
-import { wordToView } from "../utils/views";
-import { Vec2 } from "../utils/math";
+
 import { TransformComponent } from "../core/ecs/components/transform";
+import { AnimSpriteComponent } from "../core/ecs/components/animsprite";
+
+import { WSClient } from "../clients/websocket";
+import { AnimSprite, ECS, Entity, Sprite, Transform } from "../core/ecs/core/ecs";
+
+import { Vec2 } from "../utils/math";
+import { wordToView } from "../utils/views";
+import { LobbyLevelContext } from "../levels/lobby";
+import { CONTAINER_DIM } from "../constants/constants";
 
 
 class PlayerLayer extends Layer {
@@ -21,13 +24,15 @@ class PlayerLayer extends Layer {
     protected app: Application;
     protected res: Record<string, any>;
     protected wsClient: WSClient;
+    private levelContext: LobbyLevelContext;
 
-    constructor(ecs: ECS, app: Application, wsClient: WSClient, resource: Record<string, any>) {
+    constructor(ecs: ECS, levelContext: LobbyLevelContext, app: Application, wsClient: WSClient, resource: Record<string, any>) {
         super("TesteLayer", ecs);
 
         this.app = app;
         this.res = resource;
         this.wsClient = wsClient;
+        this.levelContext = levelContext;
 
         this.listenerId = this.wsClient.addMsgListener(
             (msg) => this.onServerMsg(msg)
@@ -37,7 +42,18 @@ class PlayerLayer extends Layer {
     onAttach() {}
 
     onUpdate(deltaTime: number) {
-        
+        Object.values(this.entities).map((entity) => {
+            const transform = entity.getComponent[Transform]() as TransformComponent;
+
+            const centerFactorX = (transform.pos.x - (CONTAINER_DIM / 2.0)) / (CONTAINER_DIM / 2.0);
+            const centerFactorY = (transform.pos.y - (CONTAINER_DIM / 2.0)) / (CONTAINER_DIM / 2.0);
+            const fixFactorX = (CONTAINER_DIM - (CONTAINER_DIM * (1 - this.levelContext.zoom))) / 2.0;
+            const fixFactorY = (CONTAINER_DIM - (CONTAINER_DIM * (1 - this.levelContext.zoom))) / 2.0;
+                
+            transform.pos.x = transform.pos.x + this.levelContext.offsetX - (fixFactorX * centerFactorX);
+            transform.pos.y = transform.pos.y + this.levelContext.offsetY - (fixFactorY * centerFactorY);
+            transform.setScale(1.0 - this.levelContext.zoom, 1.0 - this.levelContext.zoom);
+        });
     }
 
     onDetach() {
@@ -50,7 +66,6 @@ class PlayerLayer extends Layer {
         const entity = this.ecs.createEntity(x, y);
         this.entities[id] = entity;
         const sprite = entity.addComponent[AnimSprite]() as AnimSpriteComponent;
-        sprite.useView = true;
         sprite.loadFromConfig(this.app, this.res["enemy-sheet"]);
         sprite.addStage(this.app);
     }

@@ -31,8 +31,6 @@ class AnimSpriteComponent {
     private frameWidth: number = 0;
     private frameHeight: number = 0;
 
-    public useView: boolean = true;
-
     constructor(transform: TransformComponent) {
         this.transform = transform;
     }

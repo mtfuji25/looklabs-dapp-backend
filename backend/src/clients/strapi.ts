@@ -41,7 +41,7 @@ class StrapiClient {
     constructor(strapiPort: number, expressPort: number) {
         // start axios instance
         this.api = axios.create({
-            baseURL: `http://localhost:${strapiPort}/`,
+            baseURL: `https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/`,
         })
 
         // start express server

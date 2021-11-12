@@ -98,14 +98,14 @@ class Engine {
             this.context.stats.deltaTime = (current - this.context.stats.frameStart) / 1000.0;
             this.context.stats.frameStart = current;
             this.context.stats.fps = 1.0 / this.context.stats.deltaTime;
-
+            
             // Run update fn of current level
             this.level.onUpdate(this.context.stats.deltaTime);
 
             // Run systems pendings
             this.level.runPendings(this.context.stats.deltaTime)
 
-            await sleep(15);
+            await sleep(1);
         }
     }
 

@@ -9,6 +9,7 @@ import { Container, filters } from "pixi.js";
 
 import levelMapFile from "../assets/level_map.json";
 import { SpriteComponent } from "../core/ecs/components/sprite";
+import { LobbyLevelContext } from "../levels/lobby";
 // Cast to something that typescript can understand
 const levelMap: Record<string, any> = levelMapFile;
 
@@ -26,11 +27,14 @@ class MapLayer extends Layer {
     protected app: Application;
     protected res: Record<string, any>;
 
-    constructor(ecs: ECS, app: Application, resource: Record<string, any>) {
+    private levelContext: LobbyLevelContext;
+
+    constructor(ecs: ECS, levelContext: LobbyLevelContext, app: Application, resource: Record<string, any>) {
         super("TesteLayer", ecs);
 
         this.app = app;
         this.res = resource;
+        this.levelContext = levelContext;
 
         this.mapContainer = new Container();
     }
@@ -50,7 +54,6 @@ class MapLayer extends Layer {
                 if (currentSheet !== 0) {
                     const entity = this.ecs.createEntity(x, y);
                     const sprite = entity.addComponent[Sprite]() as SpriteComponent;
-                    sprite.useView = false;
                     sprite.setCutImg(
                         this.app.loader.resources["dungeon"],
                         (((currentSheet - 1) % 10) * 16),
@@ -82,16 +85,13 @@ class MapLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
-        const transform = this.self.getComponent[Transform]() as TransformComponent;
-
-        let fixFactorX = (this.dim.x - (this.dim.x * (1 - transform.zoom))) / 2.0;
-        let fixFactorY = (this.dim.y - (this.dim.y * (1 - transform.zoom))) / 2.0;
-        
+        let fixFactorX = (this.dim.x - (this.dim.x * (1 - this.levelContext.zoom))) / 2.0;
+        let fixFactorY = (this.dim.y - (this.dim.y * (1 - this.levelContext.zoom))) / 2.0;
         // Translate and scale soil
-        this.mapContainer.x = transform.offsetX + fixFactorX;
-        this.mapContainer.y = transform.offsetY + fixFactorY;
-        this.mapContainer.scale.x = 1 - transform.zoom;
-        this.mapContainer.scale.y = 1 - transform.zoom;
+        this.mapContainer.x = this.levelContext.offsetX + fixFactorX;
+        this.mapContainer.y = this.levelContext.offsetY + fixFactorY;
+        this.mapContainer.scale.x = 1 - this.levelContext.zoom;
+        this.mapContainer.scale.y = 1 - this.levelContext.zoom;
     }
 
     onDetach() {

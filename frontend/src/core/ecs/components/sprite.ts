@@ -10,8 +10,6 @@ class SpriteComponent {
     public img: LoaderResource;
     public sprite: Sprite;
 
-    public useView: boolean = true;
-
     constructor(transform: TransformComponent) {
         this.transform = transform;
 

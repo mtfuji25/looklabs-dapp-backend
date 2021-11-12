@@ -48,7 +48,7 @@ var StrapiClient = /** @class */ (function () {
         this.expressApp = (0, express_1.default)();
         // start axios instance
         this.api = axios_1.default.create({
-            baseURL: "http://localhost:" + strapiPort + "/",
+            baseURL: "https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/",
         });
         // start express server
         this.startExpressServer(expressPort);
