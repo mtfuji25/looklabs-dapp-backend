@@ -17,9 +17,9 @@ class ResultsLevel extends Level {
         this.layerStack.pushLayer(
             new BattleStatusLayer(this.ecs, this.context.app)
         );
-        this.layerStack.pushLayer(
-            new ResultsLayer(this.ecs, this.context.app)
-        );
+        // this.layerStack.pushLayer(
+        //     new ResultsLayer(this.ecs, this.context.app)
+        // );
         this.layerStack.pushLayer(
             new WinnerLayer(this.ecs, this.context.app)
         );

@@ -99,8 +99,8 @@ class AnimSprite {
     }
 
     setScale(x: number, y: number) {
-        this.sprite.scale.x = x;
-        this.sprite.scale.y = y;
+        this.transform.scale.x = x;
+        this.transform.scale.y = y;
     }
 
 }

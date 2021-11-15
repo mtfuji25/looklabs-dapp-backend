@@ -1,13 +1,13 @@
 import { Level } from "../Core/Level";
 
 // Levels imports
-import { AwaitingLevel } from "./Await";
+import { ResultsLevel } from "./Results";
 
 class DefaultLevel extends Level {
 
     onStart(): void {
         this.context.engine.loadLevel(
-            new AwaitingLevel(this.context, "Awaiting")
+            new ResultsLevel(this.context, "Awaiting")
         );
     }
 

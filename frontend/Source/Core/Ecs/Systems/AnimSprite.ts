@@ -6,10 +6,8 @@ const sys_UpdateAnimSpritePos = (data: EcsData, deltaTime: number): void => {
         animsprite.sprite.x = animsprite.transform.pos.x;
         animsprite.sprite.y = animsprite.transform.pos.y;
 
-        animsprite.setScale(
-            animsprite.transform.scale.x,
-            animsprite.transform.scale.y,
-        );
+        animsprite.sprite.scale.x = animsprite.transform.scale.x;
+        animsprite.sprite.scale.y = animsprite.transform.scale.y;
     });
 };
 

@@ -6,10 +6,8 @@ const sys_UpdateSpritePos = (data: EcsData, deltaTime: number): void => {
         sprite.sprite.x = sprite.transform.pos.x;
         sprite.sprite.y = sprite.transform.pos.y;
 
-        sprite.setScale(
-            sprite.transform.scale.x,
-            sprite.transform.scale.y,
-        );
+        sprite.sprite.scale.x = sprite.transform.scale.x;
+        sprite.sprite.scale.y = sprite.transform.scale.y;
     });
 };
 

@@ -64,8 +64,8 @@ class Sprite {
     }
 
     setScale(x: number, y: number) {
-        this.sprite.scale.x = x;
-        this.sprite.scale.y = y;
+        this.transform.scale.x = x;
+        this.transform.scale.y = y;
     }
 
     setPos(x: number, y: number) {
@@ -79,6 +79,10 @@ class Sprite {
 
         this.transform.scale.x = scaleX;
         this.transform.scale.y = scaleY;
+    }
+
+    setAnchor(x: number, y?: number) {
+        y ? this.sprite.anchor.set(x, y) : this.sprite.anchor.set(x);
     }
 }
 
