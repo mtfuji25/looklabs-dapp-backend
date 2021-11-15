@@ -120,6 +120,7 @@ class WinnerLayer extends Layer {
             .addSprite();
 
         this.winnerImg.setAnchor(0.0);
+        this.winnerImg.addStage(this.app);
     }
 
     onAttach() {
@@ -128,13 +129,13 @@ class WinnerLayer extends Layer {
         this.scaleImg(this.sprites["nameCard"]);
 
         // set winner img
-        this.winnerImg.setFromUrl(
-            "http://i.imgur.com/eAbsZ.png"
-        );
+        // this.winnerImg.setFromUrl(
+        //     "http://i.imgur.com/eAbsZ.png"
+        // );
 
-        this.winnerImg.setSize(200, 200);
+        // this.winnerImg.setSize(50, 50);
 
-        this.scaleImg(this.winnerImg);
+        // this.scaleImg(this.winnerImg);
     }
 
     onUpdate(deltaTime: number) {}

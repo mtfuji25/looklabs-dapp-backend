@@ -42,7 +42,7 @@ class Sprite {
     }
 
     setFromUrl(url: string) {
-        this.sprite.texture = Texture.from(url);
+        this.sprite.texture = Texture.from(url, {width: 200, height: 200});
     }
 
     addStage(app: Application) {
