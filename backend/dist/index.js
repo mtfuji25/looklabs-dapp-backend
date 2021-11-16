@@ -60,7 +60,7 @@ var websocket_1 = require("./clients/websocket");
 var strapi_1 = require("./clients/strapi");
 var dotenv = __importStar(require("dotenv"));
 dotenv.config();
-var STRAPI_PORT = Number(process.env.STRAPI_SERVER_PORT);
+var STRAPI_SERVER_URL = String(process.env.STRAPI_SERVER_URL);
 var EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
 var WS_PORT = Number(process.env.WS_SERVER_PORT);
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -68,7 +68,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                strapiClient = new strapi_1.StrapiClient(STRAPI_PORT, EXPRESS_PORT);
+                strapiClient = new strapi_1.StrapiClient(STRAPI_SERVER_URL, EXPRESS_PORT);
                 wsClient = new websocket_1.WSClient(WS_PORT);
                 engine = new engine_1.Engine(wsClient, strapiClient);
                 // Start the engine systems

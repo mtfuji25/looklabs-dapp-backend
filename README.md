@@ -19,3 +19,11 @@ cd backend
 npm install
 npm run start
 ```
+
+### Docker
+
+Build image
+`docker build -t game-engine .`
+
+Start image
+`docker run -p 3000:3000 game-engine`

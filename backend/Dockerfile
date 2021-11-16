@@ -1,5 +1,5 @@
 # from base image node
-FROM node:8.11-slim
+FROM node:12-alpine
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -10,8 +10,8 @@ COPY . .
 # install all dependencies
 RUN yarn install
 
-# build
-RUN yarn build
+# Compile all typescript to javascript
+RUN yarn tsc
 
 #expose the port
 EXPOSE 3070

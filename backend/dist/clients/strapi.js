@@ -43,12 +43,12 @@ exports.StrapiClient = void 0;
 var axios_1 = __importDefault(require("axios"));
 var express_1 = __importDefault(require("express"));
 var StrapiClient = /** @class */ (function () {
-    function StrapiClient(strapiPort, expressPort) {
+    function StrapiClient(strapiUrl, expressPort) {
         this.msgListeners = [];
         this.expressApp = (0, express_1.default)();
         // start axios instance
         this.api = axios_1.default.create({
-            baseURL: "http://localhost:" + strapiPort + "/",
+            baseURL: strapiUrl
         });
         // start express server
         this.startExpressServer(expressPort);
@@ -77,6 +77,14 @@ var StrapiClient = /** @class */ (function () {
     // starts express server
     StrapiClient.prototype.startExpressServer = function (expressPort) {
         var _this = this;
+        // route for the health-check
+        this.expressApp.get("/health-check", function (req, res) {
+            res.send({
+                service: "game-engine",
+                status: "ok",
+                date: Date.now()
+            });
+        });
         // route for the webhook that sends when a game is scheduled
         this.expressApp.post("/scheduled-games", function (req, res) {
             _this.getNearestGame().then(function (data) {
