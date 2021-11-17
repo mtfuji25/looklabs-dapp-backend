@@ -48,9 +48,9 @@ class PlayerLayer extends Layer {
 
     private readonly idStyle: Partial<ITextStyle> = {
         fontFamily: "8-BIT WONDER",
-        fontSize: 9,
+        fontSize: 12,
         fill: 0xffffff,
-        lineHeight: 12.6,
+        lineHeight: 14,
         align: "center",
         fontWeight: "400"
     }
@@ -152,7 +152,7 @@ class PlayerLayer extends Layer {
         }
 
         // Creates and stores entity
-        const title = this.ecs.createEntity(pos.x, pos.y - 20, false); // No exact measurements for offset
+        const title = this.ecs.createEntity(pos.x - 4, pos.y - 20, false); // No exact measurements for offset
         const entity = this.ecs.createEntity(pos.x, pos.y, false);
         const health = this.ecs.createEntity(pos.x, pos.y - 35, false);  //Should calculate offset later
         const healthOutline = this.ecs.createEntity(pos.x - 1, pos.y - 36, false);  //Should calculate offset later
@@ -208,8 +208,8 @@ class PlayerLayer extends Layer {
         entityTransform.pos.x = pos.x;
         entityTransform.pos.y = pos.y;
         
-        textTransform.pos.x = pos.x;
-        textTransform.pos.y = pos.y - 16;
+        textTransform.pos.x = pos.x - 8;
+        textTransform.pos.y = pos.y - 24;
 
         healthOutlineTransform.pos.x = pos.x - 1;
         healthOutlineTransform.pos.y = pos.y - 36;
