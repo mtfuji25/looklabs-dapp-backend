@@ -1,123 +1,104 @@
-// // Level imports
-// import { Level } from "../Core/Level";
-// import { AwaitLevel } from "./Await";
+// Level imports
+import { Level } from "../Core/Level";
+import { AwaitLevel } from "./Await";
 
-// // Web clients imports
-// import { ScheduledGameParticipant } from "../Clients/Strapi";
+// Web clients imports
+import { ScheduledGameParticipant } from "../Clients/Strapi";
 
-// // Interfaces imports
-// import { EngineContext } from "../Core/Interfaces";
+// Interfaces imports
+import { EngineContext } from "../Core/Interfaces";
 
-// // Layers import
-// import { PlayerLayer } from "../Layers/";
-// import { MapColliderLayer } from "../Layers";
+// Layers import
+import { PlayerLayer } from "../Layers/Lobby/Player";
+import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
+import { ReplyableMsg } from "../Clients/WebSocket";
+import { GameStatus, requests } from "../Clients/Interfaces";
 
-// class LobbyLevel extends Level {
+class LobbyLevel extends Level {
 
-//     // Current running game id
-//     private gameId: number;
+    // Current running game id
+    private gameId: number;
 
-//     // Current game participants
-//     private participants: ScheduledGameParticipant[] = [];
+    // Current game participants
+    private participants: ScheduledGameParticipant[] = [];
+    private fighters: number = 0;
 
-//     private ready: boolean = false;
-//     private fighters: PlayerLayer[] = [];
+    // Tells when game is ready to play
+    private ready: boolean = false;
 
-//     constructor(context: EngineContext, name: string, gameId: number) {
-//         super(context, name);
+    // Current ws listener is
+    private listenerId = 0;
 
-//         this.gameId = gameId;
-//     }
+    constructor(context: EngineContext, name: string, gameId: number) {
+        super(context, name);
 
-//     onStart(): void {
-//         this.context.strapiClient.getGameById(this.gameId)
-//             .then((game) => {
-//                 game.scheduled_game_participants.map((participant) => {
-//                     this.participants.push(participant);
-//                 })
-//                 this.startGame();
-//             }).catch((err) => {
-//                 console.log(err);
-//                 this.context.closeRequest = true;
-//             });
-//     }
+        this.gameId = gameId;
 
-//     startGame() {
-//         const mapCollider = new MapColliderLayer(this.ecs);
-//         const grid = mapCollider.getSelf().getComponent[Grid]() as GridComponent;
+        this.listenerId = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
+    }
 
-//         this.layerStack.pushLayer(mapCollider);
+    onStart(): void {
+        this.context.strapi.getGameById(this.gameId)
+            .then((game) => {
+                game.scheduled_game_participants.map((participant) => {
+                    this.participants.push(participant);
+                    this.fighters++;
+                });
+                this.startGame();
+            }).catch((err) => {
+                console.log(err);
+                this.context.close = true;
+            });
+    }
 
-//         this.participants.map((participant) => {
-//             const player = new PlayerLayer(
-//                 this.ecs,
-//                 this.context.wsClient,
-//                 participant.id, grid,
-//                 (player) => {
-//                     for (let i = this.fighters.length - 1; i > 0; --i) {
-//                         const j = Math.floor(Math.random() * (i + 1));
-//                         [ this.fighters[i], this.fighters[j] ] = [ this.fighters[j], this.fighters[i] ]
-//                     }
+    startGame() {
+        const mapCollider = new MapColliderLayer(this.ecs);
+        const grid = mapCollider.getSelf().getGrid();
 
-//                     let prey: PlayerLayer | null = null;
-//                     for (let fighter of this.fighters) {
-//                         if (fighter === player)
-//                             continue;
+        // Put the map in the stack
+        this.layerStack.pushLayer(mapCollider);
 
-//                         if (fighter.hunted)
-//                             continue;
+        this.participants.map((participant, index) => {
+            const player = new PlayerLayer(
+                this.ecs, this.context.ws,
+                participant.nft_id, grid, () => {
+                    this.layerStack.popLayer(player);
+                    this.fighters--;
+                }
+            );
+            grid.addDynamic(player.getSelf());
+            this.layerStack.pushLayer(player)
+        });
 
-//                         prey = fighter;
-//                         fighter.hunted = true;
-//                         break;
-//                     }
+        // Tells that lobby is ready to play
+        this.ready = true;
+    }
 
-//                     if (!prey) {
-//                         for (let fighter of this.fighters) {
-//                             if (fighter === player)
-//                                 continue;
+    onUpdate(deltaTime: number) {
+        if (this.fighters <= 1 && this.ready) {
+            this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+        }
+    }
 
-//                             prey = fighter;
-//                             break;
-//                         }
-//                     }
+    onClose(): void {
+        this.context.ws.remMsgListener(this.listenerId);
+    }
 
-//                     return prey?.getSelf() ?? null;
-//                 }
-//             );
+    onServerMsg(msg: ReplyableMsg) {
 
-//             grid.addDynamic(player.getSelf());
+        if (msg.content.type == requests.gameStatus) {
+            const reply: GameStatus = {
+                msgType: "game-status",
+                gameId: this.gameId,
+                lastGameId: 0,
+                gameStatus: "lobby"
+            }
 
-//             player.setOnDie((data) => {
-//                 // Removes dead player from update cycle
-//                 this.layerStack.popLayer(data);
+            msg.reply(reply);
+        }
 
-//                 // Removes dead player from fighters
-//                 this.fighters = this.fighters.filter(item => item !== data);
-//                 // this.context.strapiClient.createParticipantResult({
-//                 //     scheduled_game_participant: data.playerID,
-//                 //     result: "died"
-//                 // }).catch((err) => {
-//                 //     console.log("Failed to store results in player: ", data.playerID);
-//                 // })
-//             });
+        return true;
+    }
+};
 
-//             this.fighters.push(player);
-//             this.layerStack.pushLayer(player);
-//         });
-
-//         this.ready = true;
-//     }
-
-//     onUpdate(deltaTime: number) {
-//         if (this.fighters.length <= 1 && this.ready) {
-//             this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
-//         }
-//     }
-
-//     onClose(): void {
-
-//     }
-// };
-
-// export { LobbyLevel };
+export { LobbyLevel };

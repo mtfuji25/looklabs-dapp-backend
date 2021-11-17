@@ -21,6 +21,8 @@ type AnimConfig = {
 
 class AnimSprite {
 
+    public refresh: boolean = true;
+
     public transform: Transform;
 
     private ssheet: BaseTexture;
@@ -101,6 +103,11 @@ class AnimSprite {
     setScale(x: number, y: number) {
         this.transform.scale.x = x;
         this.transform.scale.y = y;
+    }
+
+    setPos(x: number, y: number) {
+        this.transform.pos.x = x;
+        this.transform.pos.y = y;
     }
 
 }

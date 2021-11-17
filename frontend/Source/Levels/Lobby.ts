@@ -1,6 +1,9 @@
 // Level import
 import { Level } from "../Core/Level";
 
+// Constants
+import { MAIN_BG_COLOR } from "../Constants/Constants";
+
 // Layers imports
 import { MapLayer } from "../Layers/Lobby/Map";
 import { PlayerLayer } from "../Layers/Lobby/Player";
@@ -14,6 +17,7 @@ interface LobbyLevelContext extends ViewContext {
 }
 
 class LobbyLevel extends Level {
+
     private levelContext: LobbyLevelContext = {
         // View properties
         zoom: 0.0,
@@ -22,6 +26,9 @@ class LobbyLevel extends Level {
     };
 
     onStart(): void {
+        // Sets bg color of main app
+        this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
+
         // Pushs view controller
         this.layerStack.pushLayer(
             new ViewLayer(this.ecs, this.levelContext, this.context.inputs)

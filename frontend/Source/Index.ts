@@ -8,7 +8,7 @@ import { StrapiClient } from "./Clients/Strapi";
 import { Application } from "pixi.js";
 
 // Constants
-import { MAIN_BG_COLOR, ROOT_DIV_ID, STRAPI_HOST, STRAPI_PORT, WS_HOST, WS_PORT } from "./Constants/Constants";
+import { MAIN_BG_COLOR, ROOT_DIV_ID, STRAPI_HOST, WS_HOST } from "./Constants/Constants";
 
 // Jquery like query selector
 const $ = (name: string) => {
@@ -28,10 +28,10 @@ const main = () => {
     });
 
     // Creates websocket client
-    const wsClient = new WSClient(WS_HOST, WS_PORT);
+    const wsClient = new WSClient(WS_HOST);
 
     // Creates strapi client
-    const strapiClient = new StrapiClient(STRAPI_HOST, STRAPI_PORT);
+    const strapiClient = new StrapiClient(STRAPI_HOST);
 
     // Start engine itself
     const engine = new Engine(wsClient, strapiClient, app, ROOT);

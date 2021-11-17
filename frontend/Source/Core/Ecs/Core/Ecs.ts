@@ -9,6 +9,7 @@ import { Text } from "../Components/Text";
 import { Sprite } from "../Components/Sprite";
 import { Transform } from "../Components/Transform";
 import { AnimSprite } from "../Components/AnimSprite";
+import { ColoredRectangle } from "../Components/ColoredRectangle";
 
 // System index imports
 import { startSystems } from "../Systems/Index";
@@ -30,6 +31,7 @@ const masks = {
     text:           0b000001,
     sprite:         0b000010,
     animsprite:     0b000100,
+    coloredRec:     0b001000,
 }
 
 // Key of index in identification array
@@ -42,14 +44,24 @@ class ECS {
         startSystems(this);
     }
 
+    public id = {
+        text: 0,
+        sprite: 0,
+        transform: 0,
+        animSprite: 0,
+        coloredRec: 0,
+        entity: 0
+    }
+
     // Data containers
-    public texts: Text[] = [];
-    public sprites: Sprite[] = [];
-    public transforms: Transform[] = [];
-    public animsprites: AnimSprite[] = [];
+    public texts: Record<number, Text> = {};
+    public sprites: Record<number, Sprite> = {};
+    public transforms: Record<number, Transform> = {};
+    public animsprites: Record<number, AnimSprite> = {};
+    public coloredRecs: Record<number, ColoredRectangle> = {};
 
     // Store all entities identifications and layouts
-    entities: Entity[] = [];
+    entities: Record<number, Entity> = {};
 
     // Store all systems
     containerSystems: EcsSysContFn[] = [];
@@ -60,17 +72,18 @@ class ECS {
         // Update all container systems
         this.containerSystems.map((fn) => {
             fn({
-               texts: this.texts,
-               sprites: this.sprites,
-               transforms: this.transforms,
-               animsprites: this.animsprites
+               texts: Object.values(this.texts),
+               sprites: Object.values(this.sprites),
+               transforms: Object.values(this.transforms),
+               animsprites: Object.values(this.animsprites),
+               coloredRecs: Object.values(this.coloredRecs),
             }, deltaTime);
         });
 
         // Update all entities systems
         this.entitiesSystems.map((fn) => {
-            this.entities.map((entity) => {
-               fn(entity, deltaTime);
+            Object.values(this.entities).map((entity) => {
+                fn(entity, deltaTime);
             });
         });
     }
@@ -84,14 +97,17 @@ class ECS {
     }
 
     destroy() {
-        this.entities.map((entity: Entity) => {
+        Object.values(this.entities).map((entity: Entity) => {
             entity.destroy();
         });
     }
 
-    deleteEntity(entity: Entity): void {
+    deleteEntity(id: BitMaskedId): void {
+        // Get current entity
+        const entity = this.entities[id[EntityKey]];
+
         // Manually remove the transform component
-        this.transforms.slice(entity.id[masks.transform], 1);
+        delete this.transforms[id[masks.transform]];
 
         // Removes the rest of the components from the entity
         entity.remText();
@@ -100,31 +116,35 @@ class ECS {
         
         entity.remAnimSprite();
 
+        entity.remColoredRectangle();
+
         // Remove the entity itself from the identification array
-        this.entities.slice(entity.id[EntityKey], 1);
+        delete this.entities[id[EntityKey]];
     }
 
-    createEntity(x: number = 0.0, y: number = 0.0) {
+    createEntity(x: number = 0.0, y: number = 0.0, refresh: boolean = true) {
         let id: BitMaskedId = {};
 
         // All entities should have a transform component
 
         // The TransformID of entity is basically the index in the
         // array that return the component 
-        id[masks.transform] = this.transforms.length;
+        id[masks.transform] = this.id.transform;
+        this.id.transform++;
 
         // Create and store a new transform component in the data
         // container
-        this.transforms.push(new Transform(x, y));
+        this.transforms[id[masks.transform]] = new Transform(x, y);
 
         // Add current location of entity in identification array
-        id[EntityKey] = this.entities.length;
+        id[EntityKey] = this.id.entity;
+        this.id.entity++;
 
         // Create the effective entity representation
         const entity = new Entity(this, id, masks.transform);
-
+        entity.refresh = refresh;
         // Add it to the identification array
-        this.entities.push(entity);
+        this.entities[id[EntityKey]] = entity;
 
         return entity;
     }
@@ -136,6 +156,7 @@ class Entity {
     // Entity definitions
     public id: BitMaskedId;
     public layout: number;
+    public refresh: boolean;
 
     // Current ecs related instance
     private ecs: ECS;
@@ -172,6 +193,13 @@ class Entity {
         return this.addAnimSprite();
     }
 
+    getColoredRectangle(): ColoredRectangle {
+        if (this.layout & masks.coloredRec)
+            return this.ecs.coloredRecs[this.id[masks.coloredRec]];
+
+        return this.addColoredRectangle();
+    }
+
     // Adders
     addText(
         content: string = "",
@@ -191,10 +219,13 @@ class Entity {
             this.getTransform(),
             content, styles
         );
+        text.refresh = this.refresh;
 
-        this.id[masks.text] = this.ecs.texts.length;
+        this.id[masks.text] = this.ecs.id.text;
+        this.ecs.id.text++;
+
         this.layout |= masks.text;
-        this.ecs.texts.push(text);
+        this.ecs.texts[this.id[masks.text]] = text;
         return text;
     }
 
@@ -203,10 +234,13 @@ class Entity {
             return this.getSprite();
 
         const sprite = new Sprite(this.getTransform(), img);
+        sprite.refresh = this.refresh;
 
-        this.id[masks.sprite] = this.ecs.sprites.length;
+        this.id[masks.sprite] = this.ecs.id.sprite;
+        this.ecs.id.sprite++
+
         this.layout |= masks.sprite;
-        this.ecs.sprites.push(sprite);
+        this.ecs.sprites[this.id[masks.sprite]] = sprite;
         return sprite;
     }
 
@@ -215,18 +249,42 @@ class Entity {
             return this.getAnimSprite()
 
         const animsprite = new AnimSprite(this.getTransform());
+        animsprite.refresh = this.refresh;
 
-        this.id[masks.animsprite] = this.ecs.animsprites.length;
+        this.id[masks.animsprite] = this.ecs.id.animSprite;
+        this.ecs.id.animSprite++;
+
         this.layout |= masks.animsprite;
-        this.ecs.animsprites.push(animsprite);
+        this.ecs.animsprites[this.id[masks.animsprite]] = animsprite;
         return animsprite;
+    }
+
+    addColoredRectangle(width: number = 0.0, height: number = 0.0, color: number = 0xFFFFFF): ColoredRectangle {
+        if (this.layout & masks.coloredRec)
+            return this.getColoredRectangle()
+
+        const rectangle = new ColoredRectangle(
+            this.getTransform(),
+            width,
+            height,
+            color
+        );
+        rectangle.refresh = this.refresh;
+
+        this.id[masks.coloredRec] = this.ecs.id.coloredRec;
+        this.ecs.id.coloredRec++;
+
+        this.layout |= masks.coloredRec;
+        this.ecs.coloredRecs[this.id[masks.coloredRec]] = rectangle;
+        return rectangle;
     }
 
     // Removers
     remText(): void {
         if (this.layout & masks.text) {
             this.ecs.texts[this.id[masks.text]].remStage();
-            this.ecs.texts.slice(this.id[masks.text], 1);
+
+            delete this.ecs.texts[this.id[masks.text]];
             this.layout &= (~masks.text);
         }
     }
@@ -234,7 +292,8 @@ class Entity {
     remSprite(): void {
         if (this.layout & masks.sprite) {
             this.ecs.sprites[this.id[masks.sprite]].remStage();
-            this.ecs.sprites.slice(this.id[masks.sprite], 1);
+
+            delete this.ecs.sprites[this.id[masks.sprite]];
             this.layout &= (~masks.sprite);
         }
     }
@@ -242,13 +301,23 @@ class Entity {
     remAnimSprite(): void {
         if (this.layout & masks.animsprite) {
             this.ecs.animsprites[this.id[masks.animsprite]].remStage();
-            this.ecs.animsprites.slice(this.id[masks.animsprite], 1);
+            
+            delete this.ecs.animsprites[this.id[masks.animsprite]]
             this.layout &= (~masks.animsprite);
         }
     }
 
+    remColoredRectangle(): void {
+        if (this.layout & masks.coloredRec) {
+            this.ecs.coloredRecs[this.id[masks.coloredRec]].remStage();
+            
+            delete this.ecs.coloredRecs[this.id[masks.coloredRec]]
+            this.layout &= (~masks.coloredRec);
+        }
+    }
+
     destroy(): void {
-        this.ecs.deleteEntity(this);
+        this.ecs.deleteEntity(this.id);
     }
 
 };

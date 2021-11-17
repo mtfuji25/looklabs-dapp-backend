@@ -93,6 +93,7 @@ class MapLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
+        this.app.stage.removeChild(this.mapContainer);
     }
 }
 

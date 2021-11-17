@@ -8,9 +8,9 @@ import { CollisionResult, recIntersectRec, recIntersectStatic } from "../../../U
 
 class Rigidbody {
 
-    velocity: Vec2;
+    public velocity: Vec2;
 
-    rectangle: Rectangle;
+    public rectangle: Rectangle;
 
     constructor(rectangle: Rectangle) {
         this.rectangle = rectangle;
@@ -18,7 +18,7 @@ class Rigidbody {
     }
 
     colide(other: Rigidbody, deltaTime: number): CollisionResult {
-        let results: CollisionResult = {
+        const results: CollisionResult = {
             contactPoint: new Vec2(),
             contactNormal: new Vec2(),
             contactTime: 0.0,
@@ -26,12 +26,11 @@ class Rigidbody {
         }
 
         results.intersect = recIntersectRec(this, other, deltaTime, results);
-
         return results;
     }
 
     colideStatic(other: Rectangle, deltaTime: number): CollisionResult {
-        let results: CollisionResult = {
+        const results: CollisionResult = {
             contactPoint: new Vec2(),
             contactNormal: new Vec2(),
             contactTime: 0.0,

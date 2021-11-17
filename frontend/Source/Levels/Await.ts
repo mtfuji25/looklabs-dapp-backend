@@ -4,46 +4,74 @@ import { Level } from "../Core/Level";
 import { TextLayer } from "../Layers/Await/Text";
 import { MapLayer } from "../Layers/Await/Basemap";
 
+// Web Clients imports
+import { ServerResponse } from "../Clients/WebSocket";
+import { GameStatus, msgTypes, requests } from "../Clients/Interfaces";
+import { LobbyLevel } from "./Lobby";
+
+// Await level bg color
 const BLACK_BG_COLOR = 0x000;
 
-class AwaitingLevel extends Level {
+class AwaitLevel extends Level {
+
+    private listenerId: number;
 
     onStart(): void {
-
-        this.context.ws.request({
-            type: "game-id"
-        }).then((response) => {
-            this.connectLayers(response.content.gameId);
-        }).catch((err) => {
-            console.log(err);
-            this.context.close = true;
-        });
+        // Add msg listener
+        this.listenerId = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
+
+        this.connectLayers();
     }
 
-    connectLayers(gameId: number): void {
+    connectLayers(): void {
         this.layerStack.pushLayer(new MapLayer(
             this.ecs,
             this.context.app,
             this.context.res
         ));
 
-        this.context.strapi.getGameById(gameId)
-        .then((currentGame) => {
-            this.layerStack.pushLayer(new TextLayer(
-                this.ecs,
-                this.context.app,
-                this.context,
-                currentGame
-            ));
+        this.context.strapi.getGameById(this.props.gameId)
+            .then((game) => {
+                this.layerStack.pushLayer(new TextLayer(
+                    this.ecs,
+                    this.context.app,
+                    this.context,
+                    game
+                ));
         });
     }
 
     onUpdate(deltaTime: number) {}
 
-    onClose(): void {}
+    onClose(): void {
+        this.context.ws.remMsgListener(this.listenerId);
+    }
+
+    onServerMsg(msg: ServerResponse) {
+        let content;
+        if (msg.content.msgType == msgTypes.gameStatus) {
+            content = msg.content as GameStatus;
+        } else {
+            return;
+        }
+            
+        if (!content.gameStatus)
+            return false;
+
+        this.context.engine.loadLevel(
+            new LobbyLevel(
+                this.context, "Lobby",
+                {
+                    gameId: content.gameId
+                }
+            )
+        )
+
+        return false;
+    }
 };
 
-export { AwaitingLevel };
+export { AwaitLevel };

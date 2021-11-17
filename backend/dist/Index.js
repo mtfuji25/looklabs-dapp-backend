@@ -67,16 +67,12 @@ var WS_HOST = String(process.env.WS_SERVER_HOST);
 var WS_PORT = Number(process.env.WS_SERVER_PORT);
 // Strapi Server configs
 var STRAPI_HOST = String(process.env.STRAPI_SERVER_HOST);
-var STRAPI_PORT = Number(process.env.STRAPI_SERVER_PORT);
-// Express Server configs
-var EXPRESS_HOST = String(process.env.EXPRESS_SERVER_HOST);
-var EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var strapiClient, wsClient, engine;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                strapiClient = new Strapi_1.StrapiClient(STRAPI_HOST, STRAPI_PORT, EXPRESS_HOST, EXPRESS_PORT);
+                strapiClient = new Strapi_1.StrapiClient(STRAPI_HOST);
                 wsClient = new WebSocket_1.WSClient(WS_HOST, WS_PORT);
                 engine = new Engine_1.Engine(wsClient, strapiClient);
                 // Start the engine systems

@@ -1,96 +1,95 @@
 "use strict";
-// // Level imports
-// import { Level } from "../Core/Level";
-// import { AwaitLevel } from "./Await";
-// // Web clients imports
-// import { ScheduledGameParticipant } from "../Clients/Strapi";
-// // Interfaces imports
-// import { EngineContext } from "../Core/Interfaces";
-// // Layers import
-// import { PlayerLayer } from "../Layers/";
-// import { MapColliderLayer } from "../Layers";
-// class LobbyLevel extends Level {
-//     // Current running game id
-//     private gameId: number;
-//     // Current game participants
-//     private participants: ScheduledGameParticipant[] = [];
-//     private ready: boolean = false;
-//     private fighters: PlayerLayer[] = [];
-//     constructor(context: EngineContext, name: string, gameId: number) {
-//         super(context, name);
-//         this.gameId = gameId;
-//     }
-//     onStart(): void {
-//         this.context.strapiClient.getGameById(this.gameId)
-//             .then((game) => {
-//                 game.scheduled_game_participants.map((participant) => {
-//                     this.participants.push(participant);
-//                 })
-//                 this.startGame();
-//             }).catch((err) => {
-//                 console.log(err);
-//                 this.context.closeRequest = true;
-//             });
-//     }
-//     startGame() {
-//         const mapCollider = new MapColliderLayer(this.ecs);
-//         const grid = mapCollider.getSelf().getComponent[Grid]() as GridComponent;
-//         this.layerStack.pushLayer(mapCollider);
-//         this.participants.map((participant) => {
-//             const player = new PlayerLayer(
-//                 this.ecs,
-//                 this.context.wsClient,
-//                 participant.id, grid,
-//                 (player) => {
-//                     for (let i = this.fighters.length - 1; i > 0; --i) {
-//                         const j = Math.floor(Math.random() * (i + 1));
-//                         [ this.fighters[i], this.fighters[j] ] = [ this.fighters[j], this.fighters[i] ]
-//                     }
-//                     let prey: PlayerLayer | null = null;
-//                     for (let fighter of this.fighters) {
-//                         if (fighter === player)
-//                             continue;
-//                         if (fighter.hunted)
-//                             continue;
-//                         prey = fighter;
-//                         fighter.hunted = true;
-//                         break;
-//                     }
-//                     if (!prey) {
-//                         for (let fighter of this.fighters) {
-//                             if (fighter === player)
-//                                 continue;
-//                             prey = fighter;
-//                             break;
-//                         }
-//                     }
-//                     return prey?.getSelf() ?? null;
-//                 }
-//             );
-//             grid.addDynamic(player.getSelf());
-//             player.setOnDie((data) => {
-//                 // Removes dead player from update cycle
-//                 this.layerStack.popLayer(data);
-//                 // Removes dead player from fighters
-//                 this.fighters = this.fighters.filter(item => item !== data);
-//                 // this.context.strapiClient.createParticipantResult({
-//                 //     scheduled_game_participant: data.playerID,
-//                 //     result: "died"
-//                 // }).catch((err) => {
-//                 //     console.log("Failed to store results in player: ", data.playerID);
-//                 // })
-//             });
-//             this.fighters.push(player);
-//             this.layerStack.pushLayer(player);
-//         });
-//         this.ready = true;
-//     }
-//     onUpdate(deltaTime: number) {
-//         if (this.fighters.length <= 1 && this.ready) {
-//             this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
-//         }
-//     }
-//     onClose(): void {
-//     }
-// };
-// export { LobbyLevel };
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LobbyLevel = void 0;
+// Level imports
+var Level_1 = require("../Core/Level");
+var Await_1 = require("./Await");
+// Layers import
+var Player_1 = require("../Layers/Lobby/Player");
+var MapCollider_1 = require("../Layers/Lobby/MapCollider");
+var Interfaces_1 = require("../Clients/Interfaces");
+var LobbyLevel = /** @class */ (function (_super) {
+    __extends(LobbyLevel, _super);
+    function LobbyLevel(context, name, gameId) {
+        var _this = _super.call(this, context, name) || this;
+        // Current game participants
+        _this.participants = [];
+        _this.fighters = 0;
+        // Tells when game is ready to play
+        _this.ready = false;
+        // Current ws listener is
+        _this.listenerId = 0;
+        _this.gameId = gameId;
+        _this.listenerId = _this.context.ws.addMsgListener(function (msg) { return _this.onServerMsg(msg); });
+        return _this;
+    }
+    LobbyLevel.prototype.onStart = function () {
+        var _this = this;
+        this.context.strapi.getGameById(this.gameId)
+            .then(function (game) {
+            game.scheduled_game_participants.map(function (participant) {
+                _this.participants.push(participant);
+                _this.fighters++;
+            });
+            _this.startGame();
+        }).catch(function (err) {
+            console.log(err);
+            _this.context.close = true;
+        });
+    };
+    LobbyLevel.prototype.startGame = function () {
+        var _this = this;
+        var mapCollider = new MapCollider_1.MapColliderLayer(this.ecs);
+        var grid = mapCollider.getSelf().getGrid();
+        // Put the map in the stack
+        this.layerStack.pushLayer(mapCollider);
+        this.participants.map(function (participant, index) {
+            var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, grid, function () {
+                _this.layerStack.popLayer(player);
+                _this.fighters--;
+            });
+            grid.addDynamic(player.getSelf());
+            _this.layerStack.pushLayer(player);
+        });
+        // Tells that lobby is ready to play
+        this.ready = true;
+    };
+    LobbyLevel.prototype.onUpdate = function (deltaTime) {
+        if (this.fighters <= 1 && this.ready) {
+            this.context.engine.loadLevel(new Await_1.AwaitLevel(this.context, "Await"));
+        }
+    };
+    LobbyLevel.prototype.onClose = function () {
+        this.context.ws.remMsgListener(this.listenerId);
+    };
+    LobbyLevel.prototype.onServerMsg = function (msg) {
+        if (msg.content.type == Interfaces_1.requests.gameStatus) {
+            var reply = {
+                msgType: "game-status",
+                gameId: this.gameId,
+                lastGameId: 0,
+                gameStatus: "lobby"
+            };
+            msg.reply(reply);
+        }
+        return true;
+    };
+    return LobbyLevel;
+}(Level_1.Level));
+exports.LobbyLevel = LobbyLevel;
+;

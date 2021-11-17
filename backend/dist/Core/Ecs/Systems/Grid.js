@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sys_UpdateCollisions = exports.sys_UpdateGrid = void 0;
+exports.sys_CheckCollisions = exports.sys_UpdateCollisions = exports.sys_UpdateGrid = void 0;
 // Math imports
 var Math_1 = require("../../../Utils/Math");
 // For neighbor checks
@@ -23,6 +23,25 @@ var sys_UpdateGrid = function (data, deltaTime) {
     });
 };
 exports.sys_UpdateGrid = sys_UpdateGrid;
+var collisionsResults = [];
+var sys_CheckCollisions = function (data, deltaTime) {
+    data.grids.forEach(function (grid) {
+        grid.dynamics.map(function (dynamic) {
+            var behavior = dynamic.entity.getBehavior();
+            behavior.colliding = [];
+        });
+        collisionsResults.map(function (collision) {
+            if (collision.entity.destroyed || collision.other.destroyed)
+                return;
+            var behavior = collision.entity.getBehavior();
+            var otherBehavior = collision.other.getBehavior();
+            behavior.colliding.push(collision.other);
+            otherBehavior.colliding.push(collision.entity);
+        });
+        collisionsResults = [];
+    });
+};
+exports.sys_CheckCollisions = sys_CheckCollisions;
 var sys_UpdateCollisions = function (data, deltaTime) {
     data.grids.forEach(function (grid) {
         var _loop_1 = function (i) {
@@ -42,6 +61,10 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                 // Test collision against other entity
                 var result = rigidbody.colide(otherRigidbody, deltaTime);
                 if (result.intersect) {
+                    collisionsResults.push({
+                        entity: entity,
+                        other: grid.dynamics[j].entity
+                    });
                     sortedEntities.push({
                         other: otherRigidbody,
                         result: result

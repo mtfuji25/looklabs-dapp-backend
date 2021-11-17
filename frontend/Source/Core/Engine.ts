@@ -114,7 +114,7 @@ class Engine {
             this.context.stats.dt = (current - this.context.stats.start) / 1000.0;
             this.context.stats.start = current;
             this.context.stats.fps = 1.0 / this.context.stats.dt;
-            
+
             // Run update fn of current level
             this.level.onUpdate(this.context.stats.dt);
 

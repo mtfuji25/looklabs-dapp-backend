@@ -2,7 +2,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { Application } from "pixi.js";
+import { Application, ITextStyle } from "pixi.js";
 
 // Web client imports
 import { ServerResponse, WSClient } from "../../Clients/WebSocket";
@@ -19,11 +19,19 @@ import { CONTAINER_DIM } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
+import { msgTypes, PlayerCommand } from "../../Clients/Interfaces";
 
+interface Player {
+    entity: Entity;
+    health: Entity;
+    healthOutline: Entity;
+    healthBackground: Entity;
+    id: Entity;
+}
 
 class PlayerLayer extends Layer {
+    private players: Record<string, Player> = {};
     // Entites storage
-    private entities: Record<number, Entity> = {};
 
     // Listener id
     private listenerId: number = 0;
@@ -37,6 +45,15 @@ class PlayerLayer extends Layer {
 
     // Lobby level context
     private levelContext: LobbyLevelContext;
+
+    private readonly idStyle: Partial<ITextStyle> = {
+        fontFamily: "8-BIT WONDER",
+        fontSize: 9,
+        fill: 0xffffff,
+        lineHeight: 12.6,
+        align: "center",
+        fontWeight: "400"
+    }
 
     constructor(
         ecs: ECS,
@@ -60,8 +77,9 @@ class PlayerLayer extends Layer {
     onAttach() {}
 
     onUpdate(deltaTime: number) {
-        Object.values(this.entities).map((entity) => {
-            const transform = entity.getTransform();
+        Object.values(this.players).map((player) => {
+            const transform = player.entity.getTransform();
+            const animsprite = player.entity.getAnimSprite();
 
             // Calculates offsets to fix view
             const centerFactorX = (transform.pos.x - CONTAINER_DIM / 2.0) / (CONTAINER_DIM / 2.0);
@@ -69,15 +87,52 @@ class PlayerLayer extends Layer {
             const fixFactorX = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
             const fixFactorY = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
 
-            // Fix the position
-            transform.pos.x = transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
-            transform.pos.y = transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
+            // Fix the position for the player
+            animsprite.sprite.x = transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
+            animsprite.sprite.y = transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
 
-            // Set the scale
-            transform.setScale(
-                1.0 - this.levelContext.zoom,
-                1.0 - this.levelContext.zoom
-            );
+            animsprite.sprite.scale.x = 1.0 - this.levelContext.zoom;
+            animsprite.sprite.scale.y = 1.0 - this.levelContext.zoom;  
+            
+            // Update text
+            const id = player.id.getText();
+            const idTransform = player.id.getTransform();
+
+            id.text.x = idTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
+            id.text.y = idTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
+
+            // id.text.scale.x = 1.0 - this.levelContext.zoom;
+            // id.text.scale.y = 1.0 - this.levelContext.zoom;
+
+            // Update health bar
+            const healt = player.health.getColoredRectangle();
+            const healtTransform = player.health.getTransform();
+
+            healt.sprite.x = healtTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
+            healt.sprite.y = healtTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
+
+            healt.sprite.scale.x = 1.0 - this.levelContext.zoom;
+            healt.sprite.scale.y = 1.0 - this.levelContext.zoom;
+
+            // Update health background
+            const healtBg = player.healthBackground.getColoredRectangle();
+            const healtBgTransform = player.healthBackground.getTransform();
+
+            healtBg.sprite.x = healtBgTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
+            healtBg.sprite.y = healtBgTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
+
+            healtBg.sprite.scale.x = 1.0 - this.levelContext.zoom;
+            healtBg.sprite.scale.y = 1.0 - this.levelContext.zoom;
+
+            // Update health outline
+            const healtOut = player.healthOutline.getColoredRectangle();
+            const healtOutTransform  = player.healthOutline.getTransform();
+
+            healtOut.sprite.x = healtOutTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX;
+            healtOut.sprite.y = healtOutTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY;
+
+            healtOut.sprite.scale.x = 1.0 - this.levelContext.zoom;
+            healtOut.sprite.scale.y = 1.0 - this.levelContext.zoom;
         });
     }
 
@@ -87,74 +142,124 @@ class PlayerLayer extends Layer {
         this.self.destroy();
     }
 
-    createEnemy(id: number, pos: Vec2) {
-        // Creates and stores entity
-        const entity = this.ecs.createEntity(pos.x, pos.y);
-        this.entities[id] = entity;
+    createEnemy(content: PlayerCommand) {
+        const {id, pos} = content;
 
+        const prevPlayer = this.players[id];
+
+        if (prevPlayer) {
+            delete this.players[id];
+        }
+
+        // Creates and stores entity
+        const title = this.ecs.createEntity(pos.x, pos.y - 20, false); // No exact measurements for offset
+        const entity = this.ecs.createEntity(pos.x, pos.y, false);
+        const health = this.ecs.createEntity(pos.x, pos.y - 35, false);  //Should calculate offset later
+        const healthOutline = this.ecs.createEntity(pos.x - 1, pos.y - 36, false);  //Should calculate offset later
+        const healthBackground = this.ecs.createEntity(pos.x, pos.y - 35, false); //Should calculate offset later
+
+        // Add id text
+        title.addText(id.split('/')[1], this.idStyle);
+        const titleText = title.getText();
+        titleText.text.anchor.set(0.5);
+        titleText.addStage(this.app);
+
+        // Add healthBar
+        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.app);
+        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.app);
+        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.app);
+        
         // Add animsprite component
         const sprite = entity.addAnimSprite();
         sprite.loadFromConfig(this.app, this.res["enemy-sheet"]);
         sprite.addStage(this.app);
+
+        this.players[id] = {
+            entity: entity,
+            id: title,
+            healthOutline: healthOutline,
+            healthBackground: healthBackground,
+            health: health
+        };
     }
 
-    updateEnemy(id: number, action: number, pos: Vec2) {
-        const entity = this.entities[id];
-        const sprite = entity.getAnimSprite();
-        const transform = entity.getTransform();
+    updateEnemy(command: PlayerCommand) {
+        const { id, pos, action, health, maxHealth } = command;
+        
+        const entity = this.players[id].entity;
 
-        transform.pos.x = pos.x;
-        transform.pos.y = pos.y;
+        if (!entity) {
+            this.createEnemy(command);
+        }
 
-        switch (action) {
-            case 0:
-                sprite.animate(this.res["enemy-sheet"]["animations"][0]);
-                break;
-            case 1:
-                sprite.animate(this.res["enemy-sheet"]["animations"][1]);
-                break;
-            case 2:
-                sprite.animate(this.res["enemy-sheet"]["animations"][2]);
-                break;
-            case 3:
-                sprite.animate(this.res["enemy-sheet"]["animations"][3]);
-                break;
-            case 4:
-                sprite.animate(this.res["enemy-sheet"]["animations"][4]);
-                break;
-            case 5:
-                sprite.animate(this.res["enemy-sheet"]["animations"][5]);
-                break;
-            case 6:
-                sprite.animate(this.res["enemy-sheet"]["animations"][6]);
-                break;
-            case 7:
-                sprite.animate(this.res["enemy-sheet"]["animations"][7]);
-                break;
+        const textTransform = this.players[id].id.getTransform();
+        const healthOutlineTransform = this.players[id].healthOutline.getTransform();
+        const healthBackgroundTransform = this.players[id].healthBackground.getTransform();
+        const healthBar = this.players[id].health;
+        const healthTransform = healthBar.getTransform();
+        const entitySprite = entity.getAnimSprite();
+        const entityTransform = entity.getTransform();
+
+        const lifeRecSize = Math.floor((health / maxHealth) * 22);
+        const lifeRectangle = healthBar.getColoredRectangle();
+        lifeRectangle.setSize(lifeRecSize, 4);
+
+        // Set all positions
+        entityTransform.pos.x = pos.x;
+        entityTransform.pos.y = pos.y;
+        
+        textTransform.pos.x = pos.x;
+        textTransform.pos.y = pos.y - 16;
+
+        healthOutlineTransform.pos.x = pos.x - 1;
+        healthOutlineTransform.pos.y = pos.y - 36;
+
+        healthBackgroundTransform.pos.x = pos.x;
+        healthBackgroundTransform.pos.y = pos.y - 35;
+
+        healthTransform.pos.x = pos.x;
+        healthTransform.pos.y = pos.y - 35;
+
+
+        if(action < 8 && action >= 0) {
+            entitySprite.animate(this.res["enemy-sheet"]["animations"][action]);
         }
     }
 
-    deleteEnemy(id: number) {
-        this.entities[id].destroy();
+    deleteEnemy(command: PlayerCommand) {
+        const { id } = command;
+
+        this.players[id].id.destroy();
+        this.players[id].health.destroy();
+        this.players[id].healthOutline.destroy();
+        this.players[id].healthBackground.destroy();
+        this.players[id].entity.destroy();
+        delete this.players[id];
     }
 
     onServerMsg(msg: ServerResponse) {
-        switch (msg.content.type) {
-            case "create-enemy":
-                this.createEnemy(
-                    msg.content.id,
-                    wordToView(new Vec2(msg.content.pos.x, msg.content.pos.y))
-                );
+        let content;
+        if (msg.content.msgType == msgTypes.enemy) {
+            content = msg.content as PlayerCommand;
+        } else {
+            return false;
+        }
+
+        const { x, y } = wordToView(new Vec2(content.pos.x, content.pos.y))
+        content.pos.x = x;
+        content.pos.y = y;
+
+        console.log(content);
+
+        switch (content.type) {
+            case "create":
+                this.createEnemy(content);
                 break;
-            case "update-enemy":
-                this.updateEnemy(
-                    msg.content.id,
-                    msg.content.action,
-                    wordToView(new Vec2(msg.content.pos.x, msg.content.pos.y))
-                );
+            case "update":
+                this.updateEnemy(content);
                 break;
-            case "delete-enemy":
-                this.deleteEnemy(msg.content.id);
+            case "delete":
+                this.deleteEnemy(content);
                 break;
         }
 

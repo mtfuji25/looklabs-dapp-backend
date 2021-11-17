@@ -12,8 +12,10 @@ interface ScheduledGame {
 interface ScheduledGameParticipant {
     id: number;
     nft_id: string;
+    name: string;
     user_address: string;
     scheduled_game: number;
+    game_participants_result: GameParticipantsResult;
     published_at?: string;
     created_at?: string;
     updated_at?: string;
@@ -21,7 +23,9 @@ interface ScheduledGameParticipant {
 
 interface GameParticipantsResult {
     scheduled_game_participant: number;
-    result: "died" | "won";
+    survived_for: number;
+    kills: number;
+    health: number;
     published_at?: string;
     created_at?: string;
     updated_at?: string;
@@ -30,15 +34,13 @@ interface GameParticipantsResult {
 class StrapiClient {
     
     private host: string;
-    private port: number;
 
     private readonly api: AxiosInstance;
     // any type because ts complains if I use http.server, the correct type
     private expressServer: any;
 
-    constructor(host: string, port: number) {
+    constructor(host: string) {
         this.host = host;
-        this.port = port;
         // start axios instance
         this.api = axios.create({
             baseURL: `${this.host}`,
@@ -70,12 +72,26 @@ class StrapiClient {
 
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
-        return (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data[0];
+        try {
+            return (
+                await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)
+            ).data[0];
+        } catch {
+            console.log("No games found");
+        }
     }
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
         return (await this.get(`scheduled-games/${id}`)).data;
+    }
+
+    async getGameParticipants(id: number) {
+        return (
+            await this.get(
+                `scheduled-game-participants?scheduled_game=${id}&_sort=game_participants_result.survived_for:DESC`
+            )
+        ).data;
     }
 
     // Default engine start call

@@ -21,8 +21,12 @@ abstract class Level {
     // Main Engine context
     protected context: EngineContext;
 
-    constructor(context: EngineContext, name: string = "Default") {
+    // Specific level's properties
+    protected props: Record<string, any>;
+
+    constructor(context: EngineContext, name: string = "Default", props: Record<string, any> = {}) {
         this.name = name;
+        this.props = props;
         this.context = context;
 
         // Creates current level systems instances

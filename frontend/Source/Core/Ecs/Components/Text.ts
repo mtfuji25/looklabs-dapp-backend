@@ -9,6 +9,8 @@ import { Text as PixiText } from "pixi.js";
 
 class Text {
 
+    public refresh: boolean = true;
+
     public transform: Transform;
 
     public text: PixiText;
@@ -42,6 +44,11 @@ class Text {
             return;
 
         this.app.stage.removeChild(this.text);
+    }
+
+    setScale(x: number, y: number) {
+        this.transform.scale.x = x;
+        this.transform.scale.y = y;
     }
 
     setPos(x: number, y: number) {

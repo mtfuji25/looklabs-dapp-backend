@@ -3,8 +3,13 @@ import { EcsData } from "../Interfaces";
 const sys_UpdateTextPos = (data: EcsData, deltaTime: number): void => {
     // Iterates through all texts in system
     data.texts.forEach((text) => {
-        text.text.x = text.transform.pos.x;
-        text.text.y = text.transform.pos.y;
+        if (text.refresh) {
+            text.text.x = text.transform.pos.x;
+            text.text.y = text.transform.pos.y;
+            
+            text.text.scale.x = text.transform.scale.x;
+            text.text.scale.y = text.transform.scale.y;
+        }
     });
 };
 

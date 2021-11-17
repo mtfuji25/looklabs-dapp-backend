@@ -6,6 +6,8 @@ import { Vec2 } from "../../../Utils/Math";
 
 // Components imports
 import { Grid } from "../Components/Grid";
+import { Status } from "../Components/Status";
+import { Behavior } from "../Components/Behavior";
 import { Rectangle } from "../Components/Rectangle";
 import { Rigidbody } from "../Components/Rigidbody";
 import { Transform } from "../Components/Transform";
@@ -26,6 +28,8 @@ const masks = {
     grid:       0b000001,
     rectangle:  0b000010,
     rigidbody:  0b000100,
+    status:     0b001000,
+    behavior:   0b010000,
 }
 
 // Key of index in identification array
@@ -34,18 +38,28 @@ const EntityKey = 999;
 // Main ECS class
 class ECS {
 
+    public gridId: number = 0;
+    public statusId: number = 0;
+    public behaviorId: number = 0;
+    public rectangleId: number = 0;
+    public rigidbodyId: number = 0;
+    public transformId: number = 0;
+    public entitiesId: number = 0;
+
     constructor() {
         startSystems(this);
     }
 
     // Data containers
-    public grids: Grid[] = [];
-    public rectangles: Rectangle[] = [];
-    public rigidbodys: Rigidbody[] = [];
-    public transforms: Transform[] = [];
+    public grids: Record<number, Grid> = {};
+    public status: Record<number, Status> = {};
+    public behaviors: Record<number, Behavior> = {};
+    public rectangles: Record<number, Rectangle> = {};
+    public rigidbodys: Record<number, Rigidbody> = {};
+    public transforms: Record<number, Transform> = {};
 
     // Store all entities identifications and layouts
-    entities: Entity[] = [];
+    entities: Record<number, Entity> = {};
 
     // Store all systems
     containerSystems: EcsSysContFn[] = [];
@@ -56,16 +70,18 @@ class ECS {
         // Update all container systems
         this.containerSystems.map((fn) => {
             fn({
-               grids: this.grids,
-               rectangles: this.rectangles,
-               rigidbodys: this.rigidbodys,
-               transforms: this.transforms,
+               grids: Object.values(this.grids),
+               status: Object.values(this.status),
+               behaviors: Object.values(this.behaviors),
+               rectangles: Object.values(this.rectangles),
+               rigidbodys: Object.values(this.rigidbodys),
+               transforms: Object.values(this.transforms),
             }, deltaTime);
         });
 
         // Update all entities systems
         this.entitiesSystems.map((fn) => {
-            this.entities.map((entity) => {
+            Object.values(this.entities).map((entity) => {
                fn(entity, deltaTime);
             });
         });
@@ -80,24 +96,26 @@ class ECS {
     }
 
     destroy() {
-        this.entities.map((entity: Entity) => {
+        Object.values(this.entities).map((entity: Entity) => {
             entity.destroy();
         });
     }
 
-    deleteEntity(entity: Entity): void {
+    deleteEntity(id: BitMaskedId): void {
+        const entity = this.entities[id[EntityKey]];
+
         // Manually remove the transform component
-        this.transforms.slice(entity.id[masks.transform], 1);
+        delete this.transforms[id[masks.transform]];
 
         // Removes the rest of the components from the entity
         entity.remGrid();
-
         entity.remRectangle();
-        
+        entity.remStatus();
         entity.remRigidbody();
+        entity.remBehavior();
 
         // Remove the entity itself from the identification array
-        this.entities.slice(entity.id[EntityKey], 1);
+        delete this.entities[id[EntityKey]];
     }
 
     createEntity(x: number = 0.0, y: number = 0.0) {
@@ -107,20 +125,22 @@ class ECS {
 
         // The TransformID of entity is basically the index in the
         // array that return the component 
-        id[masks.transform] = this.transforms.length;
+        id[masks.transform] = this.transformId;
+        this.transformId++;
 
         // Create and store a new transform component in the data
         // container
-        this.transforms.push(new Transform(x, y));
+        this.transforms[id[masks.transform]] = new Transform(x, y);
 
         // Add current location of entity in identification array
-        id[EntityKey] = this.entities.length;
+        id[EntityKey] = this.entitiesId;
+        this.entitiesId++;
 
         // Create the effective entity representation
-        const entity = new Entity(this, id, masks.transform);
+        const entity = new Entity(this, id, 0);
 
         // Add it to the identification array
-        this.entities.push(entity);
+        this.entities[id[EntityKey]] = entity;
 
         return entity;
     }
@@ -128,6 +148,9 @@ class ECS {
 };
 
 class Entity {
+
+    // Destroyed mark
+    public destroyed: boolean = false;
 
     // Entity definitions
     public id: BitMaskedId;
@@ -168,6 +191,20 @@ class Entity {
         return this.addRigidbody();
     }
 
+    getStatus(): Status {
+        if (this.layout & masks.status)
+            return this.ecs.status[this.id[masks.status]];
+
+        return this.addStatus();
+    }
+
+    getBehavior(): Behavior {
+        if (this.layout & masks.behavior)
+            return this.ecs.behaviors[this.id[masks.behavior]];
+
+        return this.addBehavior();
+    }
+
     // Adders
     addGrid(width: number = 0.0, height: number = 0.0): Grid {
         if (this.layout & masks.grid)
@@ -175,9 +212,10 @@ class Entity {
 
         const grid = new Grid(width, height);
 
-        this.id[masks.grid] = this.ecs.grids.length;
+        this.id[masks.grid] = this.ecs.gridId;
+        this.ecs.gridId++;
         this.layout |= masks.grid;
-        this.ecs.grids.push(grid);
+        this.ecs.grids[this.id[masks.grid]] = grid;
         return grid;
     }
 
@@ -190,9 +228,10 @@ class Entity {
             this.getTransform()
         );
 
-        this.id[masks.rectangle] = this.ecs.rectangles.length;
+        this.id[masks.rectangle] = this.ecs.rectangleId;
+        this.ecs.rectangleId++;
         this.layout |= masks.rectangle;
-        this.ecs.rectangles.push(rectangle);
+        this.ecs.rectangles[this.id[masks.rectangle]] = rectangle;
         return rectangle;
     }
 
@@ -202,7 +241,7 @@ class Entity {
         velocity: Vec2 = new Vec2()
     ): Rigidbody {
         if (this.layout & masks.rigidbody)
-            return this.getRigidbody()
+            return this.getRigidbody();
 
         let rigidbody;
 
@@ -213,37 +252,120 @@ class Entity {
             const rectangle = this.addRectangle(width, height);
             rigidbody = new Rigidbody(rectangle);
         }
-
-        this.id[masks.rigidbody] = this.ecs.rigidbodys.length;
+        
+        rigidbody.velocity = velocity;
+        this.id[masks.rigidbody] = this.ecs.rigidbodyId;
+        this.ecs.rigidbodyId++;
         this.layout |= masks.rigidbody;
-        this.ecs.rigidbodys.push(rigidbody);
+        this.ecs.rigidbodys[this.id[masks.rigidbody]] = rigidbody;
         return rigidbody;
+    }
+
+    addStatus(
+        attack: number = 0.0,
+        speed: number = 0.0,
+        health: number = 0.0,
+        defense: number = 0.0,
+        cooldown: number = 0.0
+    ): Status {
+        if (this.layout & masks.status)
+            return this.getStatus();
+
+        const status = new Status(attack, speed, health, defense, cooldown);
+
+        this.id[masks.status] = this.ecs.statusId;
+        this.ecs.statusId++;
+        this.layout |= masks.status;
+        this.ecs.status[this.id[masks.status]] = status;
+        return status;
+    }
+
+    addBehavior(): Behavior {
+        if (this.layout & masks.behavior)
+            return this.getBehavior();
+
+        let behavior;
+
+        if (this.layout & masks.rigidbody) {
+            if (this.layout & masks.status) {
+                behavior = new Behavior(
+                    this.getStatus(),
+                    this.getTransform(),
+                    this.getRigidbody()
+                );
+            } else {
+                const status = this.addStatus();
+                behavior = new Behavior(
+                    status,
+                    this.getTransform(),
+                    this.getRigidbody()
+                );
+            }
+        } else {
+            if (this.layout & masks.status) {
+                const rigidbody = this.addRigidbody();
+                behavior = new Behavior(
+                    this.getStatus(),
+                    this.getTransform(),
+                    rigidbody
+                );
+            } else {
+                const status = this.addStatus();
+                const rigidbody = this.addRigidbody();
+                behavior = new Behavior(
+                    status,
+                    this.getTransform(),
+                    rigidbody
+                );
+            }
+        }
+
+        this.id[masks.behavior] = this.ecs.behaviorId;
+        this.ecs.behaviorId++;
+        this.layout |= masks.behavior;
+        this.ecs.behaviors[this.id[masks.behavior]] = behavior;
+        return behavior;
     }
 
     // Removers
     remGrid(): void {
         if (this.layout & masks.grid) {
-            this.ecs.grids.slice(this.id[masks.grid], 1);
+            delete this.ecs.grids[this.id[masks.grid]];
             this.layout &= (~masks.grid);
         }
     }
 
     remRectangle() {
         if (this.layout & masks.rectangle) {
-            this.ecs.rectangles.slice(this.id[masks.rectangle], 1);
+            delete this.ecs.rectangles[this.id[masks.rectangle]];
             this.layout &= (~masks.rectangle);
         }
     }
 
     remRigidbody() {
         if (this.layout & masks.rigidbody) {
-            this.ecs.rigidbodys.slice(this.id[masks.rigidbody], 1);
+            delete this.ecs.rigidbodys[this.id[masks.rigidbody]];
             this.layout &= (~masks.rigidbody);
         }
     }
 
+    remStatus() {
+        if (this.layout & masks.status) {
+            delete this.ecs.status[this.id[masks.status]];
+            this.layout &= (~masks.status);
+        }
+    }
+
+    remBehavior() {
+        if (this.layout & masks.behavior) {
+            delete this.ecs.behaviors[this.id[masks.behavior]];
+            this.layout &= (~masks.behavior);
+        }
+    }
+
     destroy(): void {
-        this.ecs.deleteEntity(this);
+        this.destroyed = true;
+        this.ecs.deleteEntity(this.id);
     }
 
 };

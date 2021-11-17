@@ -7,6 +7,7 @@ import { Application, ITextStyle } from "pixi.js";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
+import { ScheduledGameParticipant } from "../../Clients/Strapi";
 
 interface TextParams {
     text: string;
@@ -20,6 +21,7 @@ class WinnerLayer extends Layer {
     private percentX: number;
     private percentY: number;
     private winnerImg: Sprite;
+    private participant: ScheduledGameParticipant;
 
     // Style objects for texts
     private readonly textStyle: Partial<ITextStyle> = {
@@ -57,17 +59,17 @@ class WinnerLayer extends Layer {
             pos: { x: 31.2, y: 27 }
         },
         winnerName: {
-            text: "Dog44",
+            text: "",
             style: this.textStyle,
             pos: { x: 31.9, y: 61.7 }
         },
         kills: {
-            text: "20",
+            text: "",
             style: this.textStyle,
             pos: { x: 28.611, y: 66.3 }
         },
         health: {
-            text: "21",
+            text: "",
             style: this.textStyle,
             pos: { x: 33.2, y: 66.3 }
         },
@@ -77,16 +79,18 @@ class WinnerLayer extends Layer {
             pos: { x: 28.611, y: 69.8 }
         },
         survivedTime: {
-            text: "3:29:20",
+            text: "",
             style: this.textStyle,
             pos: { x: 36.2, y: 69.8 }
         }
     };
 
-    constructor(ecs: ECS, app: Application) {
+    constructor(ecs: ECS, app: Application, participant: ScheduledGameParticipant) {
         super("TesteLayer", ecs);
 
         this.app = app;
+
+        this.participant = participant;
 
         // sets percents
         this.percentX = this.app.view.width / 100.0;
@@ -136,6 +140,14 @@ class WinnerLayer extends Layer {
         // this.winnerImg.setSize(50, 50);
 
         // this.scaleImg(this.winnerImg);
+
+        // sets texts according to the winner
+        this.texts["winnerName"].setText(this.participant.name);
+        this.texts["kills"].setText(String(this.participant.game_participants_result.kills));
+        this.texts["health"].setText(String(this.participant.game_participants_result.health));
+        this.texts["survivedTime"].setText(
+            this.formatTime(this.participant.game_participants_result.survived_for)
+        );
     }
 
     onUpdate(deltaTime: number) {}
@@ -149,6 +161,18 @@ class WinnerLayer extends Layer {
         const xScale = this.app.view.width / 1440;
         const yScale = this.app.view.height / 800;
         sprite.setScale(xScale, yScale);
+    }
+
+    // Takes seconds and returns a string mm:ss
+    formatTime(time: number): string {
+        const minTwoDigits = (n: number) => {
+            return (n < 10 ? "0" : "") + n;
+        };
+
+        const minutes = Math.floor(time / 60);
+        const seconds = time - minutes * 60;
+
+        return `${minTwoDigits(minutes)}:${minTwoDigits(seconds)}`;
     }
 }
 

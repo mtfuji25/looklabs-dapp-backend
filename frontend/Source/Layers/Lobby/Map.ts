@@ -63,7 +63,7 @@ class MapLayer extends Layer {
                 const currentSheet = levelMap["data"][i][j];
                 if (currentSheet !== 0) {
                     // Creates entity and add sprite to it
-                    const entity = this.ecs.createEntity(x, y)
+                    const entity = this.ecs.createEntity(x, y, false)
                     const sprite = entity.addSprite();
 
                     // Calculates base cuts in spritesheet
@@ -101,7 +101,7 @@ class MapLayer extends Layer {
             (this.mapContainer.width - this.mapContainer.width * (1 - this.levelContext.zoom)) / 2.0;
 
         let fixFactorY =
-            (this.mapContainer.height - this.mapContainer.width * (1 - this.levelContext.zoom)) / 2.0;
+            (this.mapContainer.height - this.mapContainer.height * (1 - this.levelContext.zoom)) / 2.0;
             
         // Translate and scale soil
         this.mapContainer.x = this.levelContext.offsetX + fixFactorX;

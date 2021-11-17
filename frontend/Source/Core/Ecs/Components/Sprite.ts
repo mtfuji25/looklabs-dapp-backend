@@ -9,6 +9,8 @@ import { Sprite as PixiSprite } from  "pixi.js";
 
 class Sprite {
 
+    public refresh: boolean = true;
+
     public transform: Transform;
 
     public img: LoaderResource;

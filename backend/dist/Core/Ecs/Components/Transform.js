@@ -7,6 +7,14 @@ var Transform = /** @class */ (function () {
         this.pos = new Math_1.Vec2(x, y);
         this.scale = new Math_1.Vec2(1.0, 1.0);
     }
+    Transform.prototype.setPos = function (x, y) {
+        this.pos.x = x;
+        this.pos.y = y;
+    };
+    Transform.prototype.setScale = function (x, y) {
+        this.scale.x = x;
+        this.scale.y = y;
+    };
     return Transform;
 }());
 exports.Transform = Transform;

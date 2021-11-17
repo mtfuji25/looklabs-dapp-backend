@@ -9,6 +9,7 @@ import { Rigidbody } from "../Components/Rigidbody";
 
 // Interfaces
 import { EcsData } from "../Interfaces";
+import { Entity } from "../Core/Ecs";
 
 interface SortedCollision {
     other: Rigidbody;
@@ -42,6 +43,36 @@ const sys_UpdateGrid = (data: EcsData, deltaTime: number): void => {
     });
 };
 
+interface CollisionPair {
+    entity: Entity;
+    other: Entity;
+}
+
+let collisionsResults: CollisionPair[] = [];
+
+const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
+    data.grids.forEach((grid) => {
+
+        grid.dynamics.map((dynamic) => {
+            const behavior = dynamic.entity.getBehavior();
+
+            behavior.colliding = [];
+        });
+
+        collisionsResults.map((collision) => {
+            if (collision.entity.destroyed || collision.other.destroyed)
+                return;
+            const behavior = collision.entity.getBehavior();
+            const otherBehavior = collision.other.getBehavior();
+
+            behavior.colliding.push(collision.other);
+            otherBehavior.colliding.push(collision.entity);
+        });
+
+        collisionsResults = [];
+    });
+}
+
 const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
     data.grids.forEach((grid) => {
 
@@ -69,6 +100,10 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                 const result = rigidbody.colide(otherRigidbody, deltaTime);
 
                 if (result.intersect) {
+                    collisionsResults.push({
+                        entity: entity,
+                        other: grid.dynamics[j].entity
+                    });
                     sortedEntities.push({
                         other: otherRigidbody,
                         result: result
@@ -153,4 +188,4 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
     });
 }
 
-export { sys_UpdateGrid, sys_UpdateCollisions };
+export { sys_UpdateGrid, sys_UpdateCollisions, sys_CheckCollisions };

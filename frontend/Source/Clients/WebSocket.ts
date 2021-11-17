@@ -6,7 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 interface ServerResponse {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: any;
+    content: {
+        msgType: string
+    } & {
+        [key: string]: any;
+    };
 }
 
 // Server callbacks types
@@ -18,7 +22,6 @@ class WSClient {
 
     // Server settings
     private host: string;
-    private port: number;
     private socket: WebSocket;
 
     // Client status
@@ -36,9 +39,8 @@ class WSClient {
     // Reponses listeners
     private responseListeners: OnMsgFn[] = [];
 
-    constructor(host: string, port: number) {
+    constructor(host: string) {
         this.host = host;
-        this.port = port;
 
         console.log("WebSocket client initing in host: ", this.host);
     }
@@ -124,7 +126,7 @@ class WSClient {
 
     start(): void {
         this.socket = new WebSocket(
-            `${this.host}:${this.port}`
+            `${this.host}`
         );
 
         this.socket.addEventListener("open", (event) => {

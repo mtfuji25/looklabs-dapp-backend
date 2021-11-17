@@ -14,19 +14,11 @@ const WS_PORT = Number(process.env.WS_SERVER_PORT);
 
 // Strapi Server configs
 const STRAPI_HOST = String(process.env.STRAPI_SERVER_HOST);
-const STRAPI_PORT = Number(process.env.STRAPI_SERVER_PORT);
-
-// Express Server configs
-const EXPRESS_HOST = String(process.env.EXPRESS_SERVER_HOST);
-const EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
 
 const main = async () => {
 
     // Creates strapi client instance
-    const strapiClient = new StrapiClient(
-        STRAPI_HOST, STRAPI_PORT,
-        EXPRESS_HOST, EXPRESS_PORT
-    );
+    const strapiClient = new StrapiClient(STRAPI_HOST);
 
     // Creates websocket client instance
     const wsClient = new WSClient(
