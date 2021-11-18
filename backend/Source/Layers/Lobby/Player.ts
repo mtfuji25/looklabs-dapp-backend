@@ -84,19 +84,19 @@ class PlayerLayer extends Layer {
             // Attack
             20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
             // Speed
-            0.02 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
             // Health
             100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
             // Defense
             5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
             // Cooldown
-            0.2 + ((Math.random() * 0.5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
         ).setOnDie((status) => this.onDie(status));
 
         // Add rigibody for current entity
         this.self.addRigidbody(
-            grid.intervalX,
-            grid.intervalY,
+            grid.intervalX * 1.7,
+            grid.intervalY * 1.7,
         );
 
         this.self.getTransform().setPos(
@@ -205,6 +205,13 @@ class PlayerLayer extends Layer {
     onDie(status: StatusResult) {
         console.log("Morreu: ", this.name)
         console.log("Resultados: ", status);
+        // this.self.getStatus().lastHit;
+
+        // this.wsClient.broadcast({
+        //     killed: this.getName();
+        //     killer: 
+        // });
+
         this.dieFn();
     }
 }

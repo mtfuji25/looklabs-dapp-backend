@@ -6,6 +6,10 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 // Inputs system imports
 import { BTNS, Inputs } from "../../Core/Inputs/Inputs";
+import { Application } from "pixi.js";
+import { CONTAINER_DIM } from "../../Constants/Constants";
+import { ServerResponse } from "../../Clients/WebSocket";
+import { msgTypes } from "../../Clients/Interfaces";
 
 // Required fields for view layer
 interface ViewContext {
@@ -34,11 +38,25 @@ class ViewLayer extends Layer {
     // Current Level context
     private view: ViewContext;
 
-    constructor(ecs: ECS, viewContext: ViewContext, inputs: Inputs) {
+    private app: Application;
+
+    constructor(ecs: ECS, viewContext: ViewContext, app: Application, inputs: Inputs) {
         super("TesteLayer", ecs);
 
         this.inputs = inputs;
         this.view = viewContext;
+
+        this.app = app;
+
+        const percentX = app.view.width / 100.0;
+        const percentY = app.view.height / 100.0;
+
+        this.offsetX = 50 * percentX - CONTAINER_DIM / 2.0;
+        this.offsetY = 50 * percentY - CONTAINER_DIM / 2.0;
+
+        // this.ws.addMsgListener((msg) => {
+        //     this.onKill(msg);
+        // })
     }
 
     onAttach() {
@@ -82,6 +100,12 @@ class ViewLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
+    }
+
+    onKill(msg: ServerResponse) {
+        // if (msg.type == msgTypes.kill) {
+
+        // }
     }
 }
 

@@ -90,7 +90,7 @@ class MapLayer extends Layer {
         this.loadMap();
 
         // Apply a ligth blur on the soil
-        this.mapContainer.filters = [new filters.BlurFilter(1, 8)];
+        //this.mapContainer.filters = [new filters.BlurFilter(1, 8)];
 
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);

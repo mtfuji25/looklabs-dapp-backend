@@ -51,7 +51,7 @@ class AnimSprite {
         this.texHeight = config["texHeight"];
         this.frameWidth = config["frameWidth"];
         this.frameHeight = config["frameHeigth"];
-        
+
         config["animations"].forEach((animation) => {
             config[animation].forEach((frame) => {
                 if (!this.sprites[animation])

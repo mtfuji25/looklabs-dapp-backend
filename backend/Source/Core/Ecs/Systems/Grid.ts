@@ -122,14 +122,6 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
 
             // Solves the collison
             sortedEntities.forEach(({ other, result }) => {
-                // Stop both entities if colliding perfect in horizontal
-                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
-                    rigidbody.velocity.x = 0;
-                    rigidbody.velocity.y = 0;
-                    other.velocity.x = 0;
-                    other.velocity.y = 0;
-                }
-
                 // Fix for current entity
                 rigidbody.velocity.x += result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime);
                 rigidbody.velocity.y += result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime);
@@ -137,6 +129,14 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                 // Fix for other entity
                 other.velocity.x += (result.contactNormal.x * -1.0) * Math.abs(other.velocity.x) * (1.0 - result.contactTime);
                 other.velocity.y += (result.contactNormal.y * -1.0) * Math.abs(other.velocity.y) * (1.0 - result.contactTime);
+
+                // Stop both entities if colliding perfect in horizontal
+                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
+                    rigidbody.velocity.x = 0;
+                    rigidbody.velocity.y = 0;
+                    other.velocity.x = 0;
+                    other.velocity.y = 0;
+                }
             });
 
             //
@@ -176,14 +176,79 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
 
             // Solves the collison
             sortedStatics.forEach((result) => {
+                // Fix for current entity
+                rigidbody.velocity.x += (result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime)) * 1.001;
+                rigidbody.velocity.y += (result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime)) * 1.001;
                 if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
                     rigidbody.velocity.x = 0;
                     rigidbody.velocity.y = 0;
                 }
+            });
+        }
+
+        for (let i = 0; i < grid.dynamics.length; ++i) {
+
+            // Current dynamic entity data
+            const entity = grid.dynamics[i].entity;
+            const index = grid.dynamics[i].index;
+
+            // Get current dynamic entity rigidbody
+            const rigidbody = entity.getRigidbody();
+
+            //
+            //  First pass for dynamic entities
+            //
+
+            // Store entities ordered by contact time
+            let sortedEntities: SortedCollision[] = [];
+
+            for (let j = i + 1; j < grid.dynamics.length; ++j) {
+                // Get other dynamic entity rigidbody
+                const otherRigidbody = grid.dynamics[j].entity.getRigidbody();
+
+                // Test collision against other entity
+                const result = rigidbody.colide(otherRigidbody, deltaTime);
+
+                if (result.intersect) {
+                    collisionsResults.push({
+                        entity: entity,
+                        other: grid.dynamics[j].entity
+                    });
+                    sortedEntities.push({
+                        other: otherRigidbody,
+                        result: result
+                    });
+                }
+            }
+
+            // Sorts based on contact time
+            sortedEntities.sort((a, b) => {
+                if (Math.abs(a.result.contactTime) <  Math.abs(b.result.contactTime))
+                    return -1;
+                if (Math.abs(a.result.contactTime) > Math.abs(b.result.contactTime))
+                    return 1;
+                return 0;
+            });
+
+            // Solves the collison
+            sortedEntities.forEach(({ other, result }) => {
                 // Fix for current entity
                 rigidbody.velocity.x += result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime);
                 rigidbody.velocity.y += result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime);
+
+                // Fix for other entity
+                other.velocity.x += (result.contactNormal.x * -1.0) * Math.abs(other.velocity.x) * (1.0 - result.contactTime);
+                other.velocity.y += (result.contactNormal.y * -1.0) * Math.abs(other.velocity.y) * (1.0 - result.contactTime);
+
+                // Stop both entities if colliding perfect in horizontal
+                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
+                    rigidbody.velocity.x = 0;
+                    rigidbody.velocity.y = 0;
+                    other.velocity.x = 0;
+                    other.velocity.y = 0;
+                }
             });
+
         }
     });
 }

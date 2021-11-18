@@ -6,8 +6,20 @@ const requests = {
 
 const msgTypes = {
     enemy: "enemy",
-    gameStatus: "game-status"
+    gameStatus: "game-status",
+    kill: "kill",
+    remainPlayer: "remain-players"
 };
+
+interface KillMsg {
+    msgType: "kill";
+    // tudo que tu precisa
+}
+
+interface RemainPlayersMsg {
+    msgType: "remain-players";
+    // tudo que tuy precisa
+}
 
 interface GameStatus {
     msgType: "game-status";

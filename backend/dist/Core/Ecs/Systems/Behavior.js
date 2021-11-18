@@ -179,7 +179,7 @@ var sys_UpdateBehavior = function (data, deltaTime) {
                 behavior.healing = false;
             }
             if (lifePercent < 100) {
-                status.health += 0.001;
+                status.health += 0.01;
             }
             // Life check
             if (lifePercent < 25 || behavior.healing) {

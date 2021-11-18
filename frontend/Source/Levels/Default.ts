@@ -2,11 +2,11 @@ import { Level } from "../Core/Level";
 
 // Web client import
 import { requests, GameStatus } from "../Clients/Interfaces";
-import { ServerResponse } from "../Clients/WebSocket";
 
 // Levels imports
 import { AwaitLevel } from "./Await";
 import { LobbyLevel } from "./Lobby";
+import { NotFoundLevel } from "./NotFound";
 
 class DefaultLevel extends Level {
 
@@ -21,6 +21,12 @@ class DefaultLevel extends Level {
         .catch((err) => {
             console.log(err);
             this.context.close = true;
+        });
+
+        this.context.ws.onReady(() => {
+            this.context.ws.request({
+
+            }).then();
         });
     }
 
@@ -49,7 +55,14 @@ class DefaultLevel extends Level {
                 break;
 
             case "not-found":
-                // Should load game not found level
+                this.context.engine.loadLevel(
+                    new NotFoundLevel(
+                        this.context, "Awaiting",
+                        {
+                            gameId: response.gameId
+                        }
+                    )
+                );
                 break;
 
             default:

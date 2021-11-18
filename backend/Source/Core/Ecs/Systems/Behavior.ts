@@ -248,7 +248,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             }
 
             if (lifePercent < 100) {
-                status.health += 0.001
+                status.health += 0.01
             }
 
             // Life check

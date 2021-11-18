@@ -58,9 +58,25 @@
         {
             "name": "enemy",
             "url": "./assets/enemy-pack/enemy.png"
+        },
+        {
+            "name": "chicken",
+            "url": "./assets/enemy-pack/chicken2.png"
+        },
+        {
+            "name": "wolf",
+            "url": "./assets/enemy-pack/wolf2.png"
+        },
+        {
+            "name": "snake",
+            "url": "./assets/enemy-pack/snake2.png"
+        },
+        {
+            "name": "bat",
+            "url": "./assets/enemy-pack/bat2.png"
         }
     ],
-    "sheets": [ "enemy-sheet" ],
+    "sheets": [ "enemy-sheet", "chicken-sheet", "wolf-sheet", "snake-sheet", "bat-sheet"],
     "enemy-sheet": {
         "resource": "enemy",
         "speed": 0.5,
@@ -78,5 +94,69 @@
         "walkleft": [ [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7] ],
         "walkup": [ [6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7] ],
         "walkdown": [ [7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7] ]
+    },
+    "chicken-sheet": {
+        "resource": "chicken",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 128,
+        "texHeight": 192,
+        "frameWidth": 32,
+        "frameHeigth": 32,
+        "animations": [ "walkright", "walkleft", "jumpright", "jumpleft", "dieright", "dieleft" ],
+        "walkright": [ [3, 0], [3, 1] ],
+        "walkleft": [ [0, 0], [0, 1] ],
+        "jumpright": [ [4, 0], [4, 1], [4, 2] ],
+        "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
+        "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
+        "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
+    },
+    "wolf-sheet": {
+        "resource": "wolf",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 128,
+        "texHeight": 192,
+        "frameWidth": 32,
+        "frameHeigth": 32,
+        "animations": [ "walkright", "walkleft", "jumpright", "jumpleft", "dieright", "dieleft" ],
+        "walkright": [ [3, 0], [3, 1] ],
+        "walkleft": [ [0, 0], [0, 1] ],
+        "jumpright": [ [4, 0], [4, 1], [4, 2] ],
+        "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
+        "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
+        "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
+    },
+    "snake-sheet": {
+        "resource": "snake",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 128,
+        "texHeight": 192,
+        "frameWidth": 32,
+        "frameHeigth": 32,
+        "animations": [ "walkright", "walkleft", "jumpright", "jumpleft", "dieright", "dieleft" ],
+        "walkright": [ [3, 0], [3, 1] ],
+        "walkleft": [ [0, 0], [0, 1] ],
+        "jumpright": [ [4, 0], [4, 1], [4, 2] ],
+        "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
+        "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
+        "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
+    },
+    "bat-sheet": {
+        "resource": "bat",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 128,
+        "texHeight": 192,
+        "frameWidth": 32,
+        "frameHeigth": 32,
+        "animations": [ "walkright", "walkleft", "jumpright", "jumpleft", "dieright", "dieleft" ],
+        "walkright": [ [3, 0], [3, 1] ],
+        "walkleft": [ [0, 0], [0, 1] ],
+        "jumpright": [ [4, 0], [4, 1], [4, 2] ],
+        "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
+        "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
+        "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
     }
 }

@@ -62,6 +62,10 @@ class LobbyLevel extends Level {
             const player = new PlayerLayer(
                 this.ecs, this.context.ws,
                 participant.nft_id, grid, () => {
+                    this.context.ws.broadcast({
+                        alive: this.fighters,
+                        total: this.participants.length
+                    })
                     this.layerStack.popLayer(player);
                     this.fighters--;
                 }

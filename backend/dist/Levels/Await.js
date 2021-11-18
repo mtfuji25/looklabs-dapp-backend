@@ -42,7 +42,7 @@ var AwaitLevel = /** @class */ (function (_super) {
             .then(function (game) {
             if (!game) {
                 console.log("No scheduled game, awaiting ...");
-                setTimeout(function () { return _this.checkForGame(); }, 5000);
+                setTimeout(function () { return _this.checkForGame(); }, 2000);
             }
             else {
                 console.log("Game found, awaiting to start ...");

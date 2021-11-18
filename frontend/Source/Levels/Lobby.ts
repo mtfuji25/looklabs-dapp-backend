@@ -31,7 +31,7 @@ class LobbyLevel extends Level {
 
         // Pushs view controller
         this.layerStack.pushLayer(
-            new ViewLayer(this.ecs, this.levelContext, this.context.inputs)
+            new ViewLayer(this.ecs, this.levelContext, this.context.app, this.context.inputs)
         );
 
         // Pushs map generator

@@ -70,15 +70,15 @@ var PlayerLayer = /** @class */ (function (_super) {
         // Attack
         20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
         // Speed
-        0.02 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
+        0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
         // Health
         100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
         // Defense
         5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
         // Cooldown
-        0.2 + ((Math.random() * 0.5) * (Math.random() < 0.4 ? -1.0 : 1.0))).setOnDie(function (status) { return _this.onDie(status); });
+        0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0))).setOnDie(function (status) { return _this.onDie(status); });
         // Add rigibody for current entity
-        _this.self.addRigidbody(grid.intervalX, grid.intervalY);
+        _this.self.addRigidbody(grid.intervalX * 1.7, grid.intervalY * 1.7);
         _this.self.getTransform().setPos(spawnPos[PlayerLayer.playerCount].x, spawnPos[PlayerLayer.playerCount].y);
         if (PlayerLayer.playerCount <= 28)
             PlayerLayer.playerCount++;

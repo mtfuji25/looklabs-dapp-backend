@@ -25,7 +25,7 @@ class AwaitLevel extends Level {
             .then((game) => {
                 if (!game) {
                     console.log("No scheduled game, awaiting ...");
-                    setTimeout(() => this.checkForGame(), 5000);
+                    setTimeout(() => this.checkForGame(), 2000);
                 } else {
                     console.log("Game found, awaiting to start ...");
                     this.gameFound = true;
