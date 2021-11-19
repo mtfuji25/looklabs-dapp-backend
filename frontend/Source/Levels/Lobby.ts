@@ -8,6 +8,8 @@ import { MAIN_BG_COLOR } from "../Constants/Constants";
 import { MapLayer } from "../Layers/Lobby/Map";
 import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
+import { BattleStatusLayer } from "../Layers/Lobby/Status";
+import { LogsLayer } from "../Layers/Lobby/Log";
 
 interface LobbyLevelContext extends ViewContext {
     // View properties
@@ -45,13 +47,27 @@ class LobbyLevel extends Level {
         );
 
         // Pushs the player controller
+        // this.layerStack.pushLayer(
+        //     new PlayerLayer(
+        //         this.ecs,
+        //         this.levelContext,
+        //         this.context.app,
+        //         this.context.ws,
+        //         this.context.res
+        //     )
+        // );
+
         this.layerStack.pushLayer(
-            new PlayerLayer(
+            new BattleStatusLayer(
                 this.ecs,
-                this.levelContext,
-                this.context.app,
-                this.context.ws,
-                this.context.res
+                this.context.app
+            )
+        );
+
+        this.layerStack.pushLayer(
+            new LogsLayer(
+                this.ecs,
+                this.context.app
             )
         );
     }

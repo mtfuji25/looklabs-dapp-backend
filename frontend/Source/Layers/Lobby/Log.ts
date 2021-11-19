@@ -6,8 +6,6 @@ import { Text } from "../../Core/Ecs/Components/Text";
 
 // Pixi imports
 import { Application, ITextStyle } from "pixi.js";
-import { ScheduledGameParticipant } from "../../Clients/Strapi";
-import { Sprite } from "../../Core/Ecs/Components/Sprite";
 
 interface KillLog {
     killer: string;
@@ -17,16 +15,18 @@ interface KillLog {
         killer: Text;
         action: Text;
         killed: Text;
-    }
-};
+    };
+}
 
-class ResultsLayer extends Layer {
+class LogsLayer extends Layer {
     // Current app instance
     private app: Application;
 
     //  queue for storing the kills
     private logs: Array<KillLog> = [];
     private fiveSecCount = 0.0;
+
+    private percentX: number;
 
     private readonly normalStyle: Partial<ITextStyle> = {
         fontFamily: "monospace",
@@ -39,13 +39,15 @@ class ResultsLayer extends Layer {
 
     private readonly boldStyle: Partial<ITextStyle> = {
         ...this.normalStyle,
-        fontWeight: "700",
+        fontWeight: "700"
     };
 
     constructor(ecs: ECS, app: Application) {
         super("TesteLayer", ecs);
 
         this.app = app;
+
+        this.percentX = this.app.screen.width / 100;
     }
 
     onAttach() {
@@ -59,8 +61,8 @@ class ResultsLayer extends Layer {
                 killer: "dog44",
                 action: "eviscerated",
                 killed: "snake20"
-            },
-        ]
+            }
+        ];
 
         // renders all the results
         this.renderRows();
@@ -72,8 +74,8 @@ class ResultsLayer extends Layer {
                 killer: "Beetle999",
                 action: "eviscerated",
                 killed: "Beetle999"
-            });    
-            if(this.logs.length > 13) {
+            });
+            if (this.logs.length > 13) {
                 this.remLog();
             }
             // after all operations, render updated logs
@@ -86,14 +88,14 @@ class ResultsLayer extends Layer {
 
     // adds log on top of queue
     addLog(log: KillLog) {
-        this.logs.unshift(log)
-    };
+        this.logs.unshift(log);
+    }
 
     // Removes last log
     remLog() {
         const log = this.logs.at(-1);
         // Unstage texts from log
-        if(log.text) {
+        if (log.text) {
             Object.values(log.text).forEach((text) => {
                 text.remStage();
             });
@@ -102,7 +104,7 @@ class ResultsLayer extends Layer {
         this.logs.pop();
 
         // if the queue is still bigger than 13
-        if(this.logs.length > 13) {
+        if (this.logs.length > 13) {
             this.remLog();
         } else {
             // returns if there are no logs to remove
@@ -112,57 +114,79 @@ class ResultsLayer extends Layer {
 
     // loops through logs and renders them
     renderRows() {
-        this.logs.forEach((log, index) =>
-            this.renderLog(log, index)
-        );
+        this.logs.forEach((log, index) => this.renderLog(log, index));
     }
 
     // create result for a specific participant
     renderLog(log: KillLog, index: number) {
         // represents how much the y coordinate is offset, according to current index
-        const yOffset = 30 + index * 10;
-        const initialX = 1400;
+        const yOffset = 30 + index * 25;
+        const initialX = 97.222 * this.percentX;
         let xOffset = 0;
 
-        // Render the text for participants killed
-        const killed = this.ecs
-            .createEntity()
-            .addText(`${log.killed}`, this.boldStyle)
-    
-        xOffset += killed.text.width;
-        killed.setPos(initialX - xOffset, yOffset); 
-        
-        // render the text for participant name
-        const action = this.ecs
-            .createEntity()
-            .addText(`${log.action}`, this.normalStyle);
-        
-        xOffset += action.text.width + 10;
-        action.setPos(initialX - xOffset, yOffset);
+        // if text already exists, just reposition it
+        if (log.text) {
+            const { killed, action, killer } = log.text;
 
-        // Render the text for the position
-        const killer = this.ecs
-            .createEntity()
-            .addText(`${log.killer}`, this.boldStyle);
+            // set killed pos
+            xOffset += killed.text.width;
+            killed.setPos(initialX - xOffset, yOffset);
+            index > 12 && killed.setStyle({
+                ...this.boldStyle,
+                fill: 0x808080
+            })
 
-        xOffset += killer.text.width + 10;
-        killer.setPos(initialX - xOffset, yOffset);
+            // set action pos
+            xOffset += action.text.width + 10;
+            action.setPos(initialX - xOffset, yOffset);
+            index > 12 && killed.setStyle({
+                ...this.normalStyle,
+                fill: 0x808080
+            })
 
-        // stage all texts
-        killed.addStage(this.app);
-        action.addStage(this.app);
-        killer.addStage(this.app);
+            // set killer pos
+            xOffset += killer.text.width + 10;
+            killer.setPos(initialX - xOffset, yOffset);
+            index > 12 && killed.setStyle({
+                ...this.boldStyle,
+                fill: 0x808080
+            })
 
-        log.text = {
-            killed: killed,
-            action: action,
-            killer: killer
-        };
+        } else {
+            // Render the text for participants killed
+            const killed = this.ecs.createEntity().addText(`${log.killed}`, this.boldStyle);
+
+            xOffset += killed.text.width;
+            killed.setPos(initialX - xOffset, yOffset);
+
+            // render the text for participant name
+            const action = this.ecs.createEntity().addText(`${log.action}`, this.normalStyle);
+
+            xOffset += action.text.width + 10;
+            action.setPos(initialX - xOffset, yOffset);
+
+            // Render the text for the position
+            const killer = this.ecs.createEntity().addText(`${log.killer}`, this.boldStyle);
+
+            xOffset += killer.text.width + 10;
+            killer.setPos(initialX - xOffset, yOffset);
+
+            // stage all texts
+            killed.addStage(this.app);
+            action.addStage(this.app);
+            killer.addStage(this.app);
+
+            log.text = {
+                killed: killed,
+                action: action,
+                killer: killer
+            };
+        }
     }
-    
+
     onDetach() {
         this.self.destroy();
     }
 }
 
-export { ResultsLayer };
+export { LogsLayer };

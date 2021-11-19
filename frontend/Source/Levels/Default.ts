@@ -11,23 +11,29 @@ import { NotFoundLevel } from "./NotFound";
 class DefaultLevel extends Level {
 
     onStart(): void {
-        this.context.ws.request({
-            type: requests.gameStatus
-        })
-        .then((response) => {
-            const content = response.content as GameStatus;
-            this.startLevels(content);
-        })
-        .catch((err) => {
-            console.log(err);
-            this.context.close = true;
-        });
+        // this.context.ws.request({
+        //     type: requests.gameStatus
+        // })
+        // .then((response) => {
+        //     const content = response.content as GameStatus;
+        //     this.startLevels(content);
+        // })
+        // .catch((err) => {
+        //     console.log(err);
+        //     this.context.close = true;
+        // });
 
-        this.context.ws.onReady(() => {
-            this.context.ws.request({
+        // this.context.ws.onReady(() => {
+        //     this.context.ws.request({
 
-            }).then();
-        });
+        //     }).then();
+        // });
+        this.startLevels({
+            gameId:1,
+            gameStatus: "lobby",
+            lastGameId: 1,
+            msgType: "game-status"
+        })
     }
 
     startLevels(response : GameStatus) {

@@ -17,7 +17,8 @@ class BattleStatusLayer extends Layer {
         fontWeight: "700",
         fontSize: "16px",
         lineHeight: 23.7,
-        fill: "#000000"
+        fill: "#000000",
+        align: "center",
     }
 
     constructor(ecs: ECS, app: Application) {
@@ -30,8 +31,8 @@ class BattleStatusLayer extends Layer {
         this.card = this.ecs.createEntity(30, 83).addSprite();
 
         // Creates both texts
-        this.timeLeft = this.ecs.createEntity(56, 91).addText("00:00:00", this.textStyle);
-        this.playersLeft = this.ecs.createEntity(164, 91).addText("75/75 ALIVE", this.textStyle);
+        this.timeLeft = this.ecs.createEntity(56, 95).addText("00:00:00", this.textStyle);
+        this.playersLeft = this.ecs.createEntity(164, 95).addText("75/75 ALIVE", this.textStyle);
 
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
