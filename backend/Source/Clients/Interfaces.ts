@@ -1,23 +1,30 @@
 import { Vec2 } from "../Utils/Math";
 
-const requests = {
-    gameStatus: "game-status"
-};
+// Messages types and values
 
 const msgTypes = {
+    kill: "kill",
     enemy: "enemy",
     gameStatus: "game-status",
-    kill: "kill",
     remainPlayer: "remain-players"
 };
 
+type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players";
+
+//
+//  Msgs interfaces
+//
+
 interface KillMsg {
     msgType: "kill";
-    // tudo que tu precisa
+    killer: string;
+    killed: string;
 }
 
 interface RemainPlayersMsg {
     msgType: "remain-players";
+    totalPlayers: number;
+    remainingPlayers: number;
     // tudo que tuy precisa
 }
 
@@ -47,4 +54,29 @@ interface PlayerCommand {
     kills: number;
 }
 
-export { requests, msgTypes, GameStatus, PlayerCommand };
+// Requests types and values
+
+const requests = {
+    gameStatus: "game-status"
+};
+
+type Listeners = "game-status" | "connection";
+
+// Interfaces
+interface IncommingMsg {
+    uuid: string;
+    type: "request";
+    content: {
+        type: Listeners;
+    } & {
+        [x: string]: any;
+    };
+}
+
+interface ServerMsg {
+    uuid: string;
+    type: "response" | "broadcast" | "send";
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus;
+}
+
+export { requests, msgTypes, Listeners, MsgTypes, ServerMsg, GameStatus, PlayerCommand, IncommingMsg };

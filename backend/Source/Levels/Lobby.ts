@@ -27,14 +27,14 @@ class LobbyLevel extends Level {
     private ready: boolean = false;
 
     // Current ws listener is
-    private listenerId = 0;
+    private listener: string;
 
     constructor(context: EngineContext, name: string, gameId: number) {
         super(context, name);
 
         this.gameId = gameId;
 
-        this.listenerId = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
+        this.listener = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
     }
 
     onStart(): void {
@@ -85,7 +85,7 @@ class LobbyLevel extends Level {
     }
 
     onClose(): void {
-        this.context.ws.remMsgListener(this.listenerId);
+        this.context.ws.remMsgListener(this.listener);
     }
 
     onServerMsg(msg: ReplyableMsg) {

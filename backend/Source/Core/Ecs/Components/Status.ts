@@ -20,6 +20,7 @@ class Status {
     public readonly defense: number;
     public readonly cooldown: number;
     public readonly maxHealth: number;
+    public readonly name: string;
 
     // Current Entity Stats
     public survived: number = 0.0;
@@ -35,7 +36,8 @@ class Status {
         speed: number,
         health: number,
         defense: number,
-        cooldown: number
+        cooldown: number,
+        name: string,
     ) {
         this.attack = attack;
         this.health = health;
@@ -43,6 +45,7 @@ class Status {
         this.defense = defense;
         this.maxHealth = health;
         this.cooldown = cooldown;
+        this.name = name;
     }
 
     hit(enemy: Entity) {

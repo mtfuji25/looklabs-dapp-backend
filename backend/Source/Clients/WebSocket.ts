@@ -2,20 +2,40 @@ import WebSocket, { WebSocketServer } from "ws";
 
 // For uuid generation
 import { v4 as uuidv4 } from "uuid";
+import { Listeners, requests } from "./Interfaces";
+import { IncomingMessage } from "../Clients/Interfaces";
 
-interface ServerMsg {
-    uuid: string;
-    type: "response" | "broadcast" | "send";
-    content: any;
-}
+// Callback types
+type DestroyFn = (type: Listeners) => void;
+type OnListenerFn = (event: WebSocket | ReplyableMsg) => boolean;
 
 interface ReplyableMsg {
     content: any;
     reply: (msg: any) => void;
 }
 
-type OnConnectFn = (ws: WebSocket) => boolean;
-type OnMsgFn = (message: ReplyableMsg) => boolean;
+interface TypedCallback {
+    type: Listeners;
+    callback: OnListenerFn;
+}
+
+class Listener {
+
+    public type: Listeners;
+    private id: string;
+    private client: WSClient;
+    private destroyFn: DestroyFn;
+
+    constructor(destroyFn: DestroyFn, type: Listeners, fn: OnListenerFn, id: string) {
+        this.id = id;
+        this.type = type;
+        this.destroyFn = destroyFn;
+    }
+
+    destroy() {
+        this.destroyFn(this.type);
+    }
+}
 
 class WSClient {
 
@@ -23,8 +43,9 @@ class WSClient {
     private port: number;
 
     private server: WebSocketServer;
-    private conListeners: OnConnectFn[] = [];
-    private msgListeners: OnMsgFn[] = [];
+
+    // TODO: finish msgListeners
+    private listeners: Record<string, TypedCallback> = {};
 
     constructor(host: string, port: number) {
 
@@ -38,14 +59,14 @@ class WSClient {
 
     private handleMsgs(message: WebSocket.RawData, client: WebSocket) {
         // Parses current msg
-        const data = JSON.parse(message.toString()) as ServerMsg;
+        const data = JSON.parse(message.toString()) as IncomingMessage;
 
         // Just allow one response
         let replied = false;
 
         // Generates replyable msg
         const replyable: ReplyableMsg = {
-            content: data.content,
+            content: data.
             reply: (msg: any) => {
                 if (!replied) {
                     const serverMsg: ServerMsg = {
@@ -60,17 +81,22 @@ class WSClient {
                 }
             }
         }
-        for (let listener of this.msgListeners) {
-            if (listener(replyable))
-                break;
+
+        for (let listener of Object.values(this.listeners)) {
+            if (listener.type == data.type) {
+
+            }
         }
     }
 
     private handleConnection(ws: WebSocket) {
         console.log("New client connected in WebSocketServer.");
-        for (let listener of this.conListeners) {
-            if (listener(ws))
-                break;
+
+        for (let listener of Object.values(this.listeners)) {
+            if (listener.type == "connection") {
+                if (listener.callback(ws))
+                    break;
+            }
         }
 
         ws.on("message", (message: WebSocket.RawData) => {
@@ -109,24 +135,17 @@ class WSClient {
         this.server.close();
     }
     
-    addConListener(fn: OnConnectFn): number {
-        this.conListeners.push(fn);
-        return this.conListeners.length - 1;
+    addListener(type: Listeners, fn: OnListenerFn): Listener {
+        const id = uuidv4();
+
+        this.listeners[id] = { type: type, callback: fn };        
+
+        return new Listener((type) => this.remListener(type), type, fn, id);
     }
 
-    addMsgListener(fn: OnMsgFn): number {
-        this.msgListeners.push(fn);
-        return this.msgListeners.length - 1;
+    remListener(id: string): void {
+        delete this.listeners[id];
     }
-
-    remConListener(id: number) {
-        this.conListeners.slice(id, 1);
-    }
-
-    remMsgListener(id: number) {
-        this.msgListeners.slice(id, 1);
-    }
-
 };
 
 export { WSClient, ReplyableMsg };

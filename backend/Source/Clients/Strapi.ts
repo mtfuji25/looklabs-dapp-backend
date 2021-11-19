@@ -27,9 +27,6 @@ interface GameParticipantsResult {
     updated_at?: string;
 }
 
-type OnMsgFn = (message: ScheduledGame) => boolean;
-type OnHookFn = (message: ScheduledGame) => void;
-
 class StrapiClient {
     
     private host: string;

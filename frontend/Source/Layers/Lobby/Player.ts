@@ -34,7 +34,7 @@ class PlayerLayer extends Layer {
     // Entites storage
 
     // Listener id
-    private listenerId: number = 0;
+    private listener: string;
 
     // Application Related
     protected app: Application;
@@ -70,7 +70,7 @@ class PlayerLayer extends Layer {
         this.wsClient = wsClient;
         this.levelContext = levelContext;
 
-        this.listenerId = this.wsClient.addMsgListener((msg) =>
+        this.listener = this.wsClient.addMsgListener((msg) =>
             this.onServerMsg(msg)
         );
     }
@@ -138,7 +138,7 @@ class PlayerLayer extends Layer {
     }
 
     onDetach() {
-        this.wsClient.remMsgListener(this.listenerId);
+        this.wsClient.remMsgListener(this.listener);
 
         this.self.destroy();
     }

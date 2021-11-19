@@ -57,7 +57,7 @@ class PlayerLayer extends Layer {
 
     // Current web socket server client
     private wsClient: WSClient;
-    private conListener: number;
+    private conListener: string;
 
     // Player ID
     public playerID: string;

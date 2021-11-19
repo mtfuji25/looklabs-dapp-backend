@@ -29,15 +29,17 @@ class WSClient {
     private reconnect: boolean = true;
 
     // Client events listeners
-    private conListeners: OnEventFn[] = [];
-    private conLostListeners: OnEventFn[] = [];
+    private conListeners: Record<string, OnEventFn> = {};
+    private conLostListeners: Record<string, OnEventFn> = {};
+
+    // When server is ready to requests
     private onReadyListeners: OnReadyFn[] = [];
 
     // Listeners to server msgs
-    private msgListeners: OnMsgFn[] = [];
+    private msgListeners: Record<string, OnMsgFn> = {};
 
     // Reponses listeners
-    private responseListeners: OnMsgFn[] = [];
+    private responseListeners: Record<string, OnMsgFn> = {};
 
     constructor(host: string) {
         this.host = host;
@@ -49,12 +51,12 @@ class WSClient {
         const data = JSON.parse(message.data) as ServerResponse;
 
         if (data.type == "broadcast" || data.type == "send") {
-            for (let listener of this.msgListeners) {
+            for (let listener of Object.values(this.msgListeners)) {
                 if (listener(data))
                     break;
             }
         } else {
-            for (let listener of this.responseListeners) {
+            for (let listener of Object.values(this.responseListeners)) {
                 if (listener(data))
                     break;
             }
@@ -64,7 +66,7 @@ class WSClient {
     private onConnectionReady(event: Event) {
         this.connected =  true;
         
-        for (let listener of this.conListeners) {
+        for (let listener of Object.values(this.conListeners)) {
             if (listener(event))
                 break;
         }
@@ -83,7 +85,7 @@ class WSClient {
     private onConnectionLost(event: Event) {
         this.connected = false;
 
-        for (let listener of this.conLostListeners) {
+        for (let listener of Object.values(this.conLostListeners)) {
             if (listener(event))
                 break;
         }
@@ -154,12 +156,15 @@ class WSClient {
         this.socket.close();
     }
     
-    private addResponseListener(fn: OnMsgFn): number {
-        this.responseListeners.push(fn);
-        return this.responseListeners.length - 1;
+    private addResponseListener(fn: OnMsgFn): string {
+        const id: string = uuidv4();
+        this.responseListeners[id] = fn;
+        
+        return id;
     }
-    private remResponseListener(id: number) {
-        this.responseListeners.slice(id, 1);
+
+    private remResponseListener(id: string): void {
+        delete this.responseListeners[id];
     }
 
     onReady(fn: OnReadyFn) {
@@ -170,31 +175,41 @@ class WSClient {
         }
     }
 
-    addConListener(fn: OnEventFn): number {
-        this.conListeners.push(fn);
-        return this.conListeners.length - 1;
+    //
+    //  Listeners to add and remove ids
+    //
+
+    addConListener(fn: OnEventFn): string {
+        const id: string = uuidv4();
+        this.conListeners[id] = fn;
+
+        return id;
     }
 
-    addConLostListener(fn: OnEventFn): number {
-        this.conLostListeners.push(fn);
-        return this.conLostListeners.length - 1;
+    addConLostListener(fn: OnEventFn): string {
+        const id: string = uuidv4();
+        
+        this.conLostListeners[id] = fn;
+        return id;
     }
 
-    addMsgListener(fn: OnMsgFn): number {
-        this.msgListeners.push(fn);
-        return this.msgListeners.length - 1;
+    addMsgListener(fn: OnMsgFn): string {
+        const id: string = uuidv4();
+        this.msgListeners[id] = fn;
+        
+        return id;
     }
 
-    remConListener(id: number) {
-        this.conListeners.slice(id, 1);
+    remConListener(id: string): void {
+        delete this.conListeners[id];
     }
 
-    remConLostListener(id: number) {
-        this.conLostListeners.slice(id, 1);
+    remConLostListener(id: string): void {
+        delete this.conLostListeners[id];
     }
 
-    remMsgListener(id: number) {
-        this.msgListeners.slice(id, 1);
+    remMsgListener(id: string): void {
+        delete this.msgListeners[id];
     }
 
 };

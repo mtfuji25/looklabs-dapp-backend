@@ -9,9 +9,12 @@ import { GameStatus, requests } from "../Clients/Interfaces";
 class AwaitLevel extends Level {
 
     // WebSocket listener id
-    private listener: number = 0;
+    private listener: string;
 
+    // Current game id
     private gameId: number = 0;
+
+    // If found some game
     private gameFound: boolean = false;
 
     onStart(): void {

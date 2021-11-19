@@ -1,5 +1,11 @@
 {
-    "packs": [ "enemy-pack", "dungeon-pack", "await-pack", "results-pack" ],
+    "packs": [ "enemy-pack", "dungeon-pack", "await-pack", "results-pack", "lobby-pack" ],
+    "lobby-pack": [
+        {
+            "name": "infoCard",
+            "url": "./assets/lobby-pack/info-card.png"
+        }
+    ],
     "await-pack": [
         {
             "name": "thepit",

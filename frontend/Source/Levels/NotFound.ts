@@ -36,7 +36,7 @@ class NotFoundLevel extends Level {
     onUpdate(deltaTime: number) {}
 
     onClose(): void {
-        this.context.ws.remMsgListener(this.listenerId);
+        //this.context.ws.remMsgListener(this.listenerId);
     }
 };
 
