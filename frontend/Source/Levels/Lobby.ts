@@ -47,15 +47,15 @@ class LobbyLevel extends Level {
         );
 
         // Pushs the player controller
-        // this.layerStack.pushLayer(
-        //     new PlayerLayer(
-        //         this.ecs,
-        //         this.levelContext,
-        //         this.context.app,
-        //         this.context.ws,
-        //         this.context.res
-        //     )
-        // );
+        this.layerStack.pushLayer(
+            new PlayerLayer(
+                this.ecs,
+                this.levelContext,
+                this.context.app,
+                this.context.ws,
+                this.context.res
+            )
+        );
 
         this.layerStack.pushLayer(
             new BattleStatusLayer(

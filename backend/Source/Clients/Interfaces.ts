@@ -1,3 +1,4 @@
+import { WebSocket } from "ws";
 import { Vec2 } from "../Utils/Math";
 
 // Messages types and values
@@ -10,6 +11,7 @@ const msgTypes = {
 };
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand;
 
 //
 //  Msgs interfaces
@@ -25,7 +27,6 @@ interface RemainPlayersMsg {
     msgType: "remain-players";
     totalPlayers: number;
     remainingPlayers: number;
-    // tudo que tuy precisa
 }
 
 interface GameStatus {
@@ -60,14 +61,14 @@ const requests = {
     gameStatus: "game-status"
 };
 
-type Listeners = "game-status" | "connection";
+type ListenerTypes = "game-status" | "connection";
 
 // Interfaces
-interface IncommingMsg {
+interface IncomingMsg {
     uuid: string;
     type: "request";
     content: {
-        type: Listeners;
+        type: ListenerTypes;
     } & {
         [x: string]: any;
     };
@@ -79,4 +80,54 @@ interface ServerMsg {
     content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus;
 }
 
-export { requests, msgTypes, Listeners, MsgTypes, ServerMsg, GameStatus, PlayerCommand, IncommingMsg };
+interface ReplyableMsg {
+    content: {
+        type: ListenerTypes;
+    } & {
+        [x: string]: any;
+    };
+    reply: (msg: MsgInterfaces) => void;
+}
+
+// Listeners
+// Callback types
+type OnConnectionFn = (event: WebSocket) => boolean;
+type OnGameStatusFn = (event: ReplyableMsg) => boolean;
+
+type OnListenerFns = OnConnectionFn | OnGameStatusFn;
+
+type msgHandlerFn = (data: IncomingMsg, client: WebSocket) => void;
+
+// Listener types
+interface Listener {
+    type: ListenerTypes;
+    callback: OnListenerFns;
+    destroy: () => void;
+}
+
+interface GameStatusListener extends Listener {
+    callback: OnGameStatusFn;
+}
+
+interface OnConnectionListener extends Listener {
+    callback: OnConnectionFn;
+}
+
+export {
+    requests,
+    msgTypes,
+    ListenerTypes,
+    MsgTypes,
+    ServerMsg,
+    GameStatus,
+    PlayerCommand,
+    IncomingMsg,
+    ReplyableMsg,
+    Listener,
+    GameStatusListener,
+    OnConnectionListener,
+    OnListenerFns,
+    OnGameStatusFn,
+    OnConnectionFn,
+    msgHandlerFn
+};

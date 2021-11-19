@@ -4,12 +4,12 @@ import { LobbyLevel } from "./Lobby";
 
 // Scheduled game interface
 import { ReplyableMsg } from "../Clients/WebSocket";
-import { GameStatus, requests } from "../Clients/Interfaces";
+import { GameStatus, GameStatusListener, requests } from "../Clients/Interfaces";
 
 class AwaitLevel extends Level {
 
     // WebSocket listener id
-    private listener: string;
+    private listener: GameStatusListener;
 
     // Current game id
     private gameId: number = 0;
@@ -19,7 +19,7 @@ class AwaitLevel extends Level {
 
     onStart(): void {
         // Add WebSocket listener
-        this.listener = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
+        this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
         this.checkForGame();
     }
 
@@ -66,7 +66,8 @@ class AwaitLevel extends Level {
 
     onClose(): void {
         // Removes msg listener
-        this.context.ws.remMsgListener(this.listener);
+        // this.context.ws.remMsgListener(this.listener);
+        this.listener.destroy()
     }
 
     onServerMsg(msg: ReplyableMsg) {

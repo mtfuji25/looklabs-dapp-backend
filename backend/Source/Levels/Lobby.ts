@@ -12,7 +12,7 @@ import { EngineContext } from "../Core/Interfaces";
 import { PlayerLayer } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
-import { GameStatus, requests } from "../Clients/Interfaces";
+import { GameStatus, GameStatusListener, requests } from "../Clients/Interfaces";
 
 class LobbyLevel extends Level {
 
@@ -27,14 +27,14 @@ class LobbyLevel extends Level {
     private ready: boolean = false;
 
     // Current ws listener is
-    private listener: string;
+    private listener: GameStatusListener;
 
     constructor(context: EngineContext, name: string, gameId: number) {
         super(context, name);
 
         this.gameId = gameId;
 
-        this.listener = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
+        this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
     }
 
     onStart(): void {
@@ -85,7 +85,8 @@ class LobbyLevel extends Level {
     }
 
     onClose(): void {
-        this.context.ws.remMsgListener(this.listener);
+        this.listener.destroy();
+        // this.context.ws.remMsgListener(this.listener);
     }
 
     onServerMsg(msg: ReplyableMsg) {

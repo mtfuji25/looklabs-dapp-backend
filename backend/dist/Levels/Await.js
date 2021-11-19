@@ -24,16 +24,16 @@ var AwaitLevel = /** @class */ (function (_super) {
     __extends(AwaitLevel, _super);
     function AwaitLevel() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        // WebSocket listener id
-        _this.listener = 0;
+        // Current game id
         _this.gameId = 0;
+        // If found some game
         _this.gameFound = false;
         return _this;
     }
     AwaitLevel.prototype.onStart = function () {
         var _this = this;
         // Add WebSocket listener
-        this.listener = this.context.ws.addMsgListener(function (msg) { return _this.onServerMsg(msg); });
+        this.listener = this.context.ws.addListener("game-status", function (msg) { return _this.onServerMsg(msg); });
         this.checkForGame();
     };
     AwaitLevel.prototype.checkForGame = function () {
@@ -74,7 +74,8 @@ var AwaitLevel = /** @class */ (function (_super) {
     AwaitLevel.prototype.onUpdate = function (deltaTime) { };
     AwaitLevel.prototype.onClose = function () {
         // Removes msg listener
-        this.context.ws.remMsgListener(this.listener);
+        // this.context.ws.remMsgListener(this.listener);
+        this.listener.destroy();
     };
     AwaitLevel.prototype.onServerMsg = function (msg) {
         if (msg.content.type == Interfaces_1.requests.gameStatus) {

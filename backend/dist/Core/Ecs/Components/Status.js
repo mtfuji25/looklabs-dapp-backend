@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Status = void 0;
 var Status = /** @class */ (function () {
-    function Status(attack, speed, health, defense, cooldown) {
+    function Status(attack, speed, health, defense, cooldown, name) {
         // Current Entity Stats
         this.survived = 0.0;
         this.kills = 0.0;
@@ -13,6 +13,7 @@ var Status = /** @class */ (function () {
         this.defense = defense;
         this.maxHealth = health;
         this.cooldown = cooldown;
+        this.name = name;
     }
     Status.prototype.hit = function (enemy) {
         this.lastHit = enemy;

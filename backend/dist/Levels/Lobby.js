@@ -32,10 +32,8 @@ var LobbyLevel = /** @class */ (function (_super) {
         _this.fighters = 0;
         // Tells when game is ready to play
         _this.ready = false;
-        // Current ws listener is
-        _this.listenerId = 0;
         _this.gameId = gameId;
-        _this.listenerId = _this.context.ws.addMsgListener(function (msg) { return _this.onServerMsg(msg); });
+        _this.listener = _this.context.ws.addListener("game-status", function (msg) { return _this.onServerMsg(msg); });
         return _this;
     }
     LobbyLevel.prototype.onStart = function () {
@@ -60,6 +58,10 @@ var LobbyLevel = /** @class */ (function (_super) {
         this.layerStack.pushLayer(mapCollider);
         this.participants.map(function (participant, index) {
             var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, grid, function () {
+                _this.context.ws.broadcast({
+                    alive: _this.fighters,
+                    total: _this.participants.length
+                });
                 _this.layerStack.popLayer(player);
                 _this.fighters--;
             });
@@ -75,7 +77,8 @@ var LobbyLevel = /** @class */ (function (_super) {
         }
     };
     LobbyLevel.prototype.onClose = function () {
-        this.context.ws.remMsgListener(this.listenerId);
+        this.listener.destroy();
+        // this.context.ws.remMsgListener(this.listener);
     };
     LobbyLevel.prototype.onServerMsg = function (msg) {
         if (msg.content.type == Interfaces_1.requests.gameStatus) {

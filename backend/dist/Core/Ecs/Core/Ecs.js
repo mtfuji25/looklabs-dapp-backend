@@ -200,15 +200,16 @@ var Entity = /** @class */ (function () {
         this.ecs.rigidbodys[this.id[masks.rigidbody]] = rigidbody;
         return rigidbody;
     };
-    Entity.prototype.addStatus = function (attack, speed, health, defense, cooldown) {
+    Entity.prototype.addStatus = function (attack, speed, health, defense, cooldown, name) {
         if (attack === void 0) { attack = 0.0; }
         if (speed === void 0) { speed = 0.0; }
         if (health === void 0) { health = 0.0; }
         if (defense === void 0) { defense = 0.0; }
         if (cooldown === void 0) { cooldown = 0.0; }
+        if (name === void 0) { name = ""; }
         if (this.layout & masks.status)
             return this.getStatus();
-        var status = new Status_1.Status(attack, speed, health, defense, cooldown);
+        var status = new Status_1.Status(attack, speed, health, defense, cooldown, name);
         this.id[masks.status] = this.ecs.statusId;
         this.ecs.statusId++;
         this.layout |= masks.status;

@@ -9,7 +9,7 @@ import { WebSocket } from "ws";
 import { WSClient } from "../../Clients/WebSocket";
 import { StatusResult } from "../../Core/Ecs/Components/Status";
 import { rad2deg, Vec2 } from "../../Utils/Math";
-import { PlayerCommand } from "../../Clients/Interfaces";
+import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 //
 //  Frontend actions mapping
@@ -57,7 +57,7 @@ class PlayerLayer extends Layer {
 
     // Current web socket server client
     private wsClient: WSClient;
-    private conListener: string;
+    private conListener: OnConnectionListener;
 
     // Player ID
     public playerID: string;
@@ -112,8 +112,10 @@ class PlayerLayer extends Layer {
         this.self.addBehavior();
 
         // Start to listen for connection
-        this.conListener = this.wsClient.addConListener((ws) => this.onWsConnection(ws))
+        // this.conListener = this.wsClient.addConListener((ws) => this.onWsConnection(ws))
+        this.conListener = this.wsClient.addListener("connection", (ws) => this.onWsConnection(ws));
     }
+
 
     onAttach(): void {
         
@@ -163,7 +165,8 @@ class PlayerLayer extends Layer {
         this.wsClient.broadcast(this.getBaseMsg("delete"));
 
         // Remove connection listener
-        this.wsClient.remConListener(this.conListener);
+        // this.wsClient.remConListener(this.conListener);
+        this.conListener.destroy();
 
         // Removes itself from the grid
         this.grid.removeDynamic(this.self);

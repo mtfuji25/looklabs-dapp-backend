@@ -14,16 +14,16 @@ const BLACK_BG_COLOR = 0x000;
 
 class AwaitLevel extends Level {
 
-    private listenerId: number;
+    private listenerId: string;
 
     onStart(): void {
-    //     // Add msg listener
-    //     this.listenerId = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
+        // Add msg listener
+        this.listenerId = this.context.ws.addMsgListener((msg) => this.onServerMsg(msg));
 
-    //     // Sets bg color of main app
-    //     this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
+        // Sets bg color of main app
+        this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
-    //     this.connectLayers();
+        this.connectLayers();
     }
 
     connectLayers(): void {
@@ -47,7 +47,7 @@ class AwaitLevel extends Level {
     onUpdate(deltaTime: number) {}
 
     onClose(): void {
-        // this.context.ws.remMsgListener(this.listenerId);
+        this.context.ws.remMsgListener(this.listenerId);
     }
 
     onServerMsg(msg: ServerResponse) {

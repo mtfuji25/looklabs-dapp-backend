@@ -86,7 +86,8 @@ var PlayerLayer = /** @class */ (function (_super) {
             PlayerLayer.playerCount = 0;
         _this.self.addBehavior();
         // Start to listen for connection
-        _this.conListener = _this.wsClient.addConListener(function (ws) { return _this.onWsConnection(ws); });
+        // this.conListener = this.wsClient.addConListener((ws) => this.onWsConnection(ws))
+        _this.conListener = _this.wsClient.addListener("connection", function (ws) { return _this.onWsConnection(ws); });
         return _this;
     }
     PlayerLayer.prototype.onAttach = function () {
@@ -135,7 +136,8 @@ var PlayerLayer = /** @class */ (function (_super) {
         // Delete player entity in client
         this.wsClient.broadcast(this.getBaseMsg("delete"));
         // Remove connection listener
-        this.wsClient.remConListener(this.conListener);
+        // this.wsClient.remConListener(this.conListener);
+        this.conListener.destroy();
         // Removes itself from the grid
         this.grid.removeDynamic(this.self);
         // Destroy the self entity
@@ -170,6 +172,11 @@ var PlayerLayer = /** @class */ (function (_super) {
     PlayerLayer.prototype.onDie = function (status) {
         console.log("Morreu: ", this.name);
         console.log("Resultados: ", status);
+        // this.self.getStatus().lastHit;
+        // this.wsClient.broadcast({
+        //     killed: this.getName();
+        //     killer: 
+        // });
         this.dieFn();
     };
     // For spawn point selection
