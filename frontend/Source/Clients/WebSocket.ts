@@ -1,25 +1,31 @@
-
 import { v4 as uuidv4 } from "uuid";
-
-// Server interfaces
-
-interface ServerResponse {
-    uuid: string;
-    type: "response" | "broadcast" | "send";
-    content: {
-        msgType: string
-    } & {
-        [key: string]: any;
-    };
-}
+import {
+    ConnectionLostListener,
+    EnemyListener,
+    GameStatusListener,
+    KillListener,
+    Listener,
+    ListenerTypes,
+    msgHandlerFn,
+    OnConnectionFn,
+    OnConnectionListener,
+    OnConnectionLostFn,
+    OnEnemyFn,
+    OnGameStatusFn,
+    OnKillFn,
+    OnListenerFns,
+    OnRemainPlayersFn,
+    OnResponseFn,
+    RemainPlayersListener,
+    RequestMsg,
+    ResponseListener,
+    ServerMsg
+} from "./Interfaces";
 
 // Server callbacks types
 type OnReadyFn = () => void;
-type OnEventFn = (event: Event) => boolean;
-type OnMsgFn = (message: ServerResponse) => boolean;
 
 class WSClient {
-
     // Server settings
     private host: string;
     private socket: WebSocket;
@@ -28,18 +34,42 @@ class WSClient {
     private connected: boolean = false;
     private reconnect: boolean = true;
 
-    // Client events listeners
-    private conListeners: Record<string, OnEventFn> = {};
-    private conLostListeners: Record<string, OnEventFn> = {};
+    private listeners: Record<string, Listener> = {};
 
     // When server is ready to requests
     private onReadyListeners: OnReadyFn[] = [];
 
-    // Listeners to server msgs
-    private msgListeners: Record<string, OnMsgFn> = {};
-
-    // Reponses listeners
-    private responseListeners: Record<string, OnMsgFn> = {};
+    // msg handler record for each msg type
+    private readonly msgHandlers: Record<string, msgHandlerFn> = {
+        "game-status": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "game-status") {
+                    if ((listener as GameStatusListener).callback(data)) break;
+                }
+            }
+        },
+        "kill": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "kill") {
+                    if ((listener as KillListener).callback(data)) break;
+                }
+            }
+        },
+        "remain-players": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "remain-players") {
+                    if ((listener as RemainPlayersListener).callback(data)) break;
+                }
+            }
+        },
+        "enemy": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "enemy") {
+                    if ((listener as EnemyListener).callback(data)) break;
+                }
+            }
+        }
+    };
 
     constructor(host: string) {
         this.host = host;
@@ -48,33 +78,32 @@ class WSClient {
     }
 
     private handleServerMsg(message: any) {
-        const data = JSON.parse(message.data) as ServerResponse;
+        const data = JSON.parse(message.data) as ServerMsg;
 
         if (data.type == "broadcast" || data.type == "send") {
-            for (let listener of Object.values(this.msgListeners)) {
-                if (listener(data))
-                    break;
-            }
+            this.msgHandlers[data.content.msgType](data);
         } else {
-            for (let listener of Object.values(this.responseListeners)) {
-                if (listener(data))
-                    break;
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "response") {
+                    if ((listener as ResponseListener).callback(data)) break;
+                }
             }
         }
     }
 
     private onConnectionReady(event: Event) {
-        this.connected =  true;
-        
-        for (let listener of Object.values(this.conListeners)) {
-            if (listener(event))
-                break;
+        this.connected = true;
+
+        for (let listener of Object.values(this.listeners)) {
+            if (listener.type == "connection") {
+                if ((listener as OnConnectionListener).callback(event)) break;
+            }
         }
 
         for (let onReady of this.onReadyListeners) {
             onReady();
         }
-        
+
         this.onReadyListeners = [];
 
         this.socket.addEventListener("message", (message) => {
@@ -85,30 +114,25 @@ class WSClient {
     private onConnectionLost(event: Event) {
         this.connected = false;
 
-        for (let listener of Object.values(this.conLostListeners)) {
-            if (listener(event))
-                break;
+        for (let listener of Object.values(this.listeners)) {
+            if (listener.type == "connection-lost") {
+                if ((listener as ConnectionLostListener).callback(event)) break;
+            }
         }
     }
 
-    request(message: any): Promise<ServerResponse> {
-        return new Promise<ServerResponse>((resolve, reject) => {
+    request(message: RequestMsg): Promise<ServerMsg> {
+        return new Promise<ServerMsg>((resolve, reject) => {
             if (this.connected) {
-                const msguuid = uuidv4();
-
                 // Sends the request to the server
                 this.socket.send(
-                    JSON.stringify({
-                        uuid: msguuid,
-                        type: "request",
-                        content: message
-                    })
+                    JSON.stringify(message)
                 );
 
                 // Add response listener
-                const fnId = this.addResponseListener((msg: ServerResponse) => {
-                    if (msg.type == "response" && msg.uuid == msguuid) {
-                        this.remResponseListener(fnId);
+                const responseListener = this.addListener("response", (msg: ServerMsg) => {
+                    if (msg.type == "response" && msg.uuid == message.uuid) {
+                        this.remListener(responseListener.id);
                         resolve(msg);
                         return true;
                     }
@@ -116,9 +140,9 @@ class WSClient {
                 });
 
                 // If there is no response in 2 seconds reject
-                setTimeout(() => { 
-                    this.remResponseListener(fnId);
-                    reject("Request timeout.") 
+                setTimeout(() => {
+                    this.remListener(responseListener.id);
+                    reject("Request timeout.");
                 }, 2000);
             } else {
                 reject("Client is not connect to backend.");
@@ -127,9 +151,7 @@ class WSClient {
     }
 
     start(): void {
-        this.socket = new WebSocket(
-            `${this.host}`
-        );
+        this.socket = new WebSocket(`${this.host}`);
 
         this.socket.addEventListener("open", (event) => {
             console.log("Connected to backend.");
@@ -139,7 +161,7 @@ class WSClient {
 
         this.socket.addEventListener("close", (event) => {
             this.onConnectionLost(event);
-            
+
             if (this.reconnect) {
                 setTimeout(() => {
                     console.log("Trying to reconnect...");
@@ -155,17 +177,6 @@ class WSClient {
         this.reconnect = false;
         this.socket.close();
     }
-    
-    private addResponseListener(fn: OnMsgFn): string {
-        const id: string = uuidv4();
-        this.responseListeners[id] = fn;
-        
-        return id;
-    }
-
-    private remResponseListener(id: string): void {
-        delete this.responseListeners[id];
-    }
 
     onReady(fn: OnReadyFn) {
         if (this.connected) {
@@ -179,39 +190,31 @@ class WSClient {
     //  Listeners to add and remove ids
     //
 
-    addConListener(fn: OnEventFn): string {
-        const id: string = uuidv4();
-        this.conListeners[id] = fn;
+    addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
+    addListener(type: "connection-lost", fn: OnConnectionLostFn): ConnectionLostListener;
+    addListener(type: "game-status", fn: OnGameStatusFn): GameStatusListener;
+    addListener(type: "remain-players", fn: OnRemainPlayersFn): RemainPlayersListener;
+    addListener(type: "kill", fn: OnKillFn): KillListener;
+    addListener(type: "enemy", fn: OnEnemyFn): EnemyListener;
+    addListener(type: "response", fn: OnResponseFn): ResponseListener;
+    addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
+        const id = uuidv4();
 
-        return id;
+        const listener = {
+            type: type,
+            callback: fn,
+            destroy: () => this.remListener(id),
+            id: id
+        };
+
+        this.listeners[id] = listener;
+
+        return listener;
     }
 
-    addConLostListener(fn: OnEventFn): string {
-        const id: string = uuidv4();
-        
-        this.conLostListeners[id] = fn;
-        return id;
+    remListener(id: string): void {
+        delete this.listeners[id];
     }
+}
 
-    addMsgListener(fn: OnMsgFn): string {
-        const id: string = uuidv4();
-        this.msgListeners[id] = fn;
-        
-        return id;
-    }
-
-    remConListener(id: string): void {
-        delete this.conListeners[id];
-    }
-
-    remConLostListener(id: string): void {
-        delete this.conLostListeners[id];
-    }
-
-    remMsgListener(id: string): void {
-        delete this.msgListeners[id];
-    }
-
-};
-
-export { WSClient, ServerResponse };
+export { WSClient };

@@ -1,4 +1,5 @@
 import { Layer } from "../../Core/Layer";
+import { v4 as uuidv4 } from "uuid";
 
 // Pixi imports
 import { Application, ITextStyle } from "pixi.js";
@@ -31,13 +32,9 @@ class TextLayer extends Layer {
     };
 
     // count that resets every second
-    private oneSecCount: number = 0.0;
+    private fiveSecCount: number = 0.0;
 
-    constructor(
-        ecs: ECS,
-        app: Application,
-        context: EngineContext
-    ) {
+    constructor(ecs: ECS, app: Application, context: EngineContext) {
         super("TesteLayer", ecs);
 
         this.app = app;
@@ -57,33 +54,26 @@ class TextLayer extends Layer {
     }
 
     onAttach() {
-
         this.subtitle = this.ecs.createEntity().addText("NO GAME FOUND", this.titleStyle);
 
         this.renderText(this.subtitle, 50);
     }
 
-    startLevels(response : GameStatus) {
+    startLevels(response: GameStatus) {
         switch (response.gameStatus) {
             case "lobby":
                 this.context.engine.loadLevel(
-                    new LobbyLevel(
-                        this.context, "Lobby",
-                        {
-                            gameId: response.gameId
-                        }
-                    )
+                    new LobbyLevel(this.context, "Lobby", {
+                        gameId: response.gameId
+                    })
                 );
                 break;
 
             case "awaiting":
                 this.context.engine.loadLevel(
-                    new AwaitLevel(
-                        this.context, "Awaiting",
-                        {
-                            gameId: response.gameId
-                        }
-                    )
+                    new AwaitLevel(this.context, "Awaiting", {
+                        gameId: response.gameId
+                    })
                 );
                 break;
 
@@ -91,10 +81,7 @@ class TextLayer extends Layer {
                 break;
 
             default:
-                console.log(
-                    "Expected lobby | awaiting | not-found but got: ", 
-                    response.gameStatus
-                );
+                console.log("Expected lobby | awaiting | not-found but got: ", response.gameStatus);
                 // Should show error screen
 
                 this.context.close = true;
@@ -103,22 +90,27 @@ class TextLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
-        if (this.oneSecCount >= 5) {
-            this.context.ws.request({
-                type: requests.gameStatus
-            })
-            .then((response) => {
-                const content = response.content as GameStatus;
-                this.startLevels(content);
-            })
-            .catch((err) => {
-                console.log(err);
-                this.context.close = true;
-            });
-            this.oneSecCount -= - 5.0;
+        if (this.fiveSecCount >= 5) {
+            this.context.ws
+                .request({
+                    uuid: uuidv4(),
+                    type: "request",
+                    content: {
+                        type: "game-status"
+                    }
+                })
+                .then((response) => {
+                    const content = response.content as GameStatus;
+                    this.startLevels(content);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.context.close = true;
+                });
+            this.fiveSecCount -= 5.0;
         }
 
-        this.oneSecCount += deltaTime;
+        this.fiveSecCount += deltaTime;
     }
 
     onDetach() {

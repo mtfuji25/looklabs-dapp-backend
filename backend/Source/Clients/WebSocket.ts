@@ -2,8 +2,20 @@ import WebSocket, { WebSocketServer } from "ws";
 
 // For uuid generation
 import { v4 as uuidv4 } from "uuid";
-import { ListenerTypes, IncomingMsg, ServerMsg, ReplyableMsg, GameStatus, Listener, GameStatusListener, OnConnectionListener, OnGameStatusFn, OnConnectionFn, OnListenerFns, msgHandlerFn } from "./Interfaces";
-
+import {
+    ListenerTypes,
+    IncomingMsg,
+    ServerMsg,
+    ReplyableMsg,
+    GameStatus,
+    Listener,
+    GameStatusListener,
+    OnConnectionListener,
+    OnGameStatusFn,
+    OnConnectionFn,
+    OnListenerFns,
+    msgHandlerFn
+} from "./Interfaces";
 
 class WSClient {
     private host: string;
@@ -58,13 +70,9 @@ class WSClient {
     private handleMsgs(message: WebSocket.RawData, client: WebSocket) {
         // Parses current msg
         const data = JSON.parse(message.toString()) as IncomingMsg;
-
+        console.log(data)
         // try catch for the moment, while frontend is not updated
-        try {
-            this.msgHandlers[data.content.type](data, client);
-        } catch(err) {
-            console.log(err);
-        }
+        this.msgHandlers[data.content.type](data, client);
     }
 
     private handleConnection(ws: WebSocket) {
@@ -120,7 +128,8 @@ class WSClient {
         const listener = {
             type: type,
             callback: fn,
-            destroy: () => this.remListener(id)
+            destroy: () => this.remListener(id),
+            id: id
         };
 
         this.listeners[id] = listener;

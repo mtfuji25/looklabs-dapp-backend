@@ -103,6 +103,7 @@ interface Listener {
     type: ListenerTypes;
     callback: OnListenerFns;
     destroy: () => void;
+    id: string;
 }
 
 interface GameStatusListener extends Listener {

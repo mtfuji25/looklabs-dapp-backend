@@ -1,4 +1,5 @@
 import { Level } from "../Core/Level";
+import { v4 as uuidv4 } from "uuid";
 
 // Web client import
 import { requests, GameStatus } from "../Clients/Interfaces";
@@ -12,10 +13,15 @@ class DefaultLevel extends Level {
 
     onStart(): void {
         this.context.ws.request({
-            type: requests.gameStatus
+            uuid: uuidv4(),
+            type: "request",
+            content: {
+                type: "game-status"
+            }
         })
         .then((response) => {
             const content = response.content as GameStatus;
+            console.log(response)
             this.startLevels(content);
         })
         .catch((err) => {
@@ -24,9 +30,9 @@ class DefaultLevel extends Level {
         });
 
         this.context.ws.onReady(() => {
-            this.context.ws.request({
+        //     // this.context.ws.request({
 
-            }).then();
+        //     // }).then();
         });
     }
 

@@ -5,7 +5,7 @@ import { Layer } from "../../Core/Layer";
 import { Application, ITextStyle } from "pixi.js";
 
 // Web client imports
-import { ServerResponse, WSClient } from "../../Clients/WebSocket";
+import { WSClient } from "../../Clients/WebSocket";
 
 // Ecs imports
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
@@ -19,7 +19,7 @@ import { CONTAINER_DIM } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
-import { msgTypes, PlayerCommand } from "../../Clients/Interfaces";
+import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
 interface Player {
     entity: Entity;
@@ -34,7 +34,7 @@ class PlayerLayer extends Layer {
     // Entites storage
 
     // Listener id
-    private listener: string;
+    private listener: Listener;
 
     // Application Related
     protected app: Application;
@@ -70,7 +70,7 @@ class PlayerLayer extends Layer {
         this.wsClient = wsClient;
         this.levelContext = levelContext;
 
-        this.listener = this.wsClient.addMsgListener((msg) =>
+        this.listener = this.wsClient.addListener("enemy", (msg) =>
             this.onServerMsg(msg)
         );
     }
@@ -138,7 +138,7 @@ class PlayerLayer extends Layer {
     }
 
     onDetach() {
-        this.wsClient.remMsgListener(this.listener);
+        this.listener.destroy();
 
         this.self.destroy();
     }
@@ -290,7 +290,7 @@ class PlayerLayer extends Layer {
         delete this.players[id];
     }
 
-    onServerMsg(msg: ServerResponse) {
+    onServerMsg(msg: ServerMsg) {
         let content;
         if (msg.content.msgType == msgTypes.enemy) {
             content = msg.content as PlayerCommand;

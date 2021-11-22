@@ -48,6 +48,7 @@ var WSClient = /** @class */ (function () {
         // Parses current msg
         var data = JSON.parse(message.toString());
         console.log(data);
+        // try catch for the moment, while frontend is not updated
         this.msgHandlers[data.content.type](data, client);
     };
     WSClient.prototype.handleConnection = function (ws) {
@@ -97,7 +98,8 @@ var WSClient = /** @class */ (function () {
         var listener = {
             type: type,
             callback: fn,
-            destroy: function () { return _this.remListener(id); }
+            destroy: function () { return _this.remListener(id); },
+            id: id
         };
         this.listeners[id] = listener;
         return listener;

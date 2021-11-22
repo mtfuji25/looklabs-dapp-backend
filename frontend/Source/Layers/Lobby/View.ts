@@ -8,8 +8,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { BTNS, Inputs } from "../../Core/Inputs/Inputs";
 import { Application } from "pixi.js";
 import { CONTAINER_DIM } from "../../Constants/Constants";
-import { ServerResponse } from "../../Clients/WebSocket";
-import { msgTypes } from "../../Clients/Interfaces";
+import { ServerMsg } from "../../Clients/Interfaces";
 
 // Required fields for view layer
 interface ViewContext {
@@ -102,7 +101,7 @@ class ViewLayer extends Layer {
         this.self.destroy();
     }
 
-    onKill(msg: ServerResponse) {
+    onKill(msg: ServerMsg) {
         // if (msg.type == msgTypes.kill) {
 
         // }
