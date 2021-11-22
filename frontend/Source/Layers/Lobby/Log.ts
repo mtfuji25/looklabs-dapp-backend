@@ -8,6 +8,7 @@ import { Text } from "../../Core/Ecs/Components/Text";
 import { Application, ITextStyle } from "pixi.js";
 import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
+import { sleep, syncSleep } from "../../Utils/Sleep";
 
 interface KillLog {
     killer: string;
@@ -69,24 +70,25 @@ class LogsLayer extends Layer {
     }
 
     // Removes last log
-    remLog() {
+    async remLog() {
         const log = this.logs.at(-1);
         // Unstage texts from log
         if (log.text) {
+            // reduce opacity animation
+            for(let i = 100; i > 0; i--) {
+                await sleep(10);
+                log.text.action.text.alpha = i/100;
+                log.text.killed.text.alpha = i/100;
+                log.text.killer.text.alpha = i/100;    
+            };
+
+            // after reducing opacity, unstage text
             Object.values(log.text).forEach((text) => {
                 text.remStage();
             });
         }
         // removes log from log queue
         this.logs.pop();
-
-        // if the queue is still bigger than 13
-        if (this.logs.length > 13) {
-            this.remLog();
-        } else {
-            // returns if there are no logs to remove
-            return;
-        }
     }
 
     // loops through logs and renders them
@@ -108,18 +110,14 @@ class LogsLayer extends Layer {
             // set killed pos
             xOffset += killed.text.width;
             killed.setPos(initialX - xOffset, yOffset);
-            index > 12 ? killed.text.alpha = 0.5 : null;
 
             // set action pos
             xOffset += action.text.width + 10;
             action.setPos(initialX - xOffset, yOffset);
-            index > 12 ? action.text.alpha = 0.5 : null;
 
             // set killer pos
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
-            index > 12 ? killed.text.alpha = 0.5 : null;
-
         } else {
             // Render the text for participants killed
             const killed = this.ecs.createEntity().addText(`${log.killed}`, this.boldStyle);
@@ -167,7 +165,7 @@ class LogsLayer extends Layer {
             killed: killed
         });
 
-        if (this.logs.length > 13) {
+        if (this.logs.length > 12) {
             this.remLog();
         }
         // after all operations, render updated logs

@@ -302,8 +302,6 @@ class PlayerLayer extends Layer {
         content.pos.x = x;
         content.pos.y = y;
 
-        console.log(content);
-
         switch (content.type) {
             case "create":
                 this.createEnemy(content);

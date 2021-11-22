@@ -2,7 +2,6 @@
 import { Layer } from "../../Core/Layer";
 
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
-import { Sprite } from "../../Core/Ecs/Components/Sprite";
 
 // Math imports
 import { Vec2 } from "../../Utils/Math";
