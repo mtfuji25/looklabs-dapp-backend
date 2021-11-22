@@ -59,12 +59,13 @@ var LobbyLevel = /** @class */ (function (_super) {
         this.participants.map(function (participant, index) {
             var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, grid, function () {
                 _this.context.ws.broadcast({
-                    alive: _this.fighters,
-                    total: _this.participants.length
+                    msgType: "remain-players",
+                    remainingPlayers: _this.fighters,
+                    totalPlayers: _this.participants.length
                 });
                 _this.layerStack.popLayer(player);
                 _this.fighters--;
-            });
+            }, participant.name);
             grid.addDynamic(player.getSelf());
             _this.layerStack.pushLayer(player);
         });

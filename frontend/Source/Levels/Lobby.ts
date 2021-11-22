@@ -67,7 +67,8 @@ class LobbyLevel extends Level {
         this.layerStack.pushLayer(
             new LogsLayer(
                 this.ecs,
-                this.context.app
+                this.context.app,
+                this.context
             )
         );
     }

@@ -13,6 +13,7 @@ interface ScheduledGameParticipant {
     id: number;
     nft_id: string;
     user_address: string;
+    name: string;
     scheduled_game: number;
     published_at?: string;
     created_at?: string;

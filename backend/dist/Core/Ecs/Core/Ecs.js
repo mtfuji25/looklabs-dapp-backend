@@ -91,9 +91,10 @@ var ECS = /** @class */ (function () {
         // Remove the entity itself from the identification array
         delete this.entities[id[EntityKey]];
     };
-    ECS.prototype.createEntity = function (x, y) {
+    ECS.prototype.createEntity = function (x, y, name) {
         if (x === void 0) { x = 0.0; }
         if (y === void 0) { y = 0.0; }
+        if (name === void 0) { name = ""; }
         var id = {};
         // All entities should have a transform component
         // The TransformID of entity is basically the index in the
@@ -107,7 +108,7 @@ var ECS = /** @class */ (function () {
         id[EntityKey] = this.entitiesId;
         this.entitiesId++;
         // Create the effective entity representation
-        var entity = new Entity(this, id, 0);
+        var entity = new Entity(this, id, 0, name);
         // Add it to the identification array
         this.entities[id[EntityKey]] = entity;
         return entity;
@@ -117,12 +118,13 @@ var ECS = /** @class */ (function () {
 exports.ECS = ECS;
 ;
 var Entity = /** @class */ (function () {
-    function Entity(ecs, id, layout) {
+    function Entity(ecs, id, layout, name) {
         // Destroyed mark
         this.destroyed = false;
         this.ecs = ecs;
         this.id = id;
         this.layout = layout;
+        this.name = name;
     }
     // Getters
     Entity.prototype.getTransform = function () {

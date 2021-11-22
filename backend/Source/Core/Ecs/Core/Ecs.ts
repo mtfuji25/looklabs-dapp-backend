@@ -118,7 +118,7 @@ class ECS {
         delete this.entities[id[EntityKey]];
     }
 
-    createEntity(x: number = 0.0, y: number = 0.0) {
+    createEntity(x: number = 0.0, y: number = 0.0, name: string = "") {
         let id: BitMaskedId = {};
 
         // All entities should have a transform component
@@ -137,7 +137,7 @@ class ECS {
         this.entitiesId++;
 
         // Create the effective entity representation
-        const entity = new Entity(this, id, 0);
+        const entity = new Entity(this, id, 0, name);
 
         // Add it to the identification array
         this.entities[id[EntityKey]] = entity;
@@ -155,15 +155,18 @@ class Entity {
     // Entity definitions
     public id: BitMaskedId;
     public layout: number;
+    public name: string;
 
     // Current ecs related instance
     private ecs: ECS;
 
-    constructor(ecs: ECS, id: BitMaskedId, layout: number) {
+    constructor(ecs: ECS, id: BitMaskedId, layout: number, name: string) {
         this.ecs = ecs;
         this.id = id;
         this.layout = layout;
+        this.name = name;
     }
+
 
     // Getters
     getTransform(): Transform {

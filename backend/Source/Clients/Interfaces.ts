@@ -21,6 +21,7 @@ interface KillMsg {
     msgType: "kill";
     killer: string;
     killed: string;
+    action: string;
 }
 
 interface RemainPlayersMsg {
@@ -130,5 +131,6 @@ export {
     OnListenerFns,
     OnGameStatusFn,
     OnConnectionFn,
-    msgHandlerFn
+    msgHandlerFn,
+    MsgInterfaces
 };

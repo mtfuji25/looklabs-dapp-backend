@@ -51,6 +51,7 @@ interface PlayerCommand {
 interface KillMsg {
     msgType: "kill";
     killer: string;
+    action: string;
     killed: string;
 }
 

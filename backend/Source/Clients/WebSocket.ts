@@ -14,7 +14,8 @@ import {
     OnGameStatusFn,
     OnConnectionFn,
     OnListenerFns,
-    msgHandlerFn
+    msgHandlerFn,
+    MsgInterfaces
 } from "./Interfaces";
 
 class WSClient {
@@ -87,7 +88,7 @@ class WSClient {
         });
     }
 
-    send(client: WebSocket, msg: any) {
+    send(client: WebSocket, msg: MsgInterfaces) {
         const serverMsg: ServerMsg = {
             uuid: uuidv4(),
             type: "send",
@@ -96,7 +97,7 @@ class WSClient {
         client.send(JSON.stringify(serverMsg));
     }
 
-    broadcast(msg: any) {
+    broadcast(msg: MsgInterfaces) {
         const serverMsg: ServerMsg = {
             uuid: uuidv4(),
             type: "broadcast",

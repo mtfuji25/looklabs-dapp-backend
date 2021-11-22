@@ -11,6 +11,9 @@ import { StatusResult } from "../../Core/Ecs/Components/Status";
 import { rad2deg, Vec2 } from "../../Utils/Math";
 import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
+// Kill feed actions
+import killFeed from "../../Assets/KillFeed.json";
+
 //
 //  Frontend actions mapping
 //  "attackright": 0, "attackleft": 1,
@@ -71,13 +74,14 @@ class PlayerLayer extends Layer {
     // Die fn
     public dieFn: () => void;
 
-    constructor(ecs: ECS, wsContext: WSClient, id: string, grid: Grid, dieFn: () => void) {
+    constructor(ecs: ECS, wsContext: WSClient, id: string, grid: Grid, dieFn: () => void, name: string) {
         super(`Player${id}`, ecs);
 
         this.wsClient = wsContext;
         this.playerID = id;
         this.grid = grid;
         this.dieFn = dieFn;
+        this.self.name = name;
 
         // Add status component to current entity
         this.self.addStatus(
@@ -208,12 +212,14 @@ class PlayerLayer extends Layer {
     onDie(status: StatusResult) {
         console.log("Morreu: ", this.name)
         console.log("Resultados: ", status);
-        // this.self.getStatus().lastHit;
+        const killer = this.self.getStatus().lastHit.name;
 
-        // this.wsClient.broadcast({
-        //     killed: this.getName();
-        //     killer: 
-        // });
+        this.wsClient.broadcast({
+            killed: this.self.name,
+            killer: killer,
+            action: killFeed.items[killFeed.items.length * Math.random() | 0],
+            msgType: "kill"
+        });
 
         this.dieFn();
     }

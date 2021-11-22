@@ -63,12 +63,14 @@ class LobbyLevel extends Level {
                 this.ecs, this.context.ws,
                 participant.nft_id, grid, () => {
                     this.context.ws.broadcast({
-                        alive: this.fighters,
-                        total: this.participants.length
+                        msgType: "remain-players",
+                        remainingPlayers: this.fighters,
+                        totalPlayers: this.participants.length
                     })
                     this.layerStack.popLayer(player);
                     this.fighters--;
-                }
+                },
+                participant.name
             );
             grid.addDynamic(player.getSelf());
             this.layerStack.pushLayer(player)

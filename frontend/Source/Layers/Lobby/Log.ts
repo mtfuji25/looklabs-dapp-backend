@@ -6,6 +6,8 @@ import { Text } from "../../Core/Ecs/Components/Text";
 
 // Pixi imports
 import { Application, ITextStyle } from "pixi.js";
+import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
+import { EngineContext } from "../../Core/Interfaces";
 
 interface KillLog {
     killer: string;
@@ -22,9 +24,13 @@ class LogsLayer extends Layer {
     // Current app instance
     private app: Application;
 
+    // context
+    private context: EngineContext;
+
     //  queue for storing the kills
     private logs: Array<KillLog> = [];
-    private fiveSecCount = 0.0;
+
+    private listener: KillListener;
 
     private percentX: number;
 
@@ -42,49 +48,20 @@ class LogsLayer extends Layer {
         fontWeight: "700"
     };
 
-    constructor(ecs: ECS, app: Application) {
+    constructor(ecs: ECS, app: Application, context: EngineContext) {
         super("TesteLayer", ecs);
 
         this.app = app;
+        this.context = context;
 
         this.percentX = this.app.screen.width / 100;
+
+        this.listener = this.context.ws.addListener("kill", msg => this.onKill(msg));
     }
 
-    onAttach() {
-        this.logs = [
-            {
-                killer: "dog44",
-                action: "eviscerated",
-                killed: "snake20"
-            },
-            {
-                killer: "dog44",
-                action: "eviscerated",
-                killed: "snake20"
-            }
-        ];
+    onAttach() {}
 
-        // renders all the results
-        this.renderRows();
-    }
-
-    onUpdate(deltaTime: number) {
-        if (this.fiveSecCount >= 5) {
-            this.addLog({
-                killer: "Beetle999",
-                action: "eviscerated",
-                killed: "Beetle999"
-            });
-            if (this.logs.length > 13) {
-                this.remLog();
-            }
-            // after all operations, render updated logs
-            this.renderRows();
-            this.fiveSecCount -= 5.0;
-        }
-
-        this.fiveSecCount += deltaTime;
-    }
+    onUpdate(deltaTime: number) {}
 
     // adds log on top of queue
     addLog(log: KillLog) {
@@ -131,26 +108,17 @@ class LogsLayer extends Layer {
             // set killed pos
             xOffset += killed.text.width;
             killed.setPos(initialX - xOffset, yOffset);
-            index > 12 && killed.setStyle({
-                ...this.boldStyle,
-                fill: 0x808080
-            })
+            index > 12 ? killed.text.alpha = 0.5 : null;
 
             // set action pos
             xOffset += action.text.width + 10;
             action.setPos(initialX - xOffset, yOffset);
-            index > 12 && killed.setStyle({
-                ...this.normalStyle,
-                fill: 0x808080
-            })
+            index > 12 ? action.text.alpha = 0.5 : null;
 
             // set killer pos
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
-            index > 12 && killed.setStyle({
-                ...this.boldStyle,
-                fill: 0x808080
-            })
+            index > 12 ? killed.text.alpha = 0.5 : null;
 
         } else {
             // Render the text for participants killed
@@ -185,7 +153,28 @@ class LogsLayer extends Layer {
     }
 
     onDetach() {
+        this.listener.destroy();
         this.self.destroy();
+    }
+
+    // server msg when kill happens
+    onKill(msg: ServerMsg) {
+        console.log(msg);
+        const { killer, action, killed } = msg.content as KillMsg;
+            
+        this.addLog({
+            killer: killer,
+            action: action,
+            killed: killed
+        });
+
+        if (this.logs.length > 13) {
+            this.remLog();
+        }
+        // after all operations, render updated logs
+        this.renderRows();
+
+        return true;
     }
 }
 

@@ -14,10 +14,15 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlayerLayer = void 0;
 var Layer_1 = require("../../Core/Layer");
 var Math_1 = require("../../Utils/Math");
+// Kill feed actions
+var KillFeed_json_1 = __importDefault(require("../../Assets/KillFeed.json"));
 //
 //  Frontend actions mapping
 //  "attackright": 0, "attackleft": 1,
@@ -59,12 +64,13 @@ var spawnPos = [
 ];
 var PlayerLayer = /** @class */ (function (_super) {
     __extends(PlayerLayer, _super);
-    function PlayerLayer(ecs, wsContext, id, grid, dieFn) {
+    function PlayerLayer(ecs, wsContext, id, grid, dieFn, name) {
         var _this = _super.call(this, "Player" + id, ecs) || this;
         _this.wsClient = wsContext;
         _this.playerID = id;
         _this.grid = grid;
         _this.dieFn = dieFn;
+        _this.self.name = name;
         // Add status component to current entity
         _this.self.addStatus(
         // Attack
@@ -172,11 +178,13 @@ var PlayerLayer = /** @class */ (function (_super) {
     PlayerLayer.prototype.onDie = function (status) {
         console.log("Morreu: ", this.name);
         console.log("Resultados: ", status);
-        // this.self.getStatus().lastHit;
-        // this.wsClient.broadcast({
-        //     killed: this.getName();
-        //     killer: 
-        // });
+        var killer = this.self.getStatus().lastHit.name;
+        this.wsClient.broadcast({
+            killed: this.self.name,
+            killer: killer,
+            action: KillFeed_json_1.default.items[KillFeed_json_1.default.items.length * Math.random() | 0],
+            msgType: "kill"
+        });
         this.dieFn();
     };
     // For spawn point selection
