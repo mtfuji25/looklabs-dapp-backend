@@ -58,17 +58,24 @@ class LobbyLevel extends Level {
         // Put the map in the stack
         this.layerStack.pushLayer(mapCollider);
 
+        // Initial broadcast for players length
+        this.context.ws.broadcast({
+            msgType: "remain-players",
+            remainingPlayers: this.participants.length,
+            totalPlayers: this.participants.length
+        });
+
         this.participants.map((participant, index) => {
             const player = new PlayerLayer(
                 this.ecs, this.context.ws,
                 participant.nft_id, grid, () => {
+                    this.layerStack.popLayer(player);
+                    this.fighters--;
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,
                         totalPlayers: this.participants.length
                     })
-                    this.layerStack.popLayer(player);
-                    this.fighters--;
                 },
                 participant.name
             );

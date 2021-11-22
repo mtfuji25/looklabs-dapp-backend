@@ -189,6 +189,7 @@ class WSClient {
     //
     //  Listeners to add and remove ids
     //
+    //
 
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
     addListener(type: "connection-lost", fn: OnConnectionLostFn): ConnectionLostListener;

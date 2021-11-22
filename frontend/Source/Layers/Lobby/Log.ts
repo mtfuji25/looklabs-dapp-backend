@@ -159,7 +159,6 @@ class LogsLayer extends Layer {
 
     // server msg when kill happens
     onKill(msg: ServerMsg) {
-        console.log(msg);
         const { killer, action, killed } = msg.content as KillMsg;
             
         this.addLog({

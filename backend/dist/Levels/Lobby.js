@@ -56,15 +56,21 @@ var LobbyLevel = /** @class */ (function (_super) {
         var grid = mapCollider.getSelf().getGrid();
         // Put the map in the stack
         this.layerStack.pushLayer(mapCollider);
+        // Initial broadcast for players length
+        this.context.ws.broadcast({
+            msgType: "remain-players",
+            remainingPlayers: this.participants.length,
+            totalPlayers: this.participants.length
+        });
         this.participants.map(function (participant, index) {
             var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, grid, function () {
+                _this.layerStack.popLayer(player);
+                _this.fighters--;
                 _this.context.ws.broadcast({
                     msgType: "remain-players",
                     remainingPlayers: _this.fighters,
                     totalPlayers: _this.participants.length
                 });
-                _this.layerStack.popLayer(player);
-                _this.fighters--;
             }, participant.name);
             grid.addDynamic(player.getSelf());
             _this.layerStack.pushLayer(player);

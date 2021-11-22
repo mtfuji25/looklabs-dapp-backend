@@ -60,7 +60,8 @@ class LobbyLevel extends Level {
         this.layerStack.pushLayer(
             new BattleStatusLayer(
                 this.ecs,
-                this.context.app
+                this.context.app,
+                this.context
             )
         );
 
