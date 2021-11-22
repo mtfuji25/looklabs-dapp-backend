@@ -7,7 +7,6 @@ var uuid_1 = require("uuid");
 var WSClient = /** @class */ (function () {
     function WSClient(host, port) {
         var _this = this;
-        // TODO: finish msgListeners
         this.listeners = {};
         // handles incoming messages of corresponding types
         this.msgHandlers = {
@@ -47,8 +46,6 @@ var WSClient = /** @class */ (function () {
     WSClient.prototype.handleMsgs = function (message, client) {
         // Parses current msg
         var data = JSON.parse(message.toString());
-        console.log(data);
-        // try catch for the moment, while frontend is not updated
         this.msgHandlers[data.content.type](data, client);
     };
     WSClient.prototype.handleConnection = function (ws) {

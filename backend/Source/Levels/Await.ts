@@ -49,13 +49,13 @@ class AwaitLevel extends Level {
     }
 
     startLobby() {
-        console.log("Initing new game ...");
+        console.log("Initializing new game ...");
         const msg: GameStatus = {
             msgType: "game-status",
             gameId: this.gameId,
             lastGameId: 0,
             gameStatus: "lobby"
-        }
+        };
         this.context.ws.broadcast(msg);
         this.context.engine.loadLevel(
             new LobbyLevel(this.context, "Lobby", this.gameId)

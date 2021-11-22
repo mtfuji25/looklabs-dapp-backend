@@ -61,7 +61,7 @@ var AwaitLevel = /** @class */ (function (_super) {
         });
     };
     AwaitLevel.prototype.startLobby = function () {
-        console.log("Initing new game ...");
+        console.log("Initializing new game ...");
         var msg = {
             msgType: "game-status",
             gameId: this.gameId,

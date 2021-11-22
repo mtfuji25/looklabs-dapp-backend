@@ -2,7 +2,7 @@ import { Level } from "../Core/Level";
 import { v4 as uuidv4 } from "uuid";
 
 // Web client import
-import { requests, GameStatus } from "../Clients/Interfaces";
+import { GameStatus } from "../Clients/Interfaces";
 
 // Levels imports
 import { AwaitLevel } from "./Await";

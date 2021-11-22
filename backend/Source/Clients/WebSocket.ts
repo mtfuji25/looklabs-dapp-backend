@@ -23,7 +23,6 @@ class WSClient {
 
     private server: WebSocketServer;
 
-    // TODO: finish msgListeners
     private listeners: Record<string, Listener> = {};
 
     // handles incoming messages of corresponding types
@@ -70,8 +69,7 @@ class WSClient {
     private handleMsgs(message: WebSocket.RawData, client: WebSocket) {
         // Parses current msg
         const data = JSON.parse(message.toString()) as IncomingMsg;
-        console.log(data)
-        // try catch for the moment, while frontend is not updated
+
         this.msgHandlers[data.content.type](data, client);
     }
 
