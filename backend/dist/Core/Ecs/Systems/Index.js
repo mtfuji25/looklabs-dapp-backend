@@ -7,6 +7,7 @@ var Grid_1 = require("./Grid");
 var Status_1 = require("./Status");
 var Behavior_1 = require("./Behavior");
 var Grid_2 = require("./Grid");
+var Aabb_1 = require("./Aabb");
 var startSystems = function (ecs) {
     // Update all status components
     ecs.pushContainerSystem(Status_1.sys_UpdateStatus);
@@ -24,5 +25,7 @@ var startSystems = function (ecs) {
     ecs.pushContainerSystem(Grid_2.sys_UpdateCollisions);
     // Update all components position
     ecs.pushContainerSystem(Rigidbody_1.sys_UpdatePos);
+    // Update all components position
+    ecs.pushContainerSystem(Aabb_1.sys_CheckOverlap);
 };
 exports.startSystems = startSystems;

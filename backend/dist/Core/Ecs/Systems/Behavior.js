@@ -1,7 +1,22 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sys_CheckInRange = exports.sys_UpdateBehavior = void 0;
 var Math_1 = require("../../../Utils/Math");
+// AStar import
+var astar_typescript_1 = require("astar-typescript");
+// Map importing
+var LevelCollider_json_1 = __importDefault(require("../../../Assets/LevelCollider.json"));
+var finder = new astar_typescript_1.AStarFinder({
+    grid: {
+        matrix: LevelCollider_json_1.default["data"]
+    },
+    diagonalAllowed: false,
+    includeStartNode: true,
+    includeEndNode: true
+});
 var ENTITY_RANGE = 0.1;
 var runAwayFromTarget = function (entity) {
     var _a;
@@ -77,18 +92,138 @@ var hitStrongest = function (entity) {
         behavior.attacking = false;
     }
 };
-var seekNearest = function (entity) {
-    var _a;
+var seekNearestWithA = function (entity, grid) {
     var status = entity.getStatus();
     var behavior = entity.getBehavior();
     var transform = entity.getTransform();
     var rigidbody = entity.getRigidbody();
-    var target = (_a = behavior.nearest) !== null && _a !== void 0 ? _a : null;
+    var target = behavior.nearest;
+    if (!target)
+        return;
+    var other = grid.getDynamic(target);
+    var dynamic = grid.getDynamic(entity);
+    var convertFromNDC = function (pos) {
+        var position = pos.adds(1.0).divs(2.0);
+        position.y = 1 - position.y;
+        return position;
+    };
+    var convertCellToPos = function (cell) {
+        var position = new Math_1.Vec2((cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0), (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0));
+        return position;
+    };
+    var convertToNDC = function (pos) {
+        var position = pos.muls(2.0).subs(1.0);
+        position.y = 0 - position.y;
+        return position;
+    };
+    var ocupationsPos = [];
+    var nearestCollisionOcupation = new Math_1.Vec2();
+    var collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+    dynamic.ocupations.map(function (ocupation) {
+        ocupationsPos.push(convertCellToPos(ocupation));
+    });
+    var shortestDist = Number.MAX_SAFE_INTEGER;
+    ocupationsPos.map(function (pos, index) {
+        var dist = pos.sub(collisionStaticPosition).length();
+        if (dist < shortestDist) {
+            nearestCollisionOcupation = dynamic.ocupations[index];
+            shortestDist = dist;
+        }
+    });
+    var path = finder.findPath(nearestCollisionOcupation, other.index);
+    var seekDir = new Math_1.Vec2();
+    console.log(path);
+    var source = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
+    var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
+    if (!dest.equal(source)) {
+        seekDir = dest.sub(source);
+        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    }
+    else {
+        var enemyPos = target.getTransform().pos;
+        if (!enemyPos.equal(transform.pos)) {
+            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+        }
+    }
+    rigidbody.velocity = seekDir;
+    behavior.attacking = false;
+};
+var seekNearestInRangeWithA = function (entity, grid) {
+    var status = entity.getStatus();
+    var behavior = entity.getBehavior();
+    var transform = entity.getTransform();
+    var rigidbody = entity.getRigidbody();
+    var nearest;
+    var shortestDist = Number.MAX_SAFE_INTEGER;
+    behavior.inRange.map(function (other) {
+        var dist = transform.pos.sub(other.getTransform().pos).length();
+        if (dist < shortestDist) {
+            nearest = other;
+            shortestDist = dist;
+        }
+    });
+    if (!nearest)
+        return;
+    var other = grid.getDynamic(nearest);
+    var dynamic = grid.getDynamic(entity);
+    var convertFromNDC = function (pos) {
+        var position = pos.adds(1.0).divs(2.0);
+        position.y = 1 - position.y;
+        return position;
+    };
+    var convertCellToPos = function (cell) {
+        var position = new Math_1.Vec2((cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0), (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0));
+        return position;
+    };
+    var convertToNDC = function (pos) {
+        var position = pos.muls(2.0).subs(1.0);
+        position.y = 0 - position.y;
+        return position;
+    };
+    var ocupationsPos = [];
+    var nearestCollisionOcupation = new Math_1.Vec2();
+    var collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+    dynamic.ocupations.map(function (ocupation) {
+        ocupationsPos.push(convertCellToPos(ocupation));
+    });
+    shortestDist = Number.MAX_SAFE_INTEGER;
+    ocupationsPos.map(function (pos, index) {
+        var dist = pos.sub(collisionStaticPosition).length();
+        if (dist < shortestDist) {
+            nearestCollisionOcupation = dynamic.ocupations[index];
+            shortestDist = dist;
+        }
+    });
+    var path = finder.findPath(nearestCollisionOcupation, other.index);
+    var seekDir = new Math_1.Vec2();
+    console.log(path);
+    var source = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
+    var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
+    if (!dest.equal(source)) {
+        seekDir = dest.sub(source);
+        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    }
+    else {
+        var enemyPos = nearest.getTransform().pos;
+        if (!enemyPos.equal(transform.pos)) {
+            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+        }
+    }
+    rigidbody.velocity = seekDir;
+    behavior.attacking = false;
+};
+var seekNearest = function (entity) {
+    var status = entity.getStatus();
+    var behavior = entity.getBehavior();
+    var transform = entity.getTransform();
+    var rigidbody = entity.getRigidbody();
+    var target = behavior.nearest;
     if (!target)
         return;
     var enemy = target.getTransform();
-    var seekDir = enemy.pos.sub(transform.pos).normalize();
-    rigidbody.velocity = seekDir.muls(status.speed);
+    if (!enemy.pos.equal(transform.pos)) {
+        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+    }
     behavior.attacking = false;
 };
 var seekNearestInRange = function (entity) {
@@ -96,7 +231,7 @@ var seekNearestInRange = function (entity) {
     var behavior = entity.getBehavior();
     var transform = entity.getTransform();
     var rigidbody = entity.getRigidbody();
-    var nearest = null;
+    var nearest;
     var shortestDist = Number.MAX_SAFE_INTEGER;
     behavior.inRange.map(function (other) {
         var dist = transform.pos.sub(other.getTransform().pos).length();
@@ -108,8 +243,9 @@ var seekNearestInRange = function (entity) {
     if (!nearest)
         return;
     var enemy = nearest.getTransform();
-    var seekDir = enemy.pos.sub(transform.pos).normalize();
-    rigidbody.velocity = seekDir.muls(status.speed);
+    if (!enemy.pos.equal(transform.pos)) {
+        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+    }
     behavior.attacking = false;
 };
 var sys_CheckInRange = function (data, deltaTime) {
@@ -132,6 +268,8 @@ var sys_CheckInRange = function (data, deltaTime) {
             for (var j = i + 1; j < grid.dynamics.length; ++j) {
                 // Get other entity
                 var other = grid.dynamics[j].entity;
+                if (entity.destroyed || other.destroyed)
+                    return;
                 // Get other entity tranform
                 var otherBehavior = other.getBehavior();
                 var otherTransform = other.getTransform();
@@ -175,7 +313,7 @@ var sys_UpdateBehavior = function (data, deltaTime) {
             // Update cooldown
             behavior.refresh += deltaTime;
             // Healing checks
-            if (lifePercent >= 50) {
+            if (lifePercent >= 40) {
                 behavior.healing = false;
             }
             if (lifePercent < 100) {
@@ -210,13 +348,27 @@ var sys_UpdateBehavior = function (data, deltaTime) {
                 // Inrange check
             }
             else if (behavior.inRange.length > 0) {
-                console.log("Entered Searching inRange node");
-                seekNearestInRange(entity);
+                if (behavior.staticColide) {
+                    console.log("Entered Searching inRange node with A*");
+                    seekNearestInRangeWithA(entity, grid);
+                    behavior.staticColide = false;
+                }
+                else {
+                    console.log("Entered Searching inRange node");
+                    seekNearestInRange(entity);
+                }
                 // Out range check
             }
             else if (behavior.inRange.length == 0) {
-                console.log("Entered Searching outRange node");
-                seekNearest(entity);
+                if (behavior.staticColide) {
+                    console.log("Entered Searching outRange node with A*");
+                    seekNearestWithA(entity, grid);
+                    behavior.staticColide = false;
+                }
+                else {
+                    console.log("Entered Searching outRange node");
+                    seekNearest(entity);
+                }
             }
         });
     });

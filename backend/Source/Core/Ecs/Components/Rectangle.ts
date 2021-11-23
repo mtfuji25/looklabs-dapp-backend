@@ -6,8 +6,8 @@ import { Transform } from "./Transform";
 
 class Rectangle {
 
-    width: number;
-    height: number;
+    public width: number;
+    public height: number;
 
     transform: Transform;
 

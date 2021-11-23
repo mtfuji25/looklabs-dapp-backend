@@ -65,7 +65,7 @@ var spawnPos = [
 var PlayerLayer = /** @class */ (function (_super) {
     __extends(PlayerLayer, _super);
     function PlayerLayer(ecs, wsContext, id, grid, dieFn, name) {
-        var _this = _super.call(this, "Player" + id, ecs) || this;
+        var _this = _super.call(this, "Player".concat(id), ecs) || this;
         _this.wsClient = wsContext;
         _this.playerID = id;
         _this.grid = grid;

@@ -12,23 +12,37 @@ var sys_UpdateGrid = function (data, deltaTime) {
         // Just dynamics entitys should be checked
         grid.dynamics.forEach(function (dynamic) {
             var transform = dynamic.entity.getTransform();
+            var rectangle = dynamic.entity.getRectangle();
             // Changes coordinate sistem from ndc to normalized left-upper origin
             var position = transform.pos.adds(1.0).divs(2.0);
             position.y = 1 - position.y;
             // Find new index of entity
             var index = new Math_1.Vec2(Math.floor(position.x / (grid.intervalX / 2.0)), Math.floor(position.y / (grid.intervalY / 2.0)));
+            var index1 = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
+            var index2 = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
             // Update the index in the definition
             dynamic.index = index;
+            dynamic.ocupations = [];
+            dynamic.ocupations = [
+                index1,
+                new Math_1.Vec2(index2.x, index1.y),
+                new Math_1.Vec2(index1.x, index2.y),
+                index2
+            ];
         });
     });
 };
 exports.sys_UpdateGrid = sys_UpdateGrid;
 var collisionsResults = [];
+var staticColide = [];
 var sys_CheckCollisions = function (data, deltaTime) {
     data.grids.forEach(function (grid) {
         grid.dynamics.map(function (dynamic) {
             var behavior = dynamic.entity.getBehavior();
             behavior.colliding = [];
+            dynamic.entity.getBehavior().staticColide = false;
+            dynamic.entity.getBehavior().staticNormal = new Math_1.Vec2();
+            dynamic.entity.getBehavior().staticCenter = new Math_1.Vec2();
         });
         collisionsResults.map(function (collision) {
             if (collision.entity.destroyed || collision.other.destroyed)
@@ -38,7 +52,13 @@ var sys_CheckCollisions = function (data, deltaTime) {
             behavior.colliding.push(collision.other);
             otherBehavior.colliding.push(collision.entity);
         });
+        staticColide.map(function (collision) {
+            collision.entity.getBehavior().staticColide = true;
+            collision.entity.getBehavior().staticNormal = collision.normal;
+            collision.entity.getBehavior().staticNormal = collision.center;
+        });
         collisionsResults = [];
+        staticColide = [];
     });
 };
 exports.sys_CheckCollisions = sys_CheckCollisions;
@@ -90,10 +110,10 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                 other.velocity.y += (result.contactNormal.y * -1.0) * Math.abs(other.velocity.y) * (1.0 - result.contactTime);
                 // Stop both entities if colliding perfect in horizontal
                 if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
-                    rigidbody.velocity.x = 0;
-                    rigidbody.velocity.y = 0;
-                    other.velocity.x = 0;
-                    other.velocity.y = 0;
+                    rigidbody.velocity.x = 0.0001;
+                    rigidbody.velocity.y = 0.0001;
+                    other.velocity.x = 0.0001;
+                    other.velocity.y = 0.0001;
                 }
             });
             //
@@ -111,23 +131,35 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     continue;
                 var result = rigidbody.colideStatic(other, deltaTime);
                 if (result.intersect) {
-                    sortedStatics.push(result);
+                    console.log("Entidade", entity);
+                    console.log("Colidiu com estatico: ", other.getCenter());
+                    sortedStatics.push({
+                        other: other,
+                        result: result
+                    });
                 }
             }
             // Sorts based on contact time
             sortedStatics.sort(function (a, b) {
-                if (Math.abs(a.contactTime) < Math.abs(b.contactTime))
+                if (Math.abs(a.result.contactTime) < Math.abs(b.result.contactTime))
                     return -1;
-                if (Math.abs(a.contactTime) > Math.abs(b.contactTime))
+                if (Math.abs(a.result.contactTime) > Math.abs(b.result.contactTime))
                     return 1;
                 return 0;
             });
+            if (sortedStatics.length != 0) {
+                staticColide.push({
+                    entity: entity,
+                    normal: sortedStatics[0].result.contactNormal,
+                    center: sortedStatics[0].other.getCenter()
+                });
+            }
             // Solves the collison
             sortedStatics.forEach(function (result) {
                 // Fix for current entity
-                rigidbody.velocity.x += (result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.contactTime)) * 1.001;
-                rigidbody.velocity.y += (result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.contactTime)) * 1.001;
-                if (result.contactNormal.x == 0 && result.contactNormal.y == 0) {
+                rigidbody.velocity.x += (result.result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.result.contactTime)) * 1.001;
+                rigidbody.velocity.y += (result.result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.result.contactTime)) * 1.001;
+                if (result.result.contactNormal.x == 0 && result.result.contactNormal.y == 0) {
                     rigidbody.velocity.x = 0;
                     rigidbody.velocity.y = 0;
                 }

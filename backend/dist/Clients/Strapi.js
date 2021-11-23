@@ -87,7 +87,7 @@ var StrapiClient = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         now = new Date().toISOString();
-                        return [4 /*yield*/, this.get("scheduled-games?game_date_gte=" + now + "&_sort=game_date:ASC&_limit=1")];
+                        return [4 /*yield*/, this.get("scheduled-games?game_date_gte=".concat(now, "&_sort=game_date:ASC&_limit=1"))];
                     case 1: 
                     // queries scheduled games, where the game happens after current time, and sorts by
                     // ascending, so it returns the nearest game;
@@ -101,7 +101,7 @@ var StrapiClient = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.get("scheduled-games/" + id)];
+                    case 0: return [4 /*yield*/, this.get("scheduled-games/".concat(id))];
                     case 1: return [2 /*return*/, (_a.sent()).data];
                 }
             });

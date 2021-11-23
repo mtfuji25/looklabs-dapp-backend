@@ -2,6 +2,22 @@ import { Vec2 } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 import { EcsData } from "../Interfaces";
 
+// AStar import
+import { AStarFinder } from "astar-typescript";
+
+// Map importing
+import levelCollider from "../../../Assets/LevelCollider.json";
+import { Grid } from "../Components/Grid";
+
+const finder = new AStarFinder({
+    grid: {
+        matrix: levelCollider["data"]
+    },
+    diagonalAllowed: false,
+    includeStartNode: true,
+    includeEndNode: true
+});
+
 const ENTITY_RANGE = 0.1;
 
 const runAwayFromTarget = (entity: Entity) => {
@@ -103,22 +119,196 @@ const hitStrongest = (entity: Entity) => {
     }
 }
 
+const seekNearestWithA = (entity: Entity, grid: Grid) => {
+    const status = entity.getStatus();
+    const behavior = entity.getBehavior();
+    const transform = entity.getTransform();
+    const rigidbody = entity.getRigidbody();
+
+    const target = behavior.nearest;
+    
+    if (!target)
+        return;
+    
+    const other = grid.getDynamic(target);
+    const dynamic = grid.getDynamic(entity);
+
+    const convertFromNDC = (pos: Vec2): Vec2 => {
+        const position = pos.adds(1.0).divs(2.0);
+        position.y = 1 - position.y;
+
+        return position;
+    };
+
+    const convertCellToPos = (cell: Vec2): Vec2 => {
+        const position = new Vec2(
+            (cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0),
+            (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0)
+        );
+
+        return position;
+    };
+
+    const convertToNDC = (pos: Vec2): Vec2 => {
+        const position = pos.muls(2.0).subs(1.0);
+        position.y = 0 - position.y;
+
+        return position;
+    };
+
+    const ocupationsPos: Vec2[] = [];
+    let nearestCollisionOcupation: Vec2 = new Vec2();
+    const collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+
+    dynamic.ocupations.map((ocupation) => {
+        ocupationsPos.push(convertCellToPos(ocupation));
+    });
+
+    let shortestDist = Number.MAX_SAFE_INTEGER;
+    ocupationsPos.map((pos, index) => {
+        const dist = pos.sub(collisionStaticPosition).length();
+
+        if (dist < shortestDist) {
+            nearestCollisionOcupation = dynamic.ocupations[index];
+            shortestDist = dist;
+        }
+    });
+
+    const path = finder.findPath(
+        nearestCollisionOcupation,
+        other.index
+    );
+
+    let seekDir = new Vec2();
+    console.log(path)
+
+    const source = convertCellToPos(new Vec2(path[0][0], path[0][1]));
+    const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
+
+    if (!dest.equal(source)) {
+        seekDir = dest.sub(source);
+        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    } else {
+        const enemyPos = target.getTransform().pos;
+        if (!enemyPos.equal(transform.pos)) {
+            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+        }
+    }
+
+    rigidbody.velocity = seekDir;
+
+    behavior.attacking = false;
+}
+
+const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
+    const status = entity.getStatus();
+    const behavior = entity.getBehavior();
+    const transform = entity.getTransform();
+    const rigidbody = entity.getRigidbody();
+
+    let nearest: Entity;
+    let shortestDist = Number.MAX_SAFE_INTEGER;
+
+    behavior.inRange.map((other) => {
+        const dist = transform.pos.sub(
+            other.getTransform().pos
+        ).length();
+
+        if (dist < shortestDist) {
+            nearest = other;
+            shortestDist = dist;
+        }
+    });
+
+    if (!nearest)
+        return;
+
+    const other = grid.getDynamic(nearest);
+    const dynamic = grid.getDynamic(entity);
+
+    const convertFromNDC = (pos: Vec2): Vec2 => {
+        const position = pos.adds(1.0).divs(2.0);
+        position.y = 1 - position.y;
+
+        return position;
+    };
+
+    const convertCellToPos = (cell: Vec2): Vec2 => {
+        const position = new Vec2(
+            (cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0),
+            (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0)
+        );
+
+        return position;
+    };
+
+    const convertToNDC = (pos: Vec2): Vec2 => {
+        const position = pos.muls(2.0).subs(1.0);
+        position.y = 0 - position.y;
+
+        return position;
+    };
+
+    const ocupationsPos: Vec2[] = [];
+    let nearestCollisionOcupation: Vec2 = new Vec2();
+    const collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+
+    dynamic.ocupations.map((ocupation) => {
+        ocupationsPos.push(convertCellToPos(ocupation));
+    });
+
+    shortestDist = Number.MAX_SAFE_INTEGER;
+    ocupationsPos.map((pos, index) => {
+        const dist = pos.sub(collisionStaticPosition).length();
+
+        if (dist < shortestDist) {
+            nearestCollisionOcupation = dynamic.ocupations[index];
+            shortestDist = dist;
+        }
+    });
+
+    const path = finder.findPath(
+        nearestCollisionOcupation,
+        other.index
+    );
+
+    let seekDir = new Vec2();
+    console.log(path)
+
+    const source = convertCellToPos(new Vec2(path[0][0], path[0][1]));
+    const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
+
+    if (!dest.equal(source)) {
+        seekDir = dest.sub(source);
+        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    } else {
+        const enemyPos = nearest.getTransform().pos;
+        if (!enemyPos.equal(transform.pos)) {
+            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+        }
+    }
+
+    rigidbody.velocity = seekDir;
+
+    behavior.attacking = false;
+}
+
 const seekNearest = (entity: Entity) => {
     const status = entity.getStatus();
     const behavior = entity.getBehavior();
     const transform = entity.getTransform();
     const rigidbody = entity.getRigidbody();
 
-    const target = behavior.nearest ?? null;
+    const target = behavior.nearest;
 
     if (!target)
         return;
     
     const enemy = target.getTransform();
-    
-    const seekDir = enemy.pos.sub(transform.pos).normalize();
 
-    rigidbody.velocity = seekDir.muls(status.speed);
+    if (!enemy.pos.equal(transform.pos)) {
+        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+    }
 
     behavior.attacking = false;
 }
@@ -129,7 +319,7 @@ const seekNearestInRange = (entity: Entity) => {
     const transform = entity.getTransform();
     const rigidbody = entity.getRigidbody();
 
-    let nearest: Entity | null = null;
+    let nearest: Entity;
     let shortestDist = Number.MAX_SAFE_INTEGER;
 
     behavior.inRange.map((other) => {
@@ -148,9 +338,9 @@ const seekNearestInRange = (entity: Entity) => {
 
     const enemy = nearest.getTransform();
     
-    const seekDir = enemy.pos.sub(transform.pos).normalize();
-    
-    rigidbody.velocity = seekDir.muls(status.speed);
+    if (!enemy.pos.equal(transform.pos)) {
+        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+    }
 
     behavior.attacking = false;
 }
@@ -181,6 +371,9 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
             for (let j = i + 1; j < grid.dynamics.length; ++j) {
                 // Get other entity
                 const other = grid.dynamics[j].entity;
+
+                if (entity.destroyed || other.destroyed)
+                        return;
 
                 // Get other entity tranform
                 const otherBehavior = other.getBehavior();
@@ -243,7 +436,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             behavior.refresh += deltaTime;
 
             // Healing checks
-            if (lifePercent >= 50) {
+            if (lifePercent >= 40) {
                 behavior.healing = false;
             }
 
@@ -278,13 +471,25 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
 
             // Inrange check
             } else if (behavior.inRange.length > 0) {
-                console.log("Entered Searching inRange node");
-                seekNearestInRange(entity);
+                if (behavior.staticColide) {
+                    console.log("Entered Searching inRange node with A*");
+                    seekNearestInRangeWithA(entity, grid);
+                    behavior.staticColide = false;
+                } else {
+                    console.log("Entered Searching inRange node");
+                    seekNearestInRange(entity);
+                }
                 
             // Out range check
             } else if (behavior.inRange.length == 0) {
-                console.log("Entered Searching outRange node");
-                seekNearest(entity);
+                if (behavior.staticColide) {
+                    console.log("Entered Searching outRange node with A*");
+                    seekNearestWithA(entity, grid);
+                    behavior.staticColide = false;
+                } else {
+                    console.log("Entered Searching outRange node");
+                    seekNearest(entity);
+                }
             }
         });
     });

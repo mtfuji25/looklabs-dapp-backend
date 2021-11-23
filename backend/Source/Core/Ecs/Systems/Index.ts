@@ -7,6 +7,7 @@ import { sys_CheckCollisions, sys_UpdateGrid } from "./Grid";
 import { sys_DipatchDeaths, sys_UpdateStatus } from "./Status";
 import { sys_CheckInRange, sys_UpdateBehavior } from "./Behavior";
 import { sys_UpdateCollisions } from "./Grid";
+import { sys_CheckOverlap } from "./Aabb";
 
 const startSystems = (ecs: ECS) => {
     // Update all status components
@@ -32,6 +33,9 @@ const startSystems = (ecs: ECS) => {
 
     // Update all components position
     ecs.pushContainerSystem(sys_UpdatePos);
+
+    // Update all components position
+    ecs.pushContainerSystem(sys_CheckOverlap);
 };
 
 export { startSystems };

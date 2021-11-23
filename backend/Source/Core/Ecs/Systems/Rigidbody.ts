@@ -5,6 +5,8 @@ const sys_UpdatePos = (data: EcsData, deltaTime: number): void => {
     data.rigidbodys.forEach((rigidbody) => {
         let transform = rigidbody.rectangle.transform;
 
+        if (!transform)
+            return;
         transform.pos.x += rigidbody.velocity.x * deltaTime;
         transform.pos.y += rigidbody.velocity.y * deltaTime;
     });

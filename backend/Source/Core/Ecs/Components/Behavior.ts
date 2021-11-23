@@ -1,3 +1,4 @@
+import { Vec2 } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 import { Rigidbody } from "./Rigidbody";
 import { Status } from "./Status";
@@ -8,6 +9,9 @@ class Behavior {
     public status: Status;
     public transform: Transform;
     public rigidbody: Rigidbody;
+    public staticColide: boolean = false;
+    public staticNormal: Vec2 = new Vec2();
+    public staticCenter: Vec2 = new Vec2();
 
     // Nearby enemies
     public inRange: Entity[] = [];

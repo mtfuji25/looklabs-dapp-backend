@@ -24,18 +24,33 @@ var Grid = /** @class */ (function () {
     }
     Grid.prototype.addDynamic = function (entity) {
         var transform = entity.getTransform();
+        var rectangle = entity.getRectangle();
         // Changes coordinate sistem from ndc to normalized left-upper origin
         var position = transform.pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
         // Find the correct index of entity in grid
         var index = new Math_1.Vec2(Math.floor(position.x / (this.intervalX / 2.0)), Math.floor(position.y / (this.intervalY / 2.0)));
+        var index1 = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 2.0)) / (this.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 2.0)) / (this.intervalY / 2.0)));
+        var index2 = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 2.0)) / (this.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 2.0)) / (this.intervalY / 2.0)));
         // If index gets out of bounds return
         if (index.x >= this.width || index.y >= this.height)
             return;
-        this.dynamics.push({ entity: entity, index: index });
+        this.dynamics.push({
+            entity: entity,
+            index: index,
+            ocupations: [
+                index1,
+                new Math_1.Vec2(index2.x, index1.y),
+                new Math_1.Vec2(index1.x, index2.y),
+                index2
+            ]
+        });
     };
     Grid.prototype.removeDynamic = function (entity) {
         this.dynamics = this.dynamics.filter(function (dynamic) { return dynamic.entity !== entity; });
+    };
+    Grid.prototype.getDynamic = function (entity) {
+        return this.dynamics.find(function (dynamic) { return dynamic.entity === entity; });
     };
     Grid.prototype.addStatic = function (x, y) {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height)
