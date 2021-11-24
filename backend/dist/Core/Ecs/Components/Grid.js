@@ -28,21 +28,25 @@ var Grid = /** @class */ (function () {
         // Changes coordinate sistem from ndc to normalized left-upper origin
         var position = transform.pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
-        // Find the correct index of entity in grid
+        // Find new index of entity
         var index = new Math_1.Vec2(Math.floor(position.x / (this.intervalX / 2.0)), Math.floor(position.y / (this.intervalY / 2.0)));
-        var index1 = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 2.0)) / (this.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 2.0)) / (this.intervalY / 2.0)));
-        var index2 = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 2.0)) / (this.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 2.0)) / (this.intervalY / 2.0)));
-        // If index gets out of bounds return
-        if (index.x >= this.width || index.y >= this.height)
-            return;
+        var indexUp = new Math_1.Vec2(Math.floor((position.x) / (this.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 4.0)) / (this.intervalY / 2.0)));
+        var indexLeft = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 4.0)) / (this.intervalX / 2.0)), Math.floor((position.y) / (this.intervalY / 2.0)));
+        var indexDown = new Math_1.Vec2(Math.floor((position.x) / (this.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 4.0)) / (this.intervalY / 2.0)));
+        var indexRight = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 4.0)) / (this.intervalX / 2.0)), Math.floor((position.y) / (this.intervalY / 2.0)));
         this.dynamics.push({
             entity: entity,
             index: index,
             ocupations: [
-                index1,
-                new Math_1.Vec2(index2.x, index1.y),
-                new Math_1.Vec2(index1.x, index2.y),
-                index2
+                indexUp,
+                new Math_1.Vec2(indexLeft.x, indexUp.y),
+                indexLeft,
+                new Math_1.Vec2(indexLeft.x, indexDown.y),
+                indexDown,
+                new Math_1.Vec2(indexRight.x, indexDown.y),
+                indexRight,
+                new Math_1.Vec2(indexRight.x, indexUp.y),
+                index
             ]
         });
     };

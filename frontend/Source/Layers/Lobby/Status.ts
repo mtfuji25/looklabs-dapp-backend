@@ -55,15 +55,15 @@ class BattleStatusLayer extends Layer {
         // Set sprite image
         this.title.setImg(this.app.loader.resources["thePitSmall"]);
         this.card.setImg(this.app.loader.resources["infoCard"]);
+    }
 
+    onAttach() {
         // Add it to stage
         this.title.addStage(this.app);
         this.card.addStage(this.app);
         this.timeLeft.addStage(this.app);
         this.playersLeft.addStage(this.app);
     }
-
-    onAttach() {}
 
     onUpdate(deltaTime: number) {
         if (this.oneSecCount >= 1) {
@@ -77,6 +77,11 @@ class BattleStatusLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
+        this.title.remStage();
+        this.card.remStage();
+        this.timeLeft.remStage();
+        this.playersLeft.remStage();
+    
     }
 
     calculateTime(): Record<string, number> {

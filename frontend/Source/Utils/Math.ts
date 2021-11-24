@@ -64,6 +64,13 @@ class Vec2 {
         );
     }
 
+    abs(other: Vec2): Vec2 {
+        return new Vec2(
+            Math.abs(this.x - other.x),
+            Math.abs(this.y - other.y)
+        );
+    }
+
     equal(other: Vec2): boolean {
         return (this.x == other.x && this.y == other.y);
     }

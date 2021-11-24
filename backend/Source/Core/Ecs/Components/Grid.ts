@@ -11,7 +11,7 @@ import { Transform } from "./Transform";
 interface DynamicEntity {
     entity: Entity;
     index: Vec2;
-    ocupations: Vec2[];
+    ocupations: Vec2[] | null;
 }
 
 class Grid {
@@ -51,34 +51,45 @@ class Grid {
         const position = transform.pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
 
-        // Find the correct index of entity in grid
+        // Find new index of entity
         const index = new Vec2(
             Math.floor(position.x / (this.intervalX / 2.0)),
             Math.floor(position.y / (this.intervalY / 2.0)),
         );
 
-        const index1 = new Vec2(
-            Math.floor((position.x - (rectangle.width / 2.0)) / (this.intervalX / 2.0)),
-            Math.floor((position.y - (rectangle.height / 2.0)) / (this.intervalY / 2.0)),
+        const indexUp = new Vec2(
+            Math.floor((position.x) / (this.intervalX / 2.0)),
+            Math.floor((position.y - (rectangle.height / 4.0)) / (this.intervalY / 2.0)),
         );
 
-        const index2 = new Vec2(
-            Math.floor((position.x + (rectangle.width / 2.0)) / (this.intervalX / 2.0)),
-            Math.floor((position.y + (rectangle.height / 2.0)) / (this.intervalY / 2.0)),
+        const indexLeft = new Vec2(
+            Math.floor((position.x - (rectangle.width / 4.0)) / (this.intervalX / 2.0)),
+            Math.floor((position.y) / (this.intervalY / 2.0)),
         );
 
-        // If index gets out of bounds return
-        if (index.x >= this.width || index.y >= this.height)
-            return;
+        const indexDown = new Vec2(
+            Math.floor((position.x) / (this.intervalX / 2.0)),
+            Math.floor((position.y + (rectangle.height / 4.0)) / (this.intervalY / 2.0)),
+        );
 
+        const indexRight = new Vec2(
+            Math.floor((position.x + (rectangle.width / 4.0)) / (this.intervalX / 2.0)),
+            Math.floor((position.y) / (this.intervalY / 2.0)),
+        );
+        
         this.dynamics.push({ 
             entity: entity, 
             index: index, 
             ocupations: [
-                index1,
-                new Vec2(index2.x, index1.y),
-                new Vec2(index1.x, index2.y),
-                index2
+                indexUp,
+                new Vec2(indexLeft.x, indexUp.y),
+                indexLeft,
+                new Vec2(indexLeft.x, indexDown.y),
+                indexDown,
+                new Vec2(indexRight.x, indexDown.y),
+                indexRight,
+                new Vec2(indexRight.x, indexUp.y),
+                index
             ]
         });
     }

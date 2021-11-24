@@ -13,6 +13,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
+import { GameParticipantsResult } from "../../Clients/Strapi";
 
 //
 //  Frontend actions mapping
@@ -22,25 +23,8 @@ import killFeed from "../../Assets/KillFeed.json";
 //  "walkup": 6, "walkdown": 7
 //
 
-// const spawnPos = [
-//     new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
-//     new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
-//     new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
-//     new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
-//     new Vec2( 0.90,  0.20), new Vec2(-0.90,  0.20),
-//     new Vec2( 0.90, -0.25), new Vec2(-0.90, -0.25),
-//     new Vec2(-0.30, -0.90), new Vec2( 0.30,  0.80),
-//     new Vec2(-0.30,  0.80), new Vec2( 0.30, -0.90),
-//     new Vec2( 0.90,  0.00), new Vec2(-0.90,  0.00),
-//     new Vec2( 0.00,  0.80), new Vec2( 0.00, -0.90),
-//     new Vec2( 0.65,  0.24), new Vec2(-0.65,  0.24),
-//     new Vec2(-0.32,  0.63), new Vec2( 0.32, -0.65),
-//     new Vec2(-0.32, -0.65), new Vec2( 0.32,  0.63),
-//     new Vec2( 0.65, -0.28), new Vec2(-0.65, -0.28),
-// ];
-
 const spawnPos = [
-    new Vec2( 0.65,  0.00), new Vec2( 0.90, -0.00),
+    new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
     new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
     new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
     new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
@@ -64,6 +48,7 @@ class PlayerLayer extends Layer {
 
     // Player ID
     public playerID: string;
+    public strapiID: number;
 
     // Current grid
     private grid: Grid;
@@ -72,9 +57,9 @@ class PlayerLayer extends Layer {
     static playerCount: number = 0;
 
     // Die fn
-    public dieFn: () => void;
+    public dieFn: (result: GameParticipantsResult) => void;
 
-    constructor(ecs: ECS, wsContext: WSClient, id: string, grid: Grid, dieFn: () => void, name: string) {
+    constructor(ecs: ECS, wsContext: WSClient, id: string, strapiID: number, grid: Grid, dieFn: (result: GameParticipantsResult) => void, name: string) {
         super(`Player${id}`, ecs);
 
         this.wsClient = wsContext;
@@ -82,6 +67,7 @@ class PlayerLayer extends Layer {
         this.grid = grid;
         this.dieFn = dieFn;
         this.self.name = name;
+        this.strapiID = strapiID;
 
         // Add status component to current entity
         this.self.addStatus(
@@ -108,7 +94,7 @@ class PlayerLayer extends Layer {
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount <= 28)
+        if (PlayerLayer.playerCount < 28)
             PlayerLayer.playerCount++;
         else
             PlayerLayer.playerCount = 0;
@@ -165,6 +151,7 @@ class PlayerLayer extends Layer {
     }
 
     onDetach() {
+
         // Delete player entity in client
         this.wsClient.broadcast(this.getBaseMsg("delete"));
 
@@ -221,7 +208,12 @@ class PlayerLayer extends Layer {
             msgType: "kill"
         });
 
-        this.dieFn();
+        this.dieFn({
+            scheduled_game_participant: this.strapiID,
+            survived_for: Math.floor(status.survived),
+            kills: Math.floor(status.kills),
+            health: Math.floor(status.health),
+        });
     }
 }
 

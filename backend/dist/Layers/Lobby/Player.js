@@ -30,24 +30,8 @@ var KillFeed_json_1 = __importDefault(require("../../Assets/KillFeed.json"));
 //  "walkright": 4, "walkleft": 5,
 //  "walkup": 6, "walkdown": 7
 //
-// const spawnPos = [
-//     new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
-//     new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
-//     new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
-//     new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
-//     new Vec2( 0.90,  0.20), new Vec2(-0.90,  0.20),
-//     new Vec2( 0.90, -0.25), new Vec2(-0.90, -0.25),
-//     new Vec2(-0.30, -0.90), new Vec2( 0.30,  0.80),
-//     new Vec2(-0.30,  0.80), new Vec2( 0.30, -0.90),
-//     new Vec2( 0.90,  0.00), new Vec2(-0.90,  0.00),
-//     new Vec2( 0.00,  0.80), new Vec2( 0.00, -0.90),
-//     new Vec2( 0.65,  0.24), new Vec2(-0.65,  0.24),
-//     new Vec2(-0.32,  0.63), new Vec2( 0.32, -0.65),
-//     new Vec2(-0.32, -0.65), new Vec2( 0.32,  0.63),
-//     new Vec2( 0.65, -0.28), new Vec2(-0.65, -0.28),
-// ];
 var spawnPos = [
-    new Math_1.Vec2(0.65, 0.00), new Math_1.Vec2(0.90, -0.00),
+    new Math_1.Vec2(0.65, 0.00), new Math_1.Vec2(-0.65, 0.00),
     new Math_1.Vec2(0.00, 0.60), new Math_1.Vec2(0.00, -0.60),
     new Math_1.Vec2(0.40, 0.20), new Math_1.Vec2(-0.40, -0.25),
     new Math_1.Vec2(-0.40, 0.20), new Math_1.Vec2(0.40, -0.25),
@@ -64,13 +48,14 @@ var spawnPos = [
 ];
 var PlayerLayer = /** @class */ (function (_super) {
     __extends(PlayerLayer, _super);
-    function PlayerLayer(ecs, wsContext, id, grid, dieFn, name) {
+    function PlayerLayer(ecs, wsContext, id, strapiID, grid, dieFn, name) {
         var _this = _super.call(this, "Player".concat(id), ecs) || this;
         _this.wsClient = wsContext;
         _this.playerID = id;
         _this.grid = grid;
         _this.dieFn = dieFn;
         _this.self.name = name;
+        _this.strapiID = strapiID;
         // Add status component to current entity
         _this.self.addStatus(
         // Attack
@@ -86,7 +71,7 @@ var PlayerLayer = /** @class */ (function (_super) {
         // Add rigibody for current entity
         _this.self.addRigidbody(grid.intervalX * 1.7, grid.intervalY * 1.7);
         _this.self.getTransform().setPos(spawnPos[PlayerLayer.playerCount].x, spawnPos[PlayerLayer.playerCount].y);
-        if (PlayerLayer.playerCount <= 28)
+        if (PlayerLayer.playerCount < 28)
             PlayerLayer.playerCount++;
         else
             PlayerLayer.playerCount = 0;
@@ -185,7 +170,12 @@ var PlayerLayer = /** @class */ (function (_super) {
             action: KillFeed_json_1.default.items[KillFeed_json_1.default.items.length * Math.random() | 0],
             msgType: "kill"
         });
-        this.dieFn();
+        this.dieFn({
+            scheduled_game_participant: this.strapiID,
+            survived_for: Math.floor(status.survived),
+            kills: Math.floor(status.kills),
+            health: Math.floor(status.health),
+        });
     };
     // For spawn point selection
     PlayerLayer.playerCount = 0;

@@ -112,6 +112,10 @@ class MapLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
+        this.app.stage.removeChild(this.mapContainer);
+        this.entities.map((entity) => {
+            entity.destroy();
+        });
     }
 }
 

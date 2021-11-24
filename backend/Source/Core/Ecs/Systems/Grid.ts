@@ -43,14 +43,24 @@ const sys_UpdateGrid = (data: EcsData, deltaTime: number): void => {
                 Math.floor(position.y / (grid.intervalY / 2.0)),
             );
 
-            const index1 = new Vec2(
-                Math.floor((position.x - (rectangle.width / 4.0)) / (grid.intervalX / 2.0)),
+            const indexUp = new Vec2(
+                Math.floor((position.x) / (grid.intervalX / 2.0)),
                 Math.floor((position.y - (rectangle.height / 4.0)) / (grid.intervalY / 2.0)),
             );
     
-            const index2 = new Vec2(
-                Math.floor((position.x + (rectangle.width / 4.0)) / (grid.intervalX / 2.0)),
+            const indexLeft = new Vec2(
+                Math.floor((position.x - (rectangle.width / 4.0)) / (grid.intervalX / 2.0)),
+                Math.floor((position.y) / (grid.intervalY / 2.0)),
+            );
+
+            const indexDown = new Vec2(
+                Math.floor((position.x) / (grid.intervalX / 2.0)),
                 Math.floor((position.y + (rectangle.height / 4.0)) / (grid.intervalY / 2.0)),
+            );
+    
+            const indexRight = new Vec2(
+                Math.floor((position.x + (rectangle.width / 4.0)) / (grid.intervalX / 2.0)),
+                Math.floor((position.y) / (grid.intervalY / 2.0)),
             );
             
             // Update the index in the definition
@@ -59,10 +69,15 @@ const sys_UpdateGrid = (data: EcsData, deltaTime: number): void => {
             dynamic.ocupations = [];
 
             dynamic.ocupations = [
-                index1,
-                new Vec2(index2.x, index1.y),
-                new Vec2(index1.x, index2.y),
-                index2
+                indexUp,
+                new Vec2(indexLeft.x, indexUp.y),
+                indexLeft,
+                new Vec2(indexLeft.x, indexDown.y),
+                indexDown,
+                new Vec2(indexRight.x, indexDown.y),
+                indexRight,
+                new Vec2(indexRight.x, indexUp.y),
+                index
             ];
         });
     });
@@ -90,8 +105,8 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
 
             behavior.colliding = [];
             dynamic.entity.getBehavior().staticColide = false;
-            dynamic.entity.getBehavior().staticNormal = new Vec2();
-            dynamic.entity.getBehavior().staticCenter = new Vec2();
+            dynamic.entity.getBehavior().staticNormal = [];
+            dynamic.entity.getBehavior().staticCenter = [];
         });
 
         collisionsResults.map((collision) => {
@@ -106,8 +121,8 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
 
         staticColide.map((collision) => {
             collision.entity.getBehavior().staticColide = true;
-            collision.entity.getBehavior().staticNormal = collision.normal;
-            collision.entity.getBehavior().staticNormal = collision.center;
+            collision.entity.getBehavior().staticNormal.push(collision.normal);
+            collision.entity.getBehavior().staticCenter.push(collision.center);
         });
 
         collisionsResults = [];
@@ -203,8 +218,6 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                 const result = rigidbody.colideStatic(other, deltaTime);
 
                 if (result.intersect) {
-                    console.log("Entidade", entity);
-                    console.log("Colidiu com estatico: ", other.getCenter())
                     sortedStatics.push({
                         other: other,
                         result: result
@@ -221,13 +234,13 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                 return 0;
             });
 
-            if (sortedStatics.length != 0) {
+            sortedStatics.map((collision) => {
                 staticColide.push({
                     entity: entity,
-                    normal: sortedStatics[0].result.contactNormal,
-                    center: sortedStatics[0].other.getCenter()
+                    normal: collision.result.contactNormal,
+                    center: collision.other.getCenter()
                 });
-            }
+            });
 
             // Solves the collison
             sortedStatics.forEach((result) => {

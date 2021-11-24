@@ -97,55 +97,74 @@ var seekNearestWithA = function (entity, grid) {
     var behavior = entity.getBehavior();
     var transform = entity.getTransform();
     var rigidbody = entity.getRigidbody();
-    var target = behavior.nearest;
-    if (!target)
+    var nearest = behavior.nearest;
+    if (!nearest)
         return;
-    var other = grid.getDynamic(target);
+    var other = grid.getDynamic(nearest);
     var dynamic = grid.getDynamic(entity);
+    // Começo do solver
+    console.log("Entity: ", dynamic.index);
+    console.log("Hunting: ", other.index);
     var convertFromNDC = function (pos) {
         var position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
+        return position;
+    };
+    var convertToNDC = function (pos) {
+        var position = new Math_1.Vec2(pos.x, 0 - pos.y);
         return position;
     };
     var convertCellToPos = function (cell) {
         var position = new Math_1.Vec2((cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0), (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0));
         return position;
     };
-    var convertToNDC = function (pos) {
-        var position = pos.muls(2.0).subs(1.0);
-        position.y = 0 - position.y;
-        return position;
+    var convertPosToCell = function (pos) {
+        var index = new Math_1.Vec2(Math.floor(pos.x / (grid.intervalX / 2.0)), Math.floor(pos.y / (grid.intervalY / 2.0)));
+        return index;
     };
-    var ocupationsPos = [];
-    var nearestCollisionOcupation = new Math_1.Vec2();
-    var collisionStaticPosition = convertFromNDC(behavior.staticCenter);
-    dynamic.ocupations.map(function (ocupation) {
-        ocupationsPos.push(convertCellToPos(ocupation));
+    // Sources and direction vectors
+    var sources = [];
+    var dir = null;
+    console.log("Static Centers: ", behavior.staticCenter);
+    console.log("Ocupations: ", dynamic.ocupations);
+    behavior.staticCenter.map(function (center) {
+        var convertedCenter = convertPosToCell(convertFromNDC(center));
+        console.log("Static Cell: ", convertedCenter);
+        dynamic.ocupations.map(function (ocupation) {
+            var diff = convertedCenter.abs(ocupation);
+            // Checks if is axis aligned neighbor
+            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
+                sources.push(ocupation);
+            }
+        });
     });
-    var shortestDist = Number.MAX_SAFE_INTEGER;
-    ocupationsPos.map(function (pos, index) {
-        var dist = pos.sub(collisionStaticPosition).length();
-        if (dist < shortestDist) {
-            nearestCollisionOcupation = dynamic.ocupations[index];
-            shortestDist = dist;
+    console.log("Sources: ", sources);
+    sources.map(function (source, index) {
+        if (!dir)
+            dir = new Math_1.Vec2();
+        var path = finder.findPath(source, other.index);
+        console.log("Path" + index, path);
+        var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
+        var origin = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
+        console.log("Dest" + index, dest);
+        console.log("Origin" + index, origin);
+        if (!dest.equal(origin)) {
+            console.log("SubDir" + index, dest.sub(origin));
+            dir = dir.add(dest.sub(origin));
         }
     });
-    var path = finder.findPath(nearestCollisionOcupation, other.index);
-    var seekDir = new Math_1.Vec2();
-    console.log(path);
-    var source = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
-    var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
-    if (!dest.equal(source)) {
-        seekDir = dest.sub(source);
-        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    console.log("PreDir: ", dir);
+    if (dir) {
+        dir = convertToNDC(dir).normalize().muls(status.speed);
+        console.log("FinalDir: ", dir);
     }
     else {
-        var enemyPos = target.getTransform().pos;
+        var enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
-            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
         }
     }
-    rigidbody.velocity = seekDir;
+    rigidbody.velocity = dir;
     behavior.attacking = false;
 };
 var seekNearestInRangeWithA = function (entity, grid) {
@@ -166,50 +185,69 @@ var seekNearestInRangeWithA = function (entity, grid) {
         return;
     var other = grid.getDynamic(nearest);
     var dynamic = grid.getDynamic(entity);
+    // Começo do solver
+    console.log("Entity: ", dynamic.index);
+    console.log("Hunting: ", other.index);
     var convertFromNDC = function (pos) {
         var position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
+        return position;
+    };
+    var convertToNDC = function (pos) {
+        var position = new Math_1.Vec2(pos.x, 0 - pos.y);
         return position;
     };
     var convertCellToPos = function (cell) {
         var position = new Math_1.Vec2((cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0), (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0));
         return position;
     };
-    var convertToNDC = function (pos) {
-        var position = pos.muls(2.0).subs(1.0);
-        position.y = 0 - position.y;
-        return position;
+    var convertPosToCell = function (pos) {
+        var index = new Math_1.Vec2(Math.floor(pos.x / (grid.intervalX / 2.0)), Math.floor(pos.y / (grid.intervalY / 2.0)));
+        return index;
     };
-    var ocupationsPos = [];
-    var nearestCollisionOcupation = new Math_1.Vec2();
-    var collisionStaticPosition = convertFromNDC(behavior.staticCenter);
-    dynamic.ocupations.map(function (ocupation) {
-        ocupationsPos.push(convertCellToPos(ocupation));
+    // Sources and direction vectors
+    var sources = [];
+    var dir = null;
+    console.log("Static Centers: ", behavior.staticCenter);
+    console.log("Ocupations: ", dynamic.ocupations);
+    behavior.staticCenter.map(function (center) {
+        var convertedCenter = convertPosToCell(convertFromNDC(center));
+        console.log("Static Cell: ", convertedCenter);
+        dynamic.ocupations.map(function (ocupation) {
+            var diff = convertedCenter.abs(ocupation);
+            // Checks if is axis aligned neighbor
+            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
+                sources.push(ocupation);
+            }
+        });
     });
-    shortestDist = Number.MAX_SAFE_INTEGER;
-    ocupationsPos.map(function (pos, index) {
-        var dist = pos.sub(collisionStaticPosition).length();
-        if (dist < shortestDist) {
-            nearestCollisionOcupation = dynamic.ocupations[index];
-            shortestDist = dist;
+    console.log("Sources: ", sources);
+    sources.map(function (source, index) {
+        if (!dir)
+            dir = new Math_1.Vec2();
+        var path = finder.findPath(source, other.index);
+        console.log("Path" + index, path);
+        var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
+        var origin = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
+        console.log("Dest" + index, dest);
+        console.log("Origin" + index, origin);
+        if (!dest.equal(origin)) {
+            console.log("SubDir" + index, dest.sub(origin));
+            dir = dir.add(dest.sub(origin));
         }
     });
-    var path = finder.findPath(nearestCollisionOcupation, other.index);
-    var seekDir = new Math_1.Vec2();
-    console.log(path);
-    var source = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
-    var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
-    if (!dest.equal(source)) {
-        seekDir = dest.sub(source);
-        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    console.log("PreDir: ", dir);
+    if (dir) {
+        dir = convertToNDC(dir).normalize().muls(status.speed);
+        console.log("FinalDir: ", dir);
     }
     else {
         var enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
-            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
         }
     }
-    rigidbody.velocity = seekDir;
+    rigidbody.velocity = dir;
     behavior.attacking = false;
 };
 var seekNearest = function (entity) {

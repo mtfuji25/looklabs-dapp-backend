@@ -8,6 +8,7 @@ import { GameStatus } from "../Clients/Interfaces";
 import { AwaitLevel } from "./Await";
 import { LobbyLevel } from "./Lobby";
 import { NotFoundLevel } from "./NotFound";
+import { ResultsLevel } from "./Results";
 
 class DefaultLevel extends Level {
 
@@ -28,12 +29,7 @@ class DefaultLevel extends Level {
             console.log(err);
             this.context.close = true;
         });
-
-        this.context.ws.onReady(() => {
-        //     // this.context.ws.request({
-
-        //     // }).then();
-        });
+    
     }
 
     startLevels(response : GameStatus) {

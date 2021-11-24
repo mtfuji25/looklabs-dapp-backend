@@ -3,7 +3,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
@@ -65,17 +65,22 @@ class LobbyLevel extends Level {
             totalPlayers: this.participants.length
         });
 
-        this.participants.map((participant, index) => {
+        this.participants.map((participant) => {
             const player = new PlayerLayer(
                 this.ecs, this.context.ws,
-                participant.nft_id, grid, () => {
+                participant.nft_id, participant.id, grid, 
+                (result: GameParticipantsResult) => {
+                    this.ready = false;
                     this.layerStack.popLayer(player);
                     this.fighters--;
+                    // Esse vai para produção
+                    console.log("Matou caramba")
+                    this.context.strapi.createParticipantResult(result).then(() => this.ready = true).catch((err) => console.log(err));
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,
                         totalPlayers: this.participants.length
-                    })
+                    });
                 },
                 participant.name
             );
@@ -89,13 +94,37 @@ class LobbyLevel extends Level {
 
     onUpdate(deltaTime: number) {
         if (this.fighters <= 1 && this.ready) {
-            this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+            this.layerStack.layers.map((layer) => {
+                if (layer instanceof PlayerLayer) {
+                    const status = layer.getSelf().getStatus();
+                    this.context.ws.broadcast({
+                        msgType: "remain-players",
+                        remainingPlayers: this.fighters,
+                        totalPlayers: this.participants.length
+                    })
+                    this.context.strapi.createParticipantResult({
+                        scheduled_game_participant: layer.strapiID,
+                        survived_for: Math.floor(status.survived),
+                        kills: Math.floor(status.kills),
+                        health: Math.floor(status.health)
+                    }).then(() => {
+                        const msg: GameStatus = {
+                            msgType: "game-status",
+                            gameId: this.gameId,
+                            lastGameId: 0,
+                            gameStatus: "awaiting"
+                        };
+                        this.context.ws.broadcast(msg);
+                        this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+                    });
+                }
+            });
         }
     }
 
     onClose(): void {
+        this.layerStack.destroy();
         this.listener.destroy();
-        // this.context.ws.remMsgListener(this.listener);
     }
 
     onServerMsg(msg: ReplyableMsg) {

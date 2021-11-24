@@ -18,16 +18,23 @@ var sys_UpdateGrid = function (data, deltaTime) {
             position.y = 1 - position.y;
             // Find new index of entity
             var index = new Math_1.Vec2(Math.floor(position.x / (grid.intervalX / 2.0)), Math.floor(position.y / (grid.intervalY / 2.0)));
-            var index1 = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
-            var index2 = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
+            var indexUp = new Math_1.Vec2(Math.floor((position.x) / (grid.intervalX / 2.0)), Math.floor((position.y - (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
+            var indexLeft = new Math_1.Vec2(Math.floor((position.x - (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y) / (grid.intervalY / 2.0)));
+            var indexDown = new Math_1.Vec2(Math.floor((position.x) / (grid.intervalX / 2.0)), Math.floor((position.y + (rectangle.height / 4.0)) / (grid.intervalY / 2.0)));
+            var indexRight = new Math_1.Vec2(Math.floor((position.x + (rectangle.width / 4.0)) / (grid.intervalX / 2.0)), Math.floor((position.y) / (grid.intervalY / 2.0)));
             // Update the index in the definition
             dynamic.index = index;
             dynamic.ocupations = [];
             dynamic.ocupations = [
-                index1,
-                new Math_1.Vec2(index2.x, index1.y),
-                new Math_1.Vec2(index1.x, index2.y),
-                index2
+                indexUp,
+                new Math_1.Vec2(indexLeft.x, indexUp.y),
+                indexLeft,
+                new Math_1.Vec2(indexLeft.x, indexDown.y),
+                indexDown,
+                new Math_1.Vec2(indexRight.x, indexDown.y),
+                indexRight,
+                new Math_1.Vec2(indexRight.x, indexUp.y),
+                index
             ];
         });
     });
@@ -41,8 +48,8 @@ var sys_CheckCollisions = function (data, deltaTime) {
             var behavior = dynamic.entity.getBehavior();
             behavior.colliding = [];
             dynamic.entity.getBehavior().staticColide = false;
-            dynamic.entity.getBehavior().staticNormal = new Math_1.Vec2();
-            dynamic.entity.getBehavior().staticCenter = new Math_1.Vec2();
+            dynamic.entity.getBehavior().staticNormal = [];
+            dynamic.entity.getBehavior().staticCenter = [];
         });
         collisionsResults.map(function (collision) {
             if (collision.entity.destroyed || collision.other.destroyed)
@@ -54,8 +61,8 @@ var sys_CheckCollisions = function (data, deltaTime) {
         });
         staticColide.map(function (collision) {
             collision.entity.getBehavior().staticColide = true;
-            collision.entity.getBehavior().staticNormal = collision.normal;
-            collision.entity.getBehavior().staticNormal = collision.center;
+            collision.entity.getBehavior().staticNormal.push(collision.normal);
+            collision.entity.getBehavior().staticCenter.push(collision.center);
         });
         collisionsResults = [];
         staticColide = [];
@@ -131,8 +138,6 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     continue;
                 var result = rigidbody.colideStatic(other, deltaTime);
                 if (result.intersect) {
-                    console.log("Entidade", entity);
-                    console.log("Colidiu com estatico: ", other.getCenter());
                     sortedStatics.push({
                         other: other,
                         result: result
@@ -147,13 +152,13 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     return 1;
                 return 0;
             });
-            if (sortedStatics.length != 0) {
+            sortedStatics.map(function (collision) {
                 staticColide.push({
                     entity: entity,
-                    normal: sortedStatics[0].result.contactNormal,
-                    center: sortedStatics[0].other.getCenter()
+                    normal: collision.result.contactNormal,
+                    center: collision.other.getCenter()
                 });
-            }
+            });
             // Solves the collison
             sortedStatics.forEach(function (result) {
                 // Fix for current entity

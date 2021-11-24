@@ -32,6 +32,9 @@ var Vec2 = /** @class */ (function () {
     Vec2.prototype.divs = function (other) {
         return new Vec2(this.x / other, this.y / other);
     };
+    Vec2.prototype.abs = function (other) {
+        return new Vec2(Math.abs(this.x - other.x), Math.abs(this.y - other.y));
+    };
     Vec2.prototype.equal = function (other) {
         return (this.x == other.x && this.y == other.y);
     };

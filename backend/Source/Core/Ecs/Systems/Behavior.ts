@@ -125,17 +125,31 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
     const transform = entity.getTransform();
     const rigidbody = entity.getRigidbody();
 
-    const target = behavior.nearest;
+    const nearest = behavior.nearest;
     
-    if (!target)
+    if (!nearest)
         return;
     
-    const other = grid.getDynamic(target);
+    const other = grid.getDynamic(nearest);
     const dynamic = grid.getDynamic(entity);
+
+    // Começo do solver
+
+    console.log("Entity: ", dynamic.index);
+    console.log("Hunting: ", other.index);
 
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
+
+        return position;
+    };
+
+    const convertToNDC = (pos: Vec2): Vec2 => {
+        const position = new Vec2(
+            pos.x,
+            0 - pos.y
+        );
 
         return position;
     };
@@ -149,53 +163,68 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         return position;
     };
 
-    const convertToNDC = (pos: Vec2): Vec2 => {
-        const position = pos.muls(2.0).subs(1.0);
-        position.y = 0 - position.y;
+    const convertPosToCell = (pos: Vec2): Vec2 => {
+        const index = new Vec2(
+            Math.floor(pos.x / (grid.intervalX / 2.0)),
+            Math.floor(pos.y / (grid.intervalY / 2.0)),
+        );
 
-        return position;
+        return index;
     };
 
-    const ocupationsPos: Vec2[] = [];
-    let nearestCollisionOcupation: Vec2 = new Vec2();
-    const collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+    // Sources and direction vectors
+    const sources: Vec2[] = [];
+    let dir: Vec2 | null = null;
 
-    dynamic.ocupations.map((ocupation) => {
-        ocupationsPos.push(convertCellToPos(ocupation));
+    console.log("Static Centers: ", behavior.staticCenter)
+    console.log("Ocupations: ", dynamic.ocupations)
+    behavior.staticCenter.map((center) => {
+        const convertedCenter = convertPosToCell(convertFromNDC(center));
+        console.log("Static Cell: ", convertedCenter)
+        dynamic.ocupations.map((ocupation) => {
+            const diff = convertedCenter.abs(ocupation);
+
+            // Checks if is axis aligned neighbor
+            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
+                sources.push(ocupation);
+            }
+        });
     });
 
-    let shortestDist = Number.MAX_SAFE_INTEGER;
-    ocupationsPos.map((pos, index) => {
-        const dist = pos.sub(collisionStaticPosition).length();
+    console.log("Sources: ", sources);
 
-        if (dist < shortestDist) {
-            nearestCollisionOcupation = dynamic.ocupations[index];
-            shortestDist = dist;
+    sources.map((source, index) => {
+        if (!dir)
+            dir = new Vec2();
+
+        const path = finder.findPath(
+            source, other.index
+        );
+        console.log("Path" + index, path)
+
+        const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
+        const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
+
+        console.log("Dest" + index, dest);
+        console.log("Origin" + index, origin);
+
+        if (!dest.equal(origin)){
+            console.log("SubDir" + index, dest.sub(origin));
+            dir = dir.add(dest.sub(origin));
         }
     });
-
-    const path = finder.findPath(
-        nearestCollisionOcupation,
-        other.index
-    );
-
-    let seekDir = new Vec2();
-    console.log(path)
-
-    const source = convertCellToPos(new Vec2(path[0][0], path[0][1]));
-    const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
-
-    if (!dest.equal(source)) {
-        seekDir = dest.sub(source);
-        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    console.log("PreDir: ", dir);
+    if (dir) {
+        dir = convertToNDC(dir).normalize().muls(status.speed);
+        console.log("FinalDir: ", dir);
     } else {
-        const enemyPos = target.getTransform().pos;
+        const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
-            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
         }
     }
 
-    rigidbody.velocity = seekDir;
+    rigidbody.velocity = dir;
 
     behavior.attacking = false;
 }
@@ -226,9 +255,23 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
     const other = grid.getDynamic(nearest);
     const dynamic = grid.getDynamic(entity);
 
+    // Começo do solver
+
+    console.log("Entity: ", dynamic.index);
+    console.log("Hunting: ", other.index);
+
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
+
+        return position;
+    };
+
+    const convertToNDC = (pos: Vec2): Vec2 => {
+        const position = new Vec2(
+            pos.x,
+            0 - pos.y
+        );
 
         return position;
     };
@@ -242,53 +285,68 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         return position;
     };
 
-    const convertToNDC = (pos: Vec2): Vec2 => {
-        const position = pos.muls(2.0).subs(1.0);
-        position.y = 0 - position.y;
+    const convertPosToCell = (pos: Vec2): Vec2 => {
+        const index = new Vec2(
+            Math.floor(pos.x / (grid.intervalX / 2.0)),
+            Math.floor(pos.y / (grid.intervalY / 2.0)),
+        );
 
-        return position;
+        return index;
     };
 
-    const ocupationsPos: Vec2[] = [];
-    let nearestCollisionOcupation: Vec2 = new Vec2();
-    const collisionStaticPosition = convertFromNDC(behavior.staticCenter);
+    // Sources and direction vectors
+    const sources: Vec2[] = [];
+    let dir: Vec2 | null = null;
 
-    dynamic.ocupations.map((ocupation) => {
-        ocupationsPos.push(convertCellToPos(ocupation));
+    console.log("Static Centers: ", behavior.staticCenter)
+    console.log("Ocupations: ", dynamic.ocupations)
+    behavior.staticCenter.map((center) => {
+        const convertedCenter = convertPosToCell(convertFromNDC(center));
+        console.log("Static Cell: ", convertedCenter)
+        dynamic.ocupations.map((ocupation) => {
+            const diff = convertedCenter.abs(ocupation);
+
+            // Checks if is axis aligned neighbor
+            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
+                sources.push(ocupation);
+            }
+        });
     });
 
-    shortestDist = Number.MAX_SAFE_INTEGER;
-    ocupationsPos.map((pos, index) => {
-        const dist = pos.sub(collisionStaticPosition).length();
+    console.log("Sources: ", sources);
 
-        if (dist < shortestDist) {
-            nearestCollisionOcupation = dynamic.ocupations[index];
-            shortestDist = dist;
+    sources.map((source, index) => {
+        if (!dir)
+            dir = new Vec2();
+
+        const path = finder.findPath(
+            source, other.index
+        );
+        console.log("Path" + index, path)
+
+        const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
+        const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
+
+        console.log("Dest" + index, dest);
+        console.log("Origin" + index, origin);
+
+        if (!dest.equal(origin)){
+            console.log("SubDir" + index, dest.sub(origin));
+            dir = dir.add(dest.sub(origin));
         }
     });
-
-    const path = finder.findPath(
-        nearestCollisionOcupation,
-        other.index
-    );
-
-    let seekDir = new Vec2();
-    console.log(path)
-
-    const source = convertCellToPos(new Vec2(path[0][0], path[0][1]));
-    const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
-
-    if (!dest.equal(source)) {
-        seekDir = dest.sub(source);
-        seekDir = convertToNDC(seekDir).normalize().muls(status.speed);
+    console.log("PreDir: ", dir);
+    if (dir) {
+        dir = convertToNDC(dir).normalize().muls(status.speed);
+        console.log("FinalDir: ", dir);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
-            seekDir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
         }
     }
 
-    rigidbody.velocity = seekDir;
+    rigidbody.velocity = dir;
 
     behavior.attacking = false;
 }

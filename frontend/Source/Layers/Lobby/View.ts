@@ -52,10 +52,6 @@ class ViewLayer extends Layer {
 
         this.offsetX = 50 * percentX - CONTAINER_DIM / 2.0;
         this.offsetY = 50 * percentY - CONTAINER_DIM / 2.0;
-
-        // this.ws.addMsgListener((msg) => {
-        //     this.onKill(msg);
-        // })
     }
 
     onAttach() {

@@ -22,7 +22,9 @@ interface ScheduledGameParticipant {
 
 interface GameParticipantsResult {
     scheduled_game_participant: number;
-    result: "died" | "won";
+    survived_for: number;
+    kills: number;
+    health: number;
     published_at?: string;
     created_at?: string;
     updated_at?: string;

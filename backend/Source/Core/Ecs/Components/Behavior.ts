@@ -10,8 +10,8 @@ class Behavior {
     public transform: Transform;
     public rigidbody: Rigidbody;
     public staticColide: boolean = false;
-    public staticNormal: Vec2 = new Vec2();
-    public staticCenter: Vec2 = new Vec2();
+    public staticNormal: Vec2[] = [];
+    public staticCenter: Vec2[] = [];
 
     // Nearby enemies
     public inRange: Entity[] = [];

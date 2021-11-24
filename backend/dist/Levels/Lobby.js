@@ -62,10 +62,14 @@ var LobbyLevel = /** @class */ (function (_super) {
             remainingPlayers: this.participants.length,
             totalPlayers: this.participants.length
         });
-        this.participants.map(function (participant, index) {
-            var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, grid, function () {
+        this.participants.map(function (participant) {
+            var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, participant.id, grid, function (result) {
+                _this.ready = false;
                 _this.layerStack.popLayer(player);
                 _this.fighters--;
+                // Esse vai para produção
+                console.log("Matou caramba");
+                _this.context.strapi.createParticipantResult(result).then(function () { return _this.ready = true; }).catch(function (err) { return console.log(err); });
                 _this.context.ws.broadcast({
                     msgType: "remain-players",
                     remainingPlayers: _this.fighters,
@@ -79,13 +83,38 @@ var LobbyLevel = /** @class */ (function (_super) {
         this.ready = true;
     };
     LobbyLevel.prototype.onUpdate = function (deltaTime) {
+        var _this = this;
         if (this.fighters <= 1 && this.ready) {
-            this.context.engine.loadLevel(new Await_1.AwaitLevel(this.context, "Await"));
+            this.layerStack.layers.map(function (layer) {
+                if (layer instanceof Player_1.PlayerLayer) {
+                    var status = layer.getSelf().getStatus();
+                    _this.context.ws.broadcast({
+                        msgType: "remain-players",
+                        remainingPlayers: _this.fighters,
+                        totalPlayers: _this.participants.length
+                    });
+                    _this.context.strapi.createParticipantResult({
+                        scheduled_game_participant: layer.strapiID,
+                        survived_for: Math.floor(status.survived),
+                        kills: Math.floor(status.kills),
+                        health: Math.floor(status.health)
+                    }).then(function () {
+                        var msg = {
+                            msgType: "game-status",
+                            gameId: _this.gameId,
+                            lastGameId: 0,
+                            gameStatus: "awaiting"
+                        };
+                        _this.context.ws.broadcast(msg);
+                        _this.context.engine.loadLevel(new Await_1.AwaitLevel(_this.context, "Await"));
+                    });
+                }
+            });
         }
     };
     LobbyLevel.prototype.onClose = function () {
+        this.layerStack.destroy();
         this.listener.destroy();
-        // this.context.ws.remMsgListener(this.listener);
     };
     LobbyLevel.prototype.onServerMsg = function (msg) {
         if (msg.content.type == Interfaces_1.requests.gameStatus) {
