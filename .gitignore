@@ -71,3 +71,5 @@ package-lock.json
 .vscode/
 public/main.js
 yarn.lock
+
+*/dist

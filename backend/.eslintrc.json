@@ -11,4 +11,4 @@
       "plugin:@typescript-eslint/recommended",
       "prettier"
     ]
-  }
+}

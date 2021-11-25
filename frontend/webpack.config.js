@@ -2,26 +2,25 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./src/index.ts",
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      WS_SERVER_HOST: "ws:localhost:8082",
-    }),
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
+    entry: "./Source/Index.ts",
+    plugins: [
+        new webpack.EnvironmentPlugin({
+            WS_SERVER_HOST: "ws:localhost:8082"
+        })
     ],
-  },
-  resolve: {
-    extensions: [".tsx", ".ts", ".js"],
-  },
-  output: {
-    filename: "engine.js",
-    path: path.resolve(__dirname, "public"),
-  },
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: "ts-loader"
+            }
+        ]
+    },
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"]
+    },
+    output: {
+        filename: "engine.js",
+        path: path.resolve(__dirname, "public")
+    }
 };
