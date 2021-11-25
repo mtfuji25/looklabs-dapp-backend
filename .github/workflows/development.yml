@@ -27,6 +27,7 @@ jobs:
 
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
+        working-directory: frontend
         with:
           args: deploy --only hosting:game --project default
         env:
