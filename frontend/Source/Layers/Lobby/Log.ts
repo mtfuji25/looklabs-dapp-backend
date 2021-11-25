@@ -70,16 +70,15 @@ class LogsLayer extends Layer {
     }
 
     // Removes last log
-    async remLog() {
+    remLog() {
         const log = this.logs.at(-1);
         // Unstage texts from log
         if (log.text) {
             // reduce opacity animation
-            for(let i = 100; i > 0; i--) {
-                await sleep(10);
-                log.text.action.text.alpha = i/100;
-                log.text.killed.text.alpha = i/100;
-                log.text.killer.text.alpha = i/100;    
+            for(let i = 1000; i > 0; i--) {
+                log.text.action.text.alpha = i/1000;
+                log.text.killed.text.alpha = i/1000;
+                log.text.killer.text.alpha = i/1000;    
             };
 
             // after reducing opacity, unstage text

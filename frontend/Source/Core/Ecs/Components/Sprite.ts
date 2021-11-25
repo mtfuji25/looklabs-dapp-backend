@@ -4,7 +4,7 @@ import { Vec2 } from "../../../Utils/Math";
 import { Transform } from "./Transform";
 
 // Pixi imports
-import { Application, LoaderResource, BaseTexture, Texture, Rectangle } from "pixi.js";
+import { Application, Container, LoaderResource, BaseTexture, Texture, Rectangle } from "pixi.js";
 import { Sprite as PixiSprite } from  "pixi.js";
 
 class Sprite {
@@ -17,6 +17,7 @@ class Sprite {
     public sprite: PixiSprite;
 
     private app: Application | null = null;
+    private container: Container | null = null;
 
     constructor(transform: Transform, res: LoaderResource | null) {
         this.transform = transform;
@@ -47,22 +48,34 @@ class Sprite {
         this.sprite.texture = Texture.from(url, {width: 200, height: 200});
     }
 
-    addStage(app: Application) {
-        if (!this.app) {
-            this.app = app;
-            app.stage.addChild(this.sprite);
+    addStage(app: Application | Container) {
+        if (app instanceof Application) {
+            if (!this.app) {
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            }
         } else {
-            this.remStage();
-            this.app = app;
-            app.stage.addChild(this.sprite);
+            if (!this.container) {
+                this.container = app;
+                app.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.container = app;
+                app.addChild(this.sprite);
+            }
         }
     }
 
     remStage() {
-        if (!this.app)
-            return;
-            
-        this.app.stage.removeChild(this.sprite);
+        if (this.app)
+            this.app.stage.removeChild(this.sprite);
+          
+        if (this.container)
+            this.container.removeChild(this.sprite);
     }
 
     setScale(x: number, y: number) {

@@ -88,6 +88,7 @@ var LobbyLevel = /** @class */ (function (_super) {
             this.layerStack.layers.map(function (layer) {
                 if (layer instanceof Player_1.PlayerLayer) {
                     var status = layer.getSelf().getStatus();
+                    _this.ready = false;
                     _this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: _this.fighters,

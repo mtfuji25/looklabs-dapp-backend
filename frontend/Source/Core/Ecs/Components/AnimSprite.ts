@@ -1,10 +1,9 @@
-import { Vec2 } from "../../../Utils/Math";
 
 // Components imports
 import { Transform } from "./Transform";
 
 // Pixi imports
-import { Application, BaseTexture, Texture, Rectangle, AnimatedSprite } from "pixi.js";
+import { Application, Container, BaseTexture, Texture, Rectangle, AnimatedSprite } from "pixi.js";
 
 type AnimConfig = {
     resource: string;
@@ -37,6 +36,7 @@ class AnimSprite {
     private frameHeight: number = 0;
 
     private app: Application | null = null;
+    private container: Container | null = null;
 
     constructor(transform: Transform) {
         this.transform = transform;
@@ -82,22 +82,39 @@ class AnimSprite {
         }
     }
 
-    addStage(app: Application) {
-        if (!this.app) {
-            this.app = app;
-            app.stage.addChild(this.sprite);
+    forceAnimate(animation: string) {
+        this.sprite.textures = this.sprites[animation];
+        this.sprite.play();
+    }
+
+    addStage(app: Application | Container) {
+        if (app instanceof Application) {
+            if (!this.app) {
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            }
         } else {
-            this.remStage();
-            this.app = app;
-            app.stage.addChild(this.sprite);
+            if (!this.container) {
+                this.container = app;
+                app.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.container = app;
+                app.addChild(this.sprite);
+            }
         }
     }
 
     remStage() {
-        if (!this.app)
-            return;
-            
-        this.app.stage.removeChild(this.sprite);
+        if (this.app)
+            this.app.stage.removeChild(this.sprite);
+          
+        if (this.container)
+            this.container.removeChild(this.sprite);
     }
 
     setScale(x: number, y: number) {

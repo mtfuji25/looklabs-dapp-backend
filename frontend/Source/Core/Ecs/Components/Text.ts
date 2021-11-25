@@ -4,7 +4,7 @@ import { Vec2 } from "../../../Utils/Math";
 import { Transform } from "./Transform";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, Container, ITextStyle } from "pixi.js";
 import { Text as PixiText } from "pixi.js";
 
 class Text {
@@ -17,6 +17,7 @@ class Text {
 
     // Current attached app
     private app: Application | null = null;
+    private container: Container | null = null;
 
     constructor(transform: Transform, text: string, styles: Partial<ITextStyle>) {
         this.transform = transform;
@@ -28,22 +29,34 @@ class Text {
         this.text.text = text;
     }
 
-    addStage(app: Application) {
-        if (!this.app) {
-            this.app = app;
-            app.stage.addChild(this.text);
+    addStage(app: Application | Container) {
+        if (app instanceof Application) {
+            if (!this.app) {
+                this.app = app;
+                app.stage.addChild(this.text);
+            } else {
+                this.remStage();
+                this.app = app;
+                app.stage.addChild(this.text);
+            }
         } else {
-            this.remStage();
-            this.app = app;
-            app.stage.addChild(this.text);
+            if (!this.container) {
+                this.container = app;
+                app.addChild(this.text);
+            } else {
+                this.remStage();
+                this.container = app;
+                app.addChild(this.text);
+            }
         }
     }
 
     remStage() {
-        if (!this.app)
-            return;
-
-        this.app.stage.removeChild(this.text);
+        if (this.app)
+            this.app.stage.removeChild(this.text);
+          
+        if (this.container)
+            this.container.removeChild(this.text);
     }
 
     setScale(x: number, y: number) {

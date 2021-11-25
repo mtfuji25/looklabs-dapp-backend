@@ -97,6 +97,7 @@ class LobbyLevel extends Level {
             this.layerStack.layers.map((layer) => {
                 if (layer instanceof PlayerLayer) {
                     const status = layer.getSelf().getStatus();
+                    this.ready = false;
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,

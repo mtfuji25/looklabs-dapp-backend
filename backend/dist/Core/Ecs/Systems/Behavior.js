@@ -144,6 +144,8 @@ var seekNearestWithA = function (entity, grid) {
             dir = new Math_1.Vec2();
         var path = finder.findPath(source, other.index);
         console.log("Path" + index, path);
+        if (path.length < 2)
+            return;
         var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
         var origin = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
         console.log("Dest" + index, dest);
@@ -227,6 +229,8 @@ var seekNearestInRangeWithA = function (entity, grid) {
             dir = new Math_1.Vec2();
         var path = finder.findPath(source, other.index);
         console.log("Path" + index, path);
+        if (path.length < 2)
+            return;
         var dest = convertCellToPos(new Math_1.Vec2(path[1][0], path[1][1]));
         var origin = convertCellToPos(new Math_1.Vec2(path[0][0], path[0][1]));
         console.log("Dest" + index, dest);
