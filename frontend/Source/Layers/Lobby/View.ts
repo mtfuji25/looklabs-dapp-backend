@@ -85,7 +85,7 @@ class ViewLayer extends Layer {
         this.zoom += this.inputs.wheel - this.lastZoom;
         this.lastZoom = this.inputs.wheel;
 
-        if (this.zoom < -10.0) this.zoom = -10.0;
+        if (this.zoom < -25.0) this.zoom = -25.0;
         if (this.zoom > 5.0) this.zoom = 5.0;
 
         this.view.zoom = this.zoom / 25.0;
@@ -95,12 +95,6 @@ class ViewLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
-    }
-
-    onKill(msg: ServerMsg) {
-        // if (msg.type == msgTypes.kill) {
-
-        // }
     }
 }
 

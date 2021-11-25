@@ -111,8 +111,8 @@ class PlayerLayer extends Layer {
             id.text.x = Math.floor(idTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
             id.text.y = Math.floor(idTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
             
-            // id.text.scale.x = 1.0 - this.levelContext.zoom;
-            // id.text.scale.y = 1.0 - this.levelContext.zoom;
+            id.text.scale.x = 1.0 - (this.levelContext.zoom / 2.0);
+            id.text.scale.y = 1.0 - (this.levelContext.zoom / 2.0);
 
             // Update health bar
             const healt = player.health.getColoredRectangle();
@@ -243,20 +243,20 @@ class PlayerLayer extends Layer {
         lifeRectangle.setSize(lifeRecSize, 4);
 
         // Set all positions
-        entityTransform.pos.x = pos.x;
-        entityTransform.pos.y = pos.y;
+        entityTransform.pos.x = Math.floor(pos.x);
+        entityTransform.pos.y = Math.floor(pos.y);
         
-        textTransform.pos.x = pos.x - (splitId.length - 1) * 0.2;
-        textTransform.pos.y = pos.y - 20;
+        textTransform.pos.x = Math.floor(pos.x - (splitId.length - 1) * 0.2);
+        textTransform.pos.y = Math.floor(pos.y - 20);
 
-        healthOutlineTransform.pos.x = pos.x - 13;
-        healthOutlineTransform.pos.y = pos.y - 36;
+        healthOutlineTransform.pos.x = Math.floor(pos.x - 13);
+        healthOutlineTransform.pos.y = Math.floor(pos.y - 36);
 
-        healthBackgroundTransform.pos.x = pos.x - 12;
-        healthBackgroundTransform.pos.y = pos.y - 35;
+        healthBackgroundTransform.pos.x = Math.floor(pos.x - 12);
+        healthBackgroundTransform.pos.y = Math.floor(pos.y - 35);
 
-        healthTransform.pos.x = pos.x - 12;
-        healthTransform.pos.y = pos.y - 35;
+        healthTransform.pos.x = Math.floor(pos.x - 12);
+        healthTransform.pos.y = Math.floor(pos.y - 35);
 
         if (health <= 0) {
             if (action == 0 || action == 4) {
@@ -273,12 +273,19 @@ class PlayerLayer extends Layer {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
             }
             if (action == 0) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][2]);
+                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
             }
             if (action == 1) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
             }
-            if (action == 2 || action == 3 || action == 6 || action == 7) {
+            if (action == 2 || action == 3) {
+                if (Math.random() < 0.5) {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                } else {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                }
+            }
+            if (action == 6 || action == 7) {
                 if (Math.random() < 0.5) {
                     entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
                 } else {

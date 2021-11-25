@@ -72,27 +72,13 @@ class LogsLayer extends Layer {
     // Removes last log
     remLog() {
         const log = this.logs.at(-1);
-        // Unstage texts from log
-        if (log.text) {
-            // reduce opacity animation
-            for(let i = 1000; i > 0; i--) {
-                log.text.action.text.alpha = i/1000;
-                log.text.killed.text.alpha = i/1000;
-                log.text.killer.text.alpha = i/1000;    
-            };
-
-            // after reducing opacity, unstage text
-            Object.values(log.text).forEach((text) => {
-                text.remStage();
-            });
-        }
+        
+        // after reducing opacity, unstage text
+        Object.values(log.text).forEach((text) => {
+            text.remStage();
+        });
         // removes log from log queue
         this.logs.pop();
-    }
-
-    // loops through logs and renders them
-    renderRows() {
-        this.logs.forEach((log, index) => this.renderLog(log, index));
     }
 
     // create result for a specific participant
@@ -174,7 +160,7 @@ class LogsLayer extends Layer {
             this.remLog();
         }
         // after all operations, render updated logs
-        this.renderRows();
+        this.logs.forEach((log, index) => this.renderLog(log, index));
 
         return true;
     }

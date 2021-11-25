@@ -45,7 +45,7 @@ class Sprite {
     }
 
     setFromUrl(url: string) {
-        this.sprite.texture = Texture.from(url, {width: 200, height: 200});
+        this.sprite.texture = Texture.from(url);
     }
 
     addStage(app: Application | Container) {
@@ -86,14 +86,18 @@ class Sprite {
     setPos(x: number, y: number) {
         this.transform.pos.x = x;
         this.transform.pos.y = y;
+        this.sprite.x = x;
+        this.sprite.y = y;
     }
 
     setSize(width: number, height: number) {
-        const scaleX = width / this.sprite.width;
-        const scaleY = height / this.sprite.height;
+        const scaleX = width / this.sprite.texture.width;
+        const scaleY = height / this.sprite.texture.height;
 
         this.transform.scale.x = scaleX;
         this.transform.scale.y = scaleY;
+        this.sprite.scale.x = scaleX;
+        this.sprite.scale.y = scaleY;
     }
 
     setAnchor(x: number, y?: number) {

@@ -321,4 +321,4 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
     });
 }
 
-export { sys_UpdateGrid, sys_UpdateCollisions, sys_CheckCollisions };
+export { sys_UpdateGrid, sys_UpdateCollisions, sys_CheckCollisions, collisionsResults };
