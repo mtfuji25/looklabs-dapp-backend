@@ -1,4 +1,4 @@
-import { Engine } from "./core/engine";
+import { Engine } from "./Core/Engine";
 import { WSClient } from "./Clients/WebSocket";
 import { StrapiClient } from "./Clients/Strapi";
 
