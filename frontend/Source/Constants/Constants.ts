@@ -2,7 +2,7 @@
 const STATIC_URL = "./public";
 
 // WebSocket Client configs
-const WS_HOST = "ws:localhost:8082";
+const WS_HOST = process.env.WS_SERVER_HOST || "ws:localhost:8082";
 
 // Strapi Client configs
 const STRAPI_HOST = "https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/";
@@ -19,12 +19,4 @@ const CONTAINER_DIM = 1440;
 // Unit sprite size
 const SPRITE_SIZE = 16;
 
-export { 
-    STATIC_URL,
-    WS_HOST,
-    STRAPI_HOST,
-    ROOT_DIV_ID,
-    MAIN_BG_COLOR,
-    CONTAINER_DIM,
-    SPRITE_SIZE
-};
+export { STATIC_URL, WS_HOST, STRAPI_HOST, ROOT_DIV_ID, MAIN_BG_COLOR, CONTAINER_DIM, SPRITE_SIZE };

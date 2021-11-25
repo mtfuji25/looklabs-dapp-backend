@@ -3,11 +3,6 @@ const webpack = require("webpack");
 
 module.exports = {
     entry: "./Source/Index.ts",
-    plugins: [
-        new webpack.EnvironmentPlugin({
-            WS_SERVER_HOST: "ws:localhost:8082"
-        })
-    ],
     module: {
         rules: [
             {
