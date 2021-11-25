@@ -23,21 +23,74 @@ import { GameParticipantsResult } from "../../Clients/Strapi";
 //  "walkup": 6, "walkdown": 7
 //
 
+// const spawnPos = [
+//     new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
+//     new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
+//     new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
+//     new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
+//     new Vec2( 0.90,  0.20), new Vec2(-0.90,  0.20),
+//     new Vec2( 0.90, -0.25), new Vec2(-0.90, -0.25),
+//     new Vec2(-0.30, -0.90), new Vec2( 0.30,  0.80),
+//     new Vec2(-0.30,  0.80), new Vec2( 0.30, -0.90),
+//     new Vec2( 0.90,  0.00), new Vec2(-0.90,  0.00),
+//     new Vec2( 0.00,  0.80), new Vec2( 0.00, -0.90),
+//     new Vec2( 0.65,  0.24), new Vec2(-0.65,  0.24),
+//     new Vec2(-0.32,  0.63), new Vec2( 0.32, -0.65),
+//     new Vec2(-0.32, -0.65), new Vec2( 0.32,  0.63),
+//     new Vec2( 0.65, -0.28), new Vec2(-0.65, -0.28),
+// ];
+
 const spawnPos = [
-    new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
-    new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
-    new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
-    new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
-    new Vec2( 0.90,  0.20), new Vec2(-0.90,  0.20),
-    new Vec2( 0.90, -0.25), new Vec2(-0.90, -0.25),
-    new Vec2(-0.30, -0.90), new Vec2( 0.30,  0.80),
-    new Vec2(-0.30,  0.80), new Vec2( 0.30, -0.90),
-    new Vec2( 0.90,  0.00), new Vec2(-0.90,  0.00),
-    new Vec2( 0.00,  0.80), new Vec2( 0.00, -0.90),
-    new Vec2( 0.65,  0.24), new Vec2(-0.65,  0.24),
-    new Vec2(-0.32,  0.63), new Vec2( 0.32, -0.65),
-    new Vec2(-0.32, -0.65), new Vec2( 0.32,  0.63),
-    new Vec2( 0.65, -0.28), new Vec2(-0.65, -0.28),
+    new Vec2( 0.40,  0.05), new Vec2( 0.27, -0.40),
+    new Vec2( 0.46,  0.03), new Vec2( 0.27, -0.46),
+    new Vec2( 0.52,  0.02), new Vec2( 0.27, -0.52),
+    new Vec2( 0.58,  0.01), new Vec2( 0.27, -0.58),
+    new Vec2( 0.64,  0.04), new Vec2( 0.27, -0.64),
+    new Vec2( 0.70,  0.02), new Vec2( 0.27, -0.70),
+    new Vec2( 0.76,  0.07), new Vec2( 0.27, -0.76),
+    new Vec2( 0.82,  0.02), new Vec2( 0.27, -0.82),
+    new Vec2( 0.88,  0.01), new Vec2( 0.27, -0.88),
+    new Vec2( 0.40,  0.22), new Vec2(-0.40,  0.00),
+    new Vec2( 0.46,  0.21), new Vec2(-0.46,  0.00),
+    new Vec2( 0.52,  0.22), new Vec2(-0.52,  0.00),
+    new Vec2( 0.58,  0.23), new Vec2(-0.58,  0.00),
+    new Vec2( 0.64,  0.24), new Vec2(-0.64,  0.00),
+    new Vec2( 0.70,  0.20), new Vec2(-0.70,  0.00),
+    new Vec2( 0.76,  0.20), new Vec2(-0.76,  0.00),
+    new Vec2( 0.82,  0.20), new Vec2(-0.82,  0.00),
+    new Vec2( 0.88,  0.20), new Vec2(-0.88,  0.00),
+    new Vec2( 0.40, -0.25), new Vec2(-0.40,  0.20),
+    new Vec2( 0.46, -0.25), new Vec2(-0.46,  0.20),
+    new Vec2( 0.52, -0.25), new Vec2(-0.52,  0.20),
+    new Vec2( 0.58, -0.25), new Vec2(-0.58,  0.20),
+    new Vec2( 0.64, -0.25), new Vec2(-0.64,  0.20),
+    new Vec2( 0.70, -0.25), new Vec2(-0.70,  0.20),
+    new Vec2( 0.76, -0.25), new Vec2(-0.76,  0.20),
+    new Vec2( 0.82, -0.25), new Vec2(-0.82,  0.20),
+    new Vec2( 0.88, -0.25), new Vec2(-0.88,  0.20),
+    new Vec2( 0.00, -0.40), new Vec2(-0.40, -0.20),
+    new Vec2( 0.00, -0.46), new Vec2(-0.46, -0.20),
+    new Vec2( 0.00, -0.52), new Vec2(-0.52, -0.20),
+    new Vec2( 0.00, -0.58), new Vec2(-0.58, -0.20),
+    new Vec2( 0.00, -0.64), new Vec2(-0.64, -0.20),
+    new Vec2( 0.00, -0.70), new Vec2(-0.70, -0.20),
+    new Vec2( 0.00, -0.76), new Vec2(-0.76, -0.20),
+    new Vec2( 0.00, -0.82), new Vec2(-0.82, -0.20),
+    new Vec2( 0.00, -0.88), new Vec2(-0.88, -0.20),
+    new Vec2(-0.27, -0.40), new Vec2( 0.00,  0.40),
+    new Vec2(-0.27, -0.46), new Vec2( 0.00,  0.46),
+    new Vec2(-0.27, -0.52), new Vec2( 0.00,  0.52),
+    new Vec2(-0.27, -0.58), new Vec2( 0.00,  0.58),
+    new Vec2(-0.27, -0.64), new Vec2( 0.00,  0.64),
+    new Vec2(-0.27, -0.70), new Vec2( 0.00,  0.70),
+    new Vec2(-0.27, -0.76), new Vec2( 0.00,  0.76),
+    new Vec2(-0.27, -0.82), new Vec2(-0.20,  0.40),
+    new Vec2(-0.27, -0.88), new Vec2(-0.20,  0.46),
+    new Vec2(-0.20,  0.52), new Vec2( 0.20,  0.52),
+    new Vec2(-0.20,  0.58), new Vec2( 0.20,  0.58),
+    new Vec2(-0.20,  0.64), new Vec2( 0.20,  0.64),
+    new Vec2(-0.20,  0.70), new Vec2( 0.20,  0.70),
+    new Vec2(-0.20,  0.76), new Vec2( 0.20,  0.76),
 ];
 
 class PlayerLayer extends Layer {
@@ -94,10 +147,10 @@ class PlayerLayer extends Layer {
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount < 28)
-            PlayerLayer.playerCount++;
-        else
+        if (PlayerLayer.playerCount == 99)
             PlayerLayer.playerCount = 0;
+        else
+            PlayerLayer.playerCount++;
 
         this.self.addBehavior();
 
