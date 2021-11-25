@@ -67,6 +67,8 @@ class Text {
     setPos(x: number, y: number) {
         this.transform.pos.x = x;
         this.transform.pos.y = y;
+        this.text.x = x;
+        this.text.y = y;
     }
 
     setStyle(styles: Partial<ITextStyle>) {

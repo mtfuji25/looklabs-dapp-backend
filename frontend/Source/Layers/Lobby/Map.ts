@@ -15,6 +15,7 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
 import levelMapFile from "../../Assets/LevelMap.json";
+import { Vec2 } from "../../Utils/Math";
 const levelMap: Record<string, any> = levelMapFile;
 
 class MapLayer extends Layer {
@@ -30,6 +31,9 @@ class MapLayer extends Layer {
 
     // Current level's context
     private levelContext: LobbyLevelContext;
+
+    // Dimension
+    private dim: Vec2 = new Vec2();
 
     constructor(
         ecs: ECS,
@@ -92,16 +96,19 @@ class MapLayer extends Layer {
         // Apply a ligth blur on the soil
         //this.mapContainer.filters = [new filters.BlurFilter(1, 8)];
 
+        this.dim.x = this.mapContainer.width;
+        this.dim.y = this.mapContainer.height;
+
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
     }
 
     onUpdate(deltaTime: number) {
         let fixFactorX =
-            (this.mapContainer.width - this.mapContainer.width * (1 - this.levelContext.zoom)) / 2.0;
+            (this.dim.x - this.dim.x * (1 - this.levelContext.zoom)) / 2.0;
 
         let fixFactorY =
-            (this.mapContainer.height - this.mapContainer.height * (1 - this.levelContext.zoom)) / 2.0;
+            (this.dim.y - this.dim.y * (1 - this.levelContext.zoom)) / 2.0;
             
         // Translate and scale soil
         this.mapContainer.x = this.levelContext.offsetX + fixFactorX;

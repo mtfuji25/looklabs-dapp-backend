@@ -15,6 +15,7 @@ interface ScheduledGameParticipant {
     name: string;
     user_address: string;
     scheduled_game: number;
+    image_address: string;
     game_participants_result: GameParticipantsResult;
     published_at?: string;
     created_at?: string;

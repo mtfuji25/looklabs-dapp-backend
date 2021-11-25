@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sys_CheckOverlap = void 0;
+var Grid_1 = require("./Grid");
 var aabbCheck = function (rec1, rec2) {
     var center1 = rec1.getCenter();
     var center2 = rec2.getCenter();
@@ -20,6 +21,10 @@ var sys_CheckOverlap = function (data, deltaTime) {
             for (var j = i + 1; j < grid.dynamics.length; ++j) {
                 var rec2 = grid.dynamics[j].entity.getRectangle();
                 if (aabbCheck(rec1, rec2)) {
+                    Grid_1.collisionsResults.push({
+                        entity: grid.dynamics[i].entity,
+                        other: grid.dynamics[j].entity
+                    });
                     var rigidbody = grid.dynamics[i].entity.getRigidbody();
                     var otherRigidbody = grid.dynamics[j].entity.getRigidbody();
                     var transform = grid.dynamics[i].entity.getTransform();

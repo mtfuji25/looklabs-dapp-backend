@@ -125,6 +125,8 @@ class AnimSprite {
     setPos(x: number, y: number) {
         this.transform.pos.x = x;
         this.transform.pos.y = y;
+        this.sprite.x = x;
+        this.sprite.y = y;
     }
 
 }

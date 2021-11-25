@@ -132,6 +132,10 @@ class WinnerLayer extends Layer {
         this.scaleImg(this.sprites["resultCard"]);
         this.scaleImg(this.sprites["nameCard"]);
 
+        this.winnerImg.setFromUrl(
+            this.participant.image_address
+        );
+
         // sets texts according to the winner
         this.texts["winnerName"].setText(this.participant.name);
         this.texts["kills"].setText(String(this.participant.game_participants_result.kills));
@@ -141,7 +145,9 @@ class WinnerLayer extends Layer {
         );
     }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        this.winnerImg.setSize(200 * this.app.view.width / 1440, 200 * this.app.view.height / 800);
+    }
 
     onDetach() {
         this.self.destroy();

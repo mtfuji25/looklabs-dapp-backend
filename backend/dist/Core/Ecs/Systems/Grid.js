@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sys_CheckCollisions = exports.sys_UpdateCollisions = exports.sys_UpdateGrid = void 0;
+exports.collisionsResults = exports.sys_CheckCollisions = exports.sys_UpdateCollisions = exports.sys_UpdateGrid = void 0;
 // Math imports
 var Math_1 = require("../../../Utils/Math");
 // For neighbor checks
@@ -41,6 +41,7 @@ var sys_UpdateGrid = function (data, deltaTime) {
 };
 exports.sys_UpdateGrid = sys_UpdateGrid;
 var collisionsResults = [];
+exports.collisionsResults = collisionsResults;
 var staticColide = [];
 var sys_CheckCollisions = function (data, deltaTime) {
     data.grids.forEach(function (grid) {
@@ -64,7 +65,7 @@ var sys_CheckCollisions = function (data, deltaTime) {
             collision.entity.getBehavior().staticNormal.push(collision.normal);
             collision.entity.getBehavior().staticCenter.push(collision.center);
         });
-        collisionsResults = [];
+        exports.collisionsResults = collisionsResults = [];
         staticColide = [];
     });
 };

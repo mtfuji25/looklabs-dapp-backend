@@ -13,22 +13,28 @@ import { ResultsLevel } from "./Results";
 class DefaultLevel extends Level {
 
     onStart(): void {
-        this.context.ws.request({
-            uuid: uuidv4(),
-            type: "request",
-            content: {
-                type: "game-status"
+        // this.context.ws.request({
+        //     uuid: uuidv4(),
+        //     type: "request",
+        //     content: {
+        //         type: "game-status"
+        //     }
+        // })
+        // .then((response) => {
+        //     const content = response.content as GameStatus;
+        //     console.log(response)
+        //     this.startLevels(content);
+        // })
+        // .catch((err) => {
+        //     console.log(err);
+        //     this.context.close = true;
+        // });
+        this.context.engine.loadLevel(new ResultsLevel(
+            this.context, "Results",
+            {
+                gameId: 12
             }
-        })
-        .then((response) => {
-            const content = response.content as GameStatus;
-            console.log(response)
-            this.startLevels(content);
-        })
-        .catch((err) => {
-            console.log(err);
-            this.context.close = true;
-        });
+        ));
     
     }
 
