@@ -21,6 +21,8 @@ import { CONTAINER_DIM } from "../../Constants/Constants";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
+import { Container } from "pixi.js";
+
 interface Player {
     entity: Entity;
     health: Entity;
@@ -42,6 +44,9 @@ class PlayerLayer extends Layer {
 
     // Web clients
     protected wsClient: WSClient;
+
+    // Playher container
+    private container: Container;
 
     // Lobby level context
     private levelContext: LobbyLevelContext;
@@ -73,9 +78,13 @@ class PlayerLayer extends Layer {
         this.listener = this.wsClient.addListener("enemy", (msg) =>
             this.onServerMsg(msg)
         );
+
+        this.container = new Container();
     }
 
-    onAttach() {}
+    onAttach() {
+        this.app.stage.addChild(this.container);
+    }
 
     onUpdate(deltaTime: number) {
         Object.values(this.players).map((player) => {

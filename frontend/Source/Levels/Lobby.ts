@@ -10,7 +10,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameStatus, ServerMsg } from "../Clients/Interfaces";
+import { GameStatus, Listener, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 
 interface LobbyLevelContext extends ViewContext {
@@ -22,6 +22,8 @@ interface LobbyLevelContext extends ViewContext {
 
 class LobbyLevel extends Level {
 
+    private listener: Listener;
+
     private levelContext: LobbyLevelContext = {
         // View properties
         zoom: 0.0,
@@ -31,7 +33,7 @@ class LobbyLevel extends Level {
 
     onStart(): void {
 
-        this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
+        this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
@@ -90,12 +92,14 @@ class LobbyLevel extends Level {
         status.content = status.content as GameStatus;
 
         if (status.content.gameStatus == "awaiting") {
+            console.log("Running")
             this.context.engine.loadLevel(new ResultsLevel(
                 this.context, "Results",
                 {
                     gameId: status.content.gameId
                 }
             ));
+            this.listener.destroy();
         }
 
         return true;
