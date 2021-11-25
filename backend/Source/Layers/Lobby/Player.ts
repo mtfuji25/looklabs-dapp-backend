@@ -220,7 +220,6 @@ class PlayerLayer extends Layer {
     }
 
     onWsConnection(ws: WebSocket) {
-
         this.wsClient.send(ws, this.getBaseMsg("create"));
 
         // Doesn't handle the event

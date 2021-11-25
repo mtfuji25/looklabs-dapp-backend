@@ -174,12 +174,12 @@ class PlayerLayer extends Layer {
         title.addText(splitId, this.idStyle);
         const titleText = title.getText();
         titleText.text.anchor.set(0.5);
-        titleText.addStage(this.app);
+        titleText.addStage(this.container);
         
         // Add healthBar
-        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.app);
-        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.app);
-        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.app);
+        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.container);
+        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.container);
+        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.container);
         
         // Add animsprite component
         const sprite = entity.addAnimSprite();
@@ -202,7 +202,7 @@ class PlayerLayer extends Layer {
                 break;
         }
         
-        sprite.addStage(this.app);
+        sprite.addStage(this.container);
 
         this.players[id] = {
             entity: entity,
@@ -291,12 +291,16 @@ class PlayerLayer extends Layer {
     deleteEnemy(command: PlayerCommand) {
         const { id } = command;
 
-        this.players[id].id.destroy();
-        this.players[id].health.destroy();
-        this.players[id].healthOutline.destroy();
-        this.players[id].healthBackground.destroy();
-        this.players[id].entity.destroy();
-        delete this.players[id];
+        this.players[id].entity.getAnimSprite().forceAnimate(this.res["wolf-sheet"]["animations"][4]);
+
+        setTimeout(() => {
+            this.players[id].id.destroy();
+            this.players[id].health.destroy();
+            this.players[id].healthOutline.destroy();
+            this.players[id].healthBackground.destroy();
+            this.players[id].entity.destroy();
+            delete this.players[id];
+        }, 200);
     }
 
     onServerMsg(msg: ServerMsg) {

@@ -202,6 +202,9 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         );
         console.log("Path" + index, path)
 
+        if (path.length < 2)
+            return;
+
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
@@ -323,6 +326,9 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
             source, other.index
         );
         console.log("Path" + index, path)
+
+        if (path.length < 2)
+            return;
 
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
