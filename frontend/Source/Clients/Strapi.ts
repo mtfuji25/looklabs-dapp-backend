@@ -32,7 +32,6 @@ interface GameParticipantsResult {
 }
 
 class StrapiClient {
-    
     private host: string;
 
     private readonly api: AxiosInstance;
@@ -43,7 +42,7 @@ class StrapiClient {
         this.host = host;
         // start axios instance
         this.api = axios.create({
-            baseURL: `${this.host}`,
+            baseURL: `${this.host}`
         });
     }
 
@@ -51,11 +50,11 @@ class StrapiClient {
         return this.api.get(url);
     }
 
-    private async post(url: string, data: any): Promise<AxiosResponse>  {
+    private async post(url: string, data: any): Promise<AxiosResponse> {
         return this.api.post(url, data);
     }
 
-    private async put(url: string): Promise<AxiosResponse>  {
+    private async put(url: string): Promise<AxiosResponse> {
         return this.api.put(url);
     }
 
@@ -66,7 +65,7 @@ class StrapiClient {
     }
 
     // gets the nearest game
-    async getNearestGame(): Promise<ScheduledGame>{
+    async getNearestGame(): Promise<ScheduledGame> {
         // get current time
         const now = new Date().toISOString();
 
@@ -100,7 +99,7 @@ class StrapiClient {
     // Default engine close call
     // closes express server
     close(): void {
-        console.log("Closing express server.")
+        console.log("Closing express server.");
         this.expressServer.close();
     }
 }

@@ -55,23 +55,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var engine_1 = require("./core/engine");
+// Core engine import
+var Engine_1 = require("./Core/Engine");
+// Web clients import
 var WebSocket_1 = require("./Clients/WebSocket");
 var Strapi_1 = require("./Clients/Strapi");
 var dotenv = __importStar(require("dotenv"));
 dotenv.config();
-var STRAPI_SERVER_URL = String(process.env.STRAPI_SERVER_URL);
-var EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
-var WS_PORT = Number(process.env.WS_SERVER_PORT);
+// WebSocket Server configs
 var WS_HOST = String(process.env.WS_SERVER_HOST);
+var WS_PORT = Number(process.env.WS_SERVER_PORT);
+// Strapi Server configs
+var STRAPI_HOST = String(process.env.STRAPI_SERVER_HOST);
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var strapiClient, wsClient, engine;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                strapiClient = new Strapi_1.StrapiClient(STRAPI_SERVER_URL);
+                strapiClient = new Strapi_1.StrapiClient(STRAPI_HOST);
                 wsClient = new WebSocket_1.WSClient(WS_HOST, WS_PORT);
-                engine = new engine_1.Engine(wsClient, strapiClient);
+                engine = new Engine_1.Engine(wsClient, strapiClient);
                 // Start the engine systems
                 engine.start();
                 // Start the engine game loop

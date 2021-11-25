@@ -63,14 +63,13 @@ dotenv.config();
 var STRAPI_SERVER_URL = String(process.env.STRAPI_SERVER_URL);
 var EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
 var WS_PORT = Number(process.env.WS_SERVER_PORT);
-var WS_HOST = String(process.env.WS_SERVER_HOST);
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var strapiClient, wsClient, engine;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                strapiClient = new Strapi_1.StrapiClient(STRAPI_SERVER_URL);
-                wsClient = new WebSocket_1.WSClient(WS_HOST, WS_PORT);
+                strapiClient = new Strapi_1.StrapiClient(STRAPI_SERVER_URL, EXPRESS_PORT);
+                wsClient = new WebSocket_1.WSClient(WS_PORT);
                 engine = new engine_1.Engine(wsClient, strapiClient);
                 // Start the engine systems
                 engine.start();

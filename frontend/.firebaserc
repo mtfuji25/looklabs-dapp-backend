@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "the-pit-328710"
+  },
+  "targets": {
+    "the-pit-328710": {
+      "hosting": {
+        "game": [
+          "thepitnft-game"
+        ]
+      }
+    }
+  }
+}
