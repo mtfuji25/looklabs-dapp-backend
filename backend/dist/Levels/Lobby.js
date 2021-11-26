@@ -66,10 +66,13 @@ var LobbyLevel = /** @class */ (function (_super) {
             var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, participant.id, grid, function (result) {
                 _this.ready = false;
                 _this.layerStack.popLayer(player);
-                _this.fighters--;
                 // Esse vai para produção
                 console.log("Matou caramba");
-                _this.context.strapi.createParticipantResult(result).then(function () { return _this.ready = true; }).catch(function (err) { return console.log(err); });
+                _this.context.strapi.createParticipantResult(result).then(function () {
+                    _this.ready = true;
+                }).catch(function (err) { return console.log(err); });
+                // Shoud be after create result
+                _this.fighters--;
                 _this.context.ws.broadcast({
                     msgType: "remain-players",
                     remainingPlayers: _this.fighters,
@@ -84,22 +87,29 @@ var LobbyLevel = /** @class */ (function (_super) {
     };
     LobbyLevel.prototype.onUpdate = function (deltaTime) {
         var _this = this;
+        // When game finished
         if (this.fighters <= 1 && this.ready) {
+            // Find the last remain player
             this.layerStack.layers.map(function (layer) {
                 if (layer instanceof Player_1.PlayerLayer) {
-                    var status = layer.getSelf().getStatus();
+                    // Block update for re-running
                     _this.ready = false;
+                    // Get status component
+                    var status = layer.getSelf().getStatus();
+                    // Tells front-ends that there is only one player
                     _this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: _this.fighters,
                         totalPlayers: _this.participants.length
                     });
+                    // Create last participant result
                     _this.context.strapi.createParticipantResult({
                         scheduled_game_participant: layer.strapiID,
                         survived_for: Math.floor(status.survived),
                         kills: Math.floor(status.kills),
-                        health: Math.floor(status.health)
+                        health: Math.ceil(status.health)
                     }).then(function () {
+                        // Tells frontends that is return to await from this gameId
                         var msg = {
                             msgType: "game-status",
                             gameId: _this.gameId,
@@ -107,6 +117,7 @@ var LobbyLevel = /** @class */ (function (_super) {
                             gameStatus: "awaiting"
                         };
                         _this.context.ws.broadcast(msg);
+                        // Change to await level
                         _this.context.engine.loadLevel(new Await_1.AwaitLevel(_this.context, "Await"));
                     });
                 }

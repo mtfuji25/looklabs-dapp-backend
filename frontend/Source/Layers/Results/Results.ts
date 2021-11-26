@@ -2,7 +2,6 @@ import { Layer } from "../../Core/Layer";
 
 // Ecs and Components imports
 import { ECS } from "../../Core/Ecs/Core/Ecs";
-import { Text } from "../../Core/Ecs/Components/Text";
 
 // Pixi imports
 import { Application, ITextStyle } from "pixi.js";

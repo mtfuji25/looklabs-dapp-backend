@@ -90,7 +90,7 @@ class StrapiClient {
     async getGameParticipants(id: number) {
         return (
             await this.get(
-                `scheduled-game-participants?scheduled_game=${id}&_sort=game_participants_result.survived_for:DESC`
+                `https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/scheduled-game-participants?scheduled_game=${id}&_sort=game_participants_result.survived_for:DESC,game_participants_result.id:DESC`
             )
         ).data;
     }
