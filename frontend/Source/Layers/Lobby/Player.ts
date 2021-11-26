@@ -219,7 +219,7 @@ class PlayerLayer extends Layer {
         pos.x = Math.floor(pos.x);
         pos.y = Math.floor(pos.y);
 
-        if (!this.players) {
+        if (!this.players[id]) {
             this.createEnemy(command);
         }
 

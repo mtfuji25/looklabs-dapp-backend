@@ -161,8 +161,6 @@ class PlayerLayer extends Layer {
 
 
     onAttach(): void {
-        
-        
         // Create player entity in new client
         this.wsClient.broadcast(this.getBaseMsg("create"));
     }
