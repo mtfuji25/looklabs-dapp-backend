@@ -307,7 +307,7 @@ class PlayerLayer extends Layer {
             this.players[id].healthBackground.destroy();
             this.players[id].entity.destroy();
             delete this.players[id];
-        }, 200);
+        }, 400);
     }
 
     onServerMsg(msg: ServerMsg) {

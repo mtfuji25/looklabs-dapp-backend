@@ -72,10 +72,13 @@ class LobbyLevel extends Level {
                 (result: GameParticipantsResult) => {
                     this.ready = false;
                     this.layerStack.popLayer(player);
-                    this.fighters--;
                     // Esse vai para produção
                     console.log("Matou caramba")
-                    this.context.strapi.createParticipantResult(result).then(() => this.ready = true).catch((err) => console.log(err));
+                    this.context.strapi.createParticipantResult(result).then(() => {
+                        this.ready = true
+                    }).catch((err) => console.log(err));
+                    // Shoud be after create result
+                    this.fighters--;
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,
@@ -93,22 +96,35 @@ class LobbyLevel extends Level {
     }
 
     onUpdate(deltaTime: number) {
+        // When game finished
         if (this.fighters <= 1 && this.ready) {
+
+            // Find the last remain player
             this.layerStack.layers.map((layer) => {
                 if (layer instanceof PlayerLayer) {
-                    const status = layer.getSelf().getStatus();
+
+                    // Block update for re-running
                     this.ready = false;
+
+                    // Get status component
+                    const status = layer.getSelf().getStatus();
+
+                    // Tells front-ends that there is only one player
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,
                         totalPlayers: this.participants.length
-                    })
+                    });
+
+                    // Create last participant result
                     this.context.strapi.createParticipantResult({
                         scheduled_game_participant: layer.strapiID,
                         survived_for: Math.floor(status.survived),
                         kills: Math.floor(status.kills),
-                        health: Math.floor(status.health)
+                        health: Math.ceil(status.health)
                     }).then(() => {
+
+                        // Tells frontends that is return to await from this gameId
                         const msg: GameStatus = {
                             msgType: "game-status",
                             gameId: this.gameId,
@@ -116,6 +132,8 @@ class LobbyLevel extends Level {
                             gameStatus: "awaiting"
                         };
                         this.context.ws.broadcast(msg);
+
+                        // Change to await level
                         this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
                     });
                 }
