@@ -14,10 +14,25 @@ const BLACK_BG_COLOR = 0x000;
 class AwaitLevel extends Level {
 
     private listener: Listener;
+    private conListener: Listener;
 
     onStart(): void {
         // Add msg listener
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
+
+        this.conListener = this.context.ws.addListener("connection", (ws) => {
+
+            this.context.engine.loadLevel(
+                new AwaitLevel(
+                    this.context, "Lobby",
+                    {
+                        gameId: this.props.gameId
+                    }
+                )
+            );
+
+            return false;
+        });
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
@@ -47,6 +62,7 @@ class AwaitLevel extends Level {
 
     onClose(): void {
         this.listener.destroy()
+        this.conListener.destroy();
     }
 
     onServerMsg(msg: ServerMsg) {
