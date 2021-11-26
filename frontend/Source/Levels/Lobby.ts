@@ -23,6 +23,7 @@ interface LobbyLevelContext extends ViewContext {
 class LobbyLevel extends Level {
 
     private listener: Listener;
+    private conListener: Listener;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -34,6 +35,19 @@ class LobbyLevel extends Level {
     onStart(): void {
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
+        this.conListener = this.context.ws.addListener("connection", (ws) => {
+
+            this.context.engine.loadLevel(
+                new LobbyLevel(
+                    this.context, "Lobby",
+                    {
+                        gameId: this.props.gameId
+                    }
+                )
+            );
+
+            return false;
+        });
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
@@ -85,6 +99,7 @@ class LobbyLevel extends Level {
 
     onClose(): void {
         this.layerStack.destroy();
+        this.conListener.destroy();
     }
 
     onStatus(status: ServerMsg) {

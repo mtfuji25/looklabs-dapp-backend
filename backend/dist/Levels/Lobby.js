@@ -34,6 +34,14 @@ var LobbyLevel = /** @class */ (function (_super) {
         _this.ready = false;
         _this.gameId = gameId;
         _this.listener = _this.context.ws.addListener("game-status", function (msg) { return _this.onServerMsg(msg); });
+        _this.conListener = _this.context.ws.addListener("connection", function (ws) {
+            _this.context.ws.send(ws, {
+                msgType: "remain-players",
+                remainingPlayers: _this.participants.length,
+                totalPlayers: _this.participants.length
+            });
+            return false;
+        });
         return _this;
     }
     LobbyLevel.prototype.onStart = function () {
@@ -127,6 +135,7 @@ var LobbyLevel = /** @class */ (function (_super) {
     LobbyLevel.prototype.onClose = function () {
         this.layerStack.destroy();
         this.listener.destroy();
+        this.conListener.destroy();
     };
     LobbyLevel.prototype.onServerMsg = function (msg) {
         if (msg.content.type == Interfaces_1.requests.gameStatus) {

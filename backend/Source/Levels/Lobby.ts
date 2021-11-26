@@ -12,7 +12,7 @@ import { EngineContext } from "../Core/Interfaces";
 import { PlayerLayer } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
-import { GameStatus, GameStatusListener, requests } from "../Clients/Interfaces";
+import { GameStatus, GameStatusListener, OnConnectionListener, requests } from "../Clients/Interfaces";
 
 class LobbyLevel extends Level {
 
@@ -28,6 +28,7 @@ class LobbyLevel extends Level {
 
     // Current ws listener is
     private listener: GameStatusListener;
+    private conListener: OnConnectionListener;
 
     constructor(context: EngineContext, name: string, gameId: number) {
         super(context, name);
@@ -35,6 +36,15 @@ class LobbyLevel extends Level {
         this.gameId = gameId;
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
+        this.conListener = this.context.ws.addListener("connection", (ws) => {
+            this.context.ws.send(ws, {
+                msgType: "remain-players",
+                remainingPlayers: this.participants.length,
+                totalPlayers: this.participants.length
+            });
+
+            return false;
+        });
     }
 
     onStart(): void {
@@ -144,6 +154,7 @@ class LobbyLevel extends Level {
     onClose(): void {
         this.layerStack.destroy();
         this.listener.destroy();
+        this.conListener.destroy();
     }
 
     onServerMsg(msg: ReplyableMsg) {
