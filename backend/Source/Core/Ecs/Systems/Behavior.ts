@@ -33,9 +33,69 @@ const runAwayFromTarget = (entity: Entity) => {
 
     const enemy = target.getTransform();
     
-    const runAwayDir = tranform.pos.sub(enemy.pos).normalize();
-    
-    rigidbody.velocity = runAwayDir.muls(status.speed);
+    // Começo do solver
+
+    let runAwayDir = new Vec2();
+
+    if (behavior.staticColide) {
+
+        let resNormal = new Vec2();
+
+        behavior.staticNormal.map((normal) => {
+            resNormal = resNormal.add(normal);
+        });
+
+        // Performs suffle operation
+        const tempX = resNormal.x;
+        resNormal.x = resNormal.y;
+        resNormal.y = tempX;
+
+        console.log(resNormal)
+
+        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
+            runAwayDir = resNormal.muls(-1.0);
+
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                } else {
+                    runAwayDir.y = 0.0;
+                }
+            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = 0.0;
+            }
+
+        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            } else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        } else {
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+        console.log("Get runaway dir")
+    } else {
+        runAwayDir = tranform.pos.sub(enemy.pos).normalize();
+    }
+
+    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
 
     behavior.attacking = false;
 }
@@ -56,9 +116,67 @@ const runAwayFromRange = (entity: Entity) => {
         relativeEnemy = relativeEnemy.add(pos);
     });
 
-    const runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    let runAwayDir = new Vec2();
 
-    rigidbody.velocity= runAwayDir.muls(status.speed);
+    if (behavior.staticColide) {
+
+        let resNormal = new Vec2();
+
+        behavior.staticNormal.map((normal) => {
+            resNormal = resNormal.add(normal);
+        });
+
+        // Performs suffle operation
+        const tempX = resNormal.x;
+        resNormal.x = resNormal.y;
+        resNormal.y = tempX;
+
+        console.log(resNormal)
+
+        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
+            runAwayDir = resNormal.muls(-1.0);
+
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                } else {
+                    runAwayDir.y = 0.0;
+                }
+            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = 0.0;
+            }
+
+        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            } else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        } else {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+        console.log("Get runaway dir")
+    } else {
+        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    }
+
+    rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
 
     behavior.attacking = false;
 }

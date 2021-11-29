@@ -28,8 +28,64 @@ var runAwayFromTarget = function (entity) {
     if (!target)
         return;
     var enemy = target.getTransform();
-    var runAwayDir = tranform.pos.sub(enemy.pos).normalize();
-    rigidbody.velocity = runAwayDir.muls(status.speed);
+    // Começo do solver
+    var runAwayDir = new Math_1.Vec2();
+    if (behavior.staticColide) {
+        var resNormal_1 = new Math_1.Vec2();
+        behavior.staticNormal.map(function (normal) {
+            resNormal_1 = resNormal_1.add(normal);
+        });
+        // Performs suffle operation
+        var tempX = resNormal_1.x;
+        resNormal_1.x = resNormal_1.y;
+        resNormal_1.y = tempX;
+        console.log(resNormal_1);
+        if (Math.abs(resNormal_1.x) === Math.abs(resNormal_1.y)) {
+            runAwayDir = resNormal_1.muls(-1.0);
+            var relativeEnemyPos = enemy.pos.sub(tranform.pos);
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                }
+                else {
+                    runAwayDir.y = 0.0;
+                }
+            }
+            else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+            }
+        }
+        else if (Math.abs(resNormal_1.x) < Math.abs(resNormal_1.y)) {
+            var relativeEnemyPos = enemy.pos.sub(tranform.pos);
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        }
+        else {
+            var relativeEnemyPos = enemy.pos.sub(tranform.pos);
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+        console.log("Get runaway dir");
+    }
+    else {
+        runAwayDir = tranform.pos.sub(enemy.pos).normalize();
+    }
+    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
     behavior.attacking = false;
 };
 var runAwayFromRange = function (entity) {
@@ -43,8 +99,63 @@ var runAwayFromRange = function (entity) {
         var pos = enemy.getTransform().pos;
         relativeEnemy = relativeEnemy.add(pos);
     });
-    var runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
-    rigidbody.velocity = runAwayDir.muls(status.speed);
+    var runAwayDir = new Math_1.Vec2();
+    if (behavior.staticColide) {
+        var resNormal_2 = new Math_1.Vec2();
+        behavior.staticNormal.map(function (normal) {
+            resNormal_2 = resNormal_2.add(normal);
+        });
+        // Performs suffle operation
+        var tempX = resNormal_2.x;
+        resNormal_2.x = resNormal_2.y;
+        resNormal_2.y = tempX;
+        console.log(resNormal_2);
+        if (Math.abs(resNormal_2.x) === Math.abs(resNormal_2.y)) {
+            runAwayDir = resNormal_2.muls(-1.0);
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                }
+                else {
+                    runAwayDir.y = 0.0;
+                }
+            }
+            else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+            }
+        }
+        else if (Math.abs(resNormal_2.x) < Math.abs(resNormal_2.y)) {
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        }
+        else {
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+        console.log("Get runaway dir");
+    }
+    else {
+        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    }
+    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
     behavior.attacking = false;
 };
 var hitTarget = function (entity) {
