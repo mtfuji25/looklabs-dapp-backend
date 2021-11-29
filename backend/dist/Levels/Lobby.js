@@ -35,11 +35,13 @@ var LobbyLevel = /** @class */ (function (_super) {
         _this.gameId = gameId;
         _this.listener = _this.context.ws.addListener("game-status", function (msg) { return _this.onServerMsg(msg); });
         _this.conListener = _this.context.ws.addListener("connection", function (ws) {
-            _this.context.ws.send(ws, {
-                msgType: "remain-players",
-                remainingPlayers: _this.participants.length,
-                totalPlayers: _this.participants.length
-            });
+            setTimeout(function () {
+                _this.context.ws.send(ws, {
+                    msgType: "remain-players",
+                    remainingPlayers: _this.participants.length,
+                    totalPlayers: _this.participants.length
+                });
+            }, 1000);
             return false;
         });
         return _this;

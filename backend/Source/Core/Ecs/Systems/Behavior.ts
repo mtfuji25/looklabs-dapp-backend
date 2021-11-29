@@ -135,9 +135,6 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
 
     // Começo do solver
 
-    console.log("Entity: ", dynamic.index);
-    console.log("Hunting: ", other.index);
-
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
@@ -176,11 +173,8 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
     const sources: Vec2[] = [];
     let dir: Vec2 | null = null;
 
-    console.log("Static Centers: ", behavior.staticCenter)
-    console.log("Ocupations: ", dynamic.ocupations)
     behavior.staticCenter.map((center) => {
         const convertedCenter = convertPosToCell(convertFromNDC(center));
-        console.log("Static Cell: ", convertedCenter)
         dynamic.ocupations.map((ocupation) => {
             const diff = convertedCenter.abs(ocupation);
 
@@ -191,8 +185,6 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         });
     });
 
-    console.log("Sources: ", sources);
-
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
@@ -200,7 +192,6 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         const path = finder.findPath(
             source, other.index
         );
-        console.log("Path" + index, path)
 
         if (path.length < 2)
             return;
@@ -208,18 +199,13 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
-        console.log("Dest" + index, dest);
-        console.log("Origin" + index, origin);
-
         if (!dest.equal(origin)){
-            console.log("SubDir" + index, dest.sub(origin));
             dir = dir.add(dest.sub(origin));
         }
     });
-    console.log("PreDir: ", dir);
+
     if (dir) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
-        console.log("FinalDir: ", dir);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
@@ -260,9 +246,6 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
 
     // Começo do solver
 
-    console.log("Entity: ", dynamic.index);
-    console.log("Hunting: ", other.index);
-
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
@@ -301,11 +284,8 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
     const sources: Vec2[] = [];
     let dir: Vec2 | null = null;
 
-    console.log("Static Centers: ", behavior.staticCenter)
-    console.log("Ocupations: ", dynamic.ocupations)
     behavior.staticCenter.map((center) => {
         const convertedCenter = convertPosToCell(convertFromNDC(center));
-        console.log("Static Cell: ", convertedCenter)
         dynamic.ocupations.map((ocupation) => {
             const diff = convertedCenter.abs(ocupation);
 
@@ -316,8 +296,6 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         });
     });
 
-    console.log("Sources: ", sources);
-
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
@@ -325,7 +303,6 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         const path = finder.findPath(
             source, other.index
         );
-        console.log("Path" + index, path)
 
         if (path.length < 2)
             return;
@@ -333,18 +310,12 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
-        console.log("Dest" + index, dest);
-        console.log("Origin" + index, origin);
-
         if (!dest.equal(origin)){
-            console.log("SubDir" + index, dest.sub(origin));
             dir = dir.add(dest.sub(origin));
         }
     });
-    console.log("PreDir: ", dir);
     if (dir) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
-        console.log("FinalDir: ", dir);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
@@ -510,48 +481,48 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
 
             // Life check
             if (lifePercent < 25 || behavior.healing) {
-                console.log("Entered healing node");
+                // console.log("Entered healing node");
                 // RunAway decision
                 if (behavior.attacking) {
-                    console.log("Decided RunAway from current target");
+                    // console.log("Decided RunAway from current target");
                     runAwayFromTarget(entity);
                 } else if (behavior.inRange.length > 0) {
-                    console.log("Decided RunAway from relative range enemies");
+                    // console.log("Decided RunAway from relative range enemies");
                     runAwayFromRange(entity);
                 }
                 behavior.healing = true;
 
             // Collision checking
             } else if (behavior.colliding.length > 0) {
-                console.log("Entered collision node");
+                // console.log("Entered collision node");
                 // How many attacking
                 if (behavior.colliding.length == 1) {
-                    console.log("Decided hit current target");
+                    // console.log("Decided hit current target");
                     hitTarget(entity);
                 } else if (behavior.colliding.length > 1) {
-                    console.log("Decided hit strongest player in hit area");
+                    // console.log("Decided hit strongest player in hit area");
                     hitStrongest(entity);
                 }
 
             // Inrange check
             } else if (behavior.inRange.length > 0) {
                 if (behavior.staticColide) {
-                    console.log("Entered Searching inRange node with A*");
+                    // console.log("Entered Searching inRange node with A*");
                     seekNearestInRangeWithA(entity, grid);
                     behavior.staticColide = false;
                 } else {
-                    console.log("Entered Searching inRange node");
+                    // console.log("Entered Searching inRange node");
                     seekNearestInRange(entity);
                 }
                 
             // Out range check
             } else if (behavior.inRange.length == 0) {
                 if (behavior.staticColide) {
-                    console.log("Entered Searching outRange node with A*");
+                    // console.log("Entered Searching outRange node with A*");
                     seekNearestWithA(entity, grid);
                     behavior.staticColide = false;
                 } else {
-                    console.log("Entered Searching outRange node");
+                    // console.log("Entered Searching outRange node");
                     seekNearest(entity);
                 }
             }
