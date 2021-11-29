@@ -1,20 +1,12 @@
-# from base image node
-FROM node:12-alpine
+FROM node:latest
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir /backend && chown 1000:1000 -R /backend
 
-# copy all files
-COPY . .
+ADD . /backend
 
-# install all dependencies
-RUN yarn install
+WORKDIR /backend
 
-# Compile all typescript to javascript
-RUN yarn tsc
+RUN npm install
 
-#expose the port
-EXPOSE 3070
+CMD ["npm", "run", "start"]
 
-# command to run when intantiate an image
-CMD ["yarn","serve"]

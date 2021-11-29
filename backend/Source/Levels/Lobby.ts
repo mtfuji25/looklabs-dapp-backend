@@ -37,11 +37,13 @@ class LobbyLevel extends Level {
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
         this.conListener = this.context.ws.addListener("connection", (ws) => {
-            this.context.ws.send(ws, {
-                msgType: "remain-players",
-                remainingPlayers: this.participants.length,
-                totalPlayers: this.participants.length
-            });
+            setTimeout(() => {
+                this.context.ws.send(ws, {
+                    msgType: "remain-players",
+                    remainingPlayers: this.participants.length,
+                    totalPlayers: this.participants.length
+                });
+            }, 1000);
 
             return false;
         });
