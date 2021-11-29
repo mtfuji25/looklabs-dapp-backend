@@ -1,9 +1,0 @@
-version: '3'
-
-services:
-  backend:
-    build: ./backend/.
-    container_name: backend
-    ports:
-      - '8082:8082'
-      - '8080:8080'
