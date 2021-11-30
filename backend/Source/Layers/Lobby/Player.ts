@@ -13,7 +13,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
-import { GameParticipantsResult } from "../../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi";
 
 //
 //  Frontend actions mapping
@@ -103,6 +103,9 @@ class PlayerLayer extends Layer {
     public playerID: string;
     public strapiID: number;
 
+    // initial info for player
+    private details: ParticipantDetails;
+
     // Current grid
     private grid: Grid;
 
@@ -112,26 +115,56 @@ class PlayerLayer extends Layer {
     // Die fn
     public dieFn: (result: GameParticipantsResult) => void;
 
-    constructor(ecs: ECS, wsContext: WSClient, id: string, strapiID: number, grid: Grid, dieFn: (result: GameParticipantsResult) => void, name: string) {
+    constructor(ecs: ECS, 
+                wsContext: WSClient, 
+                id: string, 
+                strapiID: number, 
+                grid: Grid, 
+                dieFn: (result: GameParticipantsResult) => void, 
+                details: ParticipantDetails ) {
+        
         super(`Player${id}`, ecs);
 
         this.wsClient = wsContext;
         this.playerID = id;
         this.grid = grid;
         this.dieFn = dieFn;
-        this.self.name = name;
+        this.self.name = details.name;
         this.strapiID = strapiID;
+        this.details = details;
 
         // Add status component to current entity
+        // this.self.addStatus(
+        //     // Attack
+        //     20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Speed
+        //     0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Health
+        //     100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Defense
+        //     5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Cooldown
+        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        // ).setOnDie((status) => this.onDie(status));
+
+        // create a record of mapped attributes, so we can use the attributes returned more easily
+        // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
+        
+        const attributesMap: Record<string, any> = {};
+
+        this.details.attributes.map((attribute) => {
+            attributesMap[attribute.trait_type] = attribute.value;
+        })
+
         this.self.addStatus(
             // Attack
-            20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            attributesMap["Attack"],
             // Speed
-            0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            attributesMap["Speed"] / 500,
             // Health
-            100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            attributesMap["Health"],
             // Defense
-            5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            attributesMap["Defence"],
             // Cooldown
             0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
         ).setOnDie((status) => this.onDie(status));

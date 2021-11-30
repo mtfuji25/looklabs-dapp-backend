@@ -8,6 +8,7 @@ import { AStarFinder } from "astar-typescript";
 // Map importing
 import levelCollider from "../../../Assets/LevelCollider.json";
 import { Grid } from "../Components/Grid";
+import { Behavior } from "../Components/Behavior";
 
 const finder = new AStarFinder({
     grid: {
@@ -576,6 +577,14 @@ const seekNearestInRange = (entity: Entity) => {
     behavior.attacking = false;
 }
 
+const sys_CheckForBerserker = (data: EcsData, deltaTime: number): void => {
+    if ((Date.now() - Behavior.lastDeath) >= 5000) {
+        Behavior.berserker = true;
+    } else {
+        Behavior.berserker = false;
+    }
+}
+
 const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
     data.grids.map((grid) => {
 
@@ -675,9 +684,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             if (lifePercent < 100) {
                 status.health += 0.05
             }
-
+            console.log("Berserker", Behavior.berserker)
             // Life check
-            if (lifePercent < 25 || behavior.healing) {
+            if ((lifePercent < 25 || behavior.healing) && (!Behavior.berserker)) {
                 // console.log("Entered healing node");
                 // RunAway decision
                 if (behavior.attacking) {
@@ -728,7 +737,6 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             }
         });
     });
-
 };
 
-export { sys_UpdateBehavior, sys_CheckInRange };
+export { sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };

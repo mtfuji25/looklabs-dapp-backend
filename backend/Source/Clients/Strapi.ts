@@ -30,10 +30,31 @@ interface GameParticipantsResult {
     updated_at?: string;
 }
 
+// Return value for rest api
+interface ParticipantDetails {
+    name: string;
+    description: string;
+    image: string;
+    dna: string;
+    edition: number;
+    date: number;
+    attributes: DetailAttribute[];
+}
+
+// Attributes of a detail
+interface DetailAttribute {
+    trait_type: string;
+    value: number | string;
+}
+
 class StrapiClient {
     private host: string;
 
+    // strapiApi
     private readonly api: AxiosInstance;
+
+    // restApi for player attributes
+    private readonly restApi: AxiosInstance;
 
     constructor(host: string) {
         this.host = host;
@@ -41,6 +62,11 @@ class StrapiClient {
         this.api = axios.create({
             baseURL: host
         });
+
+        // start axios for restApi
+        this.restApi = axios.create({
+            baseURL: 'https://token.thepitnft.com/contractAddress/',
+        })
     }
 
     private async get(url: string): Promise<AxiosResponse> {
@@ -49,10 +75,6 @@ class StrapiClient {
 
     private async post(url: string, data: any): Promise<AxiosResponse> {
         return this.api.post(url, data);
-    }
-
-    private async put(url: string): Promise<AxiosResponse> {
-        return this.api.put(url);
     }
 
     // Creates a result for a participant on strapi. Takes a player and it's result enum(string)
@@ -77,6 +99,11 @@ class StrapiClient {
         return (await this.get(`scheduled-games/${id}`)).data;
     }
 
+    // get the details for a chosen participant
+    async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
+        return (await this.restApi.get(`${tokenId}`)).data;
+    }
+
     // Default engine start call
     start(): void {}
 
@@ -84,4 +111,4 @@ class StrapiClient {
     close(): void {}
 }
 
-export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult };
+export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute };

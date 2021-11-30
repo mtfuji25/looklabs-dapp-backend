@@ -32,10 +32,32 @@ interface GameParticipantsResult {
     updated_at?: string;
 }
 
+// Return value for rest api
+interface ParticipantDetails {
+    name: string;
+    description: string;
+    image: string;
+    dna: string;
+    edition: number;
+    date: number;
+    attributes: DetailAttribute[];
+}
+
+// Attributes of a detail
+interface DetailAttribute {
+    trait_type: string;
+    value: number | string;
+}
+
 class StrapiClient {
     private host: string;
 
+    // strapiApi
     private readonly api: AxiosInstance;
+
+    // restApi for player attributes
+    private readonly restApi: AxiosInstance;
+
     // any type because ts complains if I use http.server, the correct type
     private expressServer: any;
 
@@ -45,6 +67,12 @@ class StrapiClient {
         this.api = axios.create({
             baseURL: `${this.host}`
         });
+
+
+        // start axios for restApi
+        this.restApi = axios.create({
+            baseURL: 'https://token.thepitnft.com/contractAddress/',
+        })
     }
 
     private async get(url: string): Promise<AxiosResponse> {
@@ -94,6 +122,11 @@ class StrapiClient {
         ).data;
     }
 
+        // get the details for a chosen participant
+    async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
+        return (await this.restApi.get(`${tokenId}`)).data;
+    }    
+
     // Default engine start call
     start(): void {}
 
@@ -105,4 +138,8 @@ class StrapiClient {
     }
 }
 
+<<<<<<< HEAD
 export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult };
+=======
+export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute };
+>>>>>>> d6a36b2 (Added base overlay animations and api requests for attributes)

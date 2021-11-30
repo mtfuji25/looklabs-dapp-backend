@@ -6,6 +6,9 @@ import { Transform } from "./Transform";
 
 class Behavior {
 
+    public static berserker: boolean = false;
+    public static lastDeath: number = Date.now();
+
     public status: Status;
     public transform: Transform;
     public rigidbody: Rigidbody;
