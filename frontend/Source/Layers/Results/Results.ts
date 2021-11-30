@@ -4,13 +4,19 @@ import { Layer } from "../../Core/Layer";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, ITextStyle, Container } from "pixi.js";
 import { ScheduledGameParticipant } from "../../Clients/Strapi";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
+import { lerp } from "../../Utils/Math";
 
 class ResultsLayer extends Layer {
     // Current app instance
     private app: Application;
+    private resContainer: Container;
+
+    private count: number = 0.0;
+    private initialResY = 0.0;
+    private firstPass = true;
 
     private readonly textStyle: Partial<ITextStyle> = {
         fontFamily: "monospace",
@@ -37,6 +43,7 @@ class ResultsLayer extends Layer {
         super("TesteLayer", ecs);
 
         this.app = app;
+        this.resContainer = new Container();
 
         // Set current percents
         this.percentX = this.app.view.width / 100.0;
@@ -46,13 +53,16 @@ class ResultsLayer extends Layer {
         this.ecs
             .createEntity(58.4022 * this.percentX, 5.25 * this.percentY)
             .addText("RESULTS", this.titleStyle)
-            .addStage(this.app);
+            .addStage(this.resContainer);
 
         // renders all the results
         console.log(gameParticipants)
         gameParticipants.map((participant, index) =>
             this.renderResult(participant, index)
         );
+
+        this.app.stage.addChild(this.resContainer);
+        this.initialResY = this.resContainer.y;
     }
 
     // create result for a specific participant
@@ -75,39 +85,52 @@ class ResultsLayer extends Layer {
                 .addSprite(this.app.loader.resources["userIcon"]);
         }
 
-        resultIcon.addStage(this.app);
+        resultIcon.addStage(this.resContainer);
         resultIcon.setAnchor(0.0);
 
         // Render the text for the position
         this.ecs
             .createEntity(this.percentX * 51.944, yOffset)
             .addText(`${index + 1}`, this.textStyle)
-            .addStage(this.app);
+            .addStage(this.resContainer);
 
         // render the text for participant name
         this.ecs
             .createEntity(this.percentX * 56.458, yOffset)
             .addText(`${participant.name}`, this.textStyle)
-            .addStage(this.app);
+            .addStage(this.resContainer);
 
         // Render the tombstone icon
         const deathIcon = this.ecs
             .createEntity(this.percentX * 70.694, yOffset)
             .addSprite(this.app.loader.resources["tombstone"]);
 
-        deathIcon.addStage(this.app);
+        deathIcon.addStage(this.resContainer);
         deathIcon.setAnchor(0.0);
 
         // Render the text for participants killed
         this.ecs
             .createEntity(this.percentX * 72.43, yOffset)
             .addText(`${result.kills}`, this.textStyle)
-            .addStage(this.app);
+            .addStage(this.resContainer);
     }
 
     onAttach() {}
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        if (this.firstPass) {
+            this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+        } else {
+            this.resContainer.y = lerp(this.app.view.height, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+        }
+
+        if (this.count >= 20.0) {
+            this.count -= 20.0;
+            this.firstPass = false;
+        }
+        else
+            this.count += deltaTime;  
+    }
 
     onDetach() {
         this.self.destroy();

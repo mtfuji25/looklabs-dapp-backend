@@ -86,7 +86,6 @@ var Engine = /** @class */ (function () {
                         this.level.onUpdate(this.context.stats.dt);
                         // Run systems pendings
                         this.level.runPendings(this.context.stats.dt);
-                        console.log(this.context.stats.fps);
                         return [4 /*yield*/, (0, Sleep_1.sleep)(15)];
                     case 2:
                         _a.sent();

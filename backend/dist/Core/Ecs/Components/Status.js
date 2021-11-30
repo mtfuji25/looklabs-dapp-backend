@@ -29,9 +29,9 @@ var Status = /** @class */ (function () {
             }
         }
         // Not allow negative damage
-        if (damage < 0)
+        if (damage < 1)
             damage = 1;
-        if (damage < this.defense) {
+        if (damage <= this.defense) {
             this.health -= 1;
         }
         else {

@@ -513,8 +513,9 @@ var sys_UpdateBehavior = function (data, deltaTime) {
             if (lifePercent >= 40) {
                 behavior.healing = false;
             }
+            // Curando caramba
             if (lifePercent < 100) {
-                status.health += 0.01;
+                status.health += 0.05;
             }
             // Life check
             if (lifePercent < 25 || behavior.healing) {
@@ -529,6 +530,7 @@ var sys_UpdateBehavior = function (data, deltaTime) {
                     runAwayFromRange(entity);
                 }
                 else {
+                    // console.log("Decided RunAway from all enemies");
                     runAwayFromAll(entity, grid);
                 }
                 behavior.healing = true;
