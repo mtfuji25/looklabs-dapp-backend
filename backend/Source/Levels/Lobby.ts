@@ -3,7 +3,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
@@ -67,9 +67,6 @@ class LobbyLevel extends Level {
         const mapCollider = new MapColliderLayer(this.ecs);
         const grid = mapCollider.getSelf().getGrid();
 
-        // Put the map in the stack
-        this.layerStack.pushLayer(mapCollider);
-
         // Initial broadcast for players length
         this.context.ws.broadcast({
             msgType: "remain-players",
@@ -77,34 +74,60 @@ class LobbyLevel extends Level {
             totalPlayers: this.participants.length
         });
 
-        this.participants.map((participant) => {
-            const player = new PlayerLayer(
-                this.ecs, this.context.ws,
-                participant.nft_id, participant.id, grid, 
-                (result: GameParticipantsResult) => {
-                    this.ready = false;
-                    this.layerStack.popLayer(player);
-                    // Esse vai para produção
-                    console.log("Matou caramba")
-                    this.context.strapi.createParticipantResult(result).then(() => {
-                        this.ready = true
-                    }).catch((err) => console.log(err));
-                    // Shoud be after create result
-                    this.fighters--;
-                    this.context.ws.broadcast({
-                        msgType: "remain-players",
-                        remainingPlayers: this.fighters,
-                        totalPlayers: this.participants.length
-                    });
-                },
-                participant.name
-            );
-            grid.addDynamic(player.getSelf());
-            this.layerStack.pushLayer(player)
-        });
+        let responseCounter = 0;
+        const responses: { participant: ScheduledGameParticipant, response: ParticipantDetails }[] = [];
 
-        // Tells that lobby is ready to play
-        this.ready = true;
+        this.participants.map((participant) => {
+
+            let tokenId = Number((participant.nft_id).split('/')[1]);
+
+            if(tokenId > 50) tokenId -= 50;
+
+            console.log('TOKEN', tokenId);
+
+            this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
+                console.log(response);
+
+                responses.push({
+                    participant: participant,
+                    response: response
+                });
+                responseCounter++;
+
+                if (responseCounter == (this.participants.length - 1)) {
+                    // Put the map in the stack
+                    this.layerStack.pushLayer(mapCollider);
+        
+                    responses.map(({ participant, response }) => {
+                        const details = response;
+                        const player = new PlayerLayer(
+                            this.ecs, this.context.ws,
+                            participant.nft_id, participant.id, grid, 
+                            (result: GameParticipantsResult) => {
+                                this.ready = false;
+                                this.layerStack.popLayer(player);
+                                // Esse vai para produção
+                                console.log("Matou caramba")
+                                this.context.strapi.createParticipantResult(result).then(() => {
+                                    this.ready = true
+                                }).catch((err) => console.log(err));
+                                // Shoud be after create result
+                                this.fighters--;
+                                this.context.ws.broadcast({
+                                    msgType: "remain-players",
+                                    remainingPlayers: this.fighters,
+                                    totalPlayers: this.participants.length
+                                });
+                            },
+                            details
+                        );
+                        grid.addDynamic(player.getSelf());
+                        this.layerStack.pushLayer(player);
+                    });
+                    this.ready = true;
+                }
+            });
+        });
     }
 
     onUpdate(deltaTime: number) {

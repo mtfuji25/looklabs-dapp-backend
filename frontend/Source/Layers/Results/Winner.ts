@@ -7,7 +7,7 @@ import { Application, ITextStyle } from "pixi.js";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
-import { ScheduledGameParticipant } from "../../Clients/Strapi";
+import { ParticipantDetails, ScheduledGameParticipant } from "../../Clients/Strapi";
 
 interface TextParams {
     text: string;
@@ -21,7 +21,8 @@ class WinnerLayer extends Layer {
     private percentX: number;
     private percentY: number;
     private winnerImg: Sprite;
-    private participant: ScheduledGameParticipant;
+    private details: ParticipantDetails;
+    private participant: ScheduledGameParticipant
 
     // Style objects for texts
     private readonly textStyle: Partial<ITextStyle> = {
@@ -85,11 +86,16 @@ class WinnerLayer extends Layer {
         }
     };
 
-    constructor(ecs: ECS, app: Application, participant: ScheduledGameParticipant) {
+    constructor(ecs: ECS, 
+                app: Application, 
+                participant: ScheduledGameParticipant, 
+                details: ParticipantDetails ) {
+
         super("TesteLayer", ecs);
 
         this.app = app;
-
+        
+        this.details = details;
         this.participant = participant;
 
         // sets percents
@@ -133,7 +139,7 @@ class WinnerLayer extends Layer {
         this.scaleImg(this.sprites["nameCard"]);
 
         this.winnerImg.setFromUrl(
-            this.participant.image_address
+            this.details.image
         );
 
         // sets texts according to the winner

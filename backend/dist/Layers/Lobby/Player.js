@@ -100,24 +100,43 @@ var spawnPos = [
 ];
 var PlayerLayer = /** @class */ (function (_super) {
     __extends(PlayerLayer, _super);
-    function PlayerLayer(ecs, wsContext, id, strapiID, grid, dieFn, name) {
+    function PlayerLayer(ecs, wsContext, id, strapiID, grid, dieFn, details) {
         var _this = _super.call(this, "Player".concat(id), ecs) || this;
         _this.wsClient = wsContext;
         _this.playerID = id;
         _this.grid = grid;
         _this.dieFn = dieFn;
-        _this.self.name = name;
+        _this.self.name = details.name;
         _this.strapiID = strapiID;
+        _this.details = details;
         // Add status component to current entity
+        // this.self.addStatus(
+        //     // Attack
+        //     20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Speed
+        //     0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Health
+        //     100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Defense
+        //     5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Cooldown
+        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        // ).setOnDie((status) => this.onDie(status));
+        // create a record of mapped attributes, so we can use the attributes returned more easily
+        // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
+        var attributesMap = {};
+        _this.details.attributes.map(function (attribute) {
+            attributesMap[attribute.trait_type] = attribute.value;
+        });
         _this.self.addStatus(
         // Attack
-        20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
+        attributesMap["Attack"], 
         // Speed
-        0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
+        attributesMap["Speed"] / 500, 
         // Health
-        100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
+        attributesMap["Health"], 
         // Defense
-        5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)), 
+        attributesMap["Defence"], 
         // Cooldown
         0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0))).setOnDie(function (status) { return _this.onDie(status); });
         // Add rigibody for current entity

@@ -64,36 +64,55 @@ var LobbyLevel = /** @class */ (function (_super) {
         var _this = this;
         var mapCollider = new MapCollider_1.MapColliderLayer(this.ecs);
         var grid = mapCollider.getSelf().getGrid();
-        // Put the map in the stack
-        this.layerStack.pushLayer(mapCollider);
         // Initial broadcast for players length
         this.context.ws.broadcast({
             msgType: "remain-players",
             remainingPlayers: this.participants.length,
             totalPlayers: this.participants.length
         });
+        var responseCounter = 0;
+        var responses = [];
         this.participants.map(function (participant) {
-            var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, participant.id, grid, function (result) {
-                _this.ready = false;
-                _this.layerStack.popLayer(player);
-                // Esse vai para produção
-                console.log("Matou caramba");
-                _this.context.strapi.createParticipantResult(result).then(function () {
-                    _this.ready = true;
-                }).catch(function (err) { return console.log(err); });
-                // Shoud be after create result
-                _this.fighters--;
-                _this.context.ws.broadcast({
-                    msgType: "remain-players",
-                    remainingPlayers: _this.fighters,
-                    totalPlayers: _this.participants.length
+            var tokenId = Number((participant.nft_id).split('/')[1]);
+            if (tokenId > 50)
+                tokenId -= 50;
+            console.log('TOKEN', tokenId);
+            _this.context.strapi.getParticipantDetails(Number(tokenId)).then(function (response) {
+                console.log(response);
+                responses.push({
+                    participant: participant,
+                    response: response
                 });
-            }, participant.name);
-            grid.addDynamic(player.getSelf());
-            _this.layerStack.pushLayer(player);
+                responseCounter++;
+                if (responseCounter == (_this.participants.length - 1)) {
+                    // Put the map in the stack
+                    _this.layerStack.pushLayer(mapCollider);
+                    responses.map(function (_a) {
+                        var participant = _a.participant, response = _a.response;
+                        var details = response;
+                        var player = new Player_1.PlayerLayer(_this.ecs, _this.context.ws, participant.nft_id, participant.id, grid, function (result) {
+                            _this.ready = false;
+                            _this.layerStack.popLayer(player);
+                            // Esse vai para produção
+                            console.log("Matou caramba");
+                            _this.context.strapi.createParticipantResult(result).then(function () {
+                                _this.ready = true;
+                            }).catch(function (err) { return console.log(err); });
+                            // Shoud be after create result
+                            _this.fighters--;
+                            _this.context.ws.broadcast({
+                                msgType: "remain-players",
+                                remainingPlayers: _this.fighters,
+                                totalPlayers: _this.participants.length
+                            });
+                        }, details);
+                        grid.addDynamic(player.getSelf());
+                        _this.layerStack.pushLayer(player);
+                    });
+                    _this.ready = true;
+                }
+            });
         });
-        // Tells that lobby is ready to play
-        this.ready = true;
     };
     LobbyLevel.prototype.onUpdate = function (deltaTime) {
         var _this = this;

@@ -18,6 +18,8 @@ var startSystems = function (ecs) {
     // Colide and fix all velocitys in grid
     ecs.pushContainerSystem(Grid_1.sys_CheckCollisions);
     // Update Behavior requirements
+    ecs.pushContainerSystem(Behavior_1.sys_CheckForBerserker);
+    // Update Behavior requirements
     ecs.pushContainerSystem(Behavior_1.sys_CheckInRange);
     // Update Behavior tree
     ecs.pushContainerSystem(Behavior_1.sys_UpdateBehavior);

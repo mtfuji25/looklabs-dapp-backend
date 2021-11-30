@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sys_CheckInRange = exports.sys_UpdateBehavior = void 0;
+exports.sys_CheckForBerserker = exports.sys_CheckInRange = exports.sys_UpdateBehavior = void 0;
 var Math_1 = require("../../../Utils/Math");
 // AStar import
 var astar_typescript_1 = require("astar-typescript");
 // Map importing
 var LevelCollider_json_1 = __importDefault(require("../../../Assets/LevelCollider.json"));
+var Behavior_1 = require("../Components/Behavior");
 var finder = new astar_typescript_1.AStarFinder({
     grid: {
         matrix: LevelCollider_json_1.default["data"]
@@ -445,6 +446,15 @@ var seekNearestInRange = function (entity) {
     }
     behavior.attacking = false;
 };
+var sys_CheckForBerserker = function (data, deltaTime) {
+    if ((Date.now() - Behavior_1.Behavior.lastDeath) >= 5000) {
+        Behavior_1.Behavior.berserker = true;
+    }
+    else {
+        Behavior_1.Behavior.berserker = false;
+    }
+};
+exports.sys_CheckForBerserker = sys_CheckForBerserker;
 var sys_CheckInRange = function (data, deltaTime) {
     data.grids.map(function (grid) {
         // Clear last inRange check
@@ -517,8 +527,9 @@ var sys_UpdateBehavior = function (data, deltaTime) {
             if (lifePercent < 100) {
                 status.health += 0.05;
             }
+            console.log("Berserker", Behavior_1.Behavior.berserker);
             // Life check
-            if (lifePercent < 25 || behavior.healing) {
+            if ((lifePercent < 25 || behavior.healing) && (!Behavior_1.Behavior.berserker)) {
                 // console.log("Entered healing node");
                 // RunAway decision
                 if (behavior.attacking) {

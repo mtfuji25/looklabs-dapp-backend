@@ -20,11 +20,13 @@ class ResultsLevel extends Level {
                 new ResultsLayer(this.ecs, this.context.app, participants)
             );   
             this.layerStack.pushLayer(
-                new WinnerLayer(this.ecs, this.context.app, participants[0])
-            );
-            this.layerStack.pushLayer(
                 new BattleStatusLayer(this.ecs, this.context.app)
             );
+            this.context.strapi.getParticipantDetails((participants[0].nft_id).split('/')[1]).then((participant) => {
+                this.layerStack.pushLayer(
+                    new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
+                );
+            })
         })
     }
 

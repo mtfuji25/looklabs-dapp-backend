@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sys_DipatchDeaths = exports.sys_UpdateStatus = void 0;
+var Behavior_1 = require("../Components/Behavior");
 var deads = [];
 var sys_DipatchDeaths = function (data, deltaTime) {
     deads.forEach(function (dead) {
@@ -32,6 +33,7 @@ var sys_UpdateStatus = function (data, deltaTime) {
                 },
                 callback: stats.onDie
             });
+            Behavior_1.Behavior.lastDeath = Date.now();
         }
     });
 };

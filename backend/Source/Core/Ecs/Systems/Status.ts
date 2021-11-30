@@ -1,5 +1,6 @@
 import { EcsData } from "../Interfaces";
 import { StatusResult } from "../Components/Status";
+import { Behavior } from "../Components/Behavior";
 
 type OnDieFn = (status: StatusResult) => (void);
 
@@ -45,6 +46,8 @@ const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
                 },
                 callback: stats.onDie
             });
+            
+            Behavior.lastDeath = Date.now();
         }
     });
 };

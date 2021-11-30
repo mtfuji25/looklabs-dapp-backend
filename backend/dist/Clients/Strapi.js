@@ -48,6 +48,10 @@ var StrapiClient = /** @class */ (function () {
         this.api = axios_1.default.create({
             baseURL: host,
         });
+        // start axios for restApi
+        this.restApi = axios_1.default.create({
+            baseURL: 'https://token.thepitnft.com/contractAddress/',
+        });
     }
     StrapiClient.prototype.get = function (url) {
         return __awaiter(this, void 0, void 0, function () {
@@ -60,13 +64,6 @@ var StrapiClient = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, this.api.post(url, data)];
-            });
-        });
-    };
-    StrapiClient.prototype.put = function (url) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, this.api.put(url)];
             });
         });
     };
@@ -102,6 +99,17 @@ var StrapiClient = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.get("scheduled-games/".concat(id))];
+                    case 1: return [2 /*return*/, (_a.sent()).data];
+                }
+            });
+        });
+    };
+    // get the details for a chosen participant
+    StrapiClient.prototype.getParticipantDetails = function (tokenId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.restApi.get("".concat(tokenId))];
                     case 1: return [2 /*return*/, (_a.sent()).data];
                 }
             });

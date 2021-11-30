@@ -18,6 +18,8 @@ var Behavior = /** @class */ (function () {
         this.transform = transform;
         this.rigidbody = rigidbody;
     }
+    Behavior.berserker = false;
+    Behavior.lastDeath = Date.now();
     return Behavior;
 }());
 exports.Behavior = Behavior;
