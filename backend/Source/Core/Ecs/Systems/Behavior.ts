@@ -671,8 +671,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                 behavior.healing = false;
             }
 
+            // Curando caramba
             if (lifePercent < 100) {
-                status.health += 0.1
+                status.health += 0.05
             }
 
             // Life check
@@ -686,6 +687,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     // console.log("Decided RunAway from relative range enemies");
                     runAwayFromRange(entity);
                 } else {
+                    // console.log("Decided RunAway from all enemies");
                     runAwayFromAll(entity, grid);
                 }
                 behavior.healing = true;
