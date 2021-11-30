@@ -80,7 +80,6 @@ var runAwayFromTarget = function (entity) {
                 runAwayDir.y = 0.0;
             }
         }
-        console.log("Get runaway dir");
     }
     else {
         runAwayDir = tranform.pos.sub(enemy.pos).normalize();
@@ -129,6 +128,75 @@ var runAwayFromRange = function (entity) {
             }
         }
         else if (Math.abs(resNormal_2.x) < Math.abs(resNormal_2.y)) {
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        }
+        else {
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+        console.log("Get runaway dir");
+    }
+    else {
+        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    }
+    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
+    behavior.attacking = false;
+};
+var runAwayFromAll = function (entity, grid) {
+    var status = entity.getStatus();
+    var behavior = entity.getBehavior();
+    var tranform = entity.getTransform();
+    var rigidbody = entity.getRigidbody();
+    var relativeEnemy = new Math_1.Vec2();
+    grid.dynamics.map(function (enemy) {
+        var pos = enemy.entity.getTransform().pos;
+        relativeEnemy = relativeEnemy.add(pos);
+    });
+    var runAwayDir = new Math_1.Vec2();
+    if (behavior.staticColide) {
+        var resNormal_3 = new Math_1.Vec2();
+        behavior.staticNormal.map(function (normal) {
+            resNormal_3 = resNormal_3.add(normal);
+        });
+        // Performs suffle operation
+        var tempX = resNormal_3.x;
+        resNormal_3.x = resNormal_3.y;
+        resNormal_3.y = tempX;
+        console.log(resNormal_3);
+        if (Math.abs(resNormal_3.x) === Math.abs(resNormal_3.y)) {
+            runAwayDir = resNormal_3.muls(-1.0);
+            var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                }
+                else {
+                    runAwayDir.y = 0.0;
+                }
+            }
+            else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            }
+            else {
+                runAwayDir.x = 0.0;
+            }
+        }
+        else if (Math.abs(resNormal_3.x) < Math.abs(resNormal_3.y)) {
             var relativeEnemyPos = relativeEnemy.sub(tranform.pos);
             if (relativeEnemyPos.y < 0) {
                 runAwayDir.x = 0.0;
@@ -459,6 +527,9 @@ var sys_UpdateBehavior = function (data, deltaTime) {
                 else if (behavior.inRange.length > 0) {
                     // console.log("Decided RunAway from relative range enemies");
                     runAwayFromRange(entity);
+                }
+                else {
+                    runAwayFromAll(entity, grid);
                 }
                 behavior.healing = true;
                 // Collision checking
