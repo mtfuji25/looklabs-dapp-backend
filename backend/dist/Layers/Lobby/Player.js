@@ -157,40 +157,81 @@ var PlayerLayer = /** @class */ (function (_super) {
         this.wsClient.broadcast(this.getBaseMsg("create"));
     };
     PlayerLayer.prototype.onUpdate = function (deltaTime) {
-        var attacking = this.self.getBehavior().attacking;
+        var critical = this.self.getStatus().critical;
+        var _a = this.self.getBehavior(), attacking = _a.attacking, healing = _a.healing;
         var velocity = this.self.getRigidbody().velocity;
         // Updating phase
         var theta = (0, Math_1.rad2deg)(Math.atan2(velocity.y, velocity.x));
         if (-45.0 < theta && theta <= 45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 10));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                }
             }
             else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 24));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                }
             }
         }
         else if (45.0 < theta && theta <= 135.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 12));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                }
             }
             else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 26));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                }
             }
         }
         else if (135.0 < theta && theta <= 180 || theta <= -135.0 && theta >= -180) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 11));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                }
             }
             else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 25));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                }
             }
         }
         else if (-135.0 < theta && theta <= -45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 13));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                }
             }
             else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 27));
+                }
+                else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                }
             }
         }
     };

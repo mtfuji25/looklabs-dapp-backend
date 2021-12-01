@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Status = void 0;
 var Status = /** @class */ (function () {
     function Status(attack, speed, health, defense, cooldown, name) {
+        this.critical = false;
         // Current Entity Stats
         this.survived = 0.0;
         this.kills = 0.0;
@@ -19,8 +20,9 @@ var Status = /** @class */ (function () {
         this.lastHit = enemy;
         var damage = enemy.getStatus().attack;
         // 8% critical rate
-        if (Math.random() < 0.08) {
+        if (true) {
             damage += Math.random() * 30;
+            this.lastHit.getStatus().critical = true;
         }
         else {
             // 15% miss rate

@@ -672,6 +672,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             // Get current life percent of player
             const lifePercent = (status.health / status.maxHealth) * 100;
 
+            // Removes attacking
+            behavior.attacking = false;
+
             // Update cooldown
             behavior.refresh += deltaTime;
 

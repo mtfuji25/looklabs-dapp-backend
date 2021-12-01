@@ -14,6 +14,7 @@ var sys_UpdateStatus = function (data, deltaTime) {
     // Iterates through all status in system
     data.status.map(function (stats) {
         stats.survived += deltaTime;
+        stats.critical = false;
         if (stats.health <= 0) {
             if (!stats.lastHit)
                 return;
