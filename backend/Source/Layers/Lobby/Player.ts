@@ -199,7 +199,8 @@ class PlayerLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
-        const { attacking } = this.self.getBehavior();
+        const { critical } = this.self.getStatus();
+        const { attacking, healing } = this.self.getBehavior();
         const { velocity } = this.self.getRigidbody();
         
         // Updating phase
@@ -209,27 +210,59 @@ class PlayerLayer extends Layer {
 
         if (-45.0 < theta && theta <= 45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 10));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 24));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                }
             }
         } else if (45.0 < theta && theta <= 135.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 12));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 26));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                }
             }
         } else if (135.0 < theta && theta <= 180 || theta <= -135.0 && theta >= -180) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 11));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 25));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                }
             }
         } else if (-135.0 < theta && theta <= -45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 13));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 27));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                }
             }
         }
     }
