@@ -36,7 +36,8 @@ class AwaitLevel extends Level {
                     const nextGame = Date.parse(game.game_date);
 
                     this.gameId = game.id;
-                    setTimeout(() => this.startLobby(), nextGame - now);
+                    // this.startLobby();
+                    setTimeout(() => this.startLobby(), 10000);
                 }
             })
             .catch((err) => {

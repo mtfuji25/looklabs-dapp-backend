@@ -78,15 +78,15 @@ class LobbyLevel extends Level {
         const responses: { participant: ScheduledGameParticipant, response: ParticipantDetails }[] = [];
 
         this.participants.map((participant) => {
-
+            
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
             if(tokenId > 50) tokenId -= 50;
 
-            console.log('TOKEN', tokenId);
+            // console.log('TOKEN', tokenId);
 
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
-                console.log(response);
+                
 
                 responses.push({
                     participant: participant,
@@ -168,8 +168,11 @@ class LobbyLevel extends Level {
                         };
                         this.context.ws.broadcast(msg);
 
+                        this.context.engine.close();
+                        console.log("WE HAVE A WINNER " + layer.playerID);
+
                         // Change to await level
-                        this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+                        // this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
                     });
                 }
             });

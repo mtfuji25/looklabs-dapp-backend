@@ -134,40 +134,40 @@ class PlayerLayer extends Layer {
         this.details = details;
 
         // Add status component to current entity
-        // this.self.addStatus(
-        //     // Attack
-        //     20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Speed
-        //     0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Health
-        //     100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Defense
-        //     5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Cooldown
-        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        // ).setOnDie((status) => this.onDie(status));
+        this.self.addStatus(
+            // Attack
+            20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            // Speed
+            0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            // Health
+            100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            // Defense
+            5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            // Cooldown
+            0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        ).setOnDie((status) => this.onDie(status));
 
         // create a record of mapped attributes, so we can use the attributes returned more easily
         // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
         
         const attributesMap: Record<string, any> = {};
 
-        this.details.attributes.map((attribute) => {
-            attributesMap[attribute.trait_type] = attribute.value;
-        })
-
-        this.self.addStatus(
-            // Attack
-            attributesMap["Attack"],
-            // Speed
-            attributesMap["Speed"] / 500,
-            // Health
-            attributesMap["Health"],
-            // Defense
-            attributesMap["Defence"],
-            // Cooldown
-            0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        ).setOnDie((status) => this.onDie(status));
+        // this.details.attributes.map((attribute) => {
+        //     attributesMap[attribute.trait_type] = attribute.value;
+        // })
+ 
+        // this.self.addStatus(
+        //     // Attack
+        //     attributesMap["Attack"],
+        //     // Speed
+        //     attributesMap["Speed"] / 500,
+        //     // Health
+        //     attributesMap["Health"],
+        //     // Defense
+        //     attributesMap["Defence"],
+        //     // Cooldown
+        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        // ).setOnDie((status) => this.onDie(status));
 
         // Add rigibody for current entity
         this.self.addRigidbody(
