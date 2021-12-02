@@ -92,6 +92,13 @@ class Vec2 {
         return this.muls(1.0 / this.length());
     }
 
+    swap(): Vec2 {
+        return new Vec2(
+            this.y,
+            this.x
+        )
+    }
+
 }
 
 const deg2rad = (deg: number): number => {
