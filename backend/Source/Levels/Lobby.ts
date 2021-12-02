@@ -83,10 +83,7 @@ class LobbyLevel extends Level {
 
             if(tokenId > 50) tokenId -= 50;
 
-            console.log('TOKEN', tokenId);
-
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
-                console.log(response);
 
                 responses.push({
                     participant: participant,
@@ -106,18 +103,16 @@ class LobbyLevel extends Level {
                             (result: GameParticipantsResult) => {
                                 this.ready = false;
                                 this.layerStack.popLayer(player);
-                                // Esse vai para produção
-                                console.log("Matou caramba")
-                                this.context.strapi.createParticipantResult(result).then(() => {
-                                    this.ready = true
-                                }).catch((err) => console.log(err));
-                                // Shoud be after create result
                                 this.fighters--;
                                 this.context.ws.broadcast({
                                     msgType: "remain-players",
                                     remainingPlayers: this.fighters,
                                     totalPlayers: this.participants.length
                                 });
+
+                                this.context.strapi.createParticipantResult(result).then(() => {
+                                    this.ready = true
+                                }).catch((err) => console.log(err));
                             },
                             details
                         );

@@ -51,8 +51,6 @@ const runAwayFromTarget = (entity: Entity) => {
         resNormal.x = resNormal.y;
         resNormal.y = tempX;
 
-        console.log(resNormal)
-
         if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
             runAwayDir = resNormal.muls(-1.0);
 
@@ -131,8 +129,6 @@ const runAwayFromRange = (entity: Entity) => {
         resNormal.x = resNormal.y;
         resNormal.y = tempX;
 
-        console.log(resNormal)
-
         if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
             runAwayDir = resNormal.muls(-1.0);
 
@@ -171,7 +167,6 @@ const runAwayFromRange = (entity: Entity) => {
                 runAwayDir.y = 0.0;
             }
         }
-        console.log("Get runaway dir")
     } else {
         runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
     }
@@ -210,8 +205,6 @@ const runAwayFromAll = (entity: Entity, grid: Grid) => {
         resNormal.x = resNormal.y;
         resNormal.y = tempX;
 
-        console.log(resNormal)
-
         if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
             runAwayDir = resNormal.muls(-1.0);
 
@@ -250,7 +243,6 @@ const runAwayFromAll = (entity: Entity, grid: Grid) => {
                 runAwayDir.y = 0.0;
             }
         }
-        console.log("Get runaway dir")
     } else {
         runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
     }
@@ -685,9 +677,8 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
 
             // Curando caramba
             if (lifePercent < 100) {
-                status.health += 0.05
+                status.health += 0.03
             }
-            console.log("Berserker", Behavior.berserker)
             // Life check
             if ((lifePercent < 25 || behavior.healing) && (!Behavior.berserker)) {
                 // console.log("Entered healing node");

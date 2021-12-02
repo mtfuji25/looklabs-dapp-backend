@@ -5,7 +5,7 @@ import { Layer } from "../../Core/Layer";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 // Map importing
-import levelCollider from "../../Assets/LevelCollider.json";
+import levelCollider from "../../Assets/level_collider.json";
 
 class MapColliderLayer extends Layer {
 
@@ -16,8 +16,6 @@ class MapColliderLayer extends Layer {
             levelCollider["width"],
             levelCollider["height"]
         );
-
-        this.self.addRectangle();
     }
 
     onAttach() {
@@ -27,7 +25,8 @@ class MapColliderLayer extends Layer {
             for (let j = 0; j < levelCollider["height"]; ++j) {
                 const collider = levelCollider["data"][i][j];
                 if (collider !== 0) {
-                    grid.addStatic(j, i);
+                    console.log(`X: ${i}, Y: ${j}, value: ${collider}`);
+                    grid.addStatic(i, j);
                 }
             }
         }
