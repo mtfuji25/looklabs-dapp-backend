@@ -74,3 +74,5 @@ yarn.lock
 */dist
 dist/*.js
 public/*.js
+**/dist/**/*.js
+**/public/**/*.js
