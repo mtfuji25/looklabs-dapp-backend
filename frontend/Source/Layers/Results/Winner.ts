@@ -18,6 +18,8 @@ interface TextParams {
 class WinnerLayer extends Layer {
     private app: Application;
 
+    private screenX: number;
+    private screenY: number;
     private percentX: number;
     private percentY: number;
     private winnerImg: Sprite;
@@ -101,6 +103,8 @@ class WinnerLayer extends Layer {
         // sets percents
         this.percentX = this.app.view.width / 100.0;
         this.percentY = this.app.view.height / 100.0;
+        this.screenX = this.app.view.width;
+        this.screenY = this.app.view.height;
 
         // generate all sprites
         Object.entries(this.spriteConstructors).map(([key, value], index) => {
@@ -153,6 +157,27 @@ class WinnerLayer extends Layer {
 
     onUpdate(deltaTime: number) {
         this.winnerImg.setSize(200 * this.app.view.width / 1440, 200 * this.app.view.height / 800);
+
+        // on window resize 
+        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.width / 100.0;
+            this.percentY = this.app.view.height / 100.0;
+
+            this.screenX = this.app.view.width;
+            this.screenY = this.app.view.height;
+
+            // repositions all objects
+            Object.entries(this.spriteConstructors).map(([key, value], index) => {
+                this.sprites[key].setPos(this.percentX * value.x, this.percentY * value.y);
+            });
+    
+            // generate all texts
+            Object.entries(this.textConstructors).map(([key, value]) => {
+                this.texts[key].setPos(this.percentX * value.pos.x, this.percentY * value.pos.y);
+            });    
+        }
+        
     }
 
     onDetach() {
