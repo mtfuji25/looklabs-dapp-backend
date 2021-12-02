@@ -244,19 +244,24 @@ class PlayerLayer extends Layer {
         this.details = details;
 
         const get_rate = () => {
-            return Math.random() * 0.8 + 0.2;
+            return Math.random() * 80 + 20;
+            // return Math.random() * 0.8 + 0.2;
         }
         
         // Add status component to current entity
         this.self.addStatus(
             // Attack
-            20 * get_rate(),
+            get_rate(),
+            // 20 * get_rate(),
             // Speed
-            0.05 * get_rate(),
+            get_rate() / 500,
+            // 0.05 * get_rate(),
             // Health
-            150,
+            100,
+            // 150,
             // Defense
-            15 * get_rate(),
+            get_rate(),
+            // 15 * get_rate(),
             // Cooldown
             0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
         ).setOnDie((status) => this.onDie(status));
