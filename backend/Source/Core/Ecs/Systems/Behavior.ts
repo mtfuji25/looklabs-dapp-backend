@@ -6,13 +6,24 @@ import { EcsData } from "../Interfaces";
 import { AStarFinder } from "astar-typescript";
 
 // Map importing
-import levelCollider from "../../../Assets/LevelCollider.json";
+import levelCollider from "../../../Assets/level_collider.json";
 import { Grid } from "../Components/Grid";
 import { Behavior } from "../Components/Behavior";
+import { assert } from "console";
+
+const transposedCollider: Array<Array<number>> = [];
+for (let i = 0; i < levelCollider["height"]; ++i) {
+    const row: number[] = [];
+    for (let j = 0; j < levelCollider["width"]; ++j) {
+        const collider = levelCollider["data"][j][i];
+        row.push(collider);
+    }
+    transposedCollider.push(row);
+}
 
 const finder = new AStarFinder({
     grid: {
-        matrix: levelCollider["data"]
+        matrix: transposedCollider
     },
     diagonalAllowed: false,
     includeStartNode: true,
@@ -94,6 +105,7 @@ const runAwayFromTarget = (entity: Entity) => {
     }
 
     rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 1: ${rigidbody} Is NaN`);
 
     behavior.attacking = false;
 }
@@ -172,6 +184,7 @@ const runAwayFromRange = (entity: Entity) => {
     }
 
     rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 2: ${rigidbody} Is NaN`);
 
     behavior.attacking = false;
 }
@@ -248,6 +261,7 @@ const runAwayFromAll = (entity: Entity, grid: Grid) => {
     }
 
     rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 3: ${rigidbody} Is NaN`);
 
     behavior.attacking = false;
 }
@@ -382,27 +396,34 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
             source, other.index
         );
 
-        if (path === null || path.length < 2)
+        if (path === null || path.length < 2) {
+            console.log("Source of null path: ", source)
+            console.log("Source of null path: ", other.index)
             return;
+        }
 
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
         if (!dest.equal(origin)){
             dir = dir.add(dest.sub(origin));
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
         }
     });
 
-    if (dir) {
+    if (dir && (!dir.equal(new Vec2(0, 0)))) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
+        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 42: ${rigidbody} Is NaN`);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
             dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 43: ${rigidbody} Is NaN`);
         }
     }
 
     rigidbody.velocity = dir;
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
 
     behavior.attacking = false;
 }
@@ -493,26 +514,33 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
             source, other.index
         );
 
-        if (path === null || path.length < 2)
+        if (path === null || path.length < 2) {
+            console.log("Source of null path: ", source)
+            console.log("Dest of null path: ", other.index)
             return;
+        }
 
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
         if (!dest.equal(origin)){
             dir = dir.add(dest.sub(origin));
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 71: ${rigidbody} Is NaN`);
         }
     });
-    if (dir) {
+    if (dir && (!dir.equal(new Vec2(0, 0)))) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
+        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 72: ${rigidbody} Is NaN`);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
             dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 73: ${rigidbody} Is NaN`);
         }
     }
 
     rigidbody.velocity = dir;
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 7: ${rigidbody} Is NaN, dir was ${dir}`);
 
     behavior.attacking = false;
 }
@@ -532,6 +560,7 @@ const seekNearest = (entity: Entity) => {
 
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
     }
 
     behavior.attacking = false;
@@ -564,6 +593,7 @@ const seekNearestInRange = (entity: Entity) => {
     
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
     }
 
     behavior.attacking = false;
