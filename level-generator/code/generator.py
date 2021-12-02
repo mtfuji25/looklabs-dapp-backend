@@ -117,55 +117,55 @@ def generate_data(pix, base_sheet, json_data):
 def run():
 
     # Carrega as imagens
-    base_img = Image.open("assets/basemap.png")
-    overlays_img = Image.open("assets/overlays.png")
+    # base_img = Image.open("assets/basemap.png")
+    # overlays_img = Image.open("assets/overlays.png")
     collider_img = Image.open("assets/collider.png")
 
     # Extrai o array de pixels
-    base_pix = base_img.load()
-    overlays_pix = overlays_img.load()
+    # base_pix = base_img.load()
+    # overlays_pix = overlays_img.load()
     collider_pix = collider_img.load()
 
-    base_imgs = extract_units(base_pix)
-    overlay_imgs = extract_units(overlays_pix)
+    # base_imgs = extract_units(base_pix)
+    # overlay_imgs = extract_units(overlays_pix)
     collider_imgs = extract_units(collider_pix)
 
     # Compare for basemap
-    base_sheet = []
-    overlay_sheet = []
+    # base_sheet = []
+    # overlay_sheet = []
     collider_sheet = []
 
-    for i, img in enumerate(base_imgs):
-        equals = []
-        for j, other in enumerate(base_imgs):
-            if i == j:
-                continue
-            else:
-                res = compare_two_units(img, other)
-                if res["error"] < 0.0234375 and res["percent"]["r"] < 0.1 and res["percent"]["g"] < 0.1 and res["percent"]["b"] < 0.1:
-                    equals.append(other)
-        if len(equals) == 0:
-            base_sheet.append(img)
-        else:
-            base_sheet.append(img)
-            for other in equals:
-                base_imgs.remove(other)
+    # for i, img in enumerate(base_imgs):
+    #     equals = []
+    #     for j, other in enumerate(base_imgs):
+    #         if i == j:
+    #             continue
+    #         else:
+    #             res = compare_two_units(img, other)
+    #             if res["error"] < 0.0234375 and res["percent"]["r"] < 0.1 and res["percent"]["g"] < 0.1 and res["percent"]["b"] < 0.1:
+    #                 equals.append(other)
+    #     if len(equals) == 0:
+    #         base_sheet.append(img)
+    #     else:
+    #         base_sheet.append(img)
+    #         for other in equals:
+    #             base_imgs.remove(other)
 
-    for i, img in enumerate(overlay_imgs):
-        equals = []
-        for j, other in enumerate(overlay_imgs):
-            if i == j:
-                continue
-            else:
-                res = compare_two_units(img, other)
-                if res["error"] < 0.0234375 and res["percent"]["r"] < 0.1 and res["percent"]["g"] < 0.1 and res["percent"]["b"] < 0.1:
-                    equals.append(other)
-        if len(equals) == 0:
-            overlay_sheet.append(img)
-        else:
-            overlay_sheet.append(img)
-            for other in equals:
-                overlay_imgs.remove(other)
+    # for i, img in enumerate(overlay_imgs):
+    #     equals = []
+    #     for j, other in enumerate(overlay_imgs):
+    #         if i == j:
+    #             continue
+    #         else:
+    #             res = compare_two_units(img, other)
+    #             if res["error"] < 0.0234375 and res["percent"]["r"] < 0.1 and res["percent"]["g"] < 0.1 and res["percent"]["b"] < 0.1:
+    #                 equals.append(other)
+    #     if len(equals) == 0:
+    #         overlay_sheet.append(img)
+    #     else:
+    #         overlay_sheet.append(img)
+    #         for other in equals:
+    #             overlay_imgs.remove(other)
 
     for i, img in enumerate(collider_imgs):
         equals = []
@@ -183,24 +183,28 @@ def run():
             for other in equals:
                 collider_imgs.remove(other)
 
-    for i, img in enumerate(base_sheet):
-        imageio.imwrite("basemap/basemap" + str(i) + ".png", np.array(img, np.uint8))
+    # for i, img in enumerate(base_sheet):
+    #     imageio.imwrite("basemap/basemap" + str(i) + ".png", np.array(img, np.uint8))
 
-    for i, img in enumerate(overlay_sheet):
-        imageio.imwrite("overlays/overlay" + str(i) + ".png", np.array(img, np.uint8))
+    # for i, img in enumerate(overlay_sheet):
+    #     imageio.imwrite("overlays/overlay" + str(i) + ".png", np.array(img, np.uint8))
 
     for i, img in enumerate(collider_sheet):
         imageio.imwrite("collider/collider" + str(i) + ".png", np.array(img, np.uint8))
 
-    generate_data(base_pix, base_sheet, basemap_json)
-    generate_data(overlays_pix, overlay_sheet, overlays_json)
+    # generate_data(base_pix, base_sheet, basemap_json)
+    # generate_data(overlays_pix, overlay_sheet, overlays_json)
     generate_data(collider_pix, collider_sheet, collider_json)
 
-    with open("level_map.json", "w") as file:
-        json.dump(basemap_json, file)
+    # with open("level_map.json", "w") as file:
+    #     json.dump(basemap_json, file)
 
-    with open("level_overlays.json", "w") as file:
-        json.dump(overlays_json, file)
+    # with open("level_overlays.json", "w") as file:
+    #     json.dump(overlays_json, file)
+
+    for i in collider_json["data"]:
+        for j in range(len(i)):
+            i[j] = 0 if i[j] == 1 else 1
 
     with open("level_collider.json", "w") as file:
         json.dump(collider_json, file)
