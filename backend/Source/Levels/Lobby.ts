@@ -9,7 +9,7 @@ import { GameParticipantsResult, ParticipantDetails, ScheduledGameParticipant } 
 import { EngineContext } from "../Core/Interfaces";
 
 // Layers import
-import { PlayerLayer } from "../Layers/Lobby/Player";
+import { PlayerLayer, spawnPos } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
 import { GameStatus, GameStatusListener, OnConnectionListener, requests } from "../Clients/Interfaces";
@@ -66,7 +66,6 @@ class LobbyLevel extends Level {
     startGame() {
         const mapCollider = new MapColliderLayer(this.ecs);
         const grid = mapCollider.getSelf().getGrid();
-
         // Initial broadcast for players length
         this.context.ws.broadcast({
             msgType: "remain-players",
@@ -82,6 +81,10 @@ class LobbyLevel extends Level {
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
             if(tokenId > 50) tokenId -= 50;
+            if (tokenId == 0)
+                tokenId = 1;
+            if (tokenId == 50)
+                tokenId = 49;
 
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
 
@@ -91,7 +94,7 @@ class LobbyLevel extends Level {
                 });
                 responseCounter++;
 
-                if (responseCounter == (this.participants.length - 1)) {
+                if (responseCounter == this.participants.length) {
                     // Put the map in the stack
                     this.layerStack.pushLayer(mapCollider);
         
@@ -103,16 +106,17 @@ class LobbyLevel extends Level {
                             (result: GameParticipantsResult) => {
                                 this.ready = false;
                                 this.layerStack.popLayer(player);
+                                
+                                this.context.strapi.createParticipantResult(result).then(() => {
+                                    this.ready = true
+                                }).catch((err) => console.log(err));
                                 this.fighters--;
+                                console.log("Fighters: ", this.fighters)
                                 this.context.ws.broadcast({
                                     msgType: "remain-players",
                                     remainingPlayers: this.fighters,
                                     totalPlayers: this.participants.length
                                 });
-
-                                this.context.strapi.createParticipantResult(result).then(() => {
-                                    this.ready = true
-                                }).catch((err) => console.log(err));
                             },
                             details
                         );

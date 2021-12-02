@@ -25,7 +25,6 @@ class MapColliderLayer extends Layer {
             for (let j = 0; j < levelCollider["height"]; ++j) {
                 const collider = levelCollider["data"][i][j];
                 if (collider !== 0) {
-                    console.log(`X: ${i}, Y: ${j}, value: ${collider}`);
                     grid.addStatic(i, j);
                 }
             }
