@@ -39,6 +39,9 @@ class ResultsLayer extends Layer {
     private percentX: number;
     private percentY: number;
 
+    private screenX: number;
+    private screenY: number;
+
     constructor(ecs: ECS, app: Application, gameParticipants: ScheduledGameParticipant[]) {
         super("TesteLayer", ecs);
 
@@ -49,6 +52,10 @@ class ResultsLayer extends Layer {
         this.percentX = this.app.view.width / 100.0;
         this.percentY = this.app.view.height / 100.0;
 
+        // sets screen size
+        this.screenX = this.app.view.width;
+        this.screenY = this.app.view.height;
+
         // Create results title
         this.ecs
             .createEntity(58.4022 * this.percentX, 5.25 * this.percentY)
@@ -56,7 +63,6 @@ class ResultsLayer extends Layer {
             .addStage(this.resContainer);
 
         // renders all the results
-        console.log(gameParticipants)
         gameParticipants.map((participant, index) =>
             this.renderResult(participant, index)
         );
@@ -118,6 +124,19 @@ class ResultsLayer extends Layer {
     onAttach() {}
 
     onUpdate(deltaTime: number) {
+        // on window resize 
+        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.width / 100.0;
+            this.percentY = this.app.view.height / 100.0;
+
+            this.screenX = this.app.view.width;
+            this.screenY = this.app.view.height;
+
+            // resizes text
+        }
+        
+
         if (this.firstPass) {
             this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
         } else {

@@ -58,6 +58,22 @@
         {
             "name": "dungeon",
             "url": "./assets/dungeon-pack/dungeon-pack.png"
+        },
+        {
+            "name": "basemap",
+            "url": "./assets/dungeon-pack/base_sheet.png"
+        },
+        {
+            "name": "overlaymap",
+            "url": "./assets/dungeon-pack/overlay_sheet.png"
+        },
+        {
+            "name": "basemap_raw",
+            "url": "./assets/dungeon-pack/basemap.png"
+        },
+        {
+            "name": "overlaymap_raw",
+            "url": "./assets/dungeon-pack/overlays.png"
         }
     ],
     "enemy-pack": [

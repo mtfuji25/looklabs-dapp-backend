@@ -12,6 +12,7 @@ import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
 import { GameStatus, Listener, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
+import { OverlayMap } from "../Layers/Lobby/Overlays";
 
 interface LobbyLevelContext extends ViewContext {
     // View properties
@@ -74,6 +75,16 @@ class LobbyLevel extends Level {
                 this.levelContext,
                 this.context.app,
                 this.context.ws,
+                this.context.res
+            )
+        );
+
+        // Load all overlays
+        this.layerStack.pushLayer(
+            new OverlayMap(
+                this.ecs,
+                this.levelContext,
+                this.context.app,
                 this.context.res
             )
         );

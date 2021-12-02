@@ -26,6 +26,9 @@ class TextLayer extends Layer {
     private currentGame: ScheduledGame;
     private context: EngineContext;
 
+    private screenX: number;
+    private screenY: number;
+
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
         fontFamily: "monospace",
@@ -65,6 +68,9 @@ class TextLayer extends Layer {
         // sets percents
         this.percentX = this.app.view.width / 100.0;
         this.percentY = this.app.view.height / 100.0;
+
+        this.screenX = this.app.view.width;
+        this.screenY = this.app.view.height;
 
         // Add sprite to it
         this.title = this.ecs.createEntity().addSprite(this.app.loader.resources["thepit"]);
@@ -117,6 +123,32 @@ class TextLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
+        // on window resize 
+        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.width / 100.0;
+            this.percentY = this.app.view.height / 100.0;
+
+            this.screenX = this.app.view.width;
+            this.screenY = this.app.view.height;
+
+            // resizes text
+            this.title.setPos(50 * this.percentX - this.title.sprite.width / 2.0, 8.125 * this.percentY);
+            this.users.setPos(37.5695 * this.percentX, 59.25 * this.percentY);
+            this.countdown.setPos(            
+                this.percentX * 50 - this.countdown.text.width / 2.0,
+                this.percentY * 40
+            );
+            this.entered.setPos(            
+                this.percentX * 50 - this.entered.text.width / 2.0,
+                this.percentY * 59.25
+            );
+            this.subtitle.setPos(            
+                this.percentX * 50 - this.subtitle.text.width / 2.0,
+                this.percentY * 33.375
+            );
+        }
+
         if (this.oneSecCount >= 1) {
             const { hours, minutes, seconds } = this.calculateTimeLeft(
                 this.currentGame.game_date
