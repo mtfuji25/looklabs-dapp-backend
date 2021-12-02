@@ -7,7 +7,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 // Inputs system imports
 import { BTNS, Inputs } from "../../Core/Inputs/Inputs";
 import { Application } from "pixi.js";
-import { CONTAINER_DIM } from "../../Constants/Constants";
+import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 import { ServerMsg } from "../../Clients/Interfaces";
 
 // Required fields for view layer
@@ -50,8 +50,8 @@ class ViewLayer extends Layer {
         const percentX = app.view.width / 100.0;
         const percentY = app.view.height / 100.0;
 
-        this.offsetX = 50 * percentX - CONTAINER_DIM / 2.0;
-        this.offsetY = 50 * percentY - CONTAINER_DIM / 2.0;
+        this.offsetX = 50 * percentX - CONTAINER_DIM_X / 2.0;
+        this.offsetY = 50 * percentY - CONTAINER_DIM_Y / 2.0;
     }
 
     onAttach() {

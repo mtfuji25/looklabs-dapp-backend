@@ -14,7 +14,7 @@ import { Application, Container, filters } from "pixi.js";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
-import levelMapFile from "../../Assets/LevelMap.json";
+import levelMapFile from "../../Assets/level_map.json"
 import { Vec2 } from "../../Utils/Math";
 const levelMap: Record<string, any> = levelMapFile;
 
@@ -64,25 +64,23 @@ class MapLayer extends Layer {
             y += step;
             for (let j = 0; j < cols; ++j) {
                 x += step;
-                const currentSheet = levelMap["data"][i][j];
-                if (currentSheet !== 0) {
-                    // Creates entity and add sprite to it
-                    const entity = this.ecs.createEntity(x, y, false)
-                    const sprite = entity.addSprite();
 
-                    // Calculates base cuts in spritesheet
-                    const pw = ((currentSheet - 1) % 10) * SPRITE_SIZE;
-                    const ph = Math.floor((currentSheet - 1) / 10) * SPRITE_SIZE;
+                // Creates entity and add sprite to it
+                const entity = this.ecs.createEntity(x, y, false)
+                const sprite = entity.addSprite();
 
-                    // Load the cuted image to sprite
-                    sprite.setCutImg(
-                        this.app.loader.resources["dungeon"],
-                        pw, ph, SPRITE_SIZE, SPRITE_SIZE
-                    );
+                // Calculates base cuts in spritesheet
+                const pw = j * SPRITE_SIZE;
+                const ph = i * SPRITE_SIZE;
 
-                    this.entities.push(entity);
-                    this.mapContainer.addChild(sprite.sprite);
-                }
+                // Load the cuted image to sprite
+                sprite.setCutImg(
+                    this.app.loader.resources["basemap_raw"],
+                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
+                );
+
+                this.entities.push(entity);
+                this.mapContainer.addChild(sprite.sprite);
                 x += step;
             }
             x = 0;

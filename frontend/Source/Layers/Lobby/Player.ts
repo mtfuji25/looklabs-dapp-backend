@@ -15,7 +15,7 @@ import { Vec2 } from "../../Utils/Math";
 import { wordToView } from "../../Utils/Views";
 
 // Constants
-import { CONTAINER_DIM } from "../../Constants/Constants";
+import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
@@ -95,10 +95,10 @@ class PlayerLayer extends Layer {
             const animsprite = player.entity.getAnimSprite();
 
             // Calculates offsets to fix view
-            const centerFactorX = (transform.pos.x - CONTAINER_DIM / 2.0) / (CONTAINER_DIM / 2.0);
-            const centerFactorY = (transform.pos.y - CONTAINER_DIM / 2.0) / (CONTAINER_DIM / 2.0);
-            const fixFactorX = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
-            const fixFactorY = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
+            const centerFactorX = (transform.pos.x - CONTAINER_DIM_X / 2.0) / (CONTAINER_DIM_X / 2.0);
+            const centerFactorY = (transform.pos.y - CONTAINER_DIM_Y / 2.0) / (CONTAINER_DIM_Y / 2.0);
+            const fixFactorX = (CONTAINER_DIM_X - CONTAINER_DIM_X * (1 - this.levelContext.zoom)) / 2.0;
+            const fixFactorY = (CONTAINER_DIM_Y - CONTAINER_DIM_Y * (1 - this.levelContext.zoom)) / 2.0;
 
             // Fix the position for the player
             animsprite.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
@@ -219,10 +219,6 @@ class PlayerLayer extends Layer {
         titleText.text.anchor.set(0.5);
         titleText.addStage(this.container);
         
-        // Add healthBar
-        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.container);
-        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.container);
-        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.container);
         
         // Add animsprite component
         const sprite = entity.addAnimSprite();
@@ -250,6 +246,11 @@ class PlayerLayer extends Layer {
         animSpriteSlot1.addStage(this.container);
         animSpriteSlot2.addStage(this.container);
         animSpriteSlot3.addStage(this.container);
+
+        // Add healthBar
+        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.container);
+        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.container);
+        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.container);
 
         this.players[id] = {
             entity: entity,
