@@ -47,6 +47,14 @@ interface DetailAttribute {
     value: number | string;
 }
 
+interface Log {
+    event: "entrants" | "damage" | "kills" | "winners" | "final_rank";
+    value?: string;
+    timestamp: string;
+    scheduled_game: number;
+    scheduled_game_participant: number;
+}
+
 class StrapiClient {
     
     private host: string;
@@ -104,6 +112,10 @@ class StrapiClient {
         return (await this.restApi.get(`${tokenId}`)).data;
     }
 
+    async createLog(log: Log) {
+        return this.api.post('/logs', log);
+    }
+
     // Default engine start call
     start(): void {}
 
@@ -111,4 +123,4 @@ class StrapiClient {
     close(): void {}
 }
 
-export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute };
+export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute, Log };
