@@ -9,7 +9,7 @@ import { GameParticipantsResult, ParticipantDetails, ScheduledGameParticipant } 
 import { EngineContext } from "../Core/Interfaces";
 
 // Layers import
-import { PlayerLayer } from "../Layers/Lobby/Player";
+import { PlayerLayer, spawnPos } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
 import { GameStatus, GameStatusListener, OnConnectionListener, requests } from "../Clients/Interfaces";
@@ -66,7 +66,6 @@ class LobbyLevel extends Level {
     startGame() {
         const mapCollider = new MapColliderLayer(this.ecs);
         const grid = mapCollider.getSelf().getGrid();
-
         // Initial broadcast for players length
         this.context.ws.broadcast({
             msgType: "remain-players",
@@ -78,15 +77,16 @@ class LobbyLevel extends Level {
         const responses: { participant: ScheduledGameParticipant, response: ParticipantDetails }[] = [];
 
         this.participants.map((participant) => {
-            
+
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
             if(tokenId > 50) tokenId -= 50;
-
-            // console.log('TOKEN', tokenId);
+            if (tokenId == 0)
+                tokenId = 1;
+            if (tokenId == 50)
+                tokenId = 49;
 
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
-                
 
                 responses.push({
                     participant: participant,
@@ -94,7 +94,7 @@ class LobbyLevel extends Level {
                 });
                 responseCounter++;
 
-                if (responseCounter == (this.participants.length - 1)) {
+                if (responseCounter == this.participants.length) {
                     // Put the map in the stack
                     this.layerStack.pushLayer(mapCollider);
         
@@ -106,13 +106,12 @@ class LobbyLevel extends Level {
                             (result: GameParticipantsResult) => {
                                 this.ready = false;
                                 this.layerStack.popLayer(player);
-                                // Esse vai para produção
-                                console.log("Matou caramba")
+                                
                                 this.context.strapi.createParticipantResult(result).then(() => {
                                     this.ready = true
                                 }).catch((err) => console.log(err));
-                                // Shoud be after create result
                                 this.fighters--;
+                                console.log("Fighters: ", this.fighters)
                                 this.context.ws.broadcast({
                                     msgType: "remain-players",
                                     remainingPlayers: this.fighters,
@@ -168,11 +167,8 @@ class LobbyLevel extends Level {
                         };
                         this.context.ws.broadcast(msg);
 
-                        this.context.engine.close();
-                        console.log("WE HAVE A WINNER " + layer.playerID);
-
                         // Change to await level
-                        // this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+                        this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
                     });
                 }
             });
