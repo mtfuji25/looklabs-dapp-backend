@@ -59,12 +59,12 @@ class WinnerLayer extends Layer {
         winner: {
             text: "WINNER",
             style: this.titleStyle,
-            pos: { x: 31.2, y: 27 }
+            pos: { x: 32.2, y: 27 }
         },
         winnerName: {
             text: "",
             style: this.textStyle,
-            pos: { x: 31.9, y: 61.7 }
+            pos: { x: 34, y: 60 }
         },
         kills: {
             text: "",
