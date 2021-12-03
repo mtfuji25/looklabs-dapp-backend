@@ -108,7 +108,7 @@ class LobbyLevel extends Level {
                                 this.layerStack.popLayer(player);
                                 
                                 this.context.strapi.createParticipantResult(result).then(() => {
-                                    this.ready = true
+                                    this.ready = true;
                                 }).catch((err) => console.log(err));
                                 this.fighters--;
                                 console.log("Fighters: ", this.fighters)

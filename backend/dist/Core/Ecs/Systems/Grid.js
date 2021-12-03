@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.collisionsResults = exports.sys_CheckCollisions = exports.sys_UpdateCollisions = exports.sys_UpdateGrid = void 0;
 // Math imports
 var Math_1 = require("../../../Utils/Math");
+var console_1 = require("console");
 // For neighbor checks
 var offsetX = [-1, 0, 1, 1, 1, 0, -1, -1];
 var offsetY = [-1, -1, -1, 0, 1, 1, 1, 0];
@@ -123,6 +124,8 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     other.velocity.x = 0.0001;
                     other.velocity.y = 0.0001;
                 }
+                (0, console_1.assert)(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), "Collision: ".concat(rigidbody, " Is NaN"));
+                (0, console_1.assert)(!(isNaN(other.velocity.x) || isNaN(other.velocity.y)), "Collision Other: ".concat(other, " Is NaN"));
             });
             //
             //  Second pass for static cells
@@ -169,6 +172,7 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     rigidbody.velocity.x = 0;
                     rigidbody.velocity.y = 0;
                 }
+                (0, console_1.assert)(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), "Collision 2: ".concat(rigidbody, " Is NaN"));
             });
         };
         for (var i = 0; i < grid.dynamics.length; ++i) {
@@ -225,6 +229,8 @@ var sys_UpdateCollisions = function (data, deltaTime) {
                     other.velocity.x = 0;
                     other.velocity.y = 0;
                 }
+                (0, console_1.assert)(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), "Collision 3: ".concat(rigidbody, " Is NaN"));
+                (0, console_1.assert)(!(isNaN(other.velocity.x) || isNaN(other.velocity.y)), "Collision Other 3: ".concat(other, " Is NaN"));
             });
         };
         for (var i = 0; i < grid.dynamics.length; ++i) {
