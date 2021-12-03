@@ -7,7 +7,10 @@ ADD . /app
 WORKDIR /app
 
 RUN npm install
+RUN npm run build
 
-EXPOSE 8080
+FROM nginx
 
-CMD ["npm", "run", "start"]
+COPY  --from=0 /app/public/. /usr/share/nginx/html/.
+
+EXPOSE 80
