@@ -80,11 +80,9 @@ class LobbyLevel extends Level {
 
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
-            if(tokenId > 50) tokenId -= 50;
+            tokenId %= 50;
             if (tokenId == 0)
                 tokenId = 1;
-            if (tokenId == 50)
-                tokenId = 49;
 
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
 

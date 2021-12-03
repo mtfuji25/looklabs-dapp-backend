@@ -35,12 +35,9 @@ interface Player {
     animSlot3: Entity;
 }
 
-type PlayerClass = "Insectoid" | "Serpentine" | "Avian" | "Canine";
-
 class PlayerLayer extends Layer {
     // Entites storage
     private players: Record<string, Player> = {};
-    static playerNames: Record<string, PlayerClass> = {};
 
     // Listener id
     private listener: Listener;
@@ -186,7 +183,7 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos } = content;
+        const { id, pos, char_class } = content;
 
         const prevPlayer = this.players[id];
 
@@ -230,7 +227,7 @@ class PlayerLayer extends Layer {
         // Add animsprite component
         const sprite = entity.addAnimSprite();
 
-        switch (PlayerLayer.playerNames[id]) {
+        switch (char_class) {
             case "Avian":
                 sprite.loadFromConfig(this.app, this.res["chicken-sheet"]);
                 break;
@@ -616,4 +613,4 @@ class PlayerLayer extends Layer {
     }
 }
 
-export { PlayerLayer, PlayerClass };
+export { PlayerLayer };
