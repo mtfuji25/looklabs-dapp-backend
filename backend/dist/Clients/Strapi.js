@@ -115,6 +115,13 @@ var StrapiClient = /** @class */ (function () {
             });
         });
     };
+    StrapiClient.prototype.createLog = function (log) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.api.post('/logs', log)];
+            });
+        });
+    };
     // Default engine start call
     StrapiClient.prototype.start = function () { };
     // Default engine close call

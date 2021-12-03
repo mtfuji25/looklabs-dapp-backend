@@ -50,6 +50,9 @@ var Vec2 = /** @class */ (function () {
     Vec2.prototype.normalize = function () {
         return this.muls(1.0 / this.length());
     };
+    Vec2.prototype.swap = function () {
+        return new Vec2(this.y, this.x);
+    };
     return Vec2;
 }());
 exports.Vec2 = Vec2;

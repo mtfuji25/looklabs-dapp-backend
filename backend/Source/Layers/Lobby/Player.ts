@@ -299,13 +299,13 @@ class PlayerLayer extends Layer {
 
         this.self.addStatus(
             // Attack
-            attributesMap["Attack"],
+            20 * (attributesMap["Attack"] / 100.0),
             // Speed
-            attributesMap["Speed"] / 500,
+            0.04 * (attributesMap["Speed"] / 100.0),
             // Health
-            attributesMap["Health"],
+            100 * (attributesMap["Health"] / 100.0),
             // Defense
-            attributesMap["Defence"],
+            5 * (attributesMap["Defence"] / 100.0),
             // Cooldown
             0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
         ).setOnDie((status) => this.onDie(status));
@@ -458,8 +458,6 @@ class PlayerLayer extends Layer {
         console.log("Resultados: ", status);
         const killer = this.self.getStatus().lastHit.name;
 
-        console.log("Passou 1")
-
         this.wsClient.broadcast({
             killed: this.self.name,
             killer: killer,
@@ -467,16 +465,12 @@ class PlayerLayer extends Layer {
             msgType: "kill"
         });
 
-        console.log("Passou 2")
-
         this.dieFn({
             scheduled_game_participant: this.strapiID,
             survived_for: Math.floor(status.survived),
             kills: Math.floor(status.kills),
             health: Math.floor(status.health),
         });
-
-        console.log("Passou 3")
     }
 }
 
