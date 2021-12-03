@@ -1,12 +1,14 @@
 FROM node:latest
 
-RUN mkdir /backend && chown 1000:1000 -R /backend
+RUN mkdir /app
 
-ADD . /backend
+ADD . /app
 
-WORKDIR /backend
+WORKDIR /app
 
 RUN npm install
+
+EXPOSE 8082
 
 CMD ["npm", "run", "start"]
 
