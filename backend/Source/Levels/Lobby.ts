@@ -103,25 +103,62 @@ class LobbyLevel extends Level {
                         const player = new PlayerLayer(
                             this.ecs, this.context.ws,
                             participant.nft_id, participant.id, grid, 
-                            (result: GameParticipantsResult) => {
+                            (result: GameParticipantsResult, killer: number) => {
                                 this.ready = false;
                                 this.layerStack.popLayer(player);
                                 
-                                this.context.strapi.createParticipantResult(result).then(() => {
-                                    this.ready = true;
-                                }).catch((err) => console.log(err));
                                 this.fighters--;
-                                console.log("Fighters: ", this.fighters)
                                 this.context.ws.broadcast({
                                     msgType: "remain-players",
                                     remainingPlayers: this.fighters,
                                     totalPlayers: this.participants.length
                                 });
+
+                                this.context.strapi.createParticipantResult(result).then(() => {
+                                    this.ready = true;
+
+                                    // Kill Log
+                                    this.context.strapi.createLog({
+                                        timestamp: Date.now().toString(),
+                                        event: "kills",
+                                        value: String(result.scheduled_game_participant),
+                                        scheduled_game: this.gameId,
+                                        scheduled_game_participant: killer,
+                                    }).catch((err) => console.log(err));
+
+                                    // Final Rank log
+                                    this.context.strapi.createLog({
+                                        timestamp: Date.now().toString(),
+                                        event: "final_rank",
+                                        value: String(this.fighters),
+                                        scheduled_game: this.gameId,
+                                        scheduled_game_participant: result.scheduled_game_participant,
+                                    }).catch((err) => console.log(err));
+
+                                }).catch((err) => console.log(err));
+                            },
+                            (damage: number, participant: number) => {
+                                // Damage log
+                                this.context.strapi.createLog({
+                                    timestamp: Date.now().toString(),
+                                    event: "damage",
+                                    value: String(damage),
+                                    scheduled_game: this.gameId,
+                                    scheduled_game_participant: participant
+                                })
                             },
                             details
                         );
                         grid.addDynamic(player.getSelf());
                         this.layerStack.pushLayer(player);
+
+                        // Entrants log
+                        this.context.strapi.createLog({
+                            timestamp: Date.now().toString(),
+                            event: "entrants",
+                            scheduled_game: this.gameId,
+                            scheduled_game_participant: participant.id,
+                        })
                     });
                     this.ready = true;
                 }
@@ -157,6 +194,14 @@ class LobbyLevel extends Level {
                         kills: Math.floor(status.kills),
                         health: Math.ceil(status.health)
                     }).then(() => {
+
+                        // Winner log
+                        this.context.strapi.createLog({
+                            timestamp: Date.now().toString(),
+                            event: "winners",
+                            scheduled_game: this.gameId,
+                            scheduled_game_participant: layer.strapiID,
+                        })
 
                         // Tells frontends that is return to await from this gameId
                         const msg: GameStatus = {

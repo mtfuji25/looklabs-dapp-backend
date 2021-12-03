@@ -75,6 +75,12 @@ class StrapiClient {
         this.restApi = axios.create({
             baseURL: 'https://token.thepitnft.com/contractAddress/',
         })
+
+        const now = new Date().toISOString();
+
+        this.get(`scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`).then((res) => {
+            console.log(JSON.stringify(res.data, null, 4))
+        });
     }
 
     private async get(url: string): Promise<AxiosResponse> {
@@ -98,8 +104,26 @@ class StrapiClient {
 
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
-        return (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`))
-            .data[0];
+        // const response = (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data["data"][0];
+        const response = (await this.get(
+            `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
+            )).data["data"][0];
+        const attributes = response.attributes;
+        // return {
+        //     id: response.id,
+        //     published_at: attributes.publishedAt,
+        //     created_at: attributes.createdAt,
+        //     updated_at: attributes.updatedAt,
+        //     game_date: attributes.game_date,
+        // };
+        return {
+            id: 2,
+            published_at: 's',
+            created_at: 's',
+            updated_at: 's',
+            game_date: 's',
+            scheduled_game_participants: []
+        }
     }
 
     // get chosen game
