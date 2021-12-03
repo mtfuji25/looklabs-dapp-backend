@@ -456,6 +456,7 @@ class PlayerLayer extends Layer {
             maxHealth: status.maxHealth,
             survived: status.survived,
             kills: status.kills,
+            char_class: this.self.name.split(' ')[0],
         };
     }
 

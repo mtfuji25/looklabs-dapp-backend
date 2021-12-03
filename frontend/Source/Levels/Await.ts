@@ -18,8 +18,6 @@ class AwaitLevel extends Level {
     private listener: Listener;
     private conListener: Listener;
 
-    private playerNames: Record<string, PlayerClass> = {};
-
     onStart(): void {
         // Add msg listener
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
@@ -80,40 +78,6 @@ class AwaitLevel extends Level {
         if (!content.gameStatus)
             return false;
         
-        this.context.strapi.getGameParticipants(content.gameId).then((participants) => {
-
-            // create multiple requests for player name
-            const participantsMap = participants.map((participant: ScheduledGameParticipant ) => {
-                return new Promise((resolve, reject) => {
-                    const unSplitId = (participant.nft_id).split('/')[1];
-                    let splitId = Number((participant.nft_id).split('/')[1]);
-                    if(splitId > 50) splitId -= 50;
-                    if(splitId == 0) splitId += 1;
-    
-                    this.context.strapi.getParticipantDetails(splitId).then((details) => {
-                        this.playerNames[unSplitId] = details.name as PlayerClass;
-                        resolve(details.name);
-                    }).catch((err) => {
-                        reject(err);
-                    })
-                })
-            })
-
-            // once all the promises are resolved, send to lobbyLevel with player names prop
-            Promise.all(participantsMap).then(() => {
-                this.context.engine.loadLevel(
-                    new LobbyLevel(
-                        this.context, "Lobby",
-                        {
-                            gameId: content.gameId,
-                            playerNames: this.playerNames
-                        }
-                    )
-                )
-            })
-        })
-
-
         return false;
     }
 };

@@ -60,6 +60,7 @@ interface PlayerCommand {
     maxHealth: number;
     survived: number;
     kills: number;
+    char_class: string;
 }
 
 // Requests types and values
