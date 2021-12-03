@@ -1,0 +1,26 @@
+{
+    "hosting": [
+        {
+            "target": "game",
+            "public": "public",
+            "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+            "rewrites": [
+                {
+                    "source": "**",
+                    "destination": "/index.html"
+                }
+            ],
+            "headers": [
+                {
+                    "source": "**/*.@(eot|otf|ttf|ttc|woff|woff2|svg|webp|png|js|mp4|font.css)",
+                    "headers": [
+                        {
+                            "key": "Cache-Control",
+                            "value": "max-age=31557600"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

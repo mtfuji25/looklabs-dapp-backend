@@ -56,7 +56,6 @@ interface Log {
 }
 
 class StrapiClient {
-    
     private host: string;
 
     // strapiApi
@@ -69,7 +68,12 @@ class StrapiClient {
         this.host = host;
         // start axios instance
         this.api = axios.create({
-            baseURL: host,
+            baseURL: host
+        });
+
+        // start axios for restApi
+        this.restApi = axios.create({
+            baseURL: 'https://token.thepitnft.com/contractAddress/',
         })
 
         // start axios for restApi
@@ -82,7 +86,7 @@ class StrapiClient {
         return this.api.get(url);
     }
 
-    private async post(url: string, data: any): Promise<AxiosResponse>  {
+    private async post(url: string, data: any): Promise<AxiosResponse> {
         return this.api.post(url, data);
     }
 
@@ -93,13 +97,14 @@ class StrapiClient {
     }
 
     // gets the nearest game
-    async getNearestGame(): Promise<ScheduledGame>{
+    async getNearestGame(): Promise<ScheduledGame> {
         // get current time
         const now = new Date().toISOString();
 
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
-        return (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data[0];
+        return (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`))
+            .data[0];
     }
 
     // get chosen game

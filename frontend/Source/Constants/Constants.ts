@@ -2,7 +2,7 @@
 const STATIC_URL = "./public";
 
 // WebSocket Client configs
-const WS_HOST = "ws:localhost:8082";
+const WS_HOST = process.env.WS_SERVER_HOST || "ws:localhost:8082";
 
 // Strapi Client configs
 const STRAPI_HOST = "https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/";
@@ -30,3 +30,4 @@ export {
     CONTAINER_DIM_Y,
     SPRITE_SIZE
 };
+
