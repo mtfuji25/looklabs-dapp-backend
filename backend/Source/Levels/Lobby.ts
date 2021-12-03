@@ -124,7 +124,7 @@ class LobbyLevel extends Level {
                                         value: String(result.scheduled_game_participant),
                                         scheduled_game: this.gameId,
                                         scheduled_game_participant: killer,
-                                    }).catch((err) => console.log(err));
+                                    }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
 
                                     // Final Rank log
                                     this.context.strapi.createLog({
@@ -133,7 +133,7 @@ class LobbyLevel extends Level {
                                         value: String(this.fighters),
                                         scheduled_game: this.gameId,
                                         scheduled_game_participant: result.scheduled_game_participant,
-                                    }).catch((err) => console.log(err));
+                                    }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
 
                                 }).catch((err) => console.log(err));
                             },
@@ -145,7 +145,7 @@ class LobbyLevel extends Level {
                                     value: String(damage),
                                     scheduled_game: this.gameId,
                                     scheduled_game_participant: participant
-                                })
+                                }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
                             },
                             details
                         );
@@ -158,7 +158,7 @@ class LobbyLevel extends Level {
                             event: "entrants",
                             scheduled_game: this.gameId,
                             scheduled_game_participant: participant.id,
-                        })
+                        }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
                     });
                     this.ready = true;
                 }
@@ -195,25 +195,27 @@ class LobbyLevel extends Level {
                         health: Math.ceil(status.health)
                     }).then(() => {
 
-                        // Winner log
-                        this.context.strapi.createLog({
-                            timestamp: Date.now().toString(),
-                            event: "winners",
-                            scheduled_game: this.gameId,
-                            scheduled_game_participant: layer.strapiID,
-                        })
+                        setTimeout(() => {
+                            // Winner log
+                            this.context.strapi.createLog({
+                                timestamp: Date.now().toString(),
+                                event: "winners",
+                                scheduled_game: this.gameId,
+                                scheduled_game_participant: layer.strapiID,
+                            })
 
-                        // Tells frontends that is return to await from this gameId
-                        const msg: GameStatus = {
-                            msgType: "game-status",
-                            gameId: this.gameId,
-                            lastGameId: 0,
-                            gameStatus: "awaiting"
-                        };
-                        this.context.ws.broadcast(msg);
+                            // Tells frontends that is return to await from this gameId
+                            const msg: GameStatus = {
+                                msgType: "game-status",
+                                gameId: this.gameId,
+                                lastGameId: 0,
+                                gameStatus: "awaiting"
+                            };
+                            this.context.ws.broadcast(msg);
 
-                        // Change to await level
-                        this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+                            // Change to await level
+                            this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+                       }, 5000);
                     });
                 }
             });

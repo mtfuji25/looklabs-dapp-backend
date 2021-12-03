@@ -307,7 +307,7 @@ class PlayerLayer extends Layer {
             // Speed
             0.04 * (attributesMap["Speed"] / 100.0),
             // Health
-            100 * (attributesMap["Health"] / 100.0),
+            100,
             // Defense
             5 * (attributesMap["Defence"] / 100.0),
             // Cooldown
