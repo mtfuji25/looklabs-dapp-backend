@@ -118,7 +118,7 @@ class ECS {
         delete this.entities[id[EntityKey]];
     }
 
-    createEntity(x: number = 0.0, y: number = 0.0, name: string = "") {
+    createEntity(x: number = 0.0, y: number = 0.0, name: string = "", strapiId: number = 0) {
         let id: BitMaskedId = {};
 
         // All entities should have a transform component
@@ -137,7 +137,7 @@ class ECS {
         this.entitiesId++;
 
         // Create the effective entity representation
-        const entity = new Entity(this, id, 0, name);
+        const entity = new Entity(this, id, 0, name, strapiId);
 
         // Add it to the identification array
         this.entities[id[EntityKey]] = entity;
@@ -155,18 +155,22 @@ class Entity {
     // Entity definitions
     public id: BitMaskedId;
     public layout: number;
+
+    // By using in wrong way strapi
     public name: string;
+    // Should probablly been in other component just for database
+    public strapiId: number;
 
     // Current ecs related instance
     private ecs: ECS;
 
-    constructor(ecs: ECS, id: BitMaskedId, layout: number, name: string) {
+    constructor(ecs: ECS, id: BitMaskedId, layout: number, name: string, strapiId: number) {
         this.ecs = ecs;
         this.id = id;
         this.layout = layout;
         this.name = name;
+        this.strapiId = strapiId;
     }
-
 
     // Getters
     getTransform(): Transform {

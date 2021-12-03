@@ -75,6 +75,14 @@ class StrapiClient {
         this.restApi = axios.create({
             baseURL: 'https://token.thepitnft.com/contractAddress/',
         })
+
+        const now = new Date().toISOString();
+
+        this.get(`scheduled-games`).then((res) => {
+            console.log(JSON.stringify(res.data, null, 4))
+        }).catch((err) => {
+            console.log(JSON.stringify(err, null, 4))
+        });
     }
 
     private async get(url: string): Promise<AxiosResponse> {
@@ -88,7 +96,9 @@ class StrapiClient {
     // Creates a result for a participant on strapi. Takes a player and it's result enum(string)
     // async because consistency is not needed immediately
     async createParticipantResult(result: GameParticipantsResult): Promise<AxiosResponse> {
-        return this.post("game-participants-results", result);
+        return this.post("game-participants-results", {
+            data: result
+        });
     }
 
     // gets the nearest game
@@ -98,13 +108,54 @@ class StrapiClient {
 
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
-        return (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`))
-            .data[0];
+        // const response = (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data["data"][0];
+        const response = (await this.get(
+            `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
+            )).data["data"][0];
+        const attributes = response.attributes;
+        return {
+            id: response.id,
+            published_at: attributes.publishedAt,
+            created_at: attributes.createdAt,
+            updated_at: attributes.updatedAt,
+            game_date: attributes.game_date,
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
+                const attributes = participant.attributes;
+                return {
+                    id: participant.id,
+                    nft_id: attributes.nft_id,
+                    user_address: attributes.user_address,
+                    name: attributes.name,
+                    scheduled_game: response.id,
+                    published_at: attributes.publishedAt,
+                    created_at: attributes.createdAt,
+                    updated_at: attributes.updatedAt,             
+                }
+            })
+        };
     }
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-        return (await this.get(`scheduled-games/${id}`)).data;
+        const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
+        const attributes = response.attributes;
+        return {
+            id: response.id,
+            game_date: attributes.game_date,
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
+                const attributes = participant.attributes;
+                return {
+                    id: participant.id,
+                    nft_id: attributes.nft_id,
+                    user_address: attributes.user_address,
+                    name: attributes.name,
+                    scheduled_game: response.id,
+                    published_at: attributes.publishedAt,
+                    created_at: attributes.createdAt,
+                    updated_at: attributes.updatedAt,             
+                }
+            })
+        }
     }
 
     // get the details for a chosen participant
@@ -113,7 +164,9 @@ class StrapiClient {
     }
 
     async createLog(log: Log) {
-        return this.api.post('/logs', log);
+        return this.api.post('/logs', {
+            data: log
+        });
     }
 
     // Default engine start call

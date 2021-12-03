@@ -3,9 +3,11 @@ import { Level } from "../Core/Level";
 // Layers imports
 import { TextLayer } from "../Layers/Await/Text";
 import { MapLayer } from "../Layers/Await/Basemap";
+import { PlayerClass } from "../Layers/Lobby/Player";
 
 // Web Clients imports
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { ScheduledGameParticipant } from "../Clients/Strapi";
 import { LobbyLevel } from "./Lobby";
 
 // Await level bg color
@@ -15,6 +17,8 @@ class AwaitLevel extends Level {
 
     private listener: Listener;
     private conListener: Listener;
+
+    private playerNames: Record<string, PlayerClass> = {};
 
     onStart(): void {
         // Add msg listener
@@ -66,7 +70,7 @@ class AwaitLevel extends Level {
     }
 
     onServerMsg(msg: ServerMsg) {
-        let content;
+        let content: GameStatus;
         if (msg.content.msgType == msgTypes.gameStatus) {
             content = msg.content as GameStatus;
         } else {
@@ -75,15 +79,40 @@ class AwaitLevel extends Level {
             
         if (!content.gameStatus)
             return false;
+        
+        this.context.strapi.getGameParticipants(content.gameId).then((participants) => {
 
-        this.context.engine.loadLevel(
-            new LobbyLevel(
-                this.context, "Lobby",
-                {
-                    gameId: content.gameId
-                }
-            )
-        )
+            // create multiple requests for player name
+            const participantsMap = participants.map((participant: ScheduledGameParticipant ) => {
+                return new Promise((resolve, reject) => {
+                    const unSplitId = (participant.nft_id).split('/')[1];
+                    let splitId = Number((participant.nft_id).split('/')[1]);
+                    if(splitId > 50) splitId -= 50;
+                    if(splitId == 0) splitId += 1;
+    
+                    this.context.strapi.getParticipantDetails(splitId).then((details) => {
+                        this.playerNames[unSplitId] = details.name as PlayerClass;
+                        resolve(details.name);
+                    }).catch((err) => {
+                        reject(err);
+                    })
+                })
+            })
+
+            // once all the promises are resolved, send to lobbyLevel with player names prop
+            Promise.all(participantsMap).then(() => {
+                this.context.engine.loadLevel(
+                    new LobbyLevel(
+                        this.context, "Lobby",
+                        {
+                            gameId: content.gameId,
+                            playerNames: this.playerNames
+                        }
+                    )
+                )
+            })
+        })
+
 
         return false;
     }

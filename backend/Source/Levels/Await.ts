@@ -41,7 +41,7 @@ class AwaitLevel extends Level {
             })
             .catch((err) => {
                 console.log("Failed while seraching game in strapi.");
-                console.log(err);
+                console.log(JSON.stringify(err, null, 4));
 
                 // Closes the engine
                 this.context.close = true;

@@ -45,8 +45,8 @@ class BattleStatusLayer extends Layer {
         this.card = this.ecs.createEntity(30, 83).addSprite();
 
         // Creates both texts
-        this.timeLeft = this.ecs.createEntity(56, 95).addText("00:00:00", this.textStyle);
-        this.playersLeft = this.ecs.createEntity(164, 95).addText(null, this.textStyle);
+        this.timeLeft = this.ecs.createEntity(62, 95).addText("00:00:00", this.textStyle);
+        this.playersLeft = this.ecs.createEntity(158, 95).addText(null, this.textStyle);
 
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
@@ -114,7 +114,7 @@ class BattleStatusLayer extends Layer {
 
         this.playersLeft.setText(`${remainingPlayers}/${totalPlayers} ALIVE`);
 
-        return true;
+        return false;
     }
 }
 

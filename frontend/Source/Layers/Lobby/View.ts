@@ -51,7 +51,7 @@ class ViewLayer extends Layer {
         const percentY = app.view.height / 100.0;
 
         this.offsetX = 50 * percentX - CONTAINER_DIM_X / 2.0;
-        this.offsetY = 50 * percentY - CONTAINER_DIM_Y / 2.0;
+        this.offsetY = (50 * percentY - CONTAINER_DIM_Y / 2.0) - 16;
     }
 
     onAttach() {
