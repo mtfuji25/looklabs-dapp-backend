@@ -7,7 +7,7 @@ import { Application, ITextStyle } from "pixi.js";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
-import { ScheduledGameParticipant } from "../../Clients/Strapi";
+import { ParticipantDetails, ScheduledGameParticipant } from "../../Clients/Strapi";
 
 interface TextParams {
     text: string;
@@ -18,10 +18,13 @@ interface TextParams {
 class WinnerLayer extends Layer {
     private app: Application;
 
+    private screenX: number;
+    private screenY: number;
     private percentX: number;
     private percentY: number;
     private winnerImg: Sprite;
-    private participant: ScheduledGameParticipant;
+    private details: ParticipantDetails;
+    private participant: ScheduledGameParticipant
 
     // Style objects for texts
     private readonly textStyle: Partial<ITextStyle> = {
@@ -85,16 +88,23 @@ class WinnerLayer extends Layer {
         }
     };
 
-    constructor(ecs: ECS, app: Application, participant: ScheduledGameParticipant) {
+    constructor(ecs: ECS, 
+                app: Application, 
+                participant: ScheduledGameParticipant, 
+                details: ParticipantDetails ) {
+
         super("TesteLayer", ecs);
 
         this.app = app;
-
+        
+        this.details = details;
         this.participant = participant;
 
         // sets percents
         this.percentX = this.app.view.width / 100.0;
         this.percentY = this.app.view.height / 100.0;
+        this.screenX = this.app.view.width;
+        this.screenY = this.app.view.height;
 
         // generate all sprites
         Object.entries(this.spriteConstructors).map(([key, value], index) => {
@@ -132,14 +142,9 @@ class WinnerLayer extends Layer {
         this.scaleImg(this.sprites["resultCard"]);
         this.scaleImg(this.sprites["nameCard"]);
 
-        // set winner img
-        // this.winnerImg.setFromUrl(
-        //     "http://i.imgur.com/eAbsZ.png"
-        // );
-
-        // this.winnerImg.setSize(50, 50);
-
-        // this.scaleImg(this.winnerImg);
+        this.winnerImg.setFromUrl(
+            this.details.image
+        );
 
         // sets texts according to the winner
         this.texts["winnerName"].setText(this.participant.name);
@@ -150,7 +155,30 @@ class WinnerLayer extends Layer {
         );
     }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        this.winnerImg.setSize(200 * this.app.view.width / 1440, 200 * this.app.view.height / 800);
+
+        // on window resize 
+        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.width / 100.0;
+            this.percentY = this.app.view.height / 100.0;
+
+            this.screenX = this.app.view.width;
+            this.screenY = this.app.view.height;
+
+            // repositions all objects
+            Object.entries(this.spriteConstructors).map(([key, value], index) => {
+                this.sprites[key].setPos(this.percentX * value.x, this.percentY * value.y);
+            });
+    
+            // generate all texts
+            Object.entries(this.textConstructors).map(([key, value]) => {
+                this.texts[key].setPos(this.percentX * value.pos.x, this.percentY * value.pos.y);
+            });    
+        }
+        
+    }
 
     onDetach() {
         this.self.destroy();

@@ -7,7 +7,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 // Inputs system imports
 import { BTNS, Inputs } from "../../Core/Inputs/Inputs";
 import { Application } from "pixi.js";
-import { CONTAINER_DIM } from "../../Constants/Constants";
+import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 import { ServerMsg } from "../../Clients/Interfaces";
 
 // Required fields for view layer
@@ -50,8 +50,8 @@ class ViewLayer extends Layer {
         const percentX = app.view.width / 100.0;
         const percentY = app.view.height / 100.0;
 
-        this.offsetX = 50 * percentX - CONTAINER_DIM / 2.0;
-        this.offsetY = 50 * percentY - CONTAINER_DIM / 2.0;
+        this.offsetX = 50 * percentX - CONTAINER_DIM_X / 2.0;
+        this.offsetY = 50 * percentY - CONTAINER_DIM_Y / 2.0;
     }
 
     onAttach() {
@@ -85,7 +85,7 @@ class ViewLayer extends Layer {
         this.zoom += this.inputs.wheel - this.lastZoom;
         this.lastZoom = this.inputs.wheel;
 
-        if (this.zoom < -10.0) this.zoom = -10.0;
+        if (this.zoom < -25.0) this.zoom = -25.0;
         if (this.zoom > 5.0) this.zoom = 5.0;
 
         this.view.zoom = this.zoom / 25.0;
@@ -95,12 +95,6 @@ class ViewLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
-    }
-
-    onKill(msg: ServerMsg) {
-        // if (msg.type == msgTypes.kill) {
-
-        // }
     }
 }
 

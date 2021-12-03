@@ -11,6 +11,7 @@ import { Rigidbody } from "../Components/Rigidbody";
 import { EcsData } from "../Interfaces";
 import { Entity } from "../Core/Ecs";
 import { Rectangle } from "../Components/Rectangle";
+import { assert } from "console";
 
 interface SortedCollision {
     other: Rigidbody;
@@ -194,6 +195,9 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                     other.velocity.x = 0.0001;
                     other.velocity.y = 0.0001;
                 }
+
+                assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Collision: ${rigidbody} Is NaN`);
+                assert(!(isNaN(other.velocity.x) || isNaN(other.velocity.y)), `Collision Other: ${other} Is NaN`);
             });
 
             //
@@ -251,6 +255,7 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                     rigidbody.velocity.x = 0;
                     rigidbody.velocity.y = 0;
                 }
+                assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Collision 2: ${rigidbody} Is NaN`);
             });
         }
 
@@ -315,10 +320,13 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                     other.velocity.x = 0;
                     other.velocity.y = 0;
                 }
+
+                assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Collision 3: ${rigidbody} Is NaN`);
+                assert(!(isNaN(other.velocity.x) || isNaN(other.velocity.y)), `Collision Other 3: ${other} Is NaN`);
             });
 
         }
     });
 }
 
-export { sys_UpdateGrid, sys_UpdateCollisions, sys_CheckCollisions };
+export { sys_UpdateGrid, sys_UpdateCollisions, sys_CheckCollisions, collisionsResults };

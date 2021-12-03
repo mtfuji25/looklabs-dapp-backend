@@ -1,5 +1,4 @@
 import { WebSocket } from "ws";
-import { Vec2 } from "../Utils/Math";
 
 // Messages types and values
 
@@ -28,6 +27,13 @@ interface RemainPlayersMsg {
     msgType: "remain-players";
     totalPlayers: number;
     remainingPlayers: number;
+}
+
+interface GameStatus {
+    msgType: "game-status";
+    gameId: number;
+    lastGameId: number;
+    gameStatus: "lobby" | "awaiting" | "not-found";
 }
 
 interface GameStatus {

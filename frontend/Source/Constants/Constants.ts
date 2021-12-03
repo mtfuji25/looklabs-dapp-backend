@@ -14,9 +14,20 @@ const ROOT_DIV_ID = "#root";
 const MAIN_BG_COLOR = 0x18215d;
 
 // Container's dimesnsion
-const CONTAINER_DIM = 1440;
+const CONTAINER_DIM_X = 1856;
+const CONTAINER_DIM_Y = 1856;
 
 // Unit sprite size
 const SPRITE_SIZE = 16;
 
-export { STATIC_URL, WS_HOST, STRAPI_HOST, ROOT_DIV_ID, MAIN_BG_COLOR, CONTAINER_DIM, SPRITE_SIZE };
+export { 
+    STATIC_URL,
+    WS_HOST,
+    STRAPI_HOST,
+    ROOT_DIV_ID,
+    MAIN_BG_COLOR,
+    CONTAINER_DIM_X,
+    CONTAINER_DIM_Y,
+    SPRITE_SIZE
+};
+

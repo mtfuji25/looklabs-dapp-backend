@@ -216,6 +216,10 @@ class WSClient {
     remListener(id: string): void {
         delete this.listeners[id];
     }
+
+    isConnected() {
+        return this.connected;
+    }
 }
 
 export { WSClient };

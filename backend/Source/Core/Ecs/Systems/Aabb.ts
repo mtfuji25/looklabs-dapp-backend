@@ -1,5 +1,6 @@
 import { Rectangle } from "../Components/Rectangle";
 import { EcsData } from "../Interfaces";
+import { collisionsResults } from "./Grid";
 
 const aabbCheck = (rec1: Rectangle, rec2: Rectangle): boolean => {
 
@@ -28,6 +29,12 @@ const sys_CheckOverlap = (data: EcsData, deltaTime: number): void => {
                 const rec2 = grid.dynamics[j].entity.getRectangle();
 
                 if (aabbCheck(rec1, rec2)) {
+
+                    collisionsResults.push({
+                        entity: grid.dynamics[i].entity,
+                        other: grid.dynamics[j].entity
+                    });
+
                     const rigidbody = grid.dynamics[i].entity.getRigidbody();
                     const otherRigidbody = grid.dynamics[j].entity.getRigidbody();
 

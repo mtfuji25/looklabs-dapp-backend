@@ -3,16 +3,16 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
 
 // Layers import
-import { PlayerLayer } from "../Layers/Lobby/Player";
+import { PlayerLayer, spawnPos } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
-import { GameStatus, GameStatusListener, requests } from "../Clients/Interfaces";
+import { GameStatus, GameStatusListener, OnConnectionListener, requests } from "../Clients/Interfaces";
 
 class LobbyLevel extends Level {
 
@@ -28,6 +28,7 @@ class LobbyLevel extends Level {
 
     // Current ws listener is
     private listener: GameStatusListener;
+    private conListener: OnConnectionListener;
 
     constructor(context: EngineContext, name: string, gameId: number) {
         super(context, name);
@@ -35,6 +36,17 @@ class LobbyLevel extends Level {
         this.gameId = gameId;
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
+        this.conListener = this.context.ws.addListener("connection", (ws) => {
+            setTimeout(() => {
+                this.context.ws.send(ws, {
+                    msgType: "remain-players",
+                    remainingPlayers: this.participants.length,
+                    totalPlayers: this.participants.length
+                });
+            }, 1000);
+
+            return false;
+        });
     }
 
     onStart(): void {
@@ -54,10 +66,6 @@ class LobbyLevel extends Level {
     startGame() {
         const mapCollider = new MapColliderLayer(this.ecs);
         const grid = mapCollider.getSelf().getGrid();
-
-        // Put the map in the stack
-        this.layerStack.pushLayer(mapCollider);
-
         // Initial broadcast for players length
         this.context.ws.broadcast({
             msgType: "remain-players",
@@ -65,49 +73,92 @@ class LobbyLevel extends Level {
             totalPlayers: this.participants.length
         });
 
+        let responseCounter = 0;
+        const responses: { participant: ScheduledGameParticipant, response: ParticipantDetails }[] = [];
+
         this.participants.map((participant) => {
-            const player = new PlayerLayer(
-                this.ecs, this.context.ws,
-                participant.nft_id, participant.id, grid, 
-                (result: GameParticipantsResult) => {
+
+            let tokenId = Number((participant.nft_id).split('/')[1]);
+
+            if(tokenId > 50) tokenId -= 50;
+            if (tokenId == 0)
+                tokenId = 1;
+            if (tokenId == 50)
+                tokenId = 49;
+
+            this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
+
+                responses.push({
+                    participant: participant,
+                    response: response
+                });
+                responseCounter++;
+
+                if (responseCounter == this.participants.length) {
+                    // Put the map in the stack
+                    this.layerStack.pushLayer(mapCollider);
+        
+                    responses.map(({ participant, response }) => {
+                        const details = response;
+                        const player = new PlayerLayer(
+                            this.ecs, this.context.ws,
+                            participant.nft_id, participant.id, grid, 
+                            (result: GameParticipantsResult) => {
+                                this.ready = false;
+                                this.layerStack.popLayer(player);
+                                
+                                this.context.strapi.createParticipantResult(result).then(() => {
+                                    this.ready = true;
+                                }).catch((err) => console.log(err));
+                                this.fighters--;
+                                console.log("Fighters: ", this.fighters)
+                                this.context.ws.broadcast({
+                                    msgType: "remain-players",
+                                    remainingPlayers: this.fighters,
+                                    totalPlayers: this.participants.length
+                                });
+                            },
+                            details
+                        );
+                        grid.addDynamic(player.getSelf());
+                        this.layerStack.pushLayer(player);
+                    });
+                    this.ready = true;
+                }
+            });
+        });
+    }
+
+    onUpdate(deltaTime: number) {
+        // When game finished
+        if (this.fighters <= 1 && this.ready) {
+
+            // Find the last remain player
+            this.layerStack.layers.map((layer) => {
+                if (layer instanceof PlayerLayer) {
+
+                    // Block update for re-running
                     this.ready = false;
-                    this.layerStack.popLayer(player);
-                    this.fighters--;
-                    // Esse vai para produção
-                    console.log("Matou caramba")
-                    this.context.strapi.createParticipantResult(result).then(() => this.ready = true).catch((err) => console.log(err));
+
+                    // Get status component
+                    const status = layer.getSelf().getStatus();
+
+                    // Tells front-ends that there is only one player
                     this.context.ws.broadcast({
                         msgType: "remain-players",
                         remainingPlayers: this.fighters,
                         totalPlayers: this.participants.length
                     });
-                },
-                participant.name
-            );
-            grid.addDynamic(player.getSelf());
-            this.layerStack.pushLayer(player)
-        });
 
-        // Tells that lobby is ready to play
-        this.ready = true;
-    }
-
-    onUpdate(deltaTime: number) {
-        if (this.fighters <= 1 && this.ready) {
-            this.layerStack.layers.map((layer) => {
-                if (layer instanceof PlayerLayer) {
-                    const status = layer.getSelf().getStatus();
-                    this.context.ws.broadcast({
-                        msgType: "remain-players",
-                        remainingPlayers: this.fighters,
-                        totalPlayers: this.participants.length
-                    })
+                    // Create last participant result
                     this.context.strapi.createParticipantResult({
                         scheduled_game_participant: layer.strapiID,
                         survived_for: Math.floor(status.survived),
                         kills: Math.floor(status.kills),
-                        health: Math.floor(status.health)
+                        health: Math.ceil(status.health)
                     }).then(() => {
+
+                        // Tells frontends that is return to await from this gameId
                         const msg: GameStatus = {
                             msgType: "game-status",
                             gameId: this.gameId,
@@ -115,6 +166,8 @@ class LobbyLevel extends Level {
                             gameStatus: "awaiting"
                         };
                         this.context.ws.broadcast(msg);
+
+                        // Change to await level
                         this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
                     });
                 }
@@ -125,6 +178,7 @@ class LobbyLevel extends Level {
     onClose(): void {
         this.layerStack.destroy();
         this.listener.destroy();
+        this.conListener.destroy();
     }
 
     onServerMsg(msg: ReplyableMsg) {

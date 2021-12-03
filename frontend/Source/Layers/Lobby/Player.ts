@@ -15,11 +15,13 @@ import { Vec2 } from "../../Utils/Math";
 import { wordToView } from "../../Utils/Views";
 
 // Constants
-import { CONTAINER_DIM } from "../../Constants/Constants";
+import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
 import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
+
+import { Container } from "pixi.js";
 
 interface Player {
     entity: Entity;
@@ -27,6 +29,9 @@ interface Player {
     healthOutline: Entity;
     healthBackground: Entity;
     id: Entity;
+    animSlot1: Entity;
+    animSlot2: Entity;
+    animSlot3: Entity;
 }
 
 class PlayerLayer extends Layer {
@@ -42,6 +47,9 @@ class PlayerLayer extends Layer {
 
     // Web clients
     protected wsClient: WSClient;
+
+    // Playher container
+    private container: Container;
 
     // Lobby level context
     private levelContext: LobbyLevelContext;
@@ -73,9 +81,13 @@ class PlayerLayer extends Layer {
         this.listener = this.wsClient.addListener("enemy", (msg) =>
             this.onServerMsg(msg)
         );
+
+        this.container = new Container();
     }
 
-    onAttach() {}
+    onAttach() {
+        this.app.stage.addChild(this.container);
+    }
 
     onUpdate(deltaTime: number) {
         Object.values(this.players).map((player) => {
@@ -83,10 +95,10 @@ class PlayerLayer extends Layer {
             const animsprite = player.entity.getAnimSprite();
 
             // Calculates offsets to fix view
-            const centerFactorX = (transform.pos.x - CONTAINER_DIM / 2.0) / (CONTAINER_DIM / 2.0);
-            const centerFactorY = (transform.pos.y - CONTAINER_DIM / 2.0) / (CONTAINER_DIM / 2.0);
-            const fixFactorX = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
-            const fixFactorY = (CONTAINER_DIM - CONTAINER_DIM * (1 - this.levelContext.zoom)) / 2.0;
+            const centerFactorX = (transform.pos.x - CONTAINER_DIM_X / 2.0) / (CONTAINER_DIM_X / 2.0);
+            const centerFactorY = (transform.pos.y - CONTAINER_DIM_Y / 2.0) / (CONTAINER_DIM_Y / 2.0);
+            const fixFactorX = (CONTAINER_DIM_X - CONTAINER_DIM_X * (1 - this.levelContext.zoom)) / 2.0;
+            const fixFactorY = (CONTAINER_DIM_Y - CONTAINER_DIM_Y * (1 - this.levelContext.zoom)) / 2.0;
 
             // Fix the position for the player
             animsprite.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
@@ -95,6 +107,29 @@ class PlayerLayer extends Layer {
             animsprite.sprite.scale.x = (1.0 - this.levelContext.zoom);
             animsprite.sprite.scale.y = (1.0 - this.levelContext.zoom);  
             
+            // Update animations slots
+            const animSpriteSlot1 = player.animSlot1.getAnimSprite();
+            const animSpriteSlot2 = player.animSlot2.getAnimSprite();
+            const animSpriteSlot3 = player.animSlot3.getAnimSprite();
+
+            animSpriteSlot3.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
+            animSpriteSlot3.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
+
+            animSpriteSlot3.sprite.scale.x = (1.0 - this.levelContext.zoom);
+            animSpriteSlot3.sprite.scale.y = (1.0 - this.levelContext.zoom);
+
+            animSpriteSlot2.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
+            animSpriteSlot2.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY) - 32;
+
+            animSpriteSlot2.sprite.scale.x = (1.0 - this.levelContext.zoom);
+            animSpriteSlot2.sprite.scale.y = (1.0 - this.levelContext.zoom);
+
+            animSpriteSlot1.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
+            animSpriteSlot1.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY) -64;
+
+            animSpriteSlot1.sprite.scale.x = (1.0 - this.levelContext.zoom);
+            animSpriteSlot1.sprite.scale.y = (1.0 - this.levelContext.zoom); 
+
             // Update text
             const id = player.id.getText();
             const idTransform = player.id.getTransform();
@@ -102,8 +137,8 @@ class PlayerLayer extends Layer {
             id.text.x = Math.floor(idTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
             id.text.y = Math.floor(idTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
             
-            // id.text.scale.x = 1.0 - this.levelContext.zoom;
-            // id.text.scale.y = 1.0 - this.levelContext.zoom;
+            id.text.scale.x = 1.0 - (this.levelContext.zoom / 2.0);
+            id.text.scale.y = 1.0 - (this.levelContext.zoom / 2.0);
 
             // Update health bar
             const healt = player.health.getColoredRectangle();
@@ -144,7 +179,7 @@ class PlayerLayer extends Layer {
     }
 
     createEnemy(content: PlayerCommand) {
-        const {id, pos} = content;
+        const { id, pos } = content;
 
         const prevPlayer = this.players[id];
 
@@ -161,16 +196,29 @@ class PlayerLayer extends Layer {
         const healthOutline = this.ecs.createEntity(pos.x - 13, pos.y - 36, false);
         const healthBackground = this.ecs.createEntity(pos.x - 12, pos.y - 35, false);
 
+        // Animations slots
+        const animSlot1 = this.ecs.createEntity(pos.x, pos.y - 64, false);
+        const animSlot2 = this.ecs.createEntity(pos.x, pos.y - 32, false);
+        const animSlot3 = this.ecs.createEntity(pos.x, pos.y, false);
+
+        const animSpriteSlot1 = animSlot1.addAnimSprite();
+        const animSpriteSlot2 = animSlot2.addAnimSprite();
+        const animSpriteSlot3 = animSlot3.addAnimSprite();
+
+        animSpriteSlot1.loadFromConfig(this.app, this.res["overlay-sheet"]);
+        animSpriteSlot2.loadFromConfig(this.app, this.res["overlay-sheet"]);
+        animSpriteSlot3.loadFromConfig(this.app, this.res["overlay-sheet"]);
+
+        animSpriteSlot1.sprite.visible = false;
+        animSpriteSlot2.sprite.visible = false;
+        animSpriteSlot3.sprite.visible = false;
+
         // Add id text
         title.addText(splitId, this.idStyle);
         const titleText = title.getText();
         titleText.text.anchor.set(0.5);
-        titleText.addStage(this.app);
+        titleText.addStage(this.container);
         
-        // Add healthBar
-        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.app);
-        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.app);
-        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.app);
         
         // Add animsprite component
         const sprite = entity.addAnimSprite();
@@ -193,14 +241,26 @@ class PlayerLayer extends Layer {
                 break;
         }
         
-        sprite.addStage(this.app);
+        sprite.addStage(this.container);
+
+        animSpriteSlot1.addStage(this.container);
+        animSpriteSlot2.addStage(this.container);
+        animSpriteSlot3.addStage(this.container);
+
+        // Add healthBar
+        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.container);
+        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.container);
+        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.container);
 
         this.players[id] = {
             entity: entity,
             id: title,
             healthOutline: healthOutline,
             healthBackground: healthBackground,
-            health: health
+            health: health,
+            animSlot1: animSlot1,
+            animSlot2: animSlot2,
+            animSlot3: animSlot3
         };
     }
 
@@ -210,7 +270,7 @@ class PlayerLayer extends Layer {
         pos.x = Math.floor(pos.x);
         pos.y = Math.floor(pos.y);
 
-        if (!this.players) {
+        if (!this.players[id]) {
             this.createEnemy(command);
         }
 
@@ -229,26 +289,31 @@ class PlayerLayer extends Layer {
         const entitySprite = entity.getAnimSprite();
         const entityTransform = entity.getTransform();
 
+        const animSpriteSlot1 = this.players[id].animSlot1.getAnimSprite();
+        const animSpriteSlot2 = this.players[id].animSlot2.getAnimSprite();
+        const animSpriteSlot3 = this.players[id].animSlot3.getAnimSprite();
+
         const lifeRecSize = Math.floor((health / maxHealth) * 22);
         const lifeRectangle = healthBar.getColoredRectangle();
         lifeRectangle.setSize(lifeRecSize, 4);
 
         // Set all positions
-        entityTransform.pos.x = pos.x;
-        entityTransform.pos.y = pos.y;
+        entityTransform.pos.x = Math.floor(pos.x);
+        entityTransform.pos.y = Math.floor(pos.y);
         
-        textTransform.pos.x = pos.x - (splitId.length - 1) * 0.2;
-        textTransform.pos.y = pos.y - 20;
+        textTransform.pos.x = Math.floor(pos.x - (splitId.length - 1) * 0.2);
+        textTransform.pos.y = Math.floor(pos.y - 20);
 
-        healthOutlineTransform.pos.x = pos.x - 13;
-        healthOutlineTransform.pos.y = pos.y - 36;
+        healthOutlineTransform.pos.x = Math.floor(pos.x - 13);
+        healthOutlineTransform.pos.y = Math.floor(pos.y - 36);
 
-        healthBackgroundTransform.pos.x = pos.x - 12;
-        healthBackgroundTransform.pos.y = pos.y - 35;
+        healthBackgroundTransform.pos.x = Math.floor(pos.x - 12);
+        healthBackgroundTransform.pos.y = Math.floor(pos.y - 35);
 
-        healthTransform.pos.x = pos.x - 12;
-        healthTransform.pos.y = pos.y - 35;
+        healthTransform.pos.x = Math.floor(pos.x - 12);
+        healthTransform.pos.y = Math.floor(pos.y - 35);
 
+        // if else generator
         if (health <= 0) {
             if (action == 0 || action == 4) {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][4]);
@@ -257,24 +322,231 @@ class PlayerLayer extends Layer {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][5]);
             }
         } else {
+            //
+            // First set
+            //
             if (action == 4) {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
             }
+            // critical R
+            if (action == 14) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
+                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
+                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            // healing
+            if (action == 24) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+
+            //
+            // Second set
+            //
             if (action == 5) {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
             }
+            // critical L
+            if (action == 15) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
+                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
+                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            // healing
+            if (action == 25) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+
+            //
+            // Third set
+            //
             if (action == 0) {
+                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
+            }
+            // critical R
+            if (action == 10) {
                 entitySprite.animate(this.res["wolf-sheet"]["animations"][2]);
+                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
+                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
+                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
             }
+            // Healing
+            if (action == 20) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][2]);
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+
+            // Fourth set
             if (action == 1) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
             }
-            if (action == 2 || action == 3 || action == 6 || action == 7) {
+            // critical L
+            if (action == 11) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
+                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
+                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            // Healing
+            if (action == 21) {
+                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            
+            //
+            // Fifth set
+            //
+            if (action == 2 || action == 3) {
+                if (Math.random() < 0.5) {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                } else {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                }
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
+            }
+            // Critical
+            if (action == 12 || action == 13) {
+                if (Math.random() < 0.5) {
+                    // Right
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
+                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
+                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+                } else {
+                    // Left
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
+                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
+                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+                }
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            // Healing
+            if (action == 22 || action == 23) {
+                if (Math.random() < 0.5) {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                } else {
+                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                }
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+
+            //
+            // Sixth set
+            //
+            if (action == 6 || action == 7) {
                 if (Math.random() < 0.5) {
                     entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
                 } else {
                     entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
                 }
+                animSpriteSlot1.sprite.visible = false;
+                animSpriteSlot2.sprite.visible = false;
+                animSpriteSlot3.sprite.visible = false;
+            }
+            // Critical
+            if (action == 16 || action == 17) {
+                if (Math.random() < 0.5) {
+                    // Right
+                    entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
+                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
+                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+                } else {
+                    // Left
+                    entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
+                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
+                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+                }
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
+            }
+            // Healing
+            if (action == 26 || action == 27) {
+                if (Math.random() < 0.5) {
+                    entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                } else {
+                    entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                }
+                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
+                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
+                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
+
+                animSpriteSlot1.sprite.visible = true;
+                animSpriteSlot2.sprite.visible = true;
+                animSpriteSlot3.sprite.visible = true;
             }
         }
     }
@@ -282,12 +554,30 @@ class PlayerLayer extends Layer {
     deleteEnemy(command: PlayerCommand) {
         const { id } = command;
 
-        this.players[id].id.destroy();
-        this.players[id].health.destroy();
-        this.players[id].healthOutline.destroy();
-        this.players[id].healthBackground.destroy();
-        this.players[id].entity.destroy();
-        delete this.players[id];
+        const animSpriteSlot1 = this.players[id].animSlot1.getAnimSprite();
+        const animSpriteSlot2 = this.players[id].animSlot2.getAnimSprite();
+        const animSpriteSlot3 = this.players[id].animSlot3.getAnimSprite();
+
+        // death animation
+        this.players[id].entity.getAnimSprite().forceAnimate(this.res["wolf-sheet"]["animations"][4]);
+        animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
+        animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+        animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
+        animSpriteSlot1.sprite.visible = true;
+        animSpriteSlot2.sprite.visible = true;
+        animSpriteSlot3.sprite.visible = true;
+
+        setTimeout(() => {
+            this.players[id].id.destroy();
+            this.players[id].health.destroy();
+            this.players[id].healthOutline.destroy();
+            this.players[id].healthBackground.destroy();
+            this.players[id].entity.destroy();
+            this.players[id].animSlot1.destroy();
+            this.players[id].animSlot2.destroy();
+            this.players[id].animSlot3.destroy();
+            delete this.players[id];
+        }, 400);
     }
 
     onServerMsg(msg: ServerMsg) {

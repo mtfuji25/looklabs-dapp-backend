@@ -14,11 +14,11 @@ import { Application, Container, filters } from "pixi.js";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
-import levelMapFile from "../../Assets/level_map.json"
+import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
 const levelMap: Record<string, any> = levelMapFile;
 
-class MapLayer extends Layer {
+class OverlayMap extends Layer {
     // Entities storage
     protected entities: Entity[] = [];
 
@@ -64,7 +64,6 @@ class MapLayer extends Layer {
             y += step;
             for (let j = 0; j < cols; ++j) {
                 x += step;
-
                 // Creates entity and add sprite to it
                 const entity = this.ecs.createEntity(x, y, false)
                 const sprite = entity.addSprite();
@@ -75,7 +74,7 @@ class MapLayer extends Layer {
 
                 // Load the cuted image to sprite
                 sprite.setCutImg(
-                    this.app.loader.resources["basemap_raw"],
+                    this.app.loader.resources["overlaymap_raw"],
                     pw, ph, SPRITE_SIZE, SPRITE_SIZE
                 );
 
@@ -124,4 +123,4 @@ class MapLayer extends Layer {
     }
 }
 
-export { MapLayer };
+export { OverlayMap };

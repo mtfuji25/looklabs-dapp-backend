@@ -13,7 +13,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
-import { GameParticipantsResult } from "../../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi";
 
 //
 //  Frontend actions mapping
@@ -24,20 +24,214 @@ import { GameParticipantsResult } from "../../Clients/Strapi";
 //
 
 const spawnPos = [
-    new Vec2( 0.65,  0.00), new Vec2(-0.65,  0.00),
-    new Vec2( 0.00,  0.60), new Vec2( 0.00, -0.60),
-    new Vec2( 0.40,  0.20), new Vec2(-0.40, -0.25),
-    new Vec2(-0.40,  0.20), new Vec2( 0.40, -0.25),
-    new Vec2( 0.90,  0.20), new Vec2(-0.90,  0.20),
-    new Vec2( 0.90, -0.25), new Vec2(-0.90, -0.25),
-    new Vec2(-0.30, -0.90), new Vec2( 0.30,  0.80),
-    new Vec2(-0.30,  0.80), new Vec2( 0.30, -0.90),
-    new Vec2( 0.90,  0.00), new Vec2(-0.90,  0.00),
-    new Vec2( 0.00,  0.80), new Vec2( 0.00, -0.90),
-    new Vec2( 0.65,  0.24), new Vec2(-0.65,  0.24),
-    new Vec2(-0.32,  0.63), new Vec2( 0.32, -0.65),
-    new Vec2(-0.32, -0.65), new Vec2( 0.32,  0.63),
-    new Vec2( 0.65, -0.28), new Vec2(-0.65, -0.28),
+    new Vec2(-0.201, -0.3),
+    new Vec2(-0.704, 0.4),
+    new Vec2(-0.201, 0.21),
+    new Vec2(0.176, -0.3),
+    new Vec2(0.176, 0.21),
+    new Vec2(0.380, 0.0),
+    new Vec2(-0.118, -0.3),
+    new Vec2(-0.118, 0.21),
+    new Vec2(0.380, -0.09),
+    new Vec2(0.758, 0.0),
+    new Vec2(0.380, -0.15),
+    new Vec2(0.758, 0.09),
+    new Vec2(0.758, -0.09),
+    new Vec2(0.758, -0.15),
+    new Vec2(-0.286, -0.3),
+    new Vec2(0.050, -0.3),
+    new Vec2(0.788, 0.4),
+    new Vec2(0.050, 0.21),
+    new Vec2(-0.284, -0.5),
+    new Vec2(-0.368, -0.5),
+    new Vec2(-0.368, 0.4),
+    new Vec2(0.368, -0.5),
+    new Vec2(0.134, 0.21),
+    new Vec2(0.368, 0.4),
+    new Vec2(-0.830, -0.5),
+    new Vec2(-0.830, 0.4),
+    new Vec2(0.830, -0.5),
+    new Vec2(0.830, 0.4),
+    new Vec2(0.218, -0.3),
+    new Vec2(0.218, 0.21),
+    new Vec2(-0.244, -0.3),
+    new Vec2(-0.244, 0.21),
+    new Vec2(0.674, 0.0),
+    new Vec2(0.674, 0.09),
+    new Vec2(0.674, -0.09),
+    new Vec2(0.674, -0.15),
+    new Vec2(-0.159, -0.3),
+    new Vec2(-0.159, 0.21),
+    new Vec2(-0.326, -0.5),
+    new Vec2(-0.326, 0.4),
+    new Vec2(0.326, -0.5),
+    new Vec2(0.326, 0.4),
+    new Vec2(-0.704, -0.5),
+    new Vec2(0.788, -0.5),
+    new Vec2(0.704, -0.5),
+    new Vec2(0.704, 0.4),
+    new Vec2(-0.284, 0.4),
+    new Vec2(0.380, 0.09),
+    new Vec2(0.284, 0.4),
+    new Vec2(0.452, -0.5),
+    new Vec2(-0.788, -0.5),
+    new Vec2(-0.788, 0.4),
+    new Vec2(-0.620, 0.4),
+    new Vec2(0.134, -0.3),
+    new Vec2(0.620, 0.4),
+    new Vec2(0.260, 0.21),
+    new Vec2(0.284, -0.5),
+    new Vec2(0.452, 0.4),
+    new Vec2(-0.452, -0.5),
+    new Vec2(-0.286, 0.21),
+    new Vec2(0.260, -0.3),
+    new Vec2(0.344, -0.3),
+    new Vec2(-0.620, -0.5),
+    new Vec2(0.620, -0.5),
+    new Vec2(-0.884, -0.15),
+    new Vec2(-0.452, 0.4),
+    new Vec2(0.344, 0.21),
+    new Vec2(0.590, 0.0),
+    new Vec2(0.590, -0.15),
+    new Vec2(0.242, -0.5),
+    new Vec2(-0.884, 0.09),
+    new Vec2(-0.242, 0.4),
+    new Vec2(-0.242, -0.5),
+    new Vec2(0.092, -0.3),
+    new Vec2(-0.884, 0.0),
+    new Vec2(-0.884, -0.09),
+    new Vec2(0.590, -0.09),
+    new Vec2(0.008, 0.21),
+    new Vec2(0.242, 0.4),
+    new Vec2(0.092, 0.21),
+    new Vec2(0.506, 0.0),
+    new Vec2(0.008, -0.3),
+    new Vec2(-0.422, -0.15),
+    new Vec2(0.506, -0.09),
+    new Vec2(-0.422, -0.09),
+    new Vec2(0.590, 0.09),
+    new Vec2(0.302, 0.21),
+    new Vec2(0.506, -0.15),
+    new Vec2(-0.422, 0.0),
+    new Vec2(-0.422, 0.09),
+    new Vec2(-0.548, -0.09),
+    new Vec2(0.506, 0.09),
+    new Vec2(-0.075, 0.21),
+    new Vec2(-0.548, 0.0),
+    new Vec2(0.302, -0.3),
+    new Vec2(0.548, -0.09),
+    new Vec2(-0.548, -0.15),
+    new Vec2(0.548, 0.0),
+    new Vec2(0.548, 0.09),
+    new Vec2(0.536, -0.5),
+    new Vec2(-0.548, 0.09),
+    new Vec2(-0.494, -0.5),
+    new Vec2(-0.075, -0.3),
+    new Vec2(-0.536, -0.5),
+    new Vec2(-0.758, -0.15),
+    new Vec2(-0.536, 0.4),
+    new Vec2(0.548, -0.15),
+    new Vec2(0.536, 0.4),
+    new Vec2(-0.758, 0.09),
+    new Vec2(0.494, 0.4),
+    new Vec2(-0.758, -0.09),
+    new Vec2(-0.494, 0.4),
+    new Vec2(-0.716, 0.09),
+    new Vec2(-0.758, 0.0),
+    new Vec2(-0.716, 0.0),
+    new Vec2(0.494, -0.5),
+    new Vec2(-0.200, 0.4),
+    new Vec2(0.632, 0.0),
+    new Vec2(0.200, 0.4),
+    new Vec2(-0.716, -0.09),
+    new Vec2(-0.200, -0.5),
+    new Vec2(0.632, -0.15),
+    new Vec2(-0.842, -0.09),
+    new Vec2(-0.590, 0.0),
+    new Vec2(-0.716, -0.15),
+    new Vec2(-0.590, -0.15),
+    new Vec2(0.632, -0.09),
+    new Vec2(0.200, -0.5),
+    new Vec2(-0.590, 0.09),
+    new Vec2(-0.590, -0.09),
+    new Vec2(-0.578, -0.5),
+    new Vec2(0.632, 0.09),
+    new Vec2(-0.842, 0.09),
+    new Vec2(-0.842, 0.0),
+    new Vec2(-0.410, -0.5),
+    new Vec2(-0.842, -0.15),
+    new Vec2(-0.578, 0.4),
+    new Vec2(-0.380, 0.09),
+    new Vec2(0.578, -0.5),
+    new Vec2(-0.380, 0.0),
+    new Vec2(0.410, -0.5),
+    new Vec2(-0.380, -0.09),
+    new Vec2(-0.674, 0.0),
+    new Vec2(0.410, 0.4),
+    new Vec2(-0.410, 0.4),
+    new Vec2(0.578, 0.4),
+    new Vec2(-0.632, -0.09),
+    new Vec2(0.884, -0.15),
+    new Vec2(0.662, -0.5),
+    new Vec2(-0.380, -0.15),
+    new Vec2(-0.632, 0.09),
+    new Vec2(0.464, 0.09),
+    new Vec2(-0.632, -0.15),
+    new Vec2(-0.662, 0.4),
+    new Vec2(-0.632, 0.0),
+    new Vec2(-0.674, -0.15),
+    new Vec2(0.464, 0.0),
+    new Vec2(-0.662, -0.5),
+    new Vec2(0.464, -0.09),
+    new Vec2(-0.674, 0.09),
+    new Vec2(-0.674, -0.09),
+    new Vec2(0.842, 0.09),
+    new Vec2(0.746, -0.5),
+    new Vec2(0.884, 0.09),
+    new Vec2(-0.033, -0.3),
+    new Vec2(0.662, 0.4),
+    new Vec2(-0.926, -0.09),
+    new Vec2(0.716, -0.09),
+    new Vec2(-0.033, 0.21),
+    new Vec2(0.800, 0.09),
+    new Vec2(0.464, -0.15),
+    new Vec2(0.884, 0.0),
+    new Vec2(0.842, -0.09),
+    new Vec2(0.422, 0.0),
+    new Vec2(0.716, 0.09),
+    new Vec2(0.884, -0.09),
+    new Vec2(0.716, 0.0),
+    new Vec2(-0.746, -0.5),
+    new Vec2(0.800, -0.15),
+    new Vec2(0.842, 0.0),
+    new Vec2(0.926, 0.0),
+    new Vec2(0.842, -0.15),
+    new Vec2(0.716, -0.15),
+    new Vec2(0.422, 0.09),
+    new Vec2(0.800, 0.0),
+    new Vec2(0.746, 0.4),
+    new Vec2(-0.746, 0.4),
+    new Vec2(0.800, -0.09),
+    new Vec2(-0.926, 0.0),
+    new Vec2(-0.926, -0.15),
+    new Vec2(0.422, -0.09),
+    new Vec2(-0.506, 0.0),
+    new Vec2(0.926, -0.09),
+    new Vec2(0.422, -0.15),
+    new Vec2(0.926, -0.15),
+    new Vec2(0.926, 0.09),
+    new Vec2(-0.926, 0.09),
+    new Vec2(-0.464, 0.09),
+    new Vec2(-0.464, 0.0),
+    new Vec2(-0.464, -0.15),
+    new Vec2(-0.506, 0.09),
+    new Vec2(-0.506, -0.15),
+    new Vec2(-0.464, -0.09),
+    new Vec2(-0.800, -0.15),
+    new Vec2(-0.506, -0.09),
+    new Vec2(-0.800, 0.0),
+    new Vec2(-0.800, 0.09),
+    new Vec2(-0.800, -0.09),
 ];
 
 class PlayerLayer extends Layer {
@@ -50,6 +244,9 @@ class PlayerLayer extends Layer {
     public playerID: string;
     public strapiID: number;
 
+    // initial info for player
+    private details: ParticipantDetails;
+
     // Current grid
     private grid: Grid;
 
@@ -59,26 +256,56 @@ class PlayerLayer extends Layer {
     // Die fn
     public dieFn: (result: GameParticipantsResult) => void;
 
-    constructor(ecs: ECS, wsContext: WSClient, id: string, strapiID: number, grid: Grid, dieFn: (result: GameParticipantsResult) => void, name: string) {
+    constructor(ecs: ECS,
+        wsContext: WSClient,
+        id: string,
+        strapiID: number,
+        grid: Grid,
+        dieFn: (result: GameParticipantsResult) => void,
+        details: ParticipantDetails) {
+
         super(`Player${id}`, ecs);
 
         this.wsClient = wsContext;
         this.playerID = id;
         this.grid = grid;
         this.dieFn = dieFn;
-        this.self.name = name;
+        this.self.name = details.name;
         this.strapiID = strapiID;
+        this.details = details;
 
         // Add status component to current entity
+        // this.self.addStatus(
+        //     // Attack
+        //     20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Speed
+        //     0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Health
+        //     100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Defense
+        //     5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        //     // Cooldown
+        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+        // ).setOnDie((status) => this.onDie(status));
+
+        // create a record of mapped attributes, so we can use the attributes returned more easily
+        // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
+
+        const attributesMap: Record<string, any> = {};
+
+        this.details.attributes.map((attribute) => {
+            attributesMap[attribute.trait_type] = attribute.value;
+        })
+
         this.self.addStatus(
             // Attack
-            20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            20 * (attributesMap["Attack"] / 100.0),
             // Speed
-            0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            0.04 * (attributesMap["Speed"] / 100.0),
             // Health
-            100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            100 * (attributesMap["Health"] / 100.0),
             // Defense
-            5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            5 * (attributesMap["Defence"] / 100.0),
             // Cooldown
             0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
         ).setOnDie((status) => this.onDie(status));
@@ -90,14 +317,14 @@ class PlayerLayer extends Layer {
         );
 
         this.self.getTransform().setPos(
-            spawnPos[PlayerLayer.playerCount].x, 
+            spawnPos[PlayerLayer.playerCount].x,
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount < 28)
-            PlayerLayer.playerCount++;
-        else
+        if (PlayerLayer.playerCount == 99)
             PlayerLayer.playerCount = 0;
+        else
+            PlayerLayer.playerCount++;
 
         this.self.addBehavior();
 
@@ -108,16 +335,15 @@ class PlayerLayer extends Layer {
 
 
     onAttach(): void {
-        
-        
         // Create player entity in new client
         this.wsClient.broadcast(this.getBaseMsg("create"));
     }
 
     onUpdate(deltaTime: number) {
-        const { attacking } = this.self.getBehavior();
+        const { critical } = this.self.getStatus();
+        const { attacking, healing } = this.self.getBehavior();
         const { velocity } = this.self.getRigidbody();
-        
+
         // Updating phase
         const theta = rad2deg(
             Math.atan2(velocity.y, velocity.x)
@@ -125,27 +351,59 @@ class PlayerLayer extends Layer {
 
         if (-45.0 < theta && theta <= 45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 10));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 24));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                }
             }
         } else if (45.0 < theta && theta <= 135.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 12));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 26));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 6));
+                }
             }
         } else if (135.0 < theta && theta <= 180 || theta <= -135.0 && theta >= -180) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 11));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 1));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 25));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 5));
+                }
             }
         } else if (-135.0 < theta && theta <= -45.0) {
             if (attacking) {
-                this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                if (critical) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 13));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 3));
+                }
             } else {
-                this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                if (healing) {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 27));
+                } else {
+                    this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                }
             }
         }
     }
@@ -161,13 +419,12 @@ class PlayerLayer extends Layer {
 
         // Removes itself from the grid
         this.grid.removeDynamic(this.self);
-        
+
         // Destroy the self entity
         this.self.destroy();
     }
 
     onWsConnection(ws: WebSocket) {
-
         this.wsClient.send(ws, this.getBaseMsg("create"));
 
         // Doesn't handle the event
@@ -217,4 +474,4 @@ class PlayerLayer extends Layer {
     }
 }
 
-export { PlayerLayer };
+export { PlayerLayer, spawnPos };

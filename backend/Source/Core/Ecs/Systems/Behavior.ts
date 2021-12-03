@@ -6,12 +6,24 @@ import { EcsData } from "../Interfaces";
 import { AStarFinder } from "astar-typescript";
 
 // Map importing
-import levelCollider from "../../../Assets/LevelCollider.json";
+import levelCollider from "../../../Assets/level_collider.json";
 import { Grid } from "../Components/Grid";
+import { Behavior } from "../Components/Behavior";
+import { assert } from "console";
+
+const transposedCollider: Array<Array<number>> = [];
+for (let i = 0; i < levelCollider["height"]; ++i) {
+    const row: number[] = [];
+    for (let j = 0; j < levelCollider["width"]; ++j) {
+        const collider = levelCollider["data"][j][i];
+        row.push(collider);
+    }
+    transposedCollider.push(row);
+}
 
 const finder = new AStarFinder({
     grid: {
-        matrix: levelCollider["data"]
+        matrix: transposedCollider
     },
     diagonalAllowed: false,
     includeStartNode: true,
@@ -33,9 +45,67 @@ const runAwayFromTarget = (entity: Entity) => {
 
     const enemy = target.getTransform();
     
-    const runAwayDir = tranform.pos.sub(enemy.pos).normalize();
-    
-    rigidbody.velocity = runAwayDir.muls(status.speed);
+    // Começo do solver
+
+    let runAwayDir = new Vec2();
+
+    if (behavior.staticColide) {
+
+        let resNormal = new Vec2();
+
+        behavior.staticNormal.map((normal) => {
+            resNormal = resNormal.add(normal);
+        });
+
+        // Performs suffle operation
+        const tempX = resNormal.x;
+        resNormal.x = resNormal.y;
+        resNormal.y = tempX;
+
+        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
+            runAwayDir = resNormal.muls(-1.0);
+
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                } else {
+                    runAwayDir.y = 0.0;
+                }
+            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = 0.0;
+            }
+
+        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            } else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        } else {
+            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
+
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+    } else {
+        runAwayDir = tranform.pos.sub(enemy.pos).normalize();
+    }
+
+    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 1: ${rigidbody} Is NaN`);
 
     behavior.attacking = false;
 }
@@ -56,9 +126,142 @@ const runAwayFromRange = (entity: Entity) => {
         relativeEnemy = relativeEnemy.add(pos);
     });
 
-    const runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    let runAwayDir = new Vec2();
 
-    rigidbody.velocity= runAwayDir.muls(status.speed);
+    if (behavior.staticColide) {
+
+        let resNormal = new Vec2();
+
+        behavior.staticNormal.map((normal) => {
+            resNormal = resNormal.add(normal);
+        });
+
+        // Performs suffle operation
+        const tempX = resNormal.x;
+        resNormal.x = resNormal.y;
+        resNormal.y = tempX;
+
+        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
+            runAwayDir = resNormal.muls(-1.0);
+
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                } else {
+                    runAwayDir.y = 0.0;
+                }
+            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = 0.0;
+            }
+
+        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            } else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        } else {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+    } else {
+        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    }
+
+    rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 2: ${rigidbody} Is NaN`);
+
+    behavior.attacking = false;
+}
+
+const runAwayFromAll = (entity: Entity, grid: Grid) => {
+    const status = entity.getStatus();
+    const behavior = entity.getBehavior();
+    const tranform = entity.getTransform();
+    const rigidbody = entity.getRigidbody();
+
+    let relativeEnemy = new Vec2();
+
+    grid.dynamics.map((enemy) => {
+        const { pos } = enemy.entity.getTransform();
+    
+        relativeEnemy = relativeEnemy.add(pos);
+    })
+
+    let runAwayDir = new Vec2();
+
+    if (behavior.staticColide) {
+
+        let resNormal = new Vec2();
+
+        behavior.staticNormal.map((normal) => {
+            resNormal = resNormal.add(normal);
+        });
+
+        // Performs suffle operation
+        const tempX = resNormal.x;
+        resNormal.x = resNormal.y;
+        resNormal.y = tempX;
+
+        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
+            runAwayDir = resNormal.muls(-1.0);
+
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
+                if (Math.random() < 0.5) {
+                    runAwayDir.x = 0.0;
+                } else {
+                    runAwayDir.y = 0.0;
+                }
+            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = 0.0;
+            }
+
+        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.y < 0) {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = 1.0;
+            } else {
+                runAwayDir.x = 0.0;
+                runAwayDir.y = -1.0;
+            }
+        } else {
+            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
+
+            if (relativeEnemyPos.x < 0) {
+                runAwayDir.x = 1.0;
+                runAwayDir.y = 0.0;
+            } else {
+                runAwayDir.x = -1.0;
+                runAwayDir.y = 0.0;
+            }
+        }
+    } else {
+        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
+    }
+
+    rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 3: ${rigidbody} Is NaN`);
 
     behavior.attacking = false;
 }
@@ -135,9 +338,6 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
 
     // Começo do solver
 
-    console.log("Entity: ", dynamic.index);
-    console.log("Hunting: ", other.index);
-
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
@@ -176,11 +376,8 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
     const sources: Vec2[] = [];
     let dir: Vec2 | null = null;
 
-    console.log("Static Centers: ", behavior.staticCenter)
-    console.log("Ocupations: ", dynamic.ocupations)
     behavior.staticCenter.map((center) => {
         const convertedCenter = convertPosToCell(convertFromNDC(center));
-        console.log("Static Cell: ", convertedCenter)
         dynamic.ocupations.map((ocupation) => {
             const diff = convertedCenter.abs(ocupation);
 
@@ -191,8 +388,6 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         });
     });
 
-    console.log("Sources: ", sources);
-
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
@@ -200,31 +395,35 @@ const seekNearestWithA = (entity: Entity, grid: Grid) => {
         const path = finder.findPath(
             source, other.index
         );
-        console.log("Path" + index, path)
+
+        if (path === null || path.length < 2) {
+            console.log("Source of null path: ", source)
+            console.log("Source of null path: ", other.index)
+            return;
+        }
 
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
-        console.log("Dest" + index, dest);
-        console.log("Origin" + index, origin);
-
         if (!dest.equal(origin)){
-            console.log("SubDir" + index, dest.sub(origin));
             dir = dir.add(dest.sub(origin));
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
         }
     });
-    console.log("PreDir: ", dir);
-    if (dir) {
+
+    if (dir && (!dir.equal(new Vec2(0, 0)))) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
-        console.log("FinalDir: ", dir);
+        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 42: ${rigidbody} Is NaN`);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
             dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 43: ${rigidbody} Is NaN`);
         }
     }
 
     rigidbody.velocity = dir;
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
 
     behavior.attacking = false;
 }
@@ -257,9 +456,6 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
 
     // Começo do solver
 
-    console.log("Entity: ", dynamic.index);
-    console.log("Hunting: ", other.index);
-
     const convertFromNDC = (pos: Vec2): Vec2 => {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
@@ -298,11 +494,8 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
     const sources: Vec2[] = [];
     let dir: Vec2 | null = null;
 
-    console.log("Static Centers: ", behavior.staticCenter)
-    console.log("Ocupations: ", dynamic.ocupations)
     behavior.staticCenter.map((center) => {
         const convertedCenter = convertPosToCell(convertFromNDC(center));
-        console.log("Static Cell: ", convertedCenter)
         dynamic.ocupations.map((ocupation) => {
             const diff = convertedCenter.abs(ocupation);
 
@@ -313,8 +506,6 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         });
     });
 
-    console.log("Sources: ", sources);
-
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
@@ -322,31 +513,34 @@ const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
         const path = finder.findPath(
             source, other.index
         );
-        console.log("Path" + index, path)
+
+        if (path === null || path.length < 2) {
+            console.log("Source of null path: ", source)
+            console.log("Dest of null path: ", other.index)
+            return;
+        }
 
         const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
         const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
 
-        console.log("Dest" + index, dest);
-        console.log("Origin" + index, origin);
-
         if (!dest.equal(origin)){
-            console.log("SubDir" + index, dest.sub(origin));
             dir = dir.add(dest.sub(origin));
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 71: ${rigidbody} Is NaN`);
         }
     });
-    console.log("PreDir: ", dir);
-    if (dir) {
+    if (dir && (!dir.equal(new Vec2(0, 0)))) {
         dir = convertToNDC(dir).normalize().muls(status.speed);
-        console.log("FinalDir: ", dir);
+        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 72: ${rigidbody} Is NaN`);
     } else {
         const enemyPos = nearest.getTransform().pos;
         if (!enemyPos.equal(transform.pos)) {
             dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 73: ${rigidbody} Is NaN`);
         }
     }
 
     rigidbody.velocity = dir;
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 7: ${rigidbody} Is NaN, dir was ${dir}`);
 
     behavior.attacking = false;
 }
@@ -366,6 +560,7 @@ const seekNearest = (entity: Entity) => {
 
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
     }
 
     behavior.attacking = false;
@@ -398,9 +593,18 @@ const seekNearestInRange = (entity: Entity) => {
     
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
+        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
     }
 
     behavior.attacking = false;
+}
+
+const sys_CheckForBerserker = (data: EcsData, deltaTime: number): void => {
+    if ((Date.now() - Behavior.lastDeath) >= 5000) {
+        Behavior.berserker = true;
+    } else {
+        Behavior.berserker = false;
+    }
 }
 
 const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
@@ -490,6 +694,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             // Get current life percent of player
             const lifePercent = (status.health / status.maxHealth) * 100;
 
+            // Removes attacking
+            behavior.attacking = false;
+
             // Update cooldown
             behavior.refresh += deltaTime;
 
@@ -498,60 +705,62 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                 behavior.healing = false;
             }
 
+            // Curando caramba
             if (lifePercent < 100) {
-                status.health += 0.01
+                status.health += 0.03
             }
-
             // Life check
-            if (lifePercent < 25 || behavior.healing) {
-                console.log("Entered healing node");
+            if ((lifePercent < 25 || behavior.healing) && (!Behavior.berserker)) {
+                // console.log("Entered healing node");
                 // RunAway decision
                 if (behavior.attacking) {
-                    console.log("Decided RunAway from current target");
+                    // console.log("Decided RunAway from current target");
                     runAwayFromTarget(entity);
                 } else if (behavior.inRange.length > 0) {
-                    console.log("Decided RunAway from relative range enemies");
+                    // console.log("Decided RunAway from relative range enemies");
                     runAwayFromRange(entity);
+                } else {
+                    // console.log("Decided RunAway from all enemies");
+                    runAwayFromAll(entity, grid);
                 }
                 behavior.healing = true;
 
             // Collision checking
             } else if (behavior.colliding.length > 0) {
-                console.log("Entered collision node");
+                // console.log("Entered collision node");
                 // How many attacking
                 if (behavior.colliding.length == 1) {
-                    console.log("Decided hit current target");
+                    // console.log("Decided hit current target");
                     hitTarget(entity);
                 } else if (behavior.colliding.length > 1) {
-                    console.log("Decided hit strongest player in hit area");
+                    // console.log("Decided hit strongest player in hit area");
                     hitStrongest(entity);
                 }
 
             // Inrange check
             } else if (behavior.inRange.length > 0) {
                 if (behavior.staticColide) {
-                    console.log("Entered Searching inRange node with A*");
+                    // console.log("Entered Searching inRange node with A*");
                     seekNearestInRangeWithA(entity, grid);
                     behavior.staticColide = false;
                 } else {
-                    console.log("Entered Searching inRange node");
+                    // console.log("Entered Searching inRange node");
                     seekNearestInRange(entity);
                 }
                 
             // Out range check
             } else if (behavior.inRange.length == 0) {
                 if (behavior.staticColide) {
-                    console.log("Entered Searching outRange node with A*");
+                    // console.log("Entered Searching outRange node with A*");
                     seekNearestWithA(entity, grid);
                     behavior.staticColide = false;
                 } else {
-                    console.log("Entered Searching outRange node");
+                    // console.log("Entered Searching outRange node");
                     seekNearest(entity);
                 }
             }
         });
     });
-
 };
 
-export { sys_UpdateBehavior, sys_CheckInRange };
+export { sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };

@@ -4,7 +4,7 @@ import { Vec2 } from "../../../Utils/Math";
 import { Transform } from "./Transform";
 
 // Pixi imports
-import { Application, LoaderResource, BaseTexture, Texture, Rectangle } from "pixi.js";
+import { Application, Container, LoaderResource, BaseTexture, Texture, Rectangle } from "pixi.js";
 import { Sprite as PixiSprite } from  "pixi.js";
 
 class Sprite {
@@ -17,6 +17,7 @@ class Sprite {
     public sprite: PixiSprite;
 
     private app: Application | null = null;
+    private container: Container | null = null;
 
     constructor(transform: Transform, res: LoaderResource | null) {
         this.transform = transform;
@@ -44,25 +45,37 @@ class Sprite {
     }
 
     setFromUrl(url: string) {
-        this.sprite.texture = Texture.from(url, {width: 200, height: 200});
+        this.sprite.texture = Texture.from(url);
     }
 
-    addStage(app: Application) {
-        if (!this.app) {
-            this.app = app;
-            app.stage.addChild(this.sprite);
+    addStage(app: Application | Container) {
+        if (app instanceof Application) {
+            if (!this.app) {
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.app = app;
+                app.stage.addChild(this.sprite);
+            }
         } else {
-            this.remStage();
-            this.app = app;
-            app.stage.addChild(this.sprite);
+            if (!this.container) {
+                this.container = app;
+                app.addChild(this.sprite);
+            } else {
+                this.remStage();
+                this.container = app;
+                app.addChild(this.sprite);
+            }
         }
     }
 
     remStage() {
-        if (!this.app)
-            return;
-            
-        this.app.stage.removeChild(this.sprite);
+        if (this.app)
+            this.app.stage.removeChild(this.sprite);
+          
+        if (this.container)
+            this.container.removeChild(this.sprite);
     }
 
     setScale(x: number, y: number) {
@@ -73,14 +86,18 @@ class Sprite {
     setPos(x: number, y: number) {
         this.transform.pos.x = x;
         this.transform.pos.y = y;
+        this.sprite.x = x;
+        this.sprite.y = y;
     }
 
     setSize(width: number, height: number) {
-        const scaleX = width / this.sprite.width;
-        const scaleY = height / this.sprite.height;
+        const scaleX = width / this.sprite.texture.width;
+        const scaleY = height / this.sprite.texture.height;
 
         this.transform.scale.x = scaleX;
         this.transform.scale.y = scaleY;
+        this.sprite.scale.x = scaleX;
+        this.sprite.scale.y = scaleY;
     }
 
     setAnchor(x: number, y?: number) {

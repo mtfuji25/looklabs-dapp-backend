@@ -5,7 +5,7 @@ import { ECS } from "../Core/Ecs";
 import { sys_UpdatePos } from "./Rigidbody";
 import { sys_CheckCollisions, sys_UpdateGrid } from "./Grid";
 import { sys_DipatchDeaths, sys_UpdateStatus } from "./Status";
-import { sys_CheckInRange, sys_UpdateBehavior } from "./Behavior";
+import { sys_CheckForBerserker, sys_CheckInRange, sys_UpdateBehavior } from "./Behavior";
 import { sys_UpdateCollisions } from "./Grid";
 import { sys_CheckOverlap } from "./Aabb";
 
@@ -21,6 +21,9 @@ const startSystems = (ecs: ECS) => {
     
     // Colide and fix all velocitys in grid
     ecs.pushContainerSystem(sys_CheckCollisions);
+
+    // Update Behavior requirements
+    ecs.pushContainerSystem(sys_CheckForBerserker);
 
     // Update Behavior requirements
     ecs.pushContainerSystem(sys_CheckInRange);

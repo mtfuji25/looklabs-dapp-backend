@@ -21,6 +21,7 @@ class Status {
     public readonly cooldown: number;
     public readonly maxHealth: number;
     public readonly name: string;
+    public critical: boolean = false;
 
     // Current Entity Stats
     public survived: number = 0.0;
@@ -55,6 +56,7 @@ class Status {
         // 8% critical rate
         if (Math.random() < 0.08) {
             damage += Math.random() * 30;
+            this.lastHit.getStatus().critical = true;
         } else {
             // 15% miss rate
             if (Math.random() < 0.15) {
@@ -63,10 +65,10 @@ class Status {
         }
 
         // Not allow negative damage
-        if (damage < 0)
+        if (damage < 1)
             damage = 1;
 
-        if (damage < this.defense) {
+        if (damage <= this.defense) {
             this.health -= 1;
         } else {
             this.health -= damage -  this.defense;

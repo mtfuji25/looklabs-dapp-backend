@@ -1,5 +1,6 @@
 import { EcsData } from "../Interfaces";
 import { StatusResult } from "../Components/Status";
+import { Behavior } from "../Components/Behavior";
 
 type OnDieFn = (status: StatusResult) => (void);
 
@@ -22,6 +23,7 @@ const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
     // Iterates through all status in system
     data.status.map((stats) => {
         stats.survived += deltaTime;
+        stats.critical = false;
         if (stats.health <= 0) {
             if (!stats.lastHit)
                 return;
@@ -37,7 +39,7 @@ const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
             deads.push({
                 results: {
                     attack: stats.attack,
-                    health: stats.health,
+                    health: stats.health / stats.maxHealth,
                     defense: stats.defense,
                     cooldown: stats.cooldown,
                     survived: stats.survived,
@@ -45,6 +47,8 @@ const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
                 },
                 callback: stats.onDie
             });
+            
+            Behavior.lastDeath = Date.now();
         }
     });
 };

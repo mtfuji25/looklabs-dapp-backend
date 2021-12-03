@@ -58,6 +58,22 @@
         {
             "name": "dungeon",
             "url": "./assets/dungeon-pack/dungeon-pack.png"
+        },
+        {
+            "name": "basemap",
+            "url": "./assets/dungeon-pack/base_sheet.png"
+        },
+        {
+            "name": "overlaymap",
+            "url": "./assets/dungeon-pack/overlay_sheet.png"
+        },
+        {
+            "name": "basemap_raw",
+            "url": "./assets/dungeon-pack/basemap.png"
+        },
+        {
+            "name": "overlaymap_raw",
+            "url": "./assets/dungeon-pack/overlays.png"
         }
     ],
     "enemy-pack": [
@@ -67,22 +83,26 @@
         },
         {
             "name": "chicken",
-            "url": "./assets/enemy-pack/chicken2.png"
+            "url": "./assets/enemy-pack/chicken.png"
         },
         {
             "name": "wolf",
-            "url": "./assets/enemy-pack/wolf2.png"
+            "url": "./assets/enemy-pack/wolf.png"
         },
         {
             "name": "snake",
-            "url": "./assets/enemy-pack/snake2.png"
+            "url": "./assets/enemy-pack/snake.png"
         },
         {
             "name": "bat",
-            "url": "./assets/enemy-pack/bat2.png"
+            "url": "./assets/enemy-pack/bat.png"
+        },
+        {
+            "name": "overlays",
+            "url": "./assets/enemy-pack/overlays.png"
         }
     ],
-    "sheets": [ "enemy-sheet", "chicken-sheet", "wolf-sheet", "snake-sheet", "bat-sheet"],
+    "sheets": [ "enemy-sheet", "chicken-sheet", "wolf-sheet", "snake-sheet", "bat-sheet", "overlay-sheet" ],
     "enemy-sheet": {
         "resource": "enemy",
         "speed": 0.5,
@@ -164,5 +184,36 @@
         "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
         "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
         "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
+    },
+    "overlay-sheet": {
+        "resource": "overlays",
+        "speed": 0.3,
+        "loop": false,
+        "texWidth": 416,
+        "texHeight": 192,
+        "frameWidth": 32,
+        "frameHeigth": 32,
+        "animations": [ 
+            "death1", "death2", "death3",
+            "criticalR1", "criticalR2", "criticalR3",
+            "criticalL1", "criticalL2", "criticalL3",
+            "healing1", "healing2", "healing3"
+        ],
+
+        "death1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
+        "death2": [ [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7] ],
+        "death3": [ [3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7] ],
+
+        "criticalR1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
+        "criticalR2": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
+        "criticalR3": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6] ],
+
+        "criticalL1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
+        "criticalL2": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
+        "criticalL3": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6] ],
+
+        "healing1": [ [4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10], [4, 11], [4, 12] ],
+        "healing2": [ [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [5, 11], [5, 12] ],
+        "healing3": [ [6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10], [6, 11], [6, 12] ]
     }
 }

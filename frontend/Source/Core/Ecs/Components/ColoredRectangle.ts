@@ -4,7 +4,7 @@ import { Vec2 } from "../../../Utils/Math";
 import { Transform } from "./Transform";
 
 // Pixi imports
-import { Application, Graphics } from "pixi.js";
+import { Application, Container, Graphics } from "pixi.js";
 
 class ColoredRectangle {
     public width: number;
@@ -27,6 +27,7 @@ class ColoredRectangle {
     public graphics: Graphics;
 
     private app: Application | null = null;
+    private container: Container | null = null;
 
     constructor(transform: Transform, width: number, height: number, color: number) {
         this.transform = transform;
@@ -53,22 +54,34 @@ class ColoredRectangle {
         this.color = color;
     }
 
-    addStage(app: Application) {
-        if (!this.app) {
-            this.app = app;
-            this.app.stage.addChild(this.graphics);
+    addStage(app: Application | Container) {
+        if (app instanceof Application) {
+            if (!this.app) {
+                this.app = app;
+                app.stage.addChild(this.graphics);
+            } else {
+                this.remStage();
+                this.app = app;
+                app.stage.addChild(this.graphics);
+            }
         } else {
-            this.remStage();
-            this.app = app;
-            this.app.stage.addChild(this.graphics);
+            if (!this.container) {
+                this.container = app;
+                app.addChild(this.graphics);
+            } else {
+                this.remStage();
+                this.container = app;
+                app.addChild(this.graphics);
+            }
         }
     }
 
     remStage() {
-        if (!this.app)
-            return;
-            
-        this.app.stage.removeChild(this.graphics);
+        if (this.app)
+            this.app.stage.removeChild(this.graphics);
+          
+        if (this.container)
+            this.container.removeChild(this.graphics);
     }
 
     setScale(x: number, y: number) {
