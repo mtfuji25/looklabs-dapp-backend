@@ -39,7 +39,7 @@ const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
             deads.push({
                 results: {
                     attack: stats.attack,
-                    health: stats.health,
+                    health: stats.health / stats.maxHealth,
                     defense: stats.defense,
                     cooldown: stats.cooldown,
                     survived: stats.survived,
