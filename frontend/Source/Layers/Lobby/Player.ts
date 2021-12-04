@@ -56,6 +56,8 @@ class PlayerLayer extends Layer {
     // Lobby level context
     private levelContext: LobbyLevelContext;
 
+    static lastGamePlayerNames: Record<string, string> = {};
+
     private readonly idStyle: Partial<ITextStyle> = {
         fontFamily: "8-BIT WONDER",
         fontSize: "10px",
@@ -183,7 +185,7 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos, char_class } = content;
+        const { id, pos, char_class, name } = content;
 
         const prevPlayer = this.players[id];
 
@@ -226,6 +228,8 @@ class PlayerLayer extends Layer {
         
         // Add animsprite component
         const sprite = entity.addAnimSprite();
+
+        PlayerLayer.lastGamePlayerNames[id] = name;
 
         switch (char_class) {
             case "Avian":

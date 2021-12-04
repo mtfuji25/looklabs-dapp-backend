@@ -158,7 +158,7 @@ class StrapiClient {
     }
 
     async createLog(log: Log) {
-        return this.api.post('/logs', {
+        return this.post('logs', {
             data: log
         });
     }

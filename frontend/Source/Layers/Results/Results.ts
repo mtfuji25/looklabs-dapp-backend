@@ -8,6 +8,7 @@ import { Application, ITextStyle, Container } from "pixi.js";
 import { ScheduledGameParticipant } from "../../Clients/Strapi";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { lerp } from "../../Utils/Math";
+import { PlayerLayer } from "../Lobby/Player";
 
 class ResultsLayer extends Layer {
     // Current app instance
@@ -104,7 +105,7 @@ class ResultsLayer extends Layer {
         // render the text for participant name
         this.ecs
             .createEntity(this.percentX * 56.458, yOffset)
-            .addText(`${participant.name}`, this.textStyle)
+            .addText(`${PlayerLayer.lastGamePlayerNames[participant.nft_id]}`, this.textStyle)
             .addStage(this.resContainer);
 
         // Render the tombstone icon
