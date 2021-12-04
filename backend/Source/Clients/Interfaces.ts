@@ -61,6 +61,7 @@ interface PlayerCommand {
     survived: number;
     kills: number;
     char_class: string;
+    name: string;
 }
 
 // Requests types and values
