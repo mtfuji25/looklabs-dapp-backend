@@ -58,7 +58,7 @@ class LobbyLevel extends Level {
                 });
                 this.startGame();
             }).catch((err) => {
-                console.log(err);
+                console.log("Hei 0", err);
                 this.context.close = true;
             });
     }
@@ -85,7 +85,6 @@ class LobbyLevel extends Level {
                 tokenId = 1;
 
             this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
-
                 responses.push({
                     participant: participant,
                     response: response
@@ -122,7 +121,7 @@ class LobbyLevel extends Level {
                                         value: String(result.scheduled_game_participant),
                                         scheduled_game: this.gameId,
                                         scheduled_game_participant: killer,
-                                    }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
+                                    }).catch((err) => console.log("Hei 1", JSON.stringify(err.request.data, null, 4)));
 
                                     // Final Rank log
                                     this.context.strapi.createLog({
@@ -131,9 +130,9 @@ class LobbyLevel extends Level {
                                         value: String(this.fighters),
                                         scheduled_game: this.gameId,
                                         scheduled_game_participant: result.scheduled_game_participant,
-                                    }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
+                                    }).catch((err) => console.log("Hei 2", JSON.stringify(err.request.data, null, 4)));
 
-                                }).catch((err) => console.log(err));
+                                }).catch((err) => console.log("Hei 3", err));
                             },
                             (damage: number, participant: number) => {
                                 // Damage log
@@ -143,7 +142,7 @@ class LobbyLevel extends Level {
                                     value: String(damage),
                                     scheduled_game: this.gameId,
                                     scheduled_game_participant: participant
-                                }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
+                                }).catch((err) => console.log("Hei 4", JSON.stringify(err.request.data, null, 4)));
                             },
                             details
                         );
@@ -156,7 +155,7 @@ class LobbyLevel extends Level {
                             event: "entrants",
                             scheduled_game: this.gameId,
                             scheduled_game_participant: participant.id,
-                        }).catch((err) => console.log(JSON.stringify(err.request.data, null, 4)));
+                        }).catch((err) => console.log("Hei 5", JSON.stringify(err, null, 4)));
                     });
                     this.ready = true;
                 }

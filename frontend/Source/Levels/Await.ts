@@ -70,12 +70,16 @@ class AwaitLevel extends Level {
         let content: GameStatus;
         if (msg.content.msgType == msgTypes.gameStatus) {
             content = msg.content as GameStatus;
-        } else {
-            return;
+            if (content.gameStatus == "lobby") {
+                this.context.engine.loadLevel(new LobbyLevel(
+                    this.context,
+                    "Lobby",
+                    {
+                        gameId: content.gameId
+                    })
+                )
+            }
         }
-            
-        if (!content.gameStatus)
-            return false;
         
         return false;
     }
