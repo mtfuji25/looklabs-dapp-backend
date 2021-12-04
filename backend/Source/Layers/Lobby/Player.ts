@@ -328,7 +328,7 @@ class PlayerLayer extends Layer {
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount == 99)
+        if (PlayerLayer.playerCount == spawnPos.length - 1)
             PlayerLayer.playerCount = 0;
         else
             PlayerLayer.playerCount++;
