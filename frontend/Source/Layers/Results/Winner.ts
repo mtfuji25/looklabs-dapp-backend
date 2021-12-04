@@ -8,6 +8,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { ParticipantDetails, ScheduledGameParticipant } from "../../Clients/Strapi";
+import { PlayerLayer } from "../Lobby/Player";
 
 interface TextParams {
     text: string;
@@ -147,7 +148,7 @@ class WinnerLayer extends Layer {
         );
 
         // sets texts according to the winner
-        this.texts["winnerName"].setText(this.participant.name);
+        this.texts["winnerName"].setText(PlayerLayer.lastGamePlayerNames[this.participant.nft_id]);
         this.texts["kills"].setText(String(this.participant.game_participants_result.kills));
         this.texts["health"].setText(String(this.participant.game_participants_result.health));
         this.texts["survivedTime"].setText(
