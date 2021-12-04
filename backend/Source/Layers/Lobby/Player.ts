@@ -311,7 +311,7 @@ class PlayerLayer extends Layer {
             // Defense
             5 * (attributesMap["Defence"] / 100.0),
             // Cooldown
-            0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
+            0.5
         );
 
         status.setOnDie((status) => this.onDie(status));
@@ -457,6 +457,7 @@ class PlayerLayer extends Layer {
             survived: status.survived,
             kills: status.kills,
             char_class: this.self.name.split(' ')[0],
+            name: this.self.name
         };
     }
 
