@@ -13,7 +13,6 @@ const WS_PORT = Number(process.env.WS_SERVER_PORT);
 const WS_HOST = String(process.env.WS_SERVER_HOST);
 
 const main = async () => {
-    console.log(STRAPI_BEARER_TOKEN)
     // Start strapi client
     const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
