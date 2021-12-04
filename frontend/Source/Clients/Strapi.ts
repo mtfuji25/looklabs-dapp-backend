@@ -183,11 +183,10 @@ class StrapiClient {
         return returnValue;
     }
 
-
-        // get the details for a chosen participant
+    // get the details for a chosen participant
     async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenId}`)).data;
-    }    
+    }
 
     // Default engine start call
     start(): void {}

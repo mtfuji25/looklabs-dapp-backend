@@ -63,9 +63,11 @@ class StrapiClient {
 
     // restApi for player attributes
     private readonly restApi: AxiosInstance;
+    private readonly authToken: string;
 
-    constructor(host: string) {
+    constructor(host: string, token: string) {
         this.host = host;
+        this.authToken = token;
         // start axios instance
         this.api = axios.create({
             baseURL: host
@@ -75,22 +77,14 @@ class StrapiClient {
         this.restApi = axios.create({
             baseURL: 'https://token.thepitnft.com/contractAddress/',
         })
-
-        const now = new Date().toISOString();
-
-        this.get(`scheduled-games`).then((res) => {
-            console.log(JSON.stringify(res.data, null, 4))
-        }).catch((err) => {
-            console.log(JSON.stringify(err, null, 4))
-        });
     }
 
     private async get(url: string): Promise<AxiosResponse> {
-        return this.api.get(url);
+        return this.api.get(url, {headers: {"Authorization" : `bearer ${this.authToken}`}});
     }
 
     private async post(url: string, data: any): Promise<AxiosResponse> {
-        return this.api.post(url, data);
+        return this.api.post(url, data, {headers: {"Authorization" : `bearer ${this.authToken}`}});
     }
 
     // Creates a result for a participant on strapi. Takes a player and it's result enum(string)
