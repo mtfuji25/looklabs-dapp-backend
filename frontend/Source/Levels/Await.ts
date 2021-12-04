@@ -3,7 +3,6 @@ import { Level } from "../Core/Level";
 // Layers imports
 import { TextLayer } from "../Layers/Await/Text";
 import { MapLayer } from "../Layers/Await/Basemap";
-import { PlayerClass } from "../Layers/Lobby/Player";
 
 // Web Clients imports
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
