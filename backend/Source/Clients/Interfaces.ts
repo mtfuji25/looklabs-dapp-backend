@@ -9,8 +9,8 @@ const msgTypes = {
     remainPlayer: "remain-players"
 };
 
-type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand;
+type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg;
 
 //
 //  Msgs interfaces
@@ -21,6 +21,13 @@ interface KillMsg {
     killer: string;
     killed: string;
     action: string;
+}
+
+interface GameTimeMsg {
+    msgType: "game-time",
+    hours: number,
+    minutes: number, 
+    seconds: number
 }
 
 interface RemainPlayersMsg {
@@ -86,7 +93,7 @@ interface IncomingMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg;
 }
 
 interface ReplyableMsg {
@@ -130,6 +137,7 @@ export {
     MsgTypes,
     ServerMsg,
     GameStatus,
+    GameTimeMsg,
     PlayerCommand,
     IncomingMsg,
     ReplyableMsg,
