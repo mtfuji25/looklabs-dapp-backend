@@ -22,6 +22,7 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
 import { Container } from "pixi.js";
+import { StrapiClient } from "../../Clients/Strapi";
 
 interface Player {
     entity: Entity;
@@ -35,8 +36,8 @@ interface Player {
 }
 
 class PlayerLayer extends Layer {
-    private players: Record<string, Player> = {};
     // Entites storage
+    private players: Record<string, Player> = {};
 
     // Listener id
     private listener: Listener;
@@ -47,12 +48,15 @@ class PlayerLayer extends Layer {
 
     // Web clients
     protected wsClient: WSClient;
+    protected strapiClient: StrapiClient;
 
     // Playher container
     private container: Container;
 
     // Lobby level context
     private levelContext: LobbyLevelContext;
+
+    static lastGamePlayerNames: Record<string, string> = {};
 
     private readonly idStyle: Partial<ITextStyle> = {
         fontFamily: "8-BIT WONDER",
@@ -69,6 +73,7 @@ class PlayerLayer extends Layer {
         levelContext: LobbyLevelContext,
         app: Application,
         wsClient: WSClient,
+        strapiClient: StrapiClient,
         resource: Record<string, any>
     ) {
         super("PlayerController", ecs);
@@ -179,7 +184,8 @@ class PlayerLayer extends Layer {
     }
 
     createEnemy(content: PlayerCommand) {
-        const { id, pos } = content;
+    
+        const { id, pos, char_class, name } = content;
 
         const prevPlayer = this.players[id];
 
@@ -188,6 +194,7 @@ class PlayerLayer extends Layer {
         }
 
         const splitId = id.split('/')[1];
+
 
         // Creates and stores entity
         const title = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 20, false);  
@@ -219,28 +226,29 @@ class PlayerLayer extends Layer {
         titleText.text.anchor.set(0.5);
         titleText.addStage(this.container);
         
-        
         // Add animsprite component
         const sprite = entity.addAnimSprite();
-        const type = Math.floor(Math.random() * 4);
-        switch (type) {
-            case 0:
-                sprite.loadFromConfig(this.app, this.res["wolf-sheet"]);
-                break;
-            case 1:
-                sprite.loadFromConfig(this.app, this.res["bat-sheet"]);
-                break;
-            case 2:
-                sprite.loadFromConfig(this.app, this.res["snake-sheet"]);
-                break;
-            case 3:
+
+        PlayerLayer.lastGamePlayerNames[id] = name;
+
+        switch (char_class) {
+            case "Avian":
                 sprite.loadFromConfig(this.app, this.res["chicken-sheet"]);
                 break;
+            case "Canine":
+                sprite.loadFromConfig(this.app, this.res["wolf-sheet"]); 
+                break;
+            case "Insectoid":
+                sprite.loadFromConfig(this.app, this.res["bat-sheet"]);
+                break;
+            case 'Serpentine':
+                sprite.loadFromConfig(this.app, this.res["snake-sheet"]);
+                break;
             default:
-                sprite.loadFromConfig(this.app, this.res["wolf-sheet"]);
+                sprite.loadFromConfig(this.app, this.res["bat-sheet"]);
                 break;
         }
-        
+
         sprite.addStage(this.container);
 
         animSpriteSlot1.addStage(this.container);

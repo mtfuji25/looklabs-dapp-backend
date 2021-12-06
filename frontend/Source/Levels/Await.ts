@@ -6,6 +6,7 @@ import { MapLayer } from "../Layers/Await/Basemap";
 
 // Web Clients imports
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { ScheduledGameParticipant } from "../Clients/Strapi";
 import { LobbyLevel } from "./Lobby";
 
 // Await level bg color
@@ -66,25 +67,20 @@ class AwaitLevel extends Level {
     }
 
     onServerMsg(msg: ServerMsg) {
-        let content;
+        let content: GameStatus;
         if (msg.content.msgType == msgTypes.gameStatus) {
             content = msg.content as GameStatus;
-        } else {
-            return;
+            if (content.gameStatus == "lobby") {
+                this.context.engine.loadLevel(new LobbyLevel(
+                    this.context,
+                    "Lobby",
+                    {
+                        gameId: content.gameId
+                    })
+                )
+            }
         }
-            
-        if (!content.gameStatus)
-            return false;
-
-        this.context.engine.loadLevel(
-            new LobbyLevel(
-                this.context, "Lobby",
-                {
-                    gameId: content.gameId
-                }
-            )
-        )
-
+        
         return false;
     }
 };

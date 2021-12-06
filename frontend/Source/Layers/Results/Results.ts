@@ -8,6 +8,7 @@ import { Application, ITextStyle, Container } from "pixi.js";
 import { ScheduledGameParticipant } from "../../Clients/Strapi";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { lerp } from "../../Utils/Math";
+import { PlayerLayer } from "../Lobby/Player";
 
 class ResultsLayer extends Layer {
     // Current app instance
@@ -17,6 +18,7 @@ class ResultsLayer extends Layer {
     private count: number = 0.0;
     private initialResY = 0.0;
     private firstPass = true;
+    private scrollAlowed: boolean = false;
 
     private readonly textStyle: Partial<ITextStyle> = {
         fontFamily: "monospace",
@@ -103,7 +105,7 @@ class ResultsLayer extends Layer {
         // render the text for participant name
         this.ecs
             .createEntity(this.percentX * 56.458, yOffset)
-            .addText(`${participant.name}`, this.textStyle)
+            .addText(`${PlayerLayer.lastGamePlayerNames[participant.nft_id]}`, this.textStyle)
             .addStage(this.resContainer);
 
         // Render the tombstone icon
@@ -136,11 +138,17 @@ class ResultsLayer extends Layer {
             // resizes text
         }
         
-
-        if (this.firstPass) {
-            this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+        if (this.scrollAlowed) {
+            if (this.firstPass) {
+                this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+            } else {
+                this.resContainer.y = lerp(this.app.view.height, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+            }
         } else {
-            this.resContainer.y = lerp(this.app.view.height, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+            if (this.count >= 2.0) {
+                this.count -= 2.0;
+                this.scrollAlowed = true;
+            }
         }
 
         if (this.count >= 20.0) {
@@ -148,7 +156,7 @@ class ResultsLayer extends Layer {
             this.firstPass = false;
         }
         else
-            this.count += deltaTime;  
+            this.count += deltaTime; 
     }
 
     onDetach() {

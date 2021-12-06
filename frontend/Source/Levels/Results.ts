@@ -15,19 +15,41 @@ class ResultsLevel extends Level {
     }
 
     connectLayers(): void {
-        this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
+        const responseParticipant = this.props.responseParticipant;
+        const responseWinner = this.props.responseWinner;
+
+        if (responseParticipant === null || responseWinner == null) {
+            this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
+                let splitId = (participants[0].nft_id).split('/')[1];
+                if(splitId > 50) splitId -= 50;
+                if(splitId == 0) splitId += 1;
+    
+                this.layerStack.pushLayer(
+                    new ResultsLayer(this.ecs, this.context.app, participants)
+                );   
+                this.layerStack.pushLayer(
+                    new BattleStatusLayer(this.ecs, this.context.app)
+                );
+                this.context.strapi.getParticipantDetails(splitId).then((participant) => {
+                    this.layerStack.pushLayer(
+                        new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
+                    );
+                })
+            })
+        } else {
+            let splitId = (responseParticipant[0].nft_id).split('/')[1];
+            if(splitId > 50) splitId -= 50;
+            if(splitId == 0) splitId += 1;
             this.layerStack.pushLayer(
-                new ResultsLayer(this.ecs, this.context.app, participants)
+                new ResultsLayer(this.ecs, this.context.app, responseParticipant)
             );   
             this.layerStack.pushLayer(
                 new BattleStatusLayer(this.ecs, this.context.app)
             );
-            this.context.strapi.getParticipantDetails((participants[0].nft_id).split('/')[1]).then((participant) => {
-                this.layerStack.pushLayer(
-                    new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
-                );
-            })
-        })
+            this.layerStack.pushLayer(
+                new WinnerLayer(this.ecs, this.context.app, responseParticipant[0], responseWinner)
+            );
+        }
     }
 
     onUpdate(deltaTime: number) {}

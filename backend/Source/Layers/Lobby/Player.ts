@@ -254,14 +254,16 @@ class PlayerLayer extends Layer {
     static playerCount: number = 0;
 
     // Die fn
-    public dieFn: (result: GameParticipantsResult) => void;
+    public dieFn: (result: GameParticipantsResult, killer: number) => void;
+    public damageFn: (damage: number, participant: number) => void;
 
     constructor(ecs: ECS,
         wsContext: WSClient,
         id: string,
         strapiID: number,
         grid: Grid,
-        dieFn: (result: GameParticipantsResult) => void,
+        dieFn: (result: GameParticipantsResult, killer: number) => void,
+        damageFn: (damage: number, participant: number) => void,
         details: ParticipantDetails) {
 
         super(`Player${id}`, ecs);
@@ -270,7 +272,9 @@ class PlayerLayer extends Layer {
         this.playerID = id;
         this.grid = grid;
         this.dieFn = dieFn;
+        this.damageFn = damageFn;
         this.self.name = details.name;
+        this.self.strapiId = strapiID;
         this.strapiID = strapiID;
         this.details = details;
 
@@ -297,18 +301,21 @@ class PlayerLayer extends Layer {
             attributesMap[attribute.trait_type] = attribute.value;
         })
 
-        this.self.addStatus(
+        const status = this.self.addStatus(
             // Attack
             20 * (attributesMap["Attack"] / 100.0),
             // Speed
             0.04 * (attributesMap["Speed"] / 100.0),
             // Health
-            100 * (attributesMap["Health"] / 100.0),
+            100,
             // Defense
             5 * (attributesMap["Defence"] / 100.0),
             // Cooldown
-            0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        ).setOnDie((status) => this.onDie(status));
+            0.5
+        );
+
+        status.setOnDie((status) => this.onDie(status));
+        status.setOnDamage((damage) => this.onDamage(damage));
 
         // Add rigibody for current entity
         this.self.addRigidbody(
@@ -321,7 +328,7 @@ class PlayerLayer extends Layer {
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount == 99)
+        if (PlayerLayer.playerCount == spawnPos.length - 1)
             PlayerLayer.playerCount = 0;
         else
             PlayerLayer.playerCount++;
@@ -449,6 +456,8 @@ class PlayerLayer extends Layer {
             maxHealth: status.maxHealth,
             survived: status.survived,
             kills: status.kills,
+            char_class: this.self.name.split(' ')[0],
+            name: this.self.name
         };
     }
 
@@ -456,11 +465,12 @@ class PlayerLayer extends Layer {
     onDie(status: StatusResult) {
         console.log("Morreu: ", this.name)
         console.log("Resultados: ", status);
-        const killer = this.self.getStatus().lastHit.name;
+        const killerName = this.self.getStatus().lastHit.name;
+        const killerId = this.self.getStatus().lastHit.strapiId;
 
         this.wsClient.broadcast({
             killed: this.self.name,
-            killer: killer,
+            killer: killerName,
             action: killFeed.items[killFeed.items.length * Math.random() | 0],
             msgType: "kill"
         });
@@ -470,7 +480,12 @@ class PlayerLayer extends Layer {
             survived_for: Math.floor(status.survived),
             kills: Math.floor(status.kills),
             health: Math.floor(status.health),
-        });
+        }, killerId);
+    }
+
+    // When player takes a hit callback
+    onDamage(damage: number) {
+       this.damageFn(damage, this.strapiID);
     }
 }
 

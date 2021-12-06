@@ -5,7 +5,7 @@ const STATIC_URL = "./public";
 const WS_HOST = process.env.WS_SERVER_HOST || "ws:localhost:8082";
 
 // Strapi Client configs
-const STRAPI_HOST = "https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/";
+const STRAPI_HOST = "https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/api/";
 
 // Canva view div id
 const ROOT_DIV_ID = "#root";

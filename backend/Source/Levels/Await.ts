@@ -28,7 +28,7 @@ class AwaitLevel extends Level {
             .then((game) => {
                 if (!game) {
                     console.log("No scheduled game, awaiting ...");
-                    setTimeout(() => this.checkForGame(), 2000);
+                    setTimeout(() => this.checkForGame(), 60000);
                 } else {
                     console.log("Game found, awaiting to start ...");
                     this.gameFound = true;
@@ -36,16 +36,21 @@ class AwaitLevel extends Level {
                     const nextGame = Date.parse(game.game_date);
 
                     this.gameId = game.id;
-                    // this.startLobby();
-                    setTimeout(() => this.startLobby(), 10000);
+                    if (nextGame - now <= 120000) {
+                        setTimeout(() => this.startLobby(), nextGame - now);
+                    }
+                    else
+                        setTimeout(() => this.checkForGame(), 60000);
                 }
             })
             .catch((err) => {
-                console.log("Failed while seraching game in strapi.");
-                console.log(err);
+                console.log("Failed while seraching game in strapi. Will try again in 60s");
+                console.log(JSON.stringify(err, null, 4));
 
                 // Closes the engine
-                this.context.close = true;
+                //this.context.close = true;
+                // just try again, maybe just a hick up
+                setTimeout(() => this.checkForGame(), 60000);
             });
     }
 

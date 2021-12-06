@@ -46,6 +46,8 @@ interface PlayerCommand {
     maxHealth: number;
     survived: number;
     kills: number;
+    char_class: string;
+    name: string;
 }
 
 interface KillMsg {

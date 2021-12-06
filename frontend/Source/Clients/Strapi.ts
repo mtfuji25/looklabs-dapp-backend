@@ -100,32 +100,93 @@ class StrapiClient {
 
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
-        try {
-            return (
-                await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)
-            ).data[0];
-        } catch {
-            console.log("No games found");
-        }
+        // const response = (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data["data"][0];
+        const response = (await this.get(
+            `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
+            )).data["data"][0];
+        const attributes = response.attributes;
+        return {
+            id: response.id,
+            published_at: attributes.publishedAt,
+            created_at: attributes.createdAt,
+            updated_at: attributes.updatedAt,
+            game_date: attributes.game_date,
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
+                const attributes = participant.attributes;
+                return {
+                    id: participant.id,
+                    nft_id: attributes.nft_id,
+                    user_address: attributes.user_address,
+                    name: attributes.name,
+                    scheduled_game: response.id,
+                    published_at: attributes.publishedAt,
+                    created_at: attributes.createdAt,
+                    updated_at: attributes.updatedAt,             
+                }
+            })
+        };
     }
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-        return (await this.get(`scheduled-games/${id}`)).data;
+        const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
+        const attributes = response.attributes;
+        return {
+            id: response.id,
+            game_date: attributes.game_date,
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
+                const attributes = participant.attributes;
+                return {
+                    id: participant.id,
+                    nft_id: attributes.nft_id,
+                    user_address: attributes.user_address,
+                    name: attributes.name,
+                    scheduled_game: response.id,
+                    published_at: attributes.publishedAt,
+                    created_at: attributes.createdAt,
+                    updated_at: attributes.updatedAt,             
+                }
+            })
+        }
     }
 
     async getGameParticipants(id: number) {
-        return (
+        // `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
+        // )).data["data"][0];
+
+        const data = (
             await this.get(
-                `https://the-pit-cloud-3fiy6wgliq-nw.a.run.app/scheduled-game-participants?scheduled_game=${id}&_sort=game_participants_result.survived_for:DESC,game_participants_result.id:DESC`
-            )
-        ).data;
+                `scheduled-game-participants?filter[scheduled_game][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
+                )).data["data"];
+
+        console.log(JSON.stringify(data, null, 4));
+
+        const returnValue = data.map((response: any) => {
+            const attributes = response.attributes;
+            return {
+                id: response.id,
+                nft_id: attributes.nft_id,
+                name: attributes.name,
+                user_address: attributes.user_address,
+                scheduled_game: attributes.scheduled_game.data.id,
+                image_address: attributes.image_address,
+                game_participants_result: {
+                    id: attributes.game_participants_result.data.id,
+                    scheduled_game_participant: response.id,
+                    ...attributes.game_participants_result.data.attributes
+                }
+            }
+        });
+
+        console.log(returnValue);
+
+        return returnValue;
     }
 
-        // get the details for a chosen participant
+    // get the details for a chosen participant
     async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenId}`)).data;
-    }    
+    }
 
     // Default engine start call
     start(): void {}
@@ -138,8 +199,4 @@ class StrapiClient {
     }
 }
 
-<<<<<<< HEAD
-export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult };
-=======
 export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute };
->>>>>>> d6a36b2 (Added base overlay animations and api requests for attributes)

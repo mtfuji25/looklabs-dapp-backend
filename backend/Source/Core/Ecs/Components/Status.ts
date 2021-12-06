@@ -10,6 +10,7 @@ interface StatusResult {
 }
 
 type OnDieFn = (status: StatusResult) => (void);
+type OnDamageFn = (damage: number) => (void);
 
 class Status {
 
@@ -31,6 +32,7 @@ class Status {
     public lastHit: Entity;
 
     public onDie: OnDieFn = () => {};
+    public onDamage: OnDamageFn = () => {};
 
     constructor(
         attack: number,
@@ -77,6 +79,10 @@ class Status {
 
     setOnDie(fn: OnDieFn) {
         this.onDie = fn;
+    }
+
+    setOnDamage(fn: OnDamageFn) {
+        this.onDamage = fn;
     }
 }
 

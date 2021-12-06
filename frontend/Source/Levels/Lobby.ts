@@ -10,7 +10,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameStatus, Listener, ServerMsg } from "../Clients/Interfaces";
+import { GameStatus, Listener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 
@@ -25,6 +25,10 @@ class LobbyLevel extends Level {
 
     private listener: Listener;
     private conListener: Listener;
+    private remaining: number = 0;
+    private responseParticipant: any | null = null;
+    private responseWinner: any | null = null;
+    private requested: boolean = false;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -36,13 +40,15 @@ class LobbyLevel extends Level {
     onStart(): void {
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
+        this.listener = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
         this.conListener = this.context.ws.addListener("connection", (ws) => {
 
             this.context.engine.loadLevel(
                 new LobbyLevel(
                     this.context, "Lobby",
                     {
-                        gameId: this.props.gameId
+                        gameId: this.props.gameId,
+                        playerNames: this.props.playerNames
                     }
                 )
             );
@@ -75,7 +81,8 @@ class LobbyLevel extends Level {
                 this.levelContext,
                 this.context.app,
                 this.context.ws,
-                this.context.res
+                this.context.strapi,
+                this.context.res,
             )
         );
 
@@ -106,11 +113,33 @@ class LobbyLevel extends Level {
         );
     }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        if (this.remaining == 1 && (!this.requested)) {
+            this.requested = true;
+            this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
+                this.responseParticipant = participants;
+                let splitId = (participants[0].nft_id).split('/')[1];
+                if(splitId > 50) splitId -= 50;
+                if(splitId == 0) splitId += 1;
+                this.context.strapi.getParticipantDetails(splitId).then((participant) => {
+                    this.responseWinner = participant;
+                })
+            })
+        }
+    }
 
     onClose(): void {
         this.layerStack.destroy();
         this.conListener.destroy();
+    }
+
+    onRemainPlayersMsg(msg: ServerMsg) {
+        
+        const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
+        
+        this.remaining = remainingPlayers;
+
+        return false;
     }
 
     onStatus(status: ServerMsg) {
@@ -122,7 +151,9 @@ class LobbyLevel extends Level {
             this.context.engine.loadLevel(new ResultsLevel(
                 this.context, "Results",
                 {
-                    gameId: status.content.gameId
+                    gameId: status.content.gameId,
+                    responseParticipant: this.responseParticipant,
+                    responseWinner: this.responseWinner,
                 }
             ));
             this.listener.destroy();

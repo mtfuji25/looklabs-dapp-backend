@@ -137,13 +137,16 @@ class LogsLayer extends Layer {
 
     onDetach() {
         this.listener.destroy();
-        this.self.destroy();
 
         this.logs.map((log) => {
-            Object.values(log.text).forEach((text) => {
-                text.remStage();
-            });
+            if (log.text) {
+                Object.values(log.text).forEach((text) => {
+                    text.remStage();
+                });
+            }
         })
+
+        this.self.destroy();
     }
 
     // server msg when kill happens
