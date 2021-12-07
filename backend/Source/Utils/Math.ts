@@ -99,6 +99,18 @@ class Vec2 {
         )
     }
 
+    angle():number {
+        return Math.atan2(this.y, this.x);
+    }
+
+
+    static fromAngle (angle:number, length:number = 0) {
+		let v =  new Vec2(Math.cos(angle), Math.sin(angle));
+		if (length > 0) return v.muls(length);
+		return v;
+	}
+
+
 }
 
 const deg2rad = (deg: number): number => {

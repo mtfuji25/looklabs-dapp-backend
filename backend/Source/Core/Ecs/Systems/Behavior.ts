@@ -680,20 +680,53 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
     });
 }
 
+const wander = (entity: Entity) => {
+    const status = entity.getStatus();
+    const behavior = entity.getBehavior();
+    const transform = entity.getTransform();
+    const rigidbody = entity.getRigidbody();
+
+
+    if (behavior.wanderTime-- <= 0) {
+        const angle =
+        rigidbody.velocity.angle() + Math.random() * (Math.PI / 8) * behavior.wanderSteer;
+        behavior.wanderVelocity = Vec2.fromAngle(angle, status.speed);
+        behavior.wanderTime = Math.round(
+          Math.random() * behavior.wanderTimeMax + behavior.wanderTimeMin
+        );
+      }
+    
+
+      if (behavior.wanderSteerChangeTime-- <= 0) {
+        behavior.wanderSteer = Math.floor(Math.random() * 2) === 0 ? 1 : -1;
+        behavior.wanderSteerChangeTime = Math.round(
+          Math.random() * behavior.wanderTimeMax  * 5 + behavior.wanderTimeMin * 2
+        );
+      }
+  
+    rigidbody.velocity = behavior.wanderVelocity;
+    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 6: ${rigidbody} Is NaN`);
+    behavior.attacking = false;
+}
+
+
 const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
     
+    
     data.grids.map((grid) => {
+        
+
         grid.dynamics.map((dynamic) => {
             
             const entity = dynamic.entity;
-
+            
             // Get current player components
             const status = entity.getStatus();
             const behavior = entity.getBehavior();
 
             // Get current life percent of player
             const lifePercent = (status.health / status.maxHealth) * 100;
-
+            
             // Removes attacking
             behavior.attacking = false;
 
@@ -709,8 +742,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             if (lifePercent < 100) {
                 status.health += 0.03
             }
+
             // Life check
-            if ((lifePercent < 25 || behavior.healing) && (!Behavior.berserker)) {
+            if ((lifePercent < 35 || behavior.healing) && (!Behavior.berserker)) {
                 // console.log("Entered healing node");
                 // RunAway decision
                 if (behavior.attacking) {
@@ -721,7 +755,11 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     runAwayFromRange(entity);
                 } else {
                     // console.log("Decided RunAway from all enemies");
-                    runAwayFromAll(entity, grid);
+                    if (Math.random() > 0.5)//the higher the value the longer the game
+                        runAwayFromAll(entity, grid);
+                    else
+                        wander(entity);
+                    
                 }
                 behavior.healing = true;
 
@@ -744,8 +782,11 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     seekNearestInRangeWithA(entity, grid);
                     behavior.staticColide = false;
                 } else {
-                    // console.log("Entered Searching inRange node");
-                    seekNearestInRange(entity);
+                    // console.log("Entered Searching inRange node");                    
+                    if (Math.random() > 0.8)//the higher the value here, the longer the game
+                        seekNearestInRange(entity);
+                    else
+                        wander(entity);
                 }
                 
             // Out range check
@@ -761,6 +802,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             }
         });
     });
+    
 };
 
 export { sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };

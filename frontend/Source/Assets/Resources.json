@@ -19,7 +19,7 @@
     "results-pack": [
         {
             "name": "thePitSmall",
-            "url": "./assets/results-pack/the-pit-small.png"
+            "url": "./assets/results-pack/the-pit-small.svg"
         },
         {
             "name": "battleEnded",
