@@ -54,26 +54,29 @@ class Status {
     hit(enemy: Entity) {
         this.lastHit = enemy;
         let damage = enemy.getStatus().attack;
+        let enemyHealth = enemy.getStatus().health;
 
-        // 8% critical rate
-        if (Math.random() < 0.08) {
-            damage += Math.random() * 30;
-            this.lastHit.getStatus().critical = true;
-        } else {
-            // 15% miss rate
-            if (Math.random() < 0.15) {
-                damage -= Math.random() * 30;
+        if (enemyHealth > 0.0) {
+            // 8% critical rate
+            if (Math.random() < 0.08) {
+                damage += Math.random() * 30;
+                this.lastHit.getStatus().critical = true;
+            } else {
+                // 15% miss rate
+                if (Math.random() < 0.15) {
+                    damage -= Math.random() * 30;
+                }
             }
-        }
 
-        // Not allow negative damage
-        if (damage < 1)
-            damage = 1;
+            // Not allow negative damage
+            if (damage < 1)
+                damage = 1;
 
-        if (damage <= this.defense) {
-            this.health -= 1;
-        } else {
-            this.health -= damage -  this.defense;
+            if (damage <= this.defense) {
+                this.health -= 1;
+            } else {
+                this.health -= damage -  this.defense;
+            }
         }
     }
 
