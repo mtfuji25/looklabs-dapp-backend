@@ -51,7 +51,7 @@ class WinnerLayer extends Layer {
         purpleHeart: { x: 31.71, y: 66.5 },
         clock: { x: 27.1, y: 69.875 },
         purpleStarLeft: { x: 28.61, y: 27.1875 },
-        purpleStarRight: { x: 38.125, y: 27.1875 }
+        purpleStarRight: { x: 39.125, y: 27.1875 }
     };
 
     // Texts record and constructors
@@ -65,7 +65,7 @@ class WinnerLayer extends Layer {
         winnerName: {
             text: "",
             style: this.textStyle,
-            pos: { x: 34, y: 60 }
+            pos: { x: 31.65, y: 61.75 }
         },
         kills: {
             text: "",
