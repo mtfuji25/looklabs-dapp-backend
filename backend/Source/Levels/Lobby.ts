@@ -24,7 +24,7 @@ class LobbyLevel extends Level {
     private fighters: number = 0;
 
     // Tells when game is ready to play
-    private ready: boolean = false;
+    private ready: boolean = true;
 
     // Current ws listener is
     private listener: GameStatusListener;
@@ -157,7 +157,6 @@ class LobbyLevel extends Level {
                             scheduled_game_participant: participant.id,
                         }).catch((err) => console.log("Hei 5", JSON.stringify(err, null, 4)));
                     });
-                    this.ready = true;
                 }
             });
         });
@@ -165,7 +164,7 @@ class LobbyLevel extends Level {
 
     onUpdate(deltaTime: number) {
         // When game finished
-        if (this.fighters <= 1 && this.ready) {
+        if (this.fighters == 1 && this.ready) {
 
             // Find the last remain player
             this.layerStack.layers.map((layer) => {
