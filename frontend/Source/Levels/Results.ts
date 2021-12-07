@@ -18,9 +18,10 @@ class ResultsLevel extends Level {
         const responseParticipant = this.props.responseParticipant;
         const responseWinner = this.props.responseWinner;
 
-        if (responseParticipant === null || responseWinner == null) {
+        if (/*responseParticipant === null || responseWinner == null*/true) {
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                 let splitId = (participants[0].nft_id).split('/')[1];
+                let address = (participants[0].nft_id).split('/')[0];
                 if(splitId > 50) splitId -= 50;
                 if(splitId == 0) splitId += 1;
     
@@ -30,7 +31,7 @@ class ResultsLevel extends Level {
                 this.layerStack.pushLayer(
                     new BattleStatusLayer(this.ecs, this.context.app)
                 );
-                this.context.strapi.getParticipantDetails(splitId).then((participant) => {
+                this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
                     this.layerStack.pushLayer(
                         new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
                     );
