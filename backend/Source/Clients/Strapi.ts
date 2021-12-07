@@ -75,7 +75,7 @@ class StrapiClient {
 
         // start axios for restApi
         this.restApi = axios.create({
-            baseURL: 'https://token.thepitnft.com/contractAddress/',
+            baseURL: 'https://token.thepitnft.com/',
         })
     }
 
@@ -159,8 +159,8 @@ class StrapiClient {
     }
 
     // get the details for a chosen participant
-    async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
-        return (await this.restApi.get(`${tokenId}`)).data;
+    async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
+        return (await this.restApi.get(`${tokenAddr}/${tokenId}`)).data;
     }
 
     async createLog(log: Log) {

@@ -156,10 +156,9 @@ class StrapiClient {
 
         const data = (
             await this.get(
-                `scheduled-game-participants?filter[scheduled_game][id][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
+                `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
                 )).data["data"];
 
-        console.log(JSON.stringify(data, null, 4));
         const returnValue = data.map((response: any) => {
             const attributes = response.attributes;
             return {
@@ -170,7 +169,7 @@ class StrapiClient {
                 scheduled_game: attributes.scheduled_game.data.id,
                 image_address: attributes.image_address,
                 ...
-                    (attributes.game_participants_result.data ?
+                    (attributes.game_participants_result.data != null ?
                         {
                             game_participants_result:
                             {
@@ -182,8 +181,6 @@ class StrapiClient {
                         : {})
             }
         });
-
-        console.log(returnValue);
 
         return returnValue;
     }
