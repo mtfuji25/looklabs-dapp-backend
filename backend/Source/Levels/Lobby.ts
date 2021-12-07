@@ -46,7 +46,7 @@ class LobbyLevel extends Level {
             setTimeout(() => {
                 this.context.ws.send(ws, {
                     msgType: "remain-players",
-                    remainingPlayers: this.participants.length,
+                    remainingPlayers: this.fighters,
                     totalPlayers: this.participants.length
                 });
             }, 1000);
@@ -84,13 +84,14 @@ class LobbyLevel extends Level {
 
         this.participants.map((participant) => {
 
+            let tokenAddr = (participant.nft_id).split('/')[0];
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
             tokenId %= 50;
             if (tokenId == 0)
                 tokenId = 1;
 
-            this.context.strapi.getParticipantDetails(Number(tokenId)).then(response => {
+            this.context.strapi.getParticipantDetails(tokenAddr, String(tokenId)).then(response => {
                 responses.push({
                     participant: participant,
                     response: response
@@ -164,6 +165,9 @@ class LobbyLevel extends Level {
                         }).catch((err) => console.log("Hei 5", JSON.stringify(err, null, 4)));
                     });
                 }
+            }).catch((err) => {
+                console.log("Achamos");
+                console.log(JSON.stringify(err));
             });
         });
     }

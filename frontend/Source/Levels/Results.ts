@@ -21,7 +21,7 @@ class ResultsLevel extends Level {
         const responseParticipant = this.props.responseParticipant;
         const responseWinner = this.props.responseWinner;
 
-        if (/*responseParticipant === null || responseWinner == null*/true) {
+        if (responseParticipant === null || responseWinner == null) {
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                 let splitId = (participants[0].nft_id).split('/')[1];
                 let address = (participants[0].nft_id).split('/')[0];
@@ -58,7 +58,7 @@ class ResultsLevel extends Level {
 
     onUpdate(deltaTime: number) {
         // after 300 seconds (5 minutes) load default level
-        if(Date.now() - this.initialDate >= (300 * 1000)) {
+        if((Date.now() - this.initialDate) >= (300 * 1000)) {
             this.context.engine.loadLevel(new DefaultLevel(
                 this.context, "Default"
             ))

@@ -132,6 +132,7 @@ class LobbyLevel extends Level {
     onClose(): void {
         this.layerStack.destroy();
         this.conListener.destroy();
+        this.listener.destroy();
     }
 
     onRemainPlayersMsg(msg: ServerMsg) {
@@ -157,7 +158,6 @@ class LobbyLevel extends Level {
                     responseWinner: this.responseWinner,
                 }
             ));
-            this.listener.destroy();
         }
 
         return true;
