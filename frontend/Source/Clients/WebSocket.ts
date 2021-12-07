@@ -3,6 +3,7 @@ import {
     ConnectionLostListener,
     EnemyListener,
     GameStatusListener,
+    GameTimeListener,
     KillListener,
     Listener,
     ListenerTypes,
@@ -12,6 +13,7 @@ import {
     OnConnectionLostFn,
     OnEnemyFn,
     OnGameStatusFn,
+    OnGameTimeFn,
     OnKillFn,
     OnListenerFns,
     OnRemainPlayersFn,
@@ -66,6 +68,14 @@ class WSClient {
             for (let listener of Object.values(this.listeners)) {
                 if (listener.type == "enemy") {
                     if ((listener as EnemyListener).callback(data)) break;
+                }
+            }
+        },
+
+        "game-time": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "game-time") {
+                    if ((listener as GameTimeListener).callback(data)) break;
                 }
             }
         }
@@ -198,6 +208,7 @@ class WSClient {
     addListener(type: "kill", fn: OnKillFn): KillListener;
     addListener(type: "enemy", fn: OnEnemyFn): EnemyListener;
     addListener(type: "response", fn: OnResponseFn): ResponseListener;
+    addListener(type: "game-time", fn: OnGameTimeFn): GameTimeListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
 
