@@ -24,7 +24,13 @@ class LobbyLevel extends Level {
     private fighters: number = 0;
 
     // Tells when game is ready to play
-    private ready: boolean = false;
+    private ready: boolean = true;
+
+    // one sec count for game timekeeping
+    private oneSecCount: number = 0.0;
+
+    // moment the game started
+    private readonly initialDate: number = Date.now();
 
     // Current ws listener is
     private listener: GameStatusListener;
@@ -157,15 +163,29 @@ class LobbyLevel extends Level {
                             scheduled_game_participant: participant.id,
                         }).catch((err) => console.log("Hei 5", JSON.stringify(err, null, 4)));
                     });
-                    this.ready = true;
                 }
             });
         });
     }
 
     onUpdate(deltaTime: number) {
+        // update timer
+        if (this.oneSecCount >= 1) {
+            const { hours, minutes, seconds } = this.calculateTime();
+            // send message containing current game time
+            this.context.ws.broadcast({
+                msgType: 'game-time',
+                hours: hours, 
+                minutes: minutes, 
+                seconds: seconds
+            })
+            this.oneSecCount -= 1.0;
+        }
+
+        this.oneSecCount += deltaTime;
+
         // When game finished
-        if (this.fighters <= 1 && this.ready) {
+        if (this.fighters == 1 && this.ready) {
 
             // Find the last remain player
             this.layerStack.layers.map((layer) => {
@@ -239,6 +259,30 @@ class LobbyLevel extends Level {
         }
 
         return true;
+    }
+
+    calculateTime(): Record<string, number> {
+        const minTwoDigits = (n: number) => {
+            return (n < 10 ? "0" : "") + String(n);
+        };
+
+        const difference = Date.now() - this.initialDate;
+
+        let timeLeft = {};
+
+        if (difference > 0) {
+            timeLeft = {
+                hours: minTwoDigits(
+                    Math.floor((difference / (1000 * 60 * 60 * 24)) * 24)
+                ),
+                minutes: minTwoDigits(
+                    Math.floor((difference / 1000 / 60) % 60)
+                ),
+                seconds: minTwoDigits(Math.floor((difference / 1000) % 60))
+            };
+        }
+
+        return timeLeft;
     }
 };
 

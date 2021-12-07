@@ -119,9 +119,10 @@ class LobbyLevel extends Level {
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                 this.responseParticipant = participants;
                 let splitId = (participants[0].nft_id).split('/')[1];
+                let address = (participants[0].nft_id).split('/')[0];
                 if(splitId > 50) splitId -= 50;
                 if(splitId == 0) splitId += 1;
-                this.context.strapi.getParticipantDetails(splitId).then((participant) => {
+                this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
                     this.responseWinner = participant;
                 })
             })

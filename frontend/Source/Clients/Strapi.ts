@@ -71,7 +71,7 @@ class StrapiClient {
 
         // start axios for restApi
         this.restApi = axios.create({
-            baseURL: 'https://token.thepitnft.com/contractAddress/',
+            baseURL: 'https://token.thepitnft.com/',
         })
     }
 
@@ -156,11 +156,10 @@ class StrapiClient {
 
         const data = (
             await this.get(
-                `scheduled-game-participants?filter[scheduled_game][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
+                `scheduled-game-participants?filter[scheduled_game][id][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
                 )).data["data"];
 
         console.log(JSON.stringify(data, null, 4));
-
         const returnValue = data.map((response: any) => {
             const attributes = response.attributes;
             return {
@@ -170,11 +169,17 @@ class StrapiClient {
                 user_address: attributes.user_address,
                 scheduled_game: attributes.scheduled_game.data.id,
                 image_address: attributes.image_address,
-                game_participants_result: {
-                    id: attributes.game_participants_result.data.id,
-                    scheduled_game_participant: response.id,
-                    ...attributes.game_participants_result.data.attributes
-                }
+                ...
+                    (attributes.game_participants_result.data ?
+                        {
+                            game_participants_result:
+                            {
+                                id: attributes.game_participants_result.data.id,
+                                scheduled_game_participant: response.id,
+                                ...attributes.game_participants_result.data.attributes
+                            }
+                        }
+                        : {})
             }
         });
 
@@ -184,8 +189,8 @@ class StrapiClient {
     }
 
     // get the details for a chosen participant
-    async getParticipantDetails(tokenId: number): Promise<ParticipantDetails> {
-        return (await this.restApi.get(`${tokenId}`)).data;
+    async getParticipantDetails(tokenAddress: string, tokenId: number): Promise<ParticipantDetails> {
+        return (await this.restApi.get(`${tokenAddress}/${tokenId}`)).data;
     }
 
     // Default engine start call

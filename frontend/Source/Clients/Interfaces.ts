@@ -9,8 +9,8 @@ const msgTypes = {
     gameStatus: "game-status"
 };
 
-type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand;
+type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg;
 
 type ListenerTypes =
     | "game-status"
@@ -19,6 +19,7 @@ type ListenerTypes =
     | "kill"
     | "remain-players"
     | "enemy"
+    | "game-time"
     | "response";
 
 // Ws messages
@@ -27,6 +28,13 @@ interface GameStatus {
     gameId: number;
     lastGameId: number;
     gameStatus: "lobby" | "awaiting" | "not-found";
+}
+
+interface GameTimeMsg {
+    msgType: "game-time",
+    hours: number,
+    minutes: number, 
+    seconds: number
 }
 
 interface PlayerCommand {
@@ -76,7 +84,7 @@ interface RequestMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg;
 }
 
 // WebSocket Listeners
@@ -88,6 +96,7 @@ type OnGameStatusFn = (msg: ServerMsg) => boolean;
 type OnReadyFn = (msg: ServerMsg) => boolean;
 type OnEnemyFn = (msg: ServerMsg) => boolean;
 type OnResponseFn = (msg: ServerMsg) => boolean;
+type OnGameTimeFn = (msg: ServerMsg) => boolean;
 
 type OnListenerFns =
     | OnConnectionFn
@@ -97,6 +106,7 @@ type OnListenerFns =
     | OnConnectionLostFn
     | OnEnemyFn
     | OnResponseFn
+    | OnGameTimeFn
     | OnReadyFn;
 
 type msgHandlerFn = (data: ServerMsg) => void;
@@ -133,6 +143,10 @@ interface EnemyListener extends Listener {
     callback: OnEnemyFn;
 }
 
+interface GameTimeListener extends Listener {
+    callback: OnGameTimeFn;
+}
+
 interface ResponseListener extends Listener {
     callback: OnResponseFn;
 }
@@ -148,6 +162,7 @@ export {
     ListenerTypes,
     KillMsg,
     RemainPlayersMsg,
+    GameTimeMsg,
     Listener,
     GameStatusListener,
     OnConnectionListener,
@@ -156,12 +171,14 @@ export {
     EnemyListener,
     KillListener,
     RemainPlayersListener,
+    GameTimeListener,
     OnListenerFns,
     OnEnemyFn,
     OnConnectionFn,
     OnConnectionLostFn,
     OnGameStatusFn,
     OnResponseFn,
+    OnGameTimeFn,
     OnKillFn,
     OnRemainPlayersFn,
     ServerMsg,

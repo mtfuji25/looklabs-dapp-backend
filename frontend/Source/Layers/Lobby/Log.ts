@@ -71,14 +71,18 @@ class LogsLayer extends Layer {
 
     // Removes last log
     remLog() {
-        const log = this.logs.at(-1);
-        
-        // after reducing opacity, unstage text
-        Object.values(log.text).forEach((text) => {
-            text.remStage();
-        });
-        // removes log from log queue
-        this.logs.pop();
+        if (this.logs != undefined && this.logs.length) {
+            const log = this.logs[this.logs.length-1]
+
+            // after reducing opacity, unstage text
+            if (log && log.text) {
+                Object.values(log.text).forEach((text) => {
+                    text.remStage();
+                });
+            }
+            // removes log from log queue
+            this.logs.pop();
+        }
     }
 
     // create result for a specific participant

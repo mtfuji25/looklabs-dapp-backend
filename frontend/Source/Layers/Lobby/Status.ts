@@ -4,7 +4,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Application, ITextStyle } from "pixi.js";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { Text } from "../../Core/Ecs/Components/Text";
-import { RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
+import { GameTimeListener, GameTimeMsg, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 
 class BattleStatusLayer extends Layer {
@@ -14,14 +14,12 @@ class BattleStatusLayer extends Layer {
     private timeLeft: Text;
     private playersLeft: Text;
 
-        // context
+    // context
     private context: EngineContext;
 
     private listener: RemainPlayersListener;
 
-    private oneSecCount: number = 0.0;
-
-    private readonly initialDate: number = Date.now();
+    private gameTimeListener: GameTimeListener;
 
     private readonly textStyle: Partial<ITextStyle> = {
         fontFamily: "monospace",
@@ -38,7 +36,10 @@ class BattleStatusLayer extends Layer {
         this.app = app;
         this.context = context;
 
-        this.listener = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
+        this.listener = this.context.ws.addListener("remain-players", msg => this.onRemainPlayersMsg(msg));
+
+        // listens to clock updates from backend
+        this.gameTimeListener = this.context.ws.addListener("game-time", msg => this.onGameTimeMsg(msg));
 
         // Create two sprites
         this.title = this.ecs.createEntity(30, 30).addSprite();
@@ -65,15 +66,7 @@ class BattleStatusLayer extends Layer {
         this.playersLeft.addStage(this.app);
     }
 
-    onUpdate(deltaTime: number) {
-        if (this.oneSecCount >= 1) {
-            const { hours, minutes, seconds } = this.calculateTime();
-            this.timeLeft.setText(`${hours}:${minutes}:${seconds}`);
-            this.oneSecCount -= - 1.0;
-        }
-
-        this.oneSecCount += deltaTime;
-    }
+    onUpdate(deltaTime: number) { }
 
     onDetach() {
         this.self.destroy();
@@ -81,31 +74,6 @@ class BattleStatusLayer extends Layer {
         this.card.remStage();
         this.timeLeft.remStage();
         this.playersLeft.remStage();
-    
-    }
-
-    calculateTime(): Record<string, number> {
-        const minTwoDigits = (n: number) => {
-            return (n < 10 ? "0" : "") + String(n);
-        };
-
-        const difference = Date.now() - this.initialDate;
-
-        let timeLeft = {};
-
-        if (difference > 0) {
-            timeLeft = {
-                hours: minTwoDigits(
-                    Math.floor((difference / (1000 * 60 * 60 * 24)) * 24)
-                ),
-                minutes: minTwoDigits(
-                    Math.floor((difference / 1000 / 60) % 60)
-                ),
-                seconds: minTwoDigits(Math.floor((difference / 1000) % 60))
-            };
-        }
-
-        return timeLeft;
     }
 
     // Sets remaining player texts
@@ -115,6 +83,16 @@ class BattleStatusLayer extends Layer {
         this.playersLeft.setText(`${remainingPlayers}/${totalPlayers} ALIVE`);
 
         return false;
+    }
+
+    // on every time update from backend
+    // sets the clock to the correct time
+    onGameTimeMsg(msg: ServerMsg) {
+        const { hours, minutes, seconds } = msg.content as GameTimeMsg;
+
+        this.timeLeft.setText(`${hours}:${minutes}:${seconds}`);
+
+        return true;
     }
 }
 

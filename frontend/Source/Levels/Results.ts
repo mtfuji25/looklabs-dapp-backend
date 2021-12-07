@@ -4,10 +4,13 @@ import { Level } from "../Core/Level";
 import { WinnerLayer } from "../Layers/Results/Winner";
 import { ResultsLayer } from "../Layers/Results/Results";
 import { BattleStatusLayer } from "../Layers/Results/BattleStatus";
+import { DefaultLevel } from "./Default";
 
 const BLACK_BG_COLOR = 0x000;
 
 class ResultsLevel extends Level {
+
+    private readonly initialDate: number = Date.now();
 
     onStart(): void {
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
@@ -18,9 +21,10 @@ class ResultsLevel extends Level {
         const responseParticipant = this.props.responseParticipant;
         const responseWinner = this.props.responseWinner;
 
-        if (responseParticipant === null || responseWinner == null) {
+        if (/*responseParticipant === null || responseWinner == null*/true) {
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                 let splitId = (participants[0].nft_id).split('/')[1];
+                let address = (participants[0].nft_id).split('/')[0];
                 if(splitId > 50) splitId -= 50;
                 if(splitId == 0) splitId += 1;
     
@@ -30,7 +34,7 @@ class ResultsLevel extends Level {
                 this.layerStack.pushLayer(
                     new BattleStatusLayer(this.ecs, this.context.app)
                 );
-                this.context.strapi.getParticipantDetails(splitId).then((participant) => {
+                this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
                     this.layerStack.pushLayer(
                         new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
                     );
@@ -52,7 +56,14 @@ class ResultsLevel extends Level {
         }
     }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        // after 300 seconds (5 minutes) load default level
+        if(Date.now() - this.initialDate >= (300 * 1000)) {
+            this.context.engine.loadLevel(new DefaultLevel(
+                this.context, "Default"
+            ))
+        }
+    }
 
     onClose(): void {
         this.layerStack.destroy();
