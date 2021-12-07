@@ -10,7 +10,7 @@ const BLACK_BG_COLOR = 0x000;
 
 class ResultsLevel extends Level {
 
-    private readonly initialDate: number = Date.now();
+    private counter: number = 0.0;
 
     onStart(): void {
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
@@ -58,11 +58,12 @@ class ResultsLevel extends Level {
 
     onUpdate(deltaTime: number) {
         // after 300 seconds (5 minutes) load default level
-        if((Date.now() - this.initialDate) >= (300 * 1000)) {
+        if(this.counter >= 300.0) {
             this.context.engine.loadLevel(new DefaultLevel(
                 this.context, "Default"
             ))
         }
+        this.counter += deltaTime;
     }
 
     onClose(): void {

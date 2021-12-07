@@ -153,7 +153,18 @@ class TextLayer extends Layer {
             const { hours, minutes, seconds } = this.calculateTimeLeft(
                 this.currentGame.game_date
             );
-            this.countdown.setText(`${hours}:${minutes}:${seconds}`);
+            if(!seconds || !minutes || !hours) {
+                // if seconds is undefined, make everything dissapear
+                this.countdown.setText("");     
+                this.subtitle.setText("");
+                this.entered.setText("");       
+
+                this.title.sprite.visible = false;
+                this.users.sprite.visible = false;
+
+            } else {
+                this.countdown.setText(`${hours}:${minutes}:${seconds}`);
+            }
             this.oneSecCount -= - 1.0;
         }
 
