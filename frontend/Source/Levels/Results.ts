@@ -21,7 +21,7 @@ class ResultsLevel extends Level {
         const responseParticipant = this.props.responseParticipant;
         const responseWinner = this.props.responseWinner;
 
-        if (responseParticipant === null || responseWinner == null) {
+        if (/*responseParticipant === null || responseWinner == null*/ true) {
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                 let splitId = (participants[0].nft_id).split('/')[1];
                 let address = (participants[0].nft_id).split('/')[0];

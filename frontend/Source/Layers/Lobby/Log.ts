@@ -36,7 +36,7 @@ class LogsLayer extends Layer {
     private percentX: number;
 
     private readonly normalStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
+        fontFamily: "Space Mono",
         fontStyle: "normal",
         fontWeight: "400",
         fontSize: 15,

@@ -24,6 +24,7 @@ interface LobbyLevelContext extends ViewContext {
 class LobbyLevel extends Level {
 
     private listener: Listener;
+    private listenerRemain: Listener;
     private conListener: Listener;
     private remaining: number = 0;
     private responseParticipant: any | null = null;
@@ -40,7 +41,7 @@ class LobbyLevel extends Level {
     onStart(): void {
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
-        this.listener = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
+        this.listenerRemain = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
         this.conListener = this.context.ws.addListener("connection", (ws) => {
 
             this.context.engine.loadLevel(
@@ -133,6 +134,7 @@ class LobbyLevel extends Level {
         this.layerStack.destroy();
         this.conListener.destroy();
         this.listener.destroy();
+        this.listenerRemain.destroy();
     }
 
     onRemainPlayersMsg(msg: ServerMsg) {
@@ -160,7 +162,7 @@ class LobbyLevel extends Level {
             ));
         }
 
-        return true;
+        return false;
     }
 }
 
