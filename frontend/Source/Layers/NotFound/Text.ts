@@ -20,12 +20,15 @@ class TextLayer extends Layer {
     private percentX: number;
     private percentY: number;
 
+    private screenX: number;
+    private screenY: number;
+
     private context: EngineContext;
 
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
-        fontSize: 130,
+        fontFamily: "Space Mono",
+        fontSize: "130px",
         fill: 0xffffff,
         align: "center",
         fontWeight: "700"
@@ -43,6 +46,9 @@ class TextLayer extends Layer {
         // sets percents
         this.percentX = this.app.view.width / 100.0;
         this.percentY = this.app.view.height / 100.0;
+
+        this.screenX = this.app.view.width;
+        this.screenY = this.app.view.height;
     }
 
     renderText(text: Text, y: number) {
@@ -90,6 +96,20 @@ class TextLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
+        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.width / 100.0;
+            this.percentY = this.app.view.height / 100.0;
+
+            this.screenX = this.app.view.width;
+            this.screenY = this.app.view.height;
+
+            this.subtitle.setPos(
+                this.percentX * 50 - this.subtitle.text.width / 2.0,
+                this.percentY * 50 - this.subtitle.text.height / 2.0
+            );
+        }
+
         if (this.fiveSecCount >= 5) {
             this.context.ws
                 .request({

@@ -29,7 +29,7 @@ class WinnerLayer extends Layer {
 
     // Style objects for texts
     private readonly textStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
+        fontFamily: "Space Mono",
         fontSize: 16,
         fill: 0xffffff,
         align: "center",
@@ -65,7 +65,7 @@ class WinnerLayer extends Layer {
         winnerName: {
             text: "",
             style: this.textStyle,
-            pos: { x: 31.65, y: 61.75 }
+            pos: { x: 34, y: 61.8 }
         },
         kills: {
             text: "",
@@ -154,6 +154,9 @@ class WinnerLayer extends Layer {
         this.texts["survivedTime"].setText(
             this.formatTime(this.participant.game_participants_result.survived_for)
         );
+
+        const offsetX = this.texts["winnerName"].text.width / 2;
+        this.texts["winnerName"].setPos((34 * this.percentX) - offsetX, 61.8 * this.percentY);
     }
 
     onUpdate(deltaTime: number) {

@@ -22,7 +22,7 @@ class BattleStatusLayer extends Layer {
     private gameTimeListener: GameTimeListener;
 
     private readonly textStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
+        fontFamily: "Space Mono",
         fontWeight: "700",
         fontSize: "16px",
         lineHeight: 23.7,
@@ -74,6 +74,8 @@ class BattleStatusLayer extends Layer {
         this.card.remStage();
         this.timeLeft.remStage();
         this.playersLeft.remStage();
+        this.listener.destroy();
+        this.gameTimeListener.destroy();
     }
 
     // Sets remaining player texts

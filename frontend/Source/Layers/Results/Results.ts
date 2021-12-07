@@ -21,7 +21,7 @@ class ResultsLayer extends Layer {
     private scrollAlowed: boolean = false;
 
     private readonly textStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
+        fontFamily: "Space Mono",
         fontStyle: "normal",
         fontWeight: "400",
         fontSize: 16,
