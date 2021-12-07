@@ -232,6 +232,107 @@ const spawnPos = [
     new Vec2(-0.800, 0.0),
     new Vec2(-0.800, 0.09),
     new Vec2(-0.800, -0.09),
+
+    // new Vec2(-0.2843,-0.2152),
+    // new Vec2(-0.6308,0.4016),
+    // new Vec2(-0.1251,0.2549),
+    // new Vec2(0.2146,-0.3022),
+    // new Vec2(0.1891,0.3437),
+    // new Vec2(0.2855,0.0319),
+    // new Vec2(-0.0939,-0.3188),
+    // new Vec2(-0.0749,0.2390),
+    // new Vec2(0.4724,-0.0612),
+    // new Vec2(0.9286,0.0172),
+    // new Vec2(0.3185,-0.1155),
+    // new Vec2(0.7811,0.2096),
+    // new Vec2(0.7400,-0.0542),
+    // new Vec2(0.6951,-0.1424),
+    // new Vec2(-0.3227,-0.1403),
+    // new Vec2(0.0163,-0.2735),
+    // new Vec2(0.7416,0.3018),
+    // new Vec2(0.2873,0.2050),
+    // new Vec2(-0.2356,-0.4840),
+    // new Vec2(-0.3930,-0.4679),
+    // new Vec2(-0.4198,0.3717),
+    // new Vec2(0.4773,-0.4822),
+    // new Vec2(0.1844,0.1698),
+    // new Vec2(0.3957,0.3871),
+    // new Vec2(-0.7920,-0.4645),
+    // new Vec2(-0.6737,0.4164),
+    // new Vec2(0.8609,-0.4457),
+    // new Vec2(0.7720,0.3792),
+    // new Vec2(0.2504,-0.2652),
+    // new Vec2(0.3657,0.1945),
+    // new Vec2(-0.2562,-0.3029),
+    // new Vec2(-0.2925,0.3304),
+    // new Vec2(0.6385,0.0345),
+    // new Vec2(0.7527,0.1047),
+    // new Vec2(0.5572,0.0023),
+    // new Vec2(0.6858,-0.0787),
+    // new Vec2(-0.2023,-0.2475),
+    // new Vec2(-0.1861,0.2421),
+    // new Vec2(-0.1933,-0.4041),
+    // new Vec2(-0.2835,0.3597),
+    // new Vec2(0.2757,-0.4990),
+    // new Vec2(0.4211,0.4164),
+    // new Vec2(-0.7635,-0.3792),
+    // new Vec2(0.7890,-0.5079),
+    // new Vec2(0.6740,-0.4042),
+    // new Vec2(0.6850,0.2410),
+    // new Vec2(-0.2493,0.3831),
+    // new Vec2(0.3190,0.0612),
+    // new Vec2(0.2965,0.4030),
+    // new Vec2(0.5408,-0.4063),
+    // new Vec2(-0.7251,-0.4617),
+    // new Vec2(-0.7628,0.3153),
+    // new Vec2(-0.5455,0.4056),
+    // new Vec2(0.1090,-0.3283),
+    // new Vec2(0.7289,0.3325),
+    // new Vec2(0.1154,0.2577),
+    // new Vec2(0.3669,-0.4568),
+    // new Vec2(0.4372,0.3441),
+    // new Vec2(-0.5292,-0.4839),
+    // new Vec2(-0.3647,0.2623),
+    // new Vec2(0.2979,-0.1884),
+    // new Vec2(0.3327,-0.4150),
+    // new Vec2(-0.7353,-0.5096),
+    // new Vec2(0.6909,-0.3490),
+    // new Vec2(-0.9083,0.0177),
+    // new Vec2(-0.4665,0.2587),
+    // new Vec2(0.4282,0.2338),
+    // new Vec2(0.6092,0.0562),
+    // new Vec2(0.5782,-0.1750),
+    // new Vec2(0.2903,-0.4129),
+    // new Vec2(-0.6114,-0.0001),
+    // new Vec2(-0.2976,0.3984),
+    // new Vec2(-0.1311,-0.4295),
+    // new Vec2(0.1756,-0.2388),
+    // new Vec2(-0.9106,0.0581),
+    // new Vec2(-0.8395,-0.1112),
+    // new Vec2(0.6393,-0.0431),
+    // new Vec2(0.0238,0.2014),
+    // new Vec2(0.1297,0.4145),
+    // new Vec2(0.0841,0.1799),
+    // new Vec2(0.6586,0.0768),
+    // new Vec2(0.0384,-0.2388),
+    // new Vec2(-0.4812,-0.1046),
+    // new Vec2(0.5243,-0.0023),
+    // new Vec2(-0.3702,-0.1402),
+    // new Vec2(0.5919,0.1314),
+    // new Vec2(0.3395,0.2238),
+    // new Vec2(0.4960,-0.1310),
+    // new Vec2(-0.4946,0.0016),
+    // new Vec2(-0.3989,0.1697),
+    // new Vec2(-0.6186,-0.0687),
+    // new Vec2(0.5430,0.1741),
+    // new Vec2(-0.1181,0.3941),
+    // new Vec2(-0.5395,0.0034),
+    // new Vec2(0.4076,-0.2775),
+    // new Vec2(0.5827,-0.0828),
+    // new Vec2(-0.5561,-0.1301),
+    // new Vec2(0.5711,-0.1236),
+    // new Vec2(0.6848,0.0225),
+    // new Vec2(0.6867,-0.5198),
 ];
 
 class PlayerLayer extends Layer {
@@ -255,7 +356,6 @@ class PlayerLayer extends Layer {
 
     // Die fn
     public dieFn: (result: GameParticipantsResult, killer: number) => void;
-    public damageFn: (damage: number, participant: number) => void;
 
     constructor(ecs: ECS,
         wsContext: WSClient,
@@ -272,9 +372,7 @@ class PlayerLayer extends Layer {
         this.playerID = id;
         this.grid = grid;
         this.dieFn = dieFn;
-        this.damageFn = damageFn;
         this.self.name = details.name;
-        this.self.strapiId = strapiID;
         this.strapiID = strapiID;
         this.details = details;
 
@@ -301,21 +399,21 @@ class PlayerLayer extends Layer {
             attributesMap[attribute.trait_type] = attribute.value;
         })
 
-        const status = this.self.addStatus(
+    
+        const stats:Array<number> = player_stats.pop() ;
+        
+        this.self.addStatus(
             // Attack
-            20 * (attributesMap["Attack"] / 100.0),
+            20 * (stats[0] / 100),
             // Speed
-            0.04 * (attributesMap["Speed"] / 100.0),
+            0.04 * (stats[1] / 100),
             // Health
             100,
             // Defense
-            5 * (attributesMap["Defence"] / 100.0),
+            5 * (stats[2] / 100),
             // Cooldown
-            0.5
-        );
-
-        status.setOnDie((status) => this.onDie(status));
-        status.setOnDamage((damage) => this.onDamage(damage));
+            0.5,
+        ).setOnDie((status) => this.onDie(status));
 
         // Add rigibody for current entity
         this.self.addRigidbody(
@@ -328,7 +426,7 @@ class PlayerLayer extends Layer {
             spawnPos[PlayerLayer.playerCount].y
         );
 
-        if (PlayerLayer.playerCount == spawnPos.length - 1)
+        if (PlayerLayer.playerCount == 99)
             PlayerLayer.playerCount = 0;
         else
             PlayerLayer.playerCount++;
@@ -456,8 +554,8 @@ class PlayerLayer extends Layer {
             maxHealth: status.maxHealth,
             survived: status.survived,
             kills: status.kills,
-            char_class: this.self.name.split(' ')[0],
-            name: this.self.name
+            char_class: get_class(),
+            name: "Bob",
         };
     }
 
@@ -465,12 +563,12 @@ class PlayerLayer extends Layer {
     onDie(status: StatusResult) {
         console.log("Morreu: ", this.name)
         console.log("Resultados: ", status);
-        const killerName = this.self.getStatus().lastHit.name;
+        const killer = this.self.getStatus().lastHit.name;
         const killerId = this.self.getStatus().lastHit.strapiId;
 
         this.wsClient.broadcast({
             killed: this.self.name,
-            killer: killerName,
+            killer: killer,
             action: killFeed.items[killFeed.items.length * Math.random() | 0],
             msgType: "kill"
         });
@@ -480,13 +578,125 @@ class PlayerLayer extends Layer {
             survived_for: Math.floor(status.survived),
             kills: Math.floor(status.kills),
             health: Math.floor(status.health),
-        }, killerId);
-    }
+        },killerId);
 
-    // When player takes a hit callback
-    onDamage(damage: number) {
-       this.damageFn(damage, this.strapiID);
+        
     }
 }
+
+const get_class = ():string => {
+    const r = Math.floor(Math.random () * 4 + 1);
+    switch (r) {
+        case 1: return "Avian";
+        case 2: return "Insectoid";
+        case 3: return "Serpentine";
+        default: return "Canine";
+    }
+    
+}
+
+const player_stats:Array<Array<number>> = [
+    [60.0, 56.0, 71.0],
+[33.0, 42.0, 38.0],
+[47.0, 41.0, 48.0],
+[55.0, 34.0, 26.0],
+[30.0, 26.0, 60.0],
+[37.0, 35.0, 25.0],
+[53.0, 41.0, 31.0],
+[85.0, 78.0, 83.0],
+[78.0, 58.0, 64.0],
+[68.0, 63.0, 76.0],
+[55.0, 37.0, 22.0],
+[70.0, 63.0, 78.0],
+[38.0, 35, 33.0],
+[43.0, 42.0, 53.0],
+[58.0, 42.0, 39.0],
+[54.0, 44.0, 50.0],
+[58.0, 35, 55.0],
+[36.0, 39.0, 36.0],
+[22.0, 24.0, 50.0],
+[58.0, 50.0, 77.0],
+[56.0, 43.0, 72.0],
+[75.0, 64.0, 53.0],
+[55.0, 26.0, 33.0],
+[25.0, 35, 26.0],
+[76.0, 76.0, 78.0],
+[50.0, 35, 20.0],
+[20.0, 35, 55.0],
+[22.0, 50.0, 37.0],
+[40.0, 28.0, 57.0],
+[80.0, 70.0, 99.0],
+[44.0, 28.0, 48.0],
+[22.0, 35, 28.0],
+[51.0, 49.0, 56.0],
+[44.0, 32.0, 27.0],
+[20.0, 35, 57.0],
+[59.0, 52.0, 61.0],
+[47.0, 38.0, 30.0],
+[60.0, 43.0, 55.0],
+[33.0, 32.0, 46.0],
+[71.0, 54.0, 60.0],
+[74.0, 80.0, 75.0],
+[20.0, 42.0, 36.0],
+[38.0, 28.0, 36.0],
+[21.0, 46.0, 35.0],
+[79.0, 75.0, 74.0],
+[50.0, 58.0, 63.0],
+[55.0, 42.0, 44.0],
+[32.0, 34.0, 55.0],
+[42.0, 44.0, 32.0],
+[65.0, 45.0, 73.0],
+[30.0, 39.0, 52.0],
+[59.0, 41.0, 23.0],
+[54.0, 43.0, 80.0],
+[34.0, 35, 21.0],
+[55.0, 35, 29.0],
+[24.0, 42.0, 32.0],
+[54.0, 37.0, 60.0],
+[46.0, 27.0, 32.0],
+[39.0, 35, 56.0],
+[60.0, 48.0, 28.0],
+[42.0, 37.0, 30.0],
+[37.0, 35.0, 50.0],
+[27.0, 21.0, 20.0],
+[43.0, 35.0, 44.0],
+[58.0, 38.0, 30.0],
+[47.0, 41.0, 45.0],
+[60.0, 26.0, 23.0],
+[32.0, 22.0, 60.0],
+[28.0, 50.0, 57.0],
+[65.0, 45.0, 73.0],
+[43.0, 35, 53.0],
+[54.0, 36.0, 54.0],
+[54.0, 35, 42.0],
+[42.0, 37.0, 46.0],
+[20.0, 33.0, 31.0],
+[54.0, 45.0, 43.0],
+[25.0, 43.0, 27.0],
+[51.0, 28.0, 53.0],
+[24.0, 35, 51.0],
+[52.0, 23.0, 46.0],
+[50.0, 27.0, 20.0],
+[46.0, 25.0, 53.0],
+[51.0, 50.0, 74.0],
+[29.0, 37.0, 44.0],
+[55.0, 50.0, 74.0],
+[79.0, 67.0, 78.0],
+[37.0, 39.0, 58.0],
+[22.0, 25.0, 38.0],
+[46.0, 25.0, 53.0],
+[80.0, 70.0, 71.0],
+[60.0, 47.0, 24.0],
+[64.0, 49.0, 54.0],
+[60.0, 45.0, 73.0],
+[51.0, 48.0, 66.0],
+[51.0, 36.0, 35.0],
+[38.0, 43.0, 22.0],
+[25.0, 30.0, 50.0],
+[44.0, 35, 43.0],
+[35.0, 27.0, 23.0],
+[46.0, 42.0, 20.0],
+];
+
 
 export { PlayerLayer, spawnPos };

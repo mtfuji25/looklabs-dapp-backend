@@ -31,6 +31,16 @@ class Behavior {
     // Healing purpose
     public healing: boolean = false;
 
+    //wander
+    // public wanderTheta:number = Math.PI / 2;
+    public wanderVelocity:Vec2 = new Vec2();
+    public wanderTimeMax:number = 80;
+    public wanderTimeMin:number = 20;
+    public wanderTime:number = 0;
+    public wanderSteer:number = 1;
+    public wanderSteerChangeTime:number = 0;
+    
+
     constructor(
         status: Status,
         transform: Transform,
