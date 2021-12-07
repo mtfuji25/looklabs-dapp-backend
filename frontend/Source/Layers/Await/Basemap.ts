@@ -4,7 +4,7 @@ import { Layer } from "../../Core/Layer";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Math imports
-import { Vec2 } from "../../Utils/Math";
+import { Vec2 } from "../../Utils/Math";;
 
 // Pixi imports
 import { Application, Container, filters } from "pixi.js";
