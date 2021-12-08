@@ -81,13 +81,21 @@ class Panel {
     }
 
     setSize(width: number, height: number) {
-        const scaleX = width / this.sprite.texture.width;
-        const scaleY = height / this.sprite.texture.height;
+        this.setWidth(width);
+        this.setHeight(height);
+    }
 
+    setWidth (width:number) {
+        this.sprite.width = width;
+        const scaleX = width / this.sprite.width;
         this.transform.scale.x = scaleX;
-        this.transform.scale.y = scaleY;
-
         this.sprite.scale.x = scaleX;
+    }
+
+    setHeight (height:number) {
+        this.sprite.height = height;
+        const scaleY = height / this.sprite.height;
+        this.transform.scale.y = scaleY;
         this.sprite.scale.y = scaleY;
     }
 

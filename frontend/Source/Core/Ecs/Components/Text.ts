@@ -74,6 +74,13 @@ class Text {
     setStyle(styles: Partial<ITextStyle>) {
         this.text.style = styles;
     }
+    
+    getSize ():Vec2 {
+        return new Vec2(this.text.width, this.text.height);
+    }
+
+
+    
 }
 
 export { Text };
