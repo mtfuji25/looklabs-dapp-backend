@@ -118,9 +118,14 @@ class ResultsLayer extends Layer {
         deathIcon.setAnchor(0.0);
 
         // Render the text for participants killed
+        let kills : str;
+        if (result != undefined)
+            kills = `${result.kills}`;
+        else
+            kills = "0";
         this.ecs
             .createEntity(this.percentX * 72.43, yOffset)
-            .addText(`${result.kills}`, this.textStyle)
+            .addText(kills, this.textStyle)
             .addStage(this.resContainer);
     }
 
