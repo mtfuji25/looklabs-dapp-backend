@@ -118,7 +118,7 @@ class ResultsLayer extends Layer {
         deathIcon.setAnchor(0.0);
 
         // Render the text for participants killed
-        let kills : str;
+        let kills : string;
         if (result != undefined)
             kills = `${result.kills}`;
         else
