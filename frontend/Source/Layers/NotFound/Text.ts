@@ -60,7 +60,7 @@ class TextLayer extends Layer {
     }
 
     onAttach() {
-        this.subtitle = this.ecs.createEntity().addText("NO GAME FOUND", this.titleStyle);
+        this.subtitle = this.ecs.createEntity().addText("NEXT BATTLE SOON", this.titleStyle);
 
         this.renderText(this.subtitle, 50);
     }
