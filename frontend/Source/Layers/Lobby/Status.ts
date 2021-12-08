@@ -3,6 +3,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 import { Application, ITextStyle } from "pixi.js";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
+import { Panel } from "../../Core/Ecs/Components/Panel";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { GameTimeListener, GameTimeMsg, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
@@ -10,7 +11,7 @@ import { EngineContext } from "../../Core/Interfaces";
 class BattleStatusLayer extends Layer {
     private app: Application;
     private title: Sprite;
-    private card: Sprite;
+    private card: Panel;
     private timeLeft: Text;
     private playersLeft: Text;
 
@@ -43,7 +44,7 @@ class BattleStatusLayer extends Layer {
 
         // Create two sprites
         this.title = this.ecs.createEntity(30, 30).addSprite();
-        this.card = this.ecs.createEntity(30, 83).addSprite();
+        this.card = this.ecs.createEntity(30, 83).addPanel(this.app.loader.resources["infoCard"]);
 
         // Creates both texts
         this.timeLeft = this.ecs.createEntity(62, 95).addText("00:00:00", this.textStyle);
@@ -51,11 +52,20 @@ class BattleStatusLayer extends Layer {
 
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
-        this.card.sprite.anchor.set(0.0);
+        
+        // Add slices to panel
+        this.card.setSlices(128, 0, 20, 0);
 
         // Set sprite image
         this.title.setImg(this.app.loader.resources["thePitSmall"]);
-        this.card.setImg(this.app.loader.resources["infoCard"]);
+        
+        this.updatePanel();
+    }
+
+    updatePanel() {
+        const txt1Size = this.timeLeft.getSize();
+        const txt2Size = this.playersLeft.getSize();
+        this.card.setWidth(txt1Size.x + 60 + txt2Size.x);
     }
 
     onAttach() {
@@ -83,7 +93,7 @@ class BattleStatusLayer extends Layer {
         const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
 
         this.playersLeft.setText(`${remainingPlayers}/${totalPlayers} ALIVE`);
-
+        this.updatePanel();
         return false;
     }
 
@@ -93,7 +103,7 @@ class BattleStatusLayer extends Layer {
         const { hours, minutes, seconds } = msg.content as GameTimeMsg;
 
         this.timeLeft.setText(`${hours}:${minutes}:${seconds}`);
-
+        this.updatePanel();
         return true;
     }
 }
