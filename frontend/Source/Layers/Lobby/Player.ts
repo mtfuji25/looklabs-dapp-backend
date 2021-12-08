@@ -236,7 +236,7 @@ class PlayerLayer extends Layer {
             case "Avian":
                 sprite.loadFromConfig(this.app, this.res["chicken-sheet"]);
                 break;
-            case "Canine":
+            case "Hound":
                 sprite.loadFromConfig(this.app, this.res["wolf-sheet"]); 
                 break;
             case "Insectoid":
