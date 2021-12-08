@@ -40,7 +40,7 @@ class WinnerLayer extends Layer {
         ...this.textStyle,
         fontFamily: "dealers",
         fontSize: "36px",
-        lineHeight: 46.8,
+        lineHeight: 36,
         fontWeight: "400"
     };
 
@@ -60,9 +60,9 @@ class WinnerLayer extends Layer {
     private readonly texts: Record<string, Text> = {};
     private readonly textConstructors: Record<string, TextParams> = {
         winner: {
-            text: "WINNER",
+            text: "WINNER!",
             style: this.titleStyle,
-            pos: { x: 32.2, y: 27 }
+            pos: { x: 31, y: 26 }
         },
         winnerName: {
             text: "",
