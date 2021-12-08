@@ -20,6 +20,13 @@
             font-family: "8-BIT WONDER";
             src: url("assets/fonts/8-BIT WONDER.TTF");
         }
+        @font-face {
+            font-family: "dealers";
+            src: url("assets/fonts/dealers.otf");
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -43,13 +50,13 @@
             margin-top: -999px;
         }
         #useDummy2 {
-            font-family: "8-BIT WONDER";
+            font-family: "dealers";
             visibility: hidden;
             margin-left: -999px;
             margin-top: -999px;
         }
         #useDummy3 {
-            font-family: 'Space Mono', monospace;
+            font-family: 'Space Mono';
             visibility: hidden;
             margin-left: -999px;
             margin-top: -999px;
@@ -63,7 +70,7 @@
     <script src="./engine.js"></script>
 
     <p id="useDummy">A</p>
-    <p id="useDummy">B</p>
+    <p id="useDummy2">B</p>
     <p id="useDummy3">C</p>
 </body>
 </html>

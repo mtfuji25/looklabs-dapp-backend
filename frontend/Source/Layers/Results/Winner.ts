@@ -38,8 +38,10 @@ class WinnerLayer extends Layer {
     };
     private readonly titleStyle: Partial<ITextStyle> = {
         ...this.textStyle,
-        fontSize: 24,
-        lineHeight: 31
+        fontFamily: "dealers",
+        fontSize: "36px",
+        lineHeight: 46.8,
+        fontWeight: "400"
     };
 
     // Sprites record and constructors
@@ -50,8 +52,8 @@ class WinnerLayer extends Layer {
         tombstone: { x: 27.1, y: 66.5 },
         purpleHeart: { x: 31.71, y: 66.5 },
         clock: { x: 27.1, y: 69.875 },
-        purpleStarLeft: { x: 28.61, y: 27.1875 },
-        purpleStarRight: { x: 39.125, y: 27.1875 }
+        characterLeft: { x: 27, y: 27.1875 },
+        characterRight: { x: 39, y: 27.1875 }
     };
 
     // Texts record and constructors
@@ -108,15 +110,13 @@ class WinnerLayer extends Layer {
         this.screenY = this.app.view.height;
 
         // generate all sprites
-        Object.entries(this.spriteConstructors).map(([key, value], index) => {
+        Object.entries(this.spriteConstructors).map(([key, value]) => {
             const component = this.ecs
                 .createEntity(this.percentX * value.x, this.percentY * value.y)
                 .addSprite();
             component.setAnchor(0.0);
             this.sprites[key] = component;
-            // because we will have 2 purpleStar sprites
-            if (index >= 5) this.sprites[key].setImg(this.app.loader.resources["purpleStar"]);
-            else this.sprites[key].setImg(this.app.loader.resources[key]);
+            this.sprites[key].setImg(this.app.loader.resources[key]);
             this.sprites[key].addStage(this.app);
         });
 

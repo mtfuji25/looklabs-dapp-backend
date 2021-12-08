@@ -32,9 +32,10 @@ class ResultsLayer extends Layer {
 
     private readonly titleStyle: Partial<ITextStyle> = {
         ...this.textStyle,
-        fontWeight: "bold",
-        fontSize: 24,
-        lineHeight: 31
+        fontFamily: "dealers",
+        fontSize: "36px",
+        lineHeight: 46.8,
+        fontWeight: "400"
     };
 
     // Percents of the screen

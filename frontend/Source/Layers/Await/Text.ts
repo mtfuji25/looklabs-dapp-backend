@@ -31,11 +31,11 @@ class TextLayer extends Layer {
     
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
-        fontFamily: "Space Mono",
-        fontSize: 130,
+        fontFamily: "dealers",
+        fontSize: "144px",
         fill: 0xffffff,
         align: "center",
-        fontWeight: "700"
+        fontWeight: "400"
     };
     
     private readonly textStyle: Partial<ITextStyle> = {
