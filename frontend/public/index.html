@@ -8,11 +8,6 @@
 
     <link rel="icon" type="image/ico" href="./images/favicon.ico"/>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-
     <title>The Pit</title>
 
     <style>
@@ -24,8 +19,11 @@
             font-family: "dealers";
             src: url("assets/fonts/dealers.otf");
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        @font-face {
+            font-family: "Space Mono";
+            src: url("assets/fonts/SpaceMono-Regular.ttf") format("truetype"),
+                url("assets/fonts/SpaceMono-Bold.ttf") format("truetype");
+        }
 
         * {
             margin: 0;

@@ -711,11 +711,11 @@ const wander = (entity: Entity) => {
 
 
 const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
-    
+   
+    const alive = data.status.filter((s) => s.health > 0).length;
     
     data.grids.map((grid) => {
         
-
         grid.dynamics.map((dynamic) => {
             
             const entity = dynamic.entity;
@@ -755,10 +755,11 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     runAwayFromRange(entity);
                 } else {
                     // console.log("Decided RunAway from all enemies");
-                    if (Math.random() > 0.5)//the higher the value the longer the game
+                    if (Math.random() > 0.5 && alive > 2) {
                         runAwayFromAll(entity, grid);
-                    else
+                    } else {
                         wander(entity);
+                    }
                     
                 }
                 behavior.healing = true;
@@ -783,10 +784,11 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     behavior.staticColide = false;
                 } else {
                     // console.log("Entered Searching inRange node");                    
-                    if (Math.random() > 0.7)//the higher the value here, the longer the game
+                    if (alive <= 5 || Math.random() > 0.8) {//the higher the value here, the longer the game
                         seekNearestInRange(entity);
-                    else
+                    } else {
                         wander(entity);
+                    }
                 }
                 
             // Out range check
