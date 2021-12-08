@@ -50,14 +50,14 @@ class AwaitLevel extends Level {
 
             this.context.engine.loadLevel(
                 new AwaitLevel(
-                    this.context, "Lobby",
+                    this.context, "Await",
                     {
                         gameId: this.props.gameId
                     }
                 )
             );
 
-            return false;
+            return true;
         });
 
         // Sets bg color of main app
@@ -89,10 +89,12 @@ class AwaitLevel extends Level {
     onClose(): void {
         this.listener.destroy()
         this.conListener.destroy();
+        this.layerStack.destroy();
     }
 
     onServerMsg(msg: ServerMsg) {
         let content: GameStatus;
+        console.log("No await", msg)
         if (msg.content.msgType == msgTypes.gameStatus) {
             content = msg.content as GameStatus;
             if (content.gameStatus == "lobby") {
@@ -106,7 +108,7 @@ class AwaitLevel extends Level {
             }
         }
         
-        return true;
+        return false;
     }
 };
 

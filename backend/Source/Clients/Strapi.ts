@@ -169,9 +169,10 @@ class StrapiClient {
     }
 
     async createLog(log: Log) {
-        return this.post('logs', {
-            data: log
-        });
+        // return this.post('logs', {
+        //     data: log
+        // });
+        return new Promise((resolve, reject) => resolve("Success"));
     }
 
     // Default engine start call

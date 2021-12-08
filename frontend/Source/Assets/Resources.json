@@ -52,6 +52,14 @@
         {
             "name": "nameCard",
             "url": "./assets/results-pack/name-card.svg"
+        },
+        {
+            "name": "characterRight",
+            "url": "./assets/results-pack/character-right.svg"
+        },
+        {
+            "name": "characterLeft",
+            "url": "./assets/results-pack/character-left.svg"
         }
     ],
     "dungeon-pack": [

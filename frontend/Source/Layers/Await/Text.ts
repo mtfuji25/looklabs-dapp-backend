@@ -10,7 +10,7 @@ import { ScheduledGame } from "../../Clients/Strapi";
 import { EngineContext } from "../../Core/Interfaces";
 
 // Ecs and Components
-import { ECS } from "../../Core/Ecs/Core/Ecs";
+import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 
@@ -28,18 +28,18 @@ class TextLayer extends Layer {
 
     private screenX: number;
     private screenY: number;
-
+    
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
-        fontSize: 130,
+        fontFamily: "dealers",
+        fontSize: "144px",
         fill: 0xffffff,
         align: "center",
-        fontWeight: "700"
+        fontWeight: "400"
     };
     
     private readonly textStyle: Partial<ITextStyle> = {
-        fontFamily: "monospace",
+        fontFamily: "Space Mono",
         fontSize: 25,
         fill: 0xffffff,
         align: "center",
@@ -183,6 +183,12 @@ class TextLayer extends Layer {
 
     onDetach() {
         this.self.destroy();
+        this.countdown.remStage();
+        this.subtitle.remStage();
+        this.entered.remStage();
+
+        this.title.remStage();
+        this.users.remStage();
     }
 
     calculateTimeLeft(targetDate: string): Record<string, number> {

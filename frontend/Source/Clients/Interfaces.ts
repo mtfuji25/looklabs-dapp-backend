@@ -1,7 +1,8 @@
 import { Vec2 } from "../Utils/Math";
 
 const requests = {
-    gameStatus: "game-status"
+    gameStatus: "game-status",
+    playerNames: "player-names"
 };
 
 const msgTypes = {
@@ -9,8 +10,8 @@ const msgTypes = {
     gameStatus: "game-status"
 };
 
-type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg;
+type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time" | "player-names";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg | PlayerNames;
 
 type ListenerTypes =
     | "game-status"
@@ -20,7 +21,8 @@ type ListenerTypes =
     | "remain-players"
     | "enemy"
     | "game-time"
-    | "response";
+    | "response"
+    | "player-names";
 
 // Ws messages
 interface GameStatus {
@@ -35,6 +37,12 @@ interface GameTimeMsg {
     hours: number,
     minutes: number, 
     seconds: number
+}
+
+interface PlayerNames {
+    msgType: "player-names";
+    gameId: number;
+    names: Record<string, string>;
 }
 
 interface PlayerCommand {
@@ -84,7 +92,7 @@ interface RequestMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg | PlayerNames;
 }
 
 // WebSocket Listeners
@@ -175,6 +183,7 @@ export {
     OnListenerFns,
     OnEnemyFn,
     OnConnectionFn,
+    PlayerNames,
     OnConnectionLostFn,
     OnGameStatusFn,
     OnResponseFn,

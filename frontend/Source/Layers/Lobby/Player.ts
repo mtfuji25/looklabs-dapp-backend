@@ -229,6 +229,7 @@ class PlayerLayer extends Layer {
         // Add animsprite component
         const sprite = entity.addAnimSprite();
 
+        console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
 
         switch (char_class) {

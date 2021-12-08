@@ -153,7 +153,7 @@ class WSClient {
                 setTimeout(() => {
                     this.remListener(responseListener.id);
                     reject("Request timeout.");
-                }, 2000);
+                }, 5000);
             } else {
                 reject("Client is not connect to backend.");
             }
@@ -211,6 +211,8 @@ class WSClient {
     addListener(type: "game-time", fn: OnGameTimeFn): GameTimeListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
+        console.log("Adicionando listener: ", id);
+        console.log("Listeners: ", this.listeners)
 
         const listener = {
             type: type,
@@ -225,6 +227,7 @@ class WSClient {
     }
 
     remListener(id: string): void {
+        console.log("Removendo Listener: ", id)
         delete this.listeners[id];
     }
 

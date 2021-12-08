@@ -783,7 +783,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                     behavior.staticColide = false;
                 } else {
                     // console.log("Entered Searching inRange node");                    
-                    if (Math.random() > 0.8)//the higher the value here, the longer the game
+                    if (Math.random() > 0.7)//the higher the value here, the longer the game
                         seekNearestInRange(entity);
                     else
                         wander(entity);
