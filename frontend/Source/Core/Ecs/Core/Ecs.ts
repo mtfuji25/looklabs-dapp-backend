@@ -10,6 +10,7 @@ import { Sprite } from "../Components/Sprite";
 import { Transform } from "../Components/Transform";
 import { AnimSprite } from "../Components/AnimSprite";
 import { ColoredRectangle } from "../Components/ColoredRectangle";
+import { Panel } from "../Components/Panel";
 
 // System index imports
 import { startSystems } from "../Systems/Index";
@@ -32,6 +33,7 @@ const masks = {
     sprite:         0b000010,
     animsprite:     0b000100,
     coloredRec:     0b001000,
+    panel:          0b010000,
 }
 
 // Key of index in identification array
@@ -50,6 +52,7 @@ class ECS {
         transform: 0,
         animSprite: 0,
         coloredRec: 0,
+        panel: 0,
         entity: 0
     }
 
@@ -59,6 +62,7 @@ class ECS {
     public transforms: Record<number, Transform> = {};
     public animsprites: Record<number, AnimSprite> = {};
     public coloredRecs: Record<number, ColoredRectangle> = {};
+    public panels: Record<number, Panel> = {};
 
     // Store all entities identifications and layouts
     entities: Record<number, Entity> = {};
@@ -77,6 +81,7 @@ class ECS {
                transforms: Object.values(this.transforms),
                animsprites: Object.values(this.animsprites),
                coloredRecs: Object.values(this.coloredRecs),
+               panels: Object.values(this.panels),
             }, deltaTime);
         });
 
@@ -200,6 +205,13 @@ class Entity {
         return this.addColoredRectangle();
     }
 
+    getPanel(img: LoaderResource): Panel {
+        if (this.layout & masks.panel)
+            return this.ecs.panels[this.id[masks.panel]];
+
+        return this.addPanel(img);
+    }
+
     // Adders
     addText(
         content: string = "",
@@ -279,6 +291,21 @@ class Entity {
         return rectangle;
     }
 
+    addPanel(img: LoaderResource, leftWidth: number = 0.0, topHeight: number = 0.0, rightWidth: number = 0.0, bottomHeight: number = 0.0): Panel {
+        if (this.layout & masks.panel)
+            return this.getPanel(img)
+
+        const panel = new Panel(this.getTransform(), img);
+        panel.refresh = this.refresh;
+
+        this.id[masks.panel] = this.ecs.id.panel;
+        this.ecs.id.panel++;
+
+        this.layout |= masks.panel;
+        this.ecs.panels[this.id[masks.panel]] = panel;
+        return panel;
+    }
+
     // Removers
     remText(): void {
         if (this.layout & masks.text) {
@@ -313,6 +340,15 @@ class Entity {
             
             delete this.ecs.coloredRecs[this.id[masks.coloredRec]]
             this.layout &= (~masks.coloredRec);
+        }
+    }
+
+    remPanel(): void {
+        if (this.layout & masks.panel) {
+            this.ecs.panels[this.id[masks.panel]].remStage();
+            
+            delete this.ecs.panels[this.id[masks.panel]]
+            this.layout &= (~masks.panel);
         }
     }
 
