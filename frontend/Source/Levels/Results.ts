@@ -43,8 +43,6 @@ class ResultsLevel extends Level {
                 this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
                     let splitId = (participants[0].nft_id).split('/')[1];
                     let address = (participants[0].nft_id).split('/')[0];
-                    if(splitId > 50) splitId -= 50;
-                    if(splitId == 0) splitId += 1;
         
                     this.layerStack.pushLayer(
                         new ResultsLayer(this.ecs, this.context.app, participants)

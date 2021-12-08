@@ -95,16 +95,13 @@ class LobbyLevel extends Level {
             let tokenAddr = (participant.nft_id).split('/')[0];
             let tokenId = Number((participant.nft_id).split('/')[1]);
 
-            tokenId %= 50;
-            if (tokenId == 0)
-                tokenId = 1;
-
             this.context.strapi.getParticipantDetails(tokenAddr, String(tokenId)).then(response => {
                 responses.push({
                     participant: participant,
                     response: response
                 });
                 responseCounter++;
+                console.log("Participant: ", participant, "Response: ", response)
 
                 if (responseCounter == this.participants.length) {
                     // Put the map in the stack
