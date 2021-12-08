@@ -12,7 +12,7 @@ import { EngineContext } from "../Core/Interfaces";
 import { PlayerLayer, spawnPos } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
-import { GameStatus, GameStatusListener, OnConnectionListener, requests } from "../Clients/Interfaces";
+import { GameStatus, GameStatusListener, OnConnectionListener, PlayerNames, PlayerNamesListener, requests } from "../Clients/Interfaces";
 
 class LobbyLevel extends Level {
 
@@ -34,14 +34,22 @@ class LobbyLevel extends Level {
 
     // Current ws listener is
     private listener: GameStatusListener;
+    private listenerNames: PlayerNamesListener;
     private conListener: OnConnectionListener;
+
+    // Player names from API
+    static playerNames: Record<string, string> = {};
 
     constructor(context: EngineContext, name: string, gameId: number) {
         super(context, name);
 
         this.gameId = gameId;
 
+        LobbyLevel.playerNames = {};
+
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
+        this.listenerNames = this.context.ws.addListener("player-names", (msg) => this.onServerMsgNames(msg));
+
         this.conListener = this.context.ws.addListener("connection", (ws) => {
             setTimeout(() => {
                 this.context.ws.send(ws, {
@@ -104,6 +112,7 @@ class LobbyLevel extends Level {
         
                     responses.map(({ participant, response }) => {
                         const details = response;
+                        LobbyLevel.playerNames[participant.nft_id] = details.name;
                         const player = new PlayerLayer(
                             this.ecs, this.context.ws,
                             participant.nft_id, participant.id, grid, 
@@ -247,6 +256,7 @@ class LobbyLevel extends Level {
         this.layerStack.destroy();
         this.listener.destroy();
         this.conListener.destroy();
+        this.listenerNames.destroy();
     }
 
     onServerMsg(msg: ReplyableMsg) {
@@ -257,6 +267,22 @@ class LobbyLevel extends Level {
                 gameId: this.gameId,
                 lastGameId: 0,
                 gameStatus: "lobby"
+            }
+
+            msg.reply(reply);
+        }
+
+        return true;
+    }
+
+    onServerMsgNames(msg: ReplyableMsg) {
+        if (msg.content.type == requests.playerNames) {
+            const reply: PlayerNames = {
+                msgType: "player-names",
+                gameId: this.gameId,
+                names: {
+                    ...LobbyLevel.playerNames
+                }
             }
 
             msg.reply(reply);

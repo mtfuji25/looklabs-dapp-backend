@@ -153,7 +153,7 @@ class WSClient {
                 setTimeout(() => {
                     this.remListener(responseListener.id);
                     reject("Request timeout.");
-                }, 2000);
+                }, 5000);
             } else {
                 reject("Client is not connect to backend.");
             }

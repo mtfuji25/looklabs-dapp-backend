@@ -10,7 +10,7 @@ const msgTypes = {
 };
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg;
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg | PlayerNames;
 
 //
 //  Msgs interfaces
@@ -43,11 +43,10 @@ interface GameStatus {
     gameStatus: "lobby" | "awaiting" | "not-found";
 }
 
-interface GameStatus {
-    msgType: "game-status";
+interface PlayerNames {
+    msgType: "player-names";
     gameId: number;
-    lastGameId: number;
-    gameStatus: "lobby" | "awaiting" | "not-found";
+    names: Record<string, string>;
 }
 
 interface PlayerCommand {
@@ -74,10 +73,11 @@ interface PlayerCommand {
 // Requests types and values
 
 const requests = {
-    gameStatus: "game-status"
+    gameStatus: "game-status",
+    playerNames: "player-names"
 };
 
-type ListenerTypes = "game-status" | "connection";
+type ListenerTypes = "game-status" | "connection" | "player-names";
 
 // Interfaces
 interface IncomingMsg {
@@ -93,7 +93,7 @@ interface IncomingMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg | PlayerNames;
 }
 
 interface ReplyableMsg {
@@ -109,6 +109,7 @@ interface ReplyableMsg {
 // Callback types
 type OnConnectionFn = (event: WebSocket) => boolean;
 type OnGameStatusFn = (event: ReplyableMsg) => boolean;
+type OnPlayerNamesFn = (event: ReplyableMsg) => boolean;
 
 type OnListenerFns = OnConnectionFn | OnGameStatusFn;
 
@@ -126,6 +127,10 @@ interface GameStatusListener extends Listener {
     callback: OnGameStatusFn;
 }
 
+interface PlayerNamesListener extends Listener {
+    callback: OnPlayerNamesFn;
+}
+
 interface OnConnectionListener extends Listener {
     callback: OnConnectionFn;
 }
@@ -137,12 +142,15 @@ export {
     MsgTypes,
     ServerMsg,
     GameStatus,
+    PlayerNames,
     GameTimeMsg,
     PlayerCommand,
     IncomingMsg,
     ReplyableMsg,
     Listener,
     GameStatusListener,
+    PlayerNamesListener,
+    OnPlayerNamesFn,
     OnConnectionListener,
     OnListenerFns,
     OnGameStatusFn,
