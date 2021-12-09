@@ -9,7 +9,7 @@ import { GameParticipantsResult, ParticipantDetails, ScheduledGameParticipant } 
 import { EngineContext } from "../Core/Interfaces";
 
 // Layers import
-import { PlayerLayer, spawnPos } from "../Layers/Lobby/Player";
+import { PlayerLayer } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
 import { GameStatus, GameStatusListener, OnConnectionListener, PlayerNames, PlayerNamesListener, requests } from "../Clients/Interfaces";
