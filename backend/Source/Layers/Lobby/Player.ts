@@ -17,6 +17,14 @@ import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi
 
 import spawnPositions from "../../Assets/SpawnPositions.json";
 
+//
+//  Frontend actions mapping
+//  "attackright": 0, "attackleft": 1,
+//  "attackup": 2, "attackdown": 3,
+//  "walkright": 4, "walkleft": 5,
+//  "walkup": 6, "walkdown": 7
+//
+
 class PlayerLayer extends Layer {
 
     // Current web socket server client
