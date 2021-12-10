@@ -65,7 +65,7 @@ class BattleStatusLayer extends Layer {
     updatePanel() {
         const txt1Size = this.timeLeft.getSize();
         const txt2Size = this.playersLeft.getSize();
-        this.card.setWidth(txt1Size.x + 60 + txt2Size.x);
+        this.card.setWidth(txt1Size.x + 64 + txt2Size.x);
     }
 
     onAttach() {
