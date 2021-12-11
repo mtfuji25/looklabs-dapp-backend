@@ -1,5 +1,9 @@
 # The Pit Game
 
+## Environment Setup
+
+See `.env.sample` in the root directory
+
 ## Running the frontend
 
 Hosted on Firebase Static Hosting

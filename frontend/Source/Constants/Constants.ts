@@ -5,7 +5,8 @@ const STATIC_URL = "./public";
 const WS_HOST = process.env.WS_SERVER_HOST || "ws:localhost:8082";
 
 // Strapi Client configs
-const STRAPI_HOST = process.env.STRAPI_SERVER_HOST;
+const STRAPI_SERVER_HOST = process.env.STRAPI_SERVER_HOST;
+const STRAPI_BEARER_TOKEN = process.env.STRAPI_BEARER_TOKEN;
 
 // Canva view div id
 const ROOT_DIV_ID = "#root";
@@ -23,7 +24,8 @@ const SPRITE_SIZE = 16;
 export {
     STATIC_URL,
     WS_HOST,
-    STRAPI_HOST,
+    STRAPI_SERVER_HOST,
+    STRAPI_BEARER_TOKEN,
     ROOT_DIV_ID,
     MAIN_BG_COLOR,
     CONTAINER_DIM_X,
