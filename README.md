@@ -4,6 +4,12 @@
 
 See `.env.sample` in the root directory
 
+## Frontend Cloud Build
+
+1. Uses the env set in the Substitution variables in Cloud Build
+2. Cloudbuild.yaml runs the script to copt env into a local env file
+3. Docker uses the new local env file to build for staging and production
+
 ## Running the frontend
 
 Hosted on Firebase Static Hosting
