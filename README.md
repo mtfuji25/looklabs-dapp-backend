@@ -8,7 +8,7 @@ See `.env.sample` in the root directory
 
 1. Uses the env set in the Substitution variables in Cloud Build
 2. Cloudbuild.yaml runs the script to copt env into a local env file
-3. Docker uses the new local env file to build for staging and production
+3. Docker uses the new local env file to build for [staging](https://console.cloud.google.com/cloud-build/triggers/edit/de092e60-fe9e-4b1d-8918-5268b63e4a1e?project=the-pit-328710) and [production](https://console.cloud.google.com/cloud-build/triggers/edit/f83d2fe0-f55a-456b-a6e8-11f3b0429c89?project=the-pit-328710)
 
 ## Running the frontend
 
