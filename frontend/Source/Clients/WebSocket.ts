@@ -86,7 +86,14 @@ class WSClient {
         this.host = host;
         this.port = port;
 
-        console.log("WebSocket client initing in host: ", `${this.host}:${this.port}`);
+        if (process.env.NODE_ENV != "production" && !this.port) {
+            console.warn(
+                "Port is not set in local developent this should be set: ",
+                `${this.host}:${this.port}`
+            );
+        }
+
+        console.log("WebSocket client initing in host: ", `${this.host}`);
     }
 
     private handleServerMsg(message: any) {
@@ -161,7 +168,10 @@ class WSClient {
     }
 
     start(): void {
-        this.socket = new WebSocket(`${this.host}:${this.port}`);
+        // In production PORT is not required due to load balancing check if port is set
+        const connectionString = this.port ? `${this.host}:${this.port}` : `${this.host}`;
+
+        this.socket = new WebSocket(connectionString);
 
         this.socket.addEventListener("open", (event) => {
             console.log("Connected to backend.");
