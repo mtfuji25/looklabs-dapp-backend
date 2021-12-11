@@ -13,7 +13,8 @@ import {
     ROOT_DIV_ID,
     STRAPI_SERVER_HOST,
     STRAPI_BEARER_TOKEN,
-    WS_HOST
+    WS_HOST,
+    WS_PORT
 } from "./Constants/Constants";
 
 // Jquery like query selector
@@ -33,7 +34,7 @@ const main = () => {
     });
 
     // Creates websocket client
-    const wsClient = new WSClient(WS_HOST);
+    const wsClient = new WSClient(WS_HOST, WS_PORT);
 
     // Creates strapi client
     const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);

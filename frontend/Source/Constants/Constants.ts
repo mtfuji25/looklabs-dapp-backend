@@ -2,8 +2,8 @@
 const STATIC_URL = "./public";
 
 // WebSocket Client configs
-const WS_HOST = process.env.WS_SERVER_HOST || "ws:localhost:8082";
-
+const WS_HOST = process.env.WS_SERVER_HOST;
+const WS_PORT = Number(process.env.WS_SERVER_PORT);
 // Strapi Client configs
 const STRAPI_SERVER_HOST = process.env.STRAPI_SERVER_HOST;
 const STRAPI_BEARER_TOKEN = process.env.STRAPI_BEARER_TOKEN;
@@ -24,6 +24,7 @@ const SPRITE_SIZE = 16;
 export {
     STATIC_URL,
     WS_HOST,
+    WS_PORT,
     STRAPI_SERVER_HOST,
     STRAPI_BEARER_TOKEN,
     ROOT_DIV_ID,
