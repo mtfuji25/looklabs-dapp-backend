@@ -9,7 +9,8 @@ module.exports = merge(common, {
     // ! For development purpose only
     plugins: [
         new webpack.EnvironmentPlugin({
-            WS_SERVER_HOST: "ws:localhost:8082"
+            WS_SERVER_HOST: "ws:localhost:8082",
+            STRAPI_SERVER_HOST: "https://the-pit-cloud-dev-3fiy6wgliq-uc.a.run.app/api/"
         })
     ]
 });
