@@ -8,6 +8,7 @@ steps:
           - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
           - "STRAPI_BEARER_TOKEN=${_STRAPI_BEARER_TOKEN}"
       id: "set-env"
+      dir: "frontend"
 
     - name: gcr.io/cloud-builders/docker
       args:
