@@ -2,7 +2,7 @@ steps:
     # Copies env set in Cloud Build into the file system for docker to run with correct vars
     - name: "gcr.io/cloud-builders/yarn:current"
       args:
-          - "gcloudEnv"
+          - "set-env"
           - "WS_SERVER_HOST=${_WS_SERVER_HOST}"
           - "WS_SERVER_PORT=${_WS_SERVER_PORT}"
           - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
