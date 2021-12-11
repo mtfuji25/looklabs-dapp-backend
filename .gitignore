@@ -76,3 +76,4 @@ dist/*.js
 public/*.js
 **/dist/**/*.js
 **/public/**/*.js
+/backend/dist

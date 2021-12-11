@@ -30,6 +30,7 @@ type OnReadyFn = () => void;
 class WSClient {
     // Server settings
     private host: string;
+    private port: number;
     private socket: WebSocket;
 
     // Client status
@@ -50,7 +51,7 @@ class WSClient {
                 }
             }
         },
-        "kill": (data: ServerMsg): void => {
+        kill: (data: ServerMsg): void => {
             for (let listener of Object.values(this.listeners)) {
                 if (listener.type == "kill") {
                     if ((listener as KillListener).callback(data)) break;
@@ -64,7 +65,7 @@ class WSClient {
                 }
             }
         },
-        "enemy": (data: ServerMsg): void => {
+        enemy: (data: ServerMsg): void => {
             for (let listener of Object.values(this.listeners)) {
                 if (listener.type == "enemy") {
                     if ((listener as EnemyListener).callback(data)) break;
@@ -81,10 +82,11 @@ class WSClient {
         }
     };
 
-    constructor(host: string) {
+    constructor(host: string, port: number) {
         this.host = host;
+        this.port = port;
 
-        console.log("WebSocket client initing in host: ", this.host);
+        console.log("WebSocket client initing in host: ", `${this.host}:${this.port}`);
     }
 
     private handleServerMsg(message: any) {
@@ -135,9 +137,7 @@ class WSClient {
         return new Promise<ServerMsg>((resolve, reject) => {
             if (this.connected) {
                 // Sends the request to the server
-                this.socket.send(
-                    JSON.stringify(message)
-                );
+                this.socket.send(JSON.stringify(message));
 
                 // Add response listener
                 const responseListener = this.addListener("response", (msg: ServerMsg) => {
@@ -161,7 +161,7 @@ class WSClient {
     }
 
     start(): void {
-        this.socket = new WebSocket(`${this.host}`);
+        this.socket = new WebSocket(`${this.host}:${this.port}`);
 
         this.socket.addEventListener("open", (event) => {
             console.log("Connected to backend.");
@@ -212,7 +212,7 @@ class WSClient {
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
         console.log("Adicionando listener: ", id);
-        console.log("Listeners: ", this.listeners)
+        console.log("Listeners: ", this.listeners);
 
         const listener = {
             type: type,
@@ -227,7 +227,7 @@ class WSClient {
     }
 
     remListener(id: string): void {
-        console.log("Removendo Listener: ", id)
+        console.log("Removendo Listener: ", id);
         delete this.listeners[id];
     }
 

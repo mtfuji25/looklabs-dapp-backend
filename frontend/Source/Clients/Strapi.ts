@@ -51,6 +51,7 @@ interface DetailAttribute {
 
 class StrapiClient {
     private host: string;
+    private authToken: string;
 
     // strapiApi
     private readonly api: AxiosInstance;
@@ -61,18 +62,19 @@ class StrapiClient {
     // any type because ts complains if I use http.server, the correct type
     private expressServer: any;
 
-    constructor(host: string) {
+    constructor(host: string, token: string) {
         this.host = host;
+        this.authToken = token;
         // start axios instance
         this.api = axios.create({
-            baseURL: `${this.host}`
+            baseURL: `${this.host}`,
+            headers: { Authorization: `bearer ${this.authToken}` }
         });
-
 
         // start axios for restApi
         this.restApi = axios.create({
-            baseURL: 'https://token.thepitnft.com/',
-        })
+            baseURL: "https://token.thepitnft.com/"
+        });
     }
 
     private async get(url: string): Promise<AxiosResponse> {
@@ -101,9 +103,11 @@ class StrapiClient {
         // queries scheduled games, where the game happens after current time, and sorts by
         // ascending, so it returns the nearest game;
         // const response = (await this.get(`scheduled-games?game_date_gte=${now}&_sort=game_date:ASC&_limit=1`)).data["data"][0];
-        const response = (await this.get(
-            `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
-            )).data["data"][0];
+        const response = (
+            await this.get(
+                `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
+            )
+        ).data["data"][0];
         const attributes = response.attributes;
         return {
             id: response.id,
@@ -111,19 +115,21 @@ class StrapiClient {
             created_at: attributes.createdAt,
             updated_at: attributes.updatedAt,
             game_date: attributes.game_date,
-            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
-                const attributes = participant.attributes;
-                return {
-                    id: participant.id,
-                    nft_id: attributes.nft_id,
-                    user_address: attributes.user_address,
-                    name: attributes.name,
-                    scheduled_game: response.id,
-                    published_at: attributes.publishedAt,
-                    created_at: attributes.createdAt,
-                    updated_at: attributes.updatedAt,             
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map(
+                (participant: any) => {
+                    const attributes = participant.attributes;
+                    return {
+                        id: participant.id,
+                        nft_id: attributes.nft_id,
+                        user_address: attributes.user_address,
+                        name: attributes.name,
+                        scheduled_game: response.id,
+                        published_at: attributes.publishedAt,
+                        created_at: attributes.createdAt,
+                        updated_at: attributes.updatedAt
+                    };
                 }
-            })
+            )
         };
     }
 
@@ -134,20 +140,22 @@ class StrapiClient {
         return {
             id: response.id,
             game_date: attributes.game_date,
-            scheduled_game_participants: attributes.scheduled_game_participants.data.map((participant: any) => {
-                const attributes = participant.attributes;
-                return {
-                    id: participant.id,
-                    nft_id: attributes.nft_id,
-                    user_address: attributes.user_address,
-                    name: attributes.name,
-                    scheduled_game: response.id,
-                    published_at: attributes.publishedAt,
-                    created_at: attributes.createdAt,
-                    updated_at: attributes.updatedAt,             
+            scheduled_game_participants: attributes.scheduled_game_participants.data.map(
+                (participant: any) => {
+                    const attributes = participant.attributes;
+                    return {
+                        id: participant.id,
+                        nft_id: attributes.nft_id,
+                        user_address: attributes.user_address,
+                        name: attributes.name,
+                        scheduled_game: response.id,
+                        published_at: attributes.publishedAt,
+                        created_at: attributes.createdAt,
+                        updated_at: attributes.updatedAt
+                    };
                 }
-            })
-        }
+            )
+        };
     }
 
     async getGameParticipants(id: number) {
@@ -157,7 +165,8 @@ class StrapiClient {
         const data = (
             await this.get(
                 `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
-                )).data["data"];
+            )
+        ).data["data"];
 
         const returnValue = data.map((response: any) => {
             const attributes = response.attributes;
@@ -168,25 +177,26 @@ class StrapiClient {
                 user_address: attributes.user_address,
                 scheduled_game: attributes.scheduled_game.data.id,
                 image_address: attributes.image_address,
-                ...
-                    (attributes.game_participants_result.data != null ?
-                        {
-                            game_participants_result:
-                            {
-                                id: attributes.game_participants_result.data.id,
-                                scheduled_game_participant: response.id,
-                                ...attributes.game_participants_result.data.attributes
-                            }
-                        }
-                        : {})
-            }
+                ...(attributes.game_participants_result.data != null
+                    ? {
+                          game_participants_result: {
+                              id: attributes.game_participants_result.data.id,
+                              scheduled_game_participant: response.id,
+                              ...attributes.game_participants_result.data.attributes
+                          }
+                      }
+                    : {})
+            };
         });
 
         return returnValue;
     }
 
     // get the details for a chosen participant
-    async getParticipantDetails(tokenAddress: string, tokenId: number): Promise<ParticipantDetails> {
+    async getParticipantDetails(
+        tokenAddress: string,
+        tokenId: number
+    ): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenAddress}/${tokenId}`)).data;
     }
 
@@ -201,4 +211,11 @@ class StrapiClient {
     }
 }
 
-export { StrapiClient, ScheduledGame, ScheduledGameParticipant, GameParticipantsResult, ParticipantDetails, DetailAttribute };
+export {
+    StrapiClient,
+    ScheduledGame,
+    ScheduledGameParticipant,
+    GameParticipantsResult,
+    ParticipantDetails,
+    DetailAttribute
+};

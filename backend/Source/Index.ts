@@ -3,7 +3,7 @@ import { WSClient } from "./Clients/WebSocket";
 import { StrapiClient } from "./Clients/Strapi";
 
 import * as dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
 const STRAPI_SERVER_HOST = String(process.env.STRAPI_SERVER_HOST);
 const STRAPI_BEARER_TOKEN = String(process.env.STRAPI_BEARER_TOKEN);
