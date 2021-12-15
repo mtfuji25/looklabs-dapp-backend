@@ -9,7 +9,7 @@ import { Application } from "pixi.js";
 
 
 // Sentry logging imports
-import * as Sentry from "@sentry/node";
+import * as Sentry from "@sentry/browser";
 // Importing @sentry/tracing patches the global hub for tracing to work.
 import * as Tracing from "@sentry/tracing";
 
@@ -45,7 +45,7 @@ const main = () => {
     if (process.env.NODE_ENV != "production") {
           
           setTimeout(() => {
-            throw new Error("This is a test error")    
+            throw new Error("This is a test error");  
           }, 1000);
     }
     
