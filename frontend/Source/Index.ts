@@ -47,9 +47,13 @@ const main = () => {
         name: "My First Test Transaction",
       });
       
+
       setTimeout(() => {
         try {
-          foo();
+          const arr:number[] = null;
+          if (arr.length > 10) {
+              console.log("Oops!");
+          }
         } catch (e) {
           Sentry.captureException(e);
         } finally {
