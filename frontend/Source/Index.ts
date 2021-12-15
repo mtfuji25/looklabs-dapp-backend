@@ -41,27 +41,7 @@ const main = () => {
         tracesSampleRate: 1.0,
     });
 
-    //generate test error for sentry 
-    const transaction = Sentry.startTransaction({
-        op: "test",
-        name: "My First Test Transaction",
-      });
-      
-
-      setTimeout(() => {
-        try {
-          const arr:number[] = null;
-          if (arr.length > 10) {
-              console.log("Oops!");
-          }
-        } catch (e) {
-          Sentry.captureException(e);
-        } finally {
-          transaction.finish();
-        }
-      }, 99);
-    
-    
+        
     // Creates PIXI application
     const app = new Application({
         resolution: devicePixelRatio,
