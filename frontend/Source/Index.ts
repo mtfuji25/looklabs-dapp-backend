@@ -43,20 +43,10 @@ const main = () => {
 
     //generate test error for sentry 
     if (process.env.NODE_ENV != "production") {
-        const transaction = Sentry.startTransaction({
-            op: "test",
-            name: "My First Test Transaction",
-          });
           
           setTimeout(() => {
-            try {
-              missingMethod();
-            } catch (e) {
-              Sentry.captureException(e);
-            } finally {
-              transaction.finish();
-            }
-          }, 99);
+            throw new Error("This is a test error")    
+          }, 1000);
     }
     
 
