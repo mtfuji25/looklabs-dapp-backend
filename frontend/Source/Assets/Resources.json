@@ -1,5 +1,5 @@
 {
-    "packs": [ "enemy-pack", "dungeon-pack", "await-pack", "results-pack", "lobby-pack" ],
+    "packs": [ "enemy-pack", "dungeon-pack", "await-pack", "results-pack", "lobby-pack", "sound-pack" ],
     "lobby-pack": [
         {
             "name": "infoCard",
@@ -108,6 +108,24 @@
         {
             "name": "overlays",
             "url": "./assets/enemy-pack/overlays.png"
+        }
+    ],
+    "sound-pack": [
+        {
+            "name": "battle",
+            "url": "./assets/sounds/battle.ogg"
+        },
+        {
+            "name": "lobby",
+            "url": "./assets/sounds/lobby.ogg"
+        },
+        {
+            "name": "results",
+            "url": "./assets/sounds/results.ogg"
+        },
+        {
+            "name": "showdown",
+            "url": "./assets/sounds/showdown.ogg"
         }
     ],
     "sheets": [ "enemy-sheet", "chicken-sheet", "wolf-sheet", "snake-sheet", "bat-sheet", "overlay-sheet" ],
