@@ -112,19 +112,19 @@
     ],
     "sound-pack": [
         {
-            "name": "battle",
+            "name": "battle_sound",
             "url": "./assets/sounds/battle.ogg"
         },
         {
-            "name": "lobby",
+            "name": "lobby_sound",
             "url": "./assets/sounds/lobby.ogg"
         },
         {
-            "name": "results",
+            "name": "results_sound",
             "url": "./assets/sounds/results.ogg"
         },
         {
-            "name": "showdown",
+            "name": "showdown_sound",
             "url": "./assets/sounds/showdown.ogg"
         }
     ],
