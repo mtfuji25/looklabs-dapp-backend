@@ -64,6 +64,7 @@ class AwaitLevel extends Level {
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
         this.connectLayers();
+        this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
 
     connectLayers(): void {

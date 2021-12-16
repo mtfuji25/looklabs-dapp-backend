@@ -18,6 +18,7 @@ class ResultsLevel extends Level {
     onStart(): void {
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
         this.connectLayers();
+        this.playBackgroundMusic(Level.RESULTS_SOUND);
     }
 
     connectLayers(): void {

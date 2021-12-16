@@ -30,6 +30,7 @@ class LobbyLevel extends Level {
     private responseParticipant: any | null = null;
     private responseWinner: any | null = null;
     private requested: boolean = false;
+    private showDownStart: boolean = false;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -112,9 +113,18 @@ class LobbyLevel extends Level {
                 this.context
             )
         );
+
+        this.playBackgroundMusic(Level.LOBBY_SOUND);
     }
 
     onUpdate(deltaTime: number) {
+        
+        if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
+            this.showDownStart = true;
+            // switch BG music to showdown
+            this.playBackgroundMusic(Level.SHOWDOWN_SOUND);
+        }
+
         if (this.remaining == 1 && (!this.requested)) {
             this.requested = true;
             this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
