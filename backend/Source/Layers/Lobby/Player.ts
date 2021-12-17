@@ -8,7 +8,7 @@ import { Grid } from "../../Core/Ecs/Components/Grid";
 import { WebSocket } from "ws";
 import { WSClient } from "../../Clients/WebSocket";
 import { StatusResult } from "../../Core/Ecs/Components/Status";
-import { rad2deg, Vec2 } from "../../Utils/Math";
+import { rad2deg, Vec2, clamp } from "../../Utils/Math";
 import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 // Kill feed actions
@@ -222,20 +222,6 @@ class PlayerLayer extends Layer {
         this.strapiID = strapiID;
         this.details = details;
 
-        // Add status component to current entity
-        // this.self.addStatus(
-        //     // Attack
-        //     20 + ((Math.random() * 10) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Speed
-        //     0.04 + ((Math.random() * 0.02) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Health
-        //     100 + ((Math.random() * 50) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Defense
-        //     5 + ((Math.random() * 5) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        //     // Cooldown
-        //     0.6 + ((Math.random() * 0.3) * (Math.random() < 0.4 ? -1.0 : 1.0)),
-        // ).setOnDie((status) => this.onDie(status));
-
         // create a record of mapped attributes, so we can use the attributes returned more easily
         // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
 
@@ -247,13 +233,16 @@ class PlayerLayer extends Layer {
 
         const status = this.self.addStatus(
             // Attack
-            20 * (attributesMap["Attack"] / 100.0),
+            // 20 * (attributesMap["Attack"] / 100.0),
+            clamp(20 * (attributesMap["Attack"] / 100.0), 10, 20),
             // Speed
-            0.04 * (attributesMap["Speed"] / 100.0),
+            // 0.04 * (attributesMap["Speed"] / 100.0),
+            clamp(0.04 * (attributesMap["Speed"] / 100.0), 0.02, 0.04),
             // Health
-            100,
+            180,
             // Defense
-            5 * (attributesMap["Defence"] / 100.0),
+            // 5 * (attributesMap["Defence"] / 100.0),
+            clamp(5 * (attributesMap["Defence"] / 100.0), 2.5, 5),
             // Cooldown
             0.5
         );

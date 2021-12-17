@@ -1,4 +1,4 @@
-import { Vec2 } from "../../../Utils/Math";
+import { Vec2, clamp } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 import { EcsData } from "../Interfaces";
 
@@ -740,7 +740,9 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
 
             // Curando caramba
             if (lifePercent < 100) {
-                status.health += 0.03
+                // status.health += 0.03
+                const attackRange = (20 - status.attack) * 0.004;
+                status.health += clamp(attackRange, 0.005, 0.05);
             }
 
             // Life check

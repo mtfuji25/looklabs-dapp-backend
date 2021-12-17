@@ -125,4 +125,7 @@ const lerp = (a: number, b: number, t: number): number => {
     return (1 - t) * a + t * b;
 }
 
-export { Vec2, deg2rad, rad2deg, lerp };
+const clamp = (num:number, min:number, max:number) => Math.min(Math.max(num, min), max);
+    
+
+export { Vec2, deg2rad, rad2deg, lerp, clamp };
