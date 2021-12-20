@@ -217,9 +217,9 @@ class LobbyLevel extends Level {
                     // Create last participant result
                     this.context.strapi.createParticipantResult({
                         scheduled_game_participant: layer.strapiID,
-                        survived_for: Math.floor(status.survived),
+                        survived_for: status.survived,
                         kills: Math.floor(status.kills),
-                        health: Math.ceil(status.health)
+                        health: status.health
                     }).then(() => {
 
                         setTimeout(() => {

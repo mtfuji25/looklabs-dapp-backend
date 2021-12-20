@@ -408,9 +408,9 @@ class PlayerLayer extends Layer {
 
         this.dieFn({
             scheduled_game_participant: this.strapiID,
-            survived_for: Math.floor(status.survived),
+            survived_for: status.survived,
             kills: Math.floor(status.kills),
-            health: Math.floor(status.health),
+            health: status.health,
         }, killerId);
     }
 
