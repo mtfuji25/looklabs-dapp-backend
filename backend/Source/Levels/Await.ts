@@ -61,7 +61,6 @@ class AwaitLevel extends Level {
 
     async checkForGame(): Promise<void> {
 
-        // 
         let game: ScheduledGame;
         
         // Request nearest game for strapi
