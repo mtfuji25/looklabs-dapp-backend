@@ -4,6 +4,26 @@
         {
             "name": "infoCard",
             "url": "./assets/lobby-pack/info-card.png"
+        },
+        {
+            "name": "logRegular",
+            "url": "./assets/fonts/logRegular.fnt"
+        },
+        {
+            "name": "logBold",
+            "url": "./assets/fonts/logBold.fnt"
+        },
+        {
+            "name": "killFeedRegular",
+            "url": "./assets/fonts/killFeedRegular.fnt"
+        },
+        {
+            "name": "killFeedBold",
+            "url": "./assets/fonts/killFeedBold.fnt"
+        },
+        {
+            "name": "nftNumber",
+            "url": "./assets/fonts/nftNumber.fnt"
         }
     ],
     "await-pack": [

@@ -2,7 +2,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, IBitmapTextStyle, ITextStyle } from "pixi.js";
 
 // Web client imports
 import { WSClient } from "../../Clients/WebSocket";
@@ -29,13 +29,14 @@ interface Player {
     health: Entity;
     healthOutline: Entity;
     healthBackground: Entity;
-    id: Entity;
+    idNumber: Entity;
     animSlot1: Entity;
     animSlot2: Entity;
     animSlot3: Entity;
 }
 
 class PlayerLayer extends Layer {
+        
     // Entites storage
     private players: Record<string, Player> = {};
 
@@ -58,14 +59,11 @@ class PlayerLayer extends Layer {
 
     static lastGamePlayerNames: Record<string, string> = {};
 
-    private readonly idStyle: Partial<ITextStyle> = {
-        fontFamily: "8-BIT WONDER",
-        fontSize: "10px",
-        fill: 0xffffff,
+
+    private readonly idStyle: Partial<IBitmapTextStyle> = {
+        fontName: "8BITWONDERNominal",
+        fontSize: 10,
         align: "center",
-        fontWeight: "800",
-        stroke: "#000000",
-        strokeThickness: 4,
     }
 
     constructor(
@@ -136,8 +134,8 @@ class PlayerLayer extends Layer {
             animSpriteSlot1.sprite.scale.y = (1.0 - this.levelContext.zoom); 
 
             // Update text
-            const id = player.id.getText();
-            const idTransform = player.id.getTransform();
+            const id = player.idNumber.getBMPText();
+            const idTransform = player.idNumber.getTransform();
 
             id.text.x = Math.floor(idTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
             id.text.y = Math.floor(idTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
@@ -185,7 +183,7 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos, char_class, name } = content;
+        const { id, pos, char_class, name, attack } = content;
 
         const prevPlayer = this.players[id];
 
@@ -197,7 +195,7 @@ class PlayerLayer extends Layer {
 
 
         // Creates and stores entity
-        const title = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 20, false);  
+        const idNumber = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 60);  
         const entity = this.ecs.createEntity(pos.x, pos.y, false);
         const health = this.ecs.createEntity(pos.x - 12, pos.y - 35, false);
         const healthOutline = this.ecs.createEntity(pos.x - 13, pos.y - 36, false);
@@ -221,15 +219,14 @@ class PlayerLayer extends Layer {
         animSpriteSlot3.sprite.visible = false;
 
         // Add id text
-        title.addText(splitId, this.idStyle);
-        const titleText = title.getText();
+        const titleText = idNumber.addBMPText(splitId, this.idStyle);      
         titleText.text.anchor.set(0.5);
         titleText.addStage(this.container);
         
         // Add animsprite component
         const sprite = entity.addAnimSprite();
 
-        console.log("ID: ", id, " Nome: ", name);
+        // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
 
         switch (char_class) {
@@ -263,7 +260,7 @@ class PlayerLayer extends Layer {
 
         this.players[id] = {
             entity: entity,
-            id: title,
+            idNumber: idNumber,
             healthOutline: healthOutline,
             healthBackground: healthBackground,
             health: health,
@@ -290,7 +287,7 @@ class PlayerLayer extends Layer {
             this.createEnemy(command);
         }
 
-        const textTransform = this.players[id].id.getTransform();
+        const textTransform = this.players[id].idNumber.getTransform();
         const healthOutlineTransform = this.players[id].healthOutline.getTransform();
         const healthBackgroundTransform = this.players[id].healthBackground.getTransform();
         const healthBar = this.players[id].health;
@@ -577,7 +574,7 @@ class PlayerLayer extends Layer {
         animSpriteSlot3.sprite.visible = true;
 
         setTimeout(() => {
-            this.players[id].id.destroy();
+            this.players[id].idNumber.destroy();
             this.players[id].health.destroy();
             this.players[id].healthOutline.destroy();
             this.players[id].healthBackground.destroy();
