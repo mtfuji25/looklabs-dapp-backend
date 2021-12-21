@@ -45,7 +45,8 @@ class Engine {
         this.level = new DefaultLevel(this.context); 
     }
 
-    start(): void {
+    // Default engine's start method
+    async start() {
         console.log("Starting backend engine.");
 
         // Start engine Web Socket client
@@ -56,9 +57,13 @@ class Engine {
 
         // Finally load the default level
         console.log("Loading level: ", this.level.getName());
-        this.level.onStart();
+
+        // Maybe IDE tells that await has no effect, but is because
+        // it is an abstract method, but it's necessary to await
+        await this.level.onStart();
     }
 
+    // Default engine's loop method
     async loop() {
         console.log("Entering main engine loop");
         
@@ -70,20 +75,21 @@ class Engine {
             this.context.stats.fps = 1.0 / this.context.stats.dt;
 
             // Run update fn of current level
-            this.level.onUpdate(this.context.stats.dt);
+            await this.level.onUpdate(this.context.stats.dt);
 
             // Run systems pendings
-            this.level.runPendings(this.context.stats.dt)
+            await this.level.runPendings(this.context.stats.dt)
 
             await sleep(15);
         }
     }
 
-    close(): void {
+    // Default engine's close method
+    async close() {
         console.log("Closing backend engine.");
 
         // Close current active level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
 
         // Close strapi client
         this.strapiClient.close();
@@ -92,10 +98,10 @@ class Engine {
         this.wsClient.close();
     }
 
-    loadLevel(level: Level): void {
+    async loadLevel(level: Level) {
  
         // First close the current running level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
             
         console.log("Loading level: ", level.getName());
 
@@ -103,10 +109,10 @@ class Engine {
         this.level = level;
 
         // Start level and put it to run
-        level.onStart();
+        await level.onStart();
     }
 
-    closeLevel(level: Level): void {
+    async closeLevel(level: Level) {
 
         console.log("Closing level: ", level.getName());
 
@@ -114,7 +120,7 @@ class Engine {
         level.closeSystems();
 
         // Fire the onClose function on current level
-        level.onClose();
+        await level.onClose();
     }
 };
 
