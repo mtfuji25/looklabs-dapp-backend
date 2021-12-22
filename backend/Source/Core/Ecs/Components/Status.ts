@@ -22,6 +22,7 @@ class Status {
     public readonly cooldown: number;
     public readonly maxHealth: number;
     public readonly name: string;
+    public readonly tier: string;
     public critical: boolean = false;
 
     // Current Entity Stats
@@ -41,6 +42,7 @@ class Status {
         defense: number,
         cooldown: number,
         name: string,
+        tier: string
     ) {
         this.attack = attack;
         this.health = health;

@@ -36,7 +36,11 @@ interface Player {
 }
 
 class PlayerLayer extends Layer {
-        
+
+    public static MAX_ATTACK:number = 20;
+    public static MAX_SPEED:number = 0.05;
+    public static MAX_DEFENSE:number = 5;
+    
     // Entites storage
     private players: Record<string, Player> = {};
 
@@ -229,21 +233,23 @@ class PlayerLayer extends Layer {
         // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
 
+
+
         switch (char_class) {
             case "Avian":
-                sprite.loadFromConfig(this.app, this.res["chicken-sheet"]);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`);
                 break;
             case "Hounds":
-                sprite.loadFromConfig(this.app, this.res["wolf-sheet"]); 
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`); 
                 break;
             case "Insectoids":
-                sprite.loadFromConfig(this.app, this.res["bat-sheet"]);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`);
                 break;
             case 'Serpents':
-                sprite.loadFromConfig(this.app, this.res["snake-sheet"]);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`);
                 break;
             default:
-                sprite.loadFromConfig(this.app, this.res["bat-sheet"]);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`);
                 break;
         }
 
@@ -322,17 +328,17 @@ class PlayerLayer extends Layer {
         // if else generator
         if (health <= 0) {
             if (action == 0 || action == 4) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][4]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][4]);
             }
             if (action == 1 || action == 5) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][5]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][5]);
             }
         } else {
             //
             // First set
             //
             if (action == 4) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][0]);
 
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -340,7 +346,7 @@ class PlayerLayer extends Layer {
             }
             // critical R
             if (action == 14) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][0]);
                 animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
                 animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
                 animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
@@ -351,7 +357,7 @@ class PlayerLayer extends Layer {
             }
             // healing
             if (action == 24) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][0]);
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
                 animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
@@ -365,7 +371,7 @@ class PlayerLayer extends Layer {
             // Second set
             //
             if (action == 5) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][1]);
 
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -373,7 +379,7 @@ class PlayerLayer extends Layer {
             }
             // critical L
             if (action == 15) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
                 animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
                 animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
@@ -384,7 +390,7 @@ class PlayerLayer extends Layer {
             }
             // healing
             if (action == 25) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
                 animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
@@ -398,7 +404,7 @@ class PlayerLayer extends Layer {
             // Third set
             //
             if (action == 0) {
-                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
 
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -406,7 +412,7 @@ class PlayerLayer extends Layer {
             }
             // critical R
             if (action == 10) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][2]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][2]);
                 animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
                 animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
                 animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
@@ -417,7 +423,7 @@ class PlayerLayer extends Layer {
             }
             // Healing
             if (action == 20) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][2]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][2]);
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
                 animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
@@ -429,7 +435,7 @@ class PlayerLayer extends Layer {
 
             // Fourth set
             if (action == 1) {
-                entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
 
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -437,7 +443,7 @@ class PlayerLayer extends Layer {
             }
             // critical L
             if (action == 11) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][3]);
                 animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
                 animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
                 animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
@@ -448,7 +454,7 @@ class PlayerLayer extends Layer {
             }
             // Healing
             if (action == 21) {
-                entitySprite.animate(this.res["wolf-sheet"]["animations"][3]);
+                entitySprite.animate(this.res["player-sheet"]["animations"][3]);
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
                 animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
@@ -463,9 +469,9 @@ class PlayerLayer extends Layer {
             //
             if (action == 2 || action == 3) {
                 if (Math.random() < 0.5) {
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
                 } else {
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                 }
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -475,13 +481,13 @@ class PlayerLayer extends Layer {
             if (action == 12 || action == 13) {
                 if (Math.random() < 0.5) {
                     // Right
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
                     animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
                     animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
                     animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
                 } else {
                     // Left
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                     animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
                     animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
                     animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
@@ -493,9 +499,9 @@ class PlayerLayer extends Layer {
             // Healing
             if (action == 22 || action == 23) {
                 if (Math.random() < 0.5) {
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][2]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
                 } else {
-                    entitySprite.forceAnimate(this.res["wolf-sheet"]["animations"][3]);
+                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                 }
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
@@ -511,9 +517,9 @@ class PlayerLayer extends Layer {
             //
             if (action == 6 || action == 7) {
                 if (Math.random() < 0.5) {
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][0]);
                 } else {
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 }
                 animSpriteSlot1.sprite.visible = false;
                 animSpriteSlot2.sprite.visible = false;
@@ -523,13 +529,13 @@ class PlayerLayer extends Layer {
             if (action == 16 || action == 17) {
                 if (Math.random() < 0.5) {
                     // Right
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][0]);
                     animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
                     animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
                     animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
                 } else {
                     // Left
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                     animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
                     animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
                     animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
@@ -542,9 +548,9 @@ class PlayerLayer extends Layer {
             // Healing
             if (action == 26 || action == 27) {
                 if (Math.random() < 0.5) {
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][0]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][0]);
                 } else {
-                    entitySprite.animate(this.res["wolf-sheet"]["animations"][1]);
+                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 }
                 animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
                 animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
@@ -565,7 +571,7 @@ class PlayerLayer extends Layer {
         const animSpriteSlot3 = this.players[id].animSlot3.getAnimSprite();
 
         // death animation
-        this.players[id].entity.getAnimSprite().forceAnimate(this.res["wolf-sheet"]["animations"][4]);
+        this.players[id].entity.getAnimSprite().forceAnimate(this.res["player-sheet"]["animations"][4]);
         animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
         animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
         animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][2]);

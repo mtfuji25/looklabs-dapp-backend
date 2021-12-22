@@ -64,6 +64,7 @@ interface PlayerCommand {
     kills: number;
     char_class: string;
     name: string;
+    tier: string;
 }
 
 interface KillMsg {

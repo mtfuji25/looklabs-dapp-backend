@@ -42,9 +42,9 @@ class AnimSprite {
         this.transform = transform;
     }
 
-    loadFromConfig(app: Application, config: AnimConfig) {
+    loadFromConfig(app: Application, config: AnimConfig, res:string = null) {
 
-        const url: string = app.loader.resources[config["resource"]].url;
+        const url: string = res === null ? app.loader.resources[config["resource"]].url : res;
         this.ssheet = BaseTexture.from(url);
 
         this.texWidth = config["texWidth"];

@@ -180,6 +180,10 @@ const spawnPos = [
     
 class PlayerLayer extends Layer {
 
+    public static MAX_ATTACK:number = 20;
+    public static MAX_SPEED:number = 0.05;
+    public static MAX_DEFENSE:number = 5;
+
     // Current web socket server client
     private wsClient: WSClient;
     private conListener: OnConnectionListener;
@@ -234,17 +238,19 @@ class PlayerLayer extends Layer {
         const status = this.self.addStatus(
             // Attack
             // 20 * (attributesMap["Attack"] / 100.0),
-            clamp(20 * (attributesMap["Attack"] / 100.0), 10, 20),
+            clamp(PlayerLayer.MAX_ATTACK * (attributesMap["Attack"] / 100.0), PlayerLayer.MAX_ATTACK * 0.4, PlayerLayer.MAX_ATTACK),
             // Speed
             // 0.04 * (attributesMap["Speed"] / 100.0),
-            clamp(0.04 * (attributesMap["Speed"] / 100.0), 0.02, 0.04),
+            clamp(PlayerLayer.MAX_SPEED * (attributesMap["Speed"] / 100.0), PlayerLayer.MAX_SPEED * 0.4, PlayerLayer.MAX_SPEED),
             // Health
             180,
             // Defense
             // 5 * (attributesMap["Defence"] / 100.0),
-            clamp(5 * (attributesMap["Defence"] / 100.0), 2.5, 5),
+            clamp(PlayerLayer.MAX_DEFENSE * (attributesMap["Defence"] / 100.0), PlayerLayer.MAX_DEFENSE * 0.4, PlayerLayer.MAX_DEFENSE),
             // Cooldown
-            0.5
+            0.5,
+            //Tier
+            attributesMap["Tier"].toLower()
         );
 
         status.setOnDie((status) => this.onDie(status));
@@ -388,7 +394,8 @@ class PlayerLayer extends Layer {
             survived: status.survived,
             kills: status.kills,
             char_class: this.self.name.split(' ')[0],
-            name: this.self.name
+            name: this.self.name,
+            tier: status.tier
         };
     }
 
