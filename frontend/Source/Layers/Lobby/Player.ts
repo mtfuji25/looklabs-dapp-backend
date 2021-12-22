@@ -136,47 +136,17 @@ class PlayerLayer extends Layer {
 
             animSpriteSlot1.sprite.scale.x = (1.0 - this.levelContext.zoom);
             animSpriteSlot1.sprite.scale.y = (1.0 - this.levelContext.zoom); 
-
-            // Update text
-            const id = player.idNumber.getBMPText();
-            const idTransform = player.idNumber.getTransform();
-
-            id.text.x = Math.floor(idTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            id.text.y = Math.floor(idTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
-            
-            id.text.scale.x = 1.0 - (this.levelContext.zoom / 2.0);
-            id.text.scale.y = 1.0 - (this.levelContext.zoom / 2.0);
-
-            // Update health bar
-            const healt = player.health.getColoredRectangle();
-            const healtTransform = player.health.getTransform();
-
-            healt.sprite.x = Math.floor(healtTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            healt.sprite.y = Math.floor(healtTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
-
-            healt.sprite.scale.x = 1.0 - this.levelContext.zoom;
-            healt.sprite.scale.y = 1.0 - this.levelContext.zoom;
-
-            // Update health background
-            const healtBg = player.healthBackground.getColoredRectangle();
-            const healtBgTransform = player.healthBackground.getTransform();
-
-            healtBg.sprite.x = Math.floor(healtBgTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            healtBg.sprite.y = Math.floor(healtBgTransform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
-
-            healtBg.sprite.scale.x = 1.0 - this.levelContext.zoom;
-            healtBg.sprite.scale.y = 1.0 - this.levelContext.zoom;
-
-            // Update health outline
-            const healtOut = player.healthOutline.getColoredRectangle();
-            const healtOutTransform  = player.healthOutline.getTransform();
-
-            healtOut.sprite.x = Math.floor(healtOutTransform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            healtOut.sprite.y = Math.floor(healtOutTransform.pos.y  + this.levelContext.offsetY - fixFactorY * centerFactorY);
-
-            healtOut.sprite.scale.x = 1.0 - this.levelContext.zoom;
-            healtOut.sprite.scale.y = 1.0 - this.levelContext.zoom;
+         
         });
+
+
+        this.container.children.sort(function(a,b) {
+            if (a.position.y > b.position.y) return 1;
+            if (a.position.y < b.position.y) return -1;
+            if (a.position.x > b.position.x) return 1;
+            if (a.position.x < b.position.x) return -1;
+            return 0;
+          }); 
     }
 
     onDetach() {
@@ -199,11 +169,11 @@ class PlayerLayer extends Layer {
 
 
         // Creates and stores entity
-        const idNumber = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 60);  
+        const idNumber = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 60, false);  
         const entity = this.ecs.createEntity(pos.x, pos.y, false);
-        const health = this.ecs.createEntity(pos.x - 12, pos.y - 35, false);
-        const healthOutline = this.ecs.createEntity(pos.x - 13, pos.y - 36, false);
-        const healthBackground = this.ecs.createEntity(pos.x - 12, pos.y - 35, false);
+        const health = this.ecs.createEntity(0, 0, false);
+        const healthOutline = this.ecs.createEntity(0, 0, false);
+        const healthBackground = this.ecs.createEntity(0, 0, false);
 
         // Animations slots
         const animSlot1 = this.ecs.createEntity(pos.x, pos.y - 64, false);
@@ -222,18 +192,13 @@ class PlayerLayer extends Layer {
         animSpriteSlot2.sprite.visible = false;
         animSpriteSlot3.sprite.visible = false;
 
-        // Add id text
-        const titleText = idNumber.addBMPText(splitId, this.idStyle);      
-        titleText.text.anchor.set(0.5);
-        titleText.addStage(this.container);
-        
         // Add animsprite component
         const sprite = entity.addAnimSprite();
 
         // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
 
-
+        
 
         switch (char_class) {
             case "Avian":
@@ -258,11 +223,28 @@ class PlayerLayer extends Layer {
         animSpriteSlot1.addStage(this.container);
         animSpriteSlot2.addStage(this.container);
         animSpriteSlot3.addStage(this.container);
-
+        
         // Add healthBar
-        healthOutline.addColoredRectangle(24, 6, 0x000000).addStage(this.container);
-        healthBackground.addColoredRectangle(22, 4, 0x373232).addStage(this.container);
-        health.addColoredRectangle(22,4, 0xF32D2D).addStage(this.container);
+        const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
+        const r2 = healthBackground.addColoredRectangle(22, 4, 0x373232);
+        const r3 = health.addColoredRectangle(22,4, 0xF32D2D);
+        r1.addStage(sprite.sprite);
+        r2.addStage(sprite.sprite);
+        r3.addStage(sprite.sprite);
+        r1.sprite.x = -12;
+        r1.sprite.y = -32;
+        r2.sprite.x = -12;
+        r2.sprite.y = -32;
+        r3.sprite.x = -12;
+        r3.sprite.y = -32;
+    
+        // Add id text
+        const titleText = idNumber.addBMPText(splitId, this.idStyle);      
+        titleText.text.anchor.set(0.5);
+        titleText.addStage(sprite.sprite);
+        titleText.text.x = 0;
+        titleText.text.y = -20;
+        
 
         this.players[id] = {
             entity: entity,
@@ -294,10 +276,7 @@ class PlayerLayer extends Layer {
         }
 
         const textTransform = this.players[id].idNumber.getTransform();
-        const healthOutlineTransform = this.players[id].healthOutline.getTransform();
-        const healthBackgroundTransform = this.players[id].healthBackground.getTransform();
         const healthBar = this.players[id].health;
-        const healthTransform = healthBar.getTransform();
         const entitySprite = entity.getAnimSprite();
         const entityTransform = entity.getTransform();
 
@@ -315,16 +294,7 @@ class PlayerLayer extends Layer {
         
         textTransform.pos.x = Math.floor(pos.x - (splitId.length - 1) * 0.2);
         textTransform.pos.y = Math.floor(pos.y - 20);
-
-        healthOutlineTransform.pos.x = Math.floor(pos.x - 13);
-        healthOutlineTransform.pos.y = Math.floor(pos.y - 36);
-
-        healthBackgroundTransform.pos.x = Math.floor(pos.x - 12);
-        healthBackgroundTransform.pos.y = Math.floor(pos.y - 35);
-
-        healthTransform.pos.x = Math.floor(pos.x - 12);
-        healthTransform.pos.y = Math.floor(pos.y - 35);
-
+        
         // if else generator
         if (health <= 0) {
             if (action == 0 || action == 4) {
@@ -563,7 +533,7 @@ class PlayerLayer extends Layer {
         }
     }
 
-    deleteEnemy(command: PlayerCommand) {
+    deleteEnemy(command:PlayerCommand) {
         const { id } = command;
 
         const animSpriteSlot1 = this.players[id].animSlot1.getAnimSprite();

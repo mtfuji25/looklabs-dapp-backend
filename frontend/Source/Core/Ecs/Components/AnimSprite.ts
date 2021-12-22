@@ -27,7 +27,8 @@ class AnimSprite {
     private ssheet: BaseTexture;
     private sprites: Record<string, Array<Texture>> = {};
     
-    public sprite: AnimatedSprite;
+    public sprite: Container;
+    public animSprite:AnimatedSprite;
 
     private texWidth: number = 0;
     private texHeight: number = 0;
@@ -66,25 +67,28 @@ class AnimSprite {
             });
         });
 
-        this.sprite = new AnimatedSprite(this.sprites[config["animations"][0]]);
-        this.sprite.animationSpeed = config["speed"];
-        this.sprite.loop = config["loop"];
+        this.animSprite = new AnimatedSprite(this.sprites[config["animations"][0]]);
+        this.animSprite.animationSpeed = config["speed"];
+        this.animSprite.loop = config["loop"];
 
-        this.sprite.anchor.set(0.5);
+        this.animSprite.anchor.set(0.5);
+        
+        this.sprite = new Container();
         this.sprite.x = this.transform.pos.x;
         this.sprite.y = this.transform.pos.y;
+        this.sprite.addChild(this.animSprite);
     }
 
     animate(animation: string) {
-        if (!this.sprite.playing) {
-            this.sprite.textures = this.sprites[animation];
-            this.sprite.play();
+        if (!this.animSprite.playing) {
+            this.animSprite.textures = this.sprites[animation];
+            this.animSprite.play();
         }
     }
 
     forceAnimate(animation: string) {
-        this.sprite.textures = this.sprites[animation];
-        this.sprite.play();
+        this.animSprite.textures = this.sprites[animation];
+        this.animSprite.play();
     }
 
     addStage(app: Application | Container) {
