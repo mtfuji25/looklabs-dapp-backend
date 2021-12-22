@@ -51,6 +51,7 @@ class Status {
         this.maxHealth = health;
         this.cooldown = cooldown;
         this.name = name;
+        this.tier = tier;
     }
 
     hit(enemy: Entity) {
