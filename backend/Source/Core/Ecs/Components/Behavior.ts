@@ -1,5 +1,5 @@
 import { Vec2 } from "../../../Utils/Math";
-import { Entity } from "../Core/Ecs";
+import { EcsSysStratFn, Entity } from "../Core/Ecs";
 import { Rigidbody } from "./Rigidbody";
 import { Status } from "./Status";
 import { Transform } from "./Transform";
@@ -12,13 +12,15 @@ class Behavior {
     public status: Status;
     public transform: Transform;
     public rigidbody: Rigidbody;
-    public staticColide: boolean = false;
+    public staticCollide: boolean = false;
     public staticNormal: Vec2[] = [];
     public staticCenter: Vec2[] = [];
 
     // Nearby enemies
     public inRange: Entity[] = [];
     public nearest: Entity | null;
+    public inRangeByTier: Record<string, Entity[]> = {};
+    public nearestByTier: Record<string, Entity> = {};
 
     // Attacking status
     public refresh: number = 0.0;
@@ -31,8 +33,12 @@ class Behavior {
     // Healing purpose
     public healing: boolean = false;
 
+    public current:EcsSysStratFn;
+    public previous:EcsSysStratFn;
+    public iterations:number = 0;
+    public stuck:number = 0
+
     //wander
-    // public wanderTheta:number = Math.PI / 2;
     public wanderVelocity:Vec2 = new Vec2();
     public wanderTimeMax:number = 80;
     public wanderTimeMin:number = 20;
@@ -49,6 +55,11 @@ class Behavior {
         this.status = status;
         this.transform = transform;
         this.rigidbody = rigidbody;
+    }
+
+    changeBehavior (newState:EcsSysStratFn):void {
+        this.previous = this.current;
+        this.current = newState;
     }
 }
 

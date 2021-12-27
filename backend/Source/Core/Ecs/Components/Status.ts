@@ -23,11 +23,13 @@ class Status {
     public readonly maxHealth: number;
     public readonly name: string;
     public readonly tier: string;
+    
     public critical: boolean = false;
 
     // Current Entity Stats
     public survived: number = 0.0;
     public kills: number = 0.0;
+    public beingHit: boolean = false;
 
     // Other enemy status
     public lastHit: Entity;
@@ -42,7 +44,7 @@ class Status {
         defense: number,
         cooldown: number,
         name: string,
-        tier: string
+        tier: string        
     ) {
         this.attack = attack;
         this.health = health;
@@ -55,7 +57,10 @@ class Status {
     }
 
     hit(enemy: Entity) {
+        
         this.lastHit = enemy;
+        this.beingHit = true;
+
         let damage = enemy.getStatus().attack;
         let enemyHealth = enemy.getStatus().health;
 
@@ -80,6 +85,7 @@ class Status {
             } else {
                 this.health -= damage -  this.defense;
             }
+            
         }
     }
 

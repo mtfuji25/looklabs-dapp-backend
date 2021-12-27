@@ -15,9 +15,11 @@ import { Transform } from "../Components/Transform";
 // System index imports
 import { startSystems } from "../Systems/Index";
 
+
 // Systems functions types
 type EcsSysEntFn = (entity: Entity, deltaTime: number) => (void);
 type EcsSysContFn = (data: EcsData, deltaTime: number) => (void);
+type EcsSysStratFn = (entity: Entity, grid:Grid, deltaTime: number) => (void);
 
 // Bit masked id type
 type BitMaskedId = Record<number, number>;
@@ -113,6 +115,7 @@ class ECS {
         entity.remStatus();
         entity.remRigidbody();
         entity.remBehavior();
+        
 
         // Remove the entity itself from the identification array
         delete this.entities[id[EntityKey]];
@@ -371,7 +374,7 @@ class Entity {
             this.layout &= (~masks.behavior);
         }
     }
-
+    
     destroy(): void {
         this.destroyed = true;
         this.ecs.deleteEntity(this.id);
@@ -379,4 +382,4 @@ class Entity {
 
 };
 
-export { ECS, Entity };
+export { ECS, Entity, EcsSysStratFn };
