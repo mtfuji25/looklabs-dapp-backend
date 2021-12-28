@@ -183,6 +183,7 @@ class PlayerLayer extends Layer {
     public static MAX_ATTACK:number = 20;
     public static MAX_SPEED:number = 0.05;
     public static MAX_DEFENSE:number = 5;
+    public static MAX_HEALTH:number = 150;
 
     // Current web socket server client
     private wsClient: WSClient;
@@ -243,7 +244,7 @@ class PlayerLayer extends Layer {
             // 0.04 * (attributesMap["Speed"] / 100.0),
             clamp(PlayerLayer.MAX_SPEED * (attributesMap["Speed"] / 100.0), PlayerLayer.MAX_SPEED * 0.4, PlayerLayer.MAX_SPEED),
             // Health
-            180,
+            PlayerLayer.MAX_HEALTH,
             // Defense
             // 5 * (attributesMap["Defence"] / 100.0),
             clamp(PlayerLayer.MAX_DEFENSE * (attributesMap["Defence"] / 100.0), PlayerLayer.MAX_DEFENSE * 0.4, PlayerLayer.MAX_DEFENSE),
@@ -271,6 +272,7 @@ class PlayerLayer extends Layer {
         PlayerLayer.playerCount++;
 
         this.self.addBehavior();
+        this.self.addStrategy();
 
         // Start to listen for connection
         // this.conListener = this.wsClient.addConListener((ws) => this.onWsConnection(ws))
