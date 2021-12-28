@@ -18,31 +18,33 @@ class AwaitLevel extends Level {
     private listener: Listener;
     private conListener: Listener;
 
-    onStart(): void {
+    async onStart(): Promise<void> {
         // Add msg listener
 
-        this.context.ws.request({
-            uuid: uuidv4(),
-            type: "request",
-            content: {
-                type: "game-status"
-            }
-        })
-        .then((response) => {
+        try {
+            const response = await this.context.ws.request({
+                uuid: uuidv4(),
+                type: "request",
+                content: {
+                    type: "game-status"
+                }
+            });
+
             const content = response.content as GameStatus;
+
             if (content.gameStatus == "lobby") {
-                this.context.engine.loadLevel(new LobbyLevel(
+                await this.context.engine.loadLevel(new LobbyLevel(
                     this.context, "Lobby",
                     {
                         gameId: content.gameId
                     }
                 ))
             }
-        })
-        .catch((err) => {
-            console.log(err);
+
+        } catch(e) {
+            console.log(e);
             this.context.close = true;
-        });
+        }
 
         this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
 

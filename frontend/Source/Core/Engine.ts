@@ -69,7 +69,7 @@ class Engine {
         this.level = new DefaultLevel(this.context); 
     }
 
-    start(asyncStart: () => (void)): void {
+    async start(): Promise<void> {
         console.log("Starting backend engine.");
 
         // Configure pixi application
@@ -84,28 +84,18 @@ class Engine {
             this.app.loader.add(resources[pack]);
         });
 
-        this.app.loader.onComplete.add(() => {
-            this.levelStart(asyncStart);
-        });
-
         // Start engine Web Socket client
         this.wsClient.start();
 
         // Effectlly load all the resources
         this.app.loader.load();
-    }
 
-    private levelStart(asyncStart: () => (void)): void {
         // Finally load the default level
         console.log("Loading level: ", this.level.getName());
-        this.level.onStart();
-
-        asyncStart();
+        await this.level.onStart();
     }
 
-    private count = 1000;
-
-    async loop() {
+    async loop(): Promise<void> {
         console.log("Entering main engine loop");
         
         while (!this.context.close) {
@@ -116,16 +106,16 @@ class Engine {
             this.context.stats.fps = 1.0 / this.context.stats.dt;
 
             // Run update fn of current level
-            this.level.onUpdate(this.context.stats.dt);
+            await this.level.onUpdate(this.context.stats.dt);
 
             // Run systems pendings
-            this.level.runPendings(this.context.stats.dt)
+            await this.level.runPendings(this.context.stats.dt)
 
             await sleep(1);
         }
     }
 
-    close(): void {
+    async close(): Promise<void> {
         console.log("Closing backend engine.");
 
         // Close current active level
@@ -135,10 +125,10 @@ class Engine {
         this.wsClient.close();
     }
 
-    loadLevel(level: Level): void {
+    async loadLevel(level: Level): Promise<void> {
  
         // First close the current running level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
             
         console.log("Loading level: ", level.getName());
 
@@ -146,18 +136,18 @@ class Engine {
         this.level = level;
 
         // Start level and put it to run
-        level.onStart();
+        await level.onStart();
     }
 
-    closeLevel(level: Level): void {
+    async closeLevel(level: Level): Promise<void> {
 
         console.log("Closing level: ", level.getName());
 
         // Close all level's systems
-        level.closeSystems();
+        await level.closeSystems();
 
         // Fire the onClose function on current level
-        level.onClose();
+        await level.onClose();
     }
 };
 

@@ -12,31 +12,34 @@ import { ResultsLevel } from "./Results";
 
 class DefaultLevel extends Level {
 
-    onStart(): void {
-        this.context.ws.onReady(() => {
-            this.context.ws.request({
+    async onStart(): Promise<void> {
+
+        // Waits for the ws client connection be stabilished
+        await this.context.ws.whenReady();
+
+        try {
+            const response = await this.context.ws.request({
                 uuid: uuidv4(),
                 type: "request",
                 content: {
                     type: "game-status"
                 }
-            })
-            .then((response) => {
-                const content = response.content as GameStatus;
-                console.log(response)
-                this.startLevels(content);
-            })
-            .catch((err) => {
-                console.log(err);
-                this.context.close = true;
             });
-        });
+
+            const content = response.content as GameStatus;
+            console.log(response);
+            await this.startLevels(content);
+
+        } catch(e) {
+            console.log(e);
+            this.context.close = true;
+        }
     }
 
-    startLevels(response : GameStatus) {
+    async startLevels(response : GameStatus) {
         switch (response.gameStatus) {
             case "lobby":
-                this.context.engine.loadLevel(
+                await this.context.engine.loadLevel(
                     new LobbyLevel(
                         this.context, "Lobby",
                         {
@@ -47,7 +50,7 @@ class DefaultLevel extends Level {
                 break;
 
             case "awaiting":
-                this.context.engine.loadLevel(
+                await this.context.engine.loadLevel(
                     new AwaitLevel(
                         this.context, "Awaiting",
                         {
@@ -58,7 +61,7 @@ class DefaultLevel extends Level {
                 break;
 
             case "not-found":
-                this.context.engine.loadLevel(
+                await this.context.engine.loadLevel(
                     new NotFoundLevel(
                         this.context, "Awaiting",
                         {

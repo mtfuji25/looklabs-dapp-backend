@@ -31,7 +31,7 @@ const $ = (name: string) => {
 // Root div to append engine's view
 const ROOT = $(ROOT_DIV_ID);
 
-const main = () => {
+const main = async () => {
 
     Sentry.init({
         dsn: "https://0310fb88d0254835be8a3d60b9a17bd6@o1091574.ingest.sentry.io/6108697",            
@@ -60,14 +60,11 @@ const main = () => {
     const engine = new Engine(wsClient, strapiClient, app, ROOT);
         
 
-    // Start the engine systems
-    engine.start(() => {
-        // Start the engine game loop
-        engine.loop().then(() => {
-            // Properly close the engine
-            engine.close();
-        });
-    });
+    await engine.start();
+
+    await engine.loop();
+
+    await engine.close();
 };
 
 main();
