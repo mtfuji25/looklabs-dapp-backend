@@ -6,7 +6,7 @@ import { Entity } from "../Core/Ecs";
 import { entitiesAlive } from "../Systems/Behavior";
 import { strategy_Explore } from "./Explore";
 
-const strategy_Flee = (entity:Entity, grid:Grid, deltaTime: number):void => {
+const strategy_Flee = (entity:Entity, grid:Grid, target?:Entity):void => {
 
     const behavior = entity.getBehavior();
     
@@ -18,13 +18,12 @@ const strategy_Flee = (entity:Entity, grid:Grid, deltaTime: number):void => {
         _runAwayFromRange(entity, grid);
     } else {
         // console.log("Decided RunAway from all enemies");
-        if (Math.random() > 0.5 && entitiesAlive > 2) {
+        if ((Math.random() > 0.5 && entitiesAlive > 2)) {
             _runAwayFromAll(entity, grid);
         } else {
             // switch behavior to EXPLORE
-            strategy_Explore(entity, grid, deltaTime);
+            strategy_Explore(entity, grid, target);
         }
-        
     }   
 }
 

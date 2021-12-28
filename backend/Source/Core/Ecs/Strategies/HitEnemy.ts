@@ -1,15 +1,20 @@
 import { Grid } from "../Components/Grid";
+import { Strategy } from "../Components/Strategy";
 import { Entity } from "../Core/Ecs";
 
 
-const strategy_HitEnemy = (entity:Entity, grid:Grid, deltaTime: number):void => {
+const strategy_HitEnemy = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
+    const strategy = entity.getStrategy();
     if (behavior.colliding.length == 1) {
-        // console.log("Decided hit current target");
         _hitTarget(entity);
     } else if (behavior.colliding.length > 1) {
-        // console.log("Decided hit strongest player in hit area");
-        _hitStrongest(entity);
+        const target = Strategy.pickTargetByPriority(behavior.colliding, strategy.getTierPriority())
+        if (target)  {
+            _hitTarget(target);
+        } else {
+            _hitStrongest(entity);
+        }
     }
 }
 

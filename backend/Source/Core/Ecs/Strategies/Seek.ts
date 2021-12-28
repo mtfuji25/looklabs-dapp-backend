@@ -2,114 +2,94 @@ import assert from "assert";
 import { Vec2 } from "../../../Utils/Math";
 import { DynamicEntity, Grid } from "../Components/Grid";
 import { Entity } from "../Core/Ecs";
-import { AStarFinder } from "astar-typescript";
 import { Behavior } from "../Components/Behavior";
-import { Rigidbody } from "../Components/Rigidbody";
 import { GridUtils } from "../../../Utils/GridUtils";
 import { strategy_Explore } from "./Explore";
 import { entitiesAlive } from "../Systems/Behavior";
+import { Strategy } from "../Components/Strategy";
 
-
-const strategy_Seek = (entity:Entity, grid:Grid, deltaTime: number):void => {
+const strategy_Seek = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
 
     if (behavior.staticCollide) {
-        // console.log("Entered Searching inRange node with A*");
         _seekNearestInRangeWithA(entity, grid);
         behavior.staticCollide = false;
     } else {
         // console.log("Entered Searching inRange node");                    
         if (entitiesAlive <= 5 || Math.random() > 0.8) {//the higher the value here, the longer the game
-            _seekNearestInRange(entity);
+            _seekNearestInRange(entity, grid);
         } else {
             // switch behavior to EXPLORE
-            strategy_Explore(entity, grid, deltaTime);
+            strategy_Explore(entity, grid);
         }
     }
 }
 
-const strategy_SeekNearest = (entity:Entity, grid:Grid, deltaTime: number):void => {
+const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
 
     if (behavior.staticCollide) {
         // console.log("Entered Searching outRange node with A*");
-        _seekNearestWithA(entity, grid);
+        _seekNearestWithA(entity, grid, target);
         behavior.staticCollide = false;
     } else {
         // console.log("Entered Searching outRange node");
-        _seekNearest(entity);
+        _seekNearest(entity, grid, target);
     }
 }
 
+const _seekNearest = (entity:Entity, grid:Grid, target?:Entity) => {
+    
+    let nearest:Entity =  _getNearest(entity, target);
+    
+    if (!nearest) {
+        _seekNearestInRange(entity, grid);
+        return;
+    }
+        
+    _seekTarget(nearest, entity, grid);
+}
 
-const _seekNearest = (entity: Entity) => {
+const _seekNearestInRange = (entity:Entity, grid:Grid) => {
+
+    let nearest: Entity = _getNearestInRange(entity);
+
+    if (!nearest) {
+        strategy_Explore(entity, grid);
+        return;
+    }
+        
+    _seekTarget(nearest, entity, grid);
+
+}
+
+const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
+
     const status = entity.getStatus();
-    const behavior = entity.getBehavior();
+
     const transform = entity.getTransform();
     const rigidbody = entity.getRigidbody();
-
-    const target = behavior.nearest;
-
-    if (!target)
-        return;
-    
     const enemy = target.getTransform();
 
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
         assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
     }
-
-    // behavior.attacking = false;
 }
 
-const _seekNearestInRange = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    let nearest: Entity;
-    let shortestDist = Number.MAX_SAFE_INTEGER;
-
-    behavior.inRange.map((other) => {
-        const dist = transform.pos.sub(
-            other.getTransform().pos
-        ).length();
-
-        if (dist < shortestDist) {
-            nearest = other;
-            shortestDist = dist;
-        }
-    });
-
-    if (!nearest)
-        return;
-
-    const enemy = nearest.getTransform();
+const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
     
-    if (!enemy.pos.equal(transform.pos)) {
-        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
-        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
-    }
-
-    // behavior.attacking = false;
-}
-
-const _seekNearestWithA = (entity: Entity, grid: Grid) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    const nearest = behavior.nearest;
     
-    if (!nearest)
+    let nearest:Entity =  _getNearest(entity, target);
+    
+    if (!nearest) 
         return;
+    
+    const behavior = entity.getBehavior();
+    const rigidbody = entity.getRigidbody();
     
     const other = grid.getDynamic(nearest);
     const dynamic = grid.getDynamic(entity);
-
 
     // Sources and direction vectors
     const sources: Vec2[] = _getFinderOrigins(behavior, dynamic, grid);
@@ -118,34 +98,18 @@ const _seekNearestWithA = (entity: Entity, grid: Grid) => {
     rigidbody.velocity = dir;
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
 
-    // behavior.attacking = false;
 }
 
 const _seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
+
     const rigidbody = entity.getRigidbody();
+    const behavior = entity.getBehavior();
 
-    let nearest: Entity;
-    let shortestDist = Number.MAX_SAFE_INTEGER;
-
-    behavior.inRange.map((other) => {
-        const dist = transform.pos.sub(
-            other.getTransform().pos
-        ).length();
-
-        if (dist < shortestDist) {
-            nearest = other;
-            shortestDist = dist;
-        }
-    });
+    let nearest: Entity = _getNearestInRange(entity);
 
     if (!nearest) {
-        
         return;
     }
-        
 
     const other = grid.getDynamic(nearest);
     const dynamic = grid.getDynamic(entity);
@@ -155,11 +119,54 @@ const _seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
     let dir: Vec2 | null = _getFinderDirection(entity, sources, other.index, grid);;
     rigidbody.velocity = dir;
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 7: ${rigidbody} Is NaN, dir was ${dir}`);
-    // behavior.attacking = false;
+}
+
+const _getNearest  = (entity:Entity, target?:Entity) => {
+    const status = entity.getStatus();
+    const priorities = entity.getStrategy().getTierPriority();
+
+    let nearest:Entity =  target ? target : entity.getBehavior().nearest;
+    if ((status.tier == "sigma" || status.tier == "alpha")  && entitiesAlive > 5 ) {
+        const priorityTarget = Strategy.pickNearestTarget(entity, priorities);
+        if (priorityTarget !== null) nearest = priorityTarget;
+    }
+    return nearest;
+
+}
+
+const _getNearestInRange = (entity:Entity) => {
+    const rigidbody = entity.getRigidbody();
+    const behavior = entity.getBehavior();
+    const transform = entity.getTransform();
+    const status = entity.getStatus();
+    const priorities = entity.getStrategy().getTierPriority();
+
+    let targets:Entity[] = [...behavior.inRange];
+
+    if ((status.tier == "sigma" || status.tier == "alpha") && entitiesAlive > 5) {
+        const priorityTargets = Strategy.pickTargetsInRange(entity, priorities);
+        if (priorityTargets.length > 0) targets = priorityTargets;
+    }
+
+    let nearest: Entity;
+    let shortestDist = Number.MAX_SAFE_INTEGER;
+
+    targets.map((other) => {
+        const dist = transform.pos.sub(
+            other.getTransform().pos
+        ).squareLength();
+
+        if (dist < shortestDist) {
+            nearest = other;
+            shortestDist = dist;
+        }
+    });
+    return nearest;
 }
 
 const _getFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Grid):Vec2[] => {
     const sources: Vec2[] = [];
+    
     behavior.staticCenter.map((center) => {
         const convertedCenter = GridUtils.convertPosToCell(GridUtils.convertFromNDC(center), grid);
         dynamic.ocupations.map((ocupation) => {
@@ -212,9 +219,7 @@ const _getFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec
             // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 43: ${rigidbody} Is NaN`);
         }
     }
-
     return dir;
 }
-
 
 export { strategy_Seek, strategy_SeekNearest }

@@ -1,16 +1,76 @@
 import { clamp } from "../../../Utils/Math";
 import { EcsData } from "../Interfaces";
 
-import { Behavior } from "../Components/Behavior";
 import { PlayerLayer } from "../../../Layers/Lobby/Player";
 import { strategy_Explore } from "../Strategies/Explore";
 import { strategy_Flee } from "../Strategies/Flee";
 import { strategy_HitEnemy } from "../Strategies/HitEnemy";
 import { strategy_Seek, strategy_SeekNearest } from "../Strategies/Seek";
+import { strategy_Evade } from "../Strategies/Evade";
 
 
 const ENTITY_RANGE = 0.1;
+const ENTITY_TIER_RANGE = 0.25;
 let entitiesAlive = 0;
+
+const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
+   
+    data.grids.map((grid) => {     
+        grid.dynamics.map((dynamic) => {
+            const entity = dynamic.entity;
+            // Get current player components
+            const status = entity.getStatus();
+            const behavior = entity.getBehavior();
+            const strategy = entity.getStrategy();
+
+            // reset state
+            status.beingHit = false;
+            behavior.attacking = false;
+
+            const lifePercent = (status.health / status.maxHealth) * 100;
+
+            // Healing checks
+            if (lifePercent >= strategy.okHealth) {
+                behavior.healing = false;
+            }
+
+            if (lifePercent < 100) {
+                const attackRange = (PlayerLayer.MAX_ATTACK - status.attack) * 0.004;
+                status.health += clamp(attackRange, 0.02, 0.03);
+            }
+
+            // Update cooldown
+            behavior.refresh += deltaTime; 
+            behavior.stuck = behavior.staticCollide ? behavior.stuck + 1 : 0;
+
+            //by default, all entities are set to EXPLORE 
+            behavior.changeBehavior(strategy_Explore);
+            
+            if ((lifePercent < strategy.criticalHealth || behavior.healing) && entitiesAlive > 5) {
+                // RunAway decision
+                if (status.tier == "delta") {
+                    behavior.changeBehavior(strategy_Evade);
+                } else {
+                    behavior.changeBehavior(strategy_Flee);        
+                }
+                behavior.healing = true;
+            // Collision checking
+            } else if (behavior.colliding.length > 0) {
+                behavior.changeBehavior(strategy_HitEnemy);
+            // Inrange check
+            } else if (behavior.inRange.length > 0) {
+                behavior.changeBehavior(strategy_Seek); 
+            // Out range check
+            } else if (behavior.inRange.length == 0) {
+                behavior.changeBehavior(strategy_SeekNearest); 
+            }
+            // execute behavior
+            behavior.current(entity, grid);
+
+        });
+    });
+ 
+};
 
 const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
 
@@ -55,46 +115,33 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
                 // Get other entity
                 const other = grid.dynamics[j].entity;
 
-                // if (other.destroyed || other.getStatus().health <= 0) continue;
-                if (entity.destroyed || other.destroyed)
-                        return;
-
+                if (other.destroyed || other.getStatus().health <= 0) continue;
+                
                 // Get other entity tranform
                 const otherBehavior = other.getBehavior();
                 const otherTransform = other.getTransform();
                 const otherTier = other.getStatus().tier;
                 
-                if (!otherBehavior)
-                    return;
-
-                if (!otherTransform)
-                    return;
+                if (!otherBehavior || !otherTransform)
+                    continue;
 
                 // Calculates the dist to other entity
                 const dist = transform.pos.sub(
                     otherTransform.pos
                 ).length();
                 
-                // console.log(dist);
-
                 // If other entity is in range add to array
                 if (dist <= ENTITY_RANGE) {
                     behavior.inRange.push(other);
                     otherBehavior.inRange.push(entity);
-                    
-                    if (otherBehavior.inRangeByTier[status.tier]) {
-                        otherBehavior.inRangeByTier[status.tier].push(entity); 
-                    } else {
-                        otherBehavior.inRangeByTier[status.tier] = [entity];
-                    }
+                }
 
-                    
-                    if (behavior.inRangeByTier[otherTier]) {
-                        behavior.inRangeByTier[otherTier].push(other); 
-                    } else {
-                        behavior.inRangeByTier[otherTier] = [other];
-                    }
-                    
+                if (!otherBehavior.inRangeByTier[status.tier]) otherBehavior.inRangeByTier[status.tier] = [];
+                if (!behavior.inRangeByTier[otherTier]) behavior.inRangeByTier[otherTier] = [];
+
+                if (dist <= ENTITY_TIER_RANGE) {
+                    otherBehavior.inRangeByTier[status.tier].push(entity); 
+                    behavior.inRangeByTier[otherTier].push(other); 
                 }
 
                 // If other entity is the nearest
@@ -130,61 +177,6 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
 }
 
 
-const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
-   
-    data.grids.map((grid) => {     
-        grid.dynamics.map((dynamic) => {
-            const entity = dynamic.entity;
-            // Get current player components
-            const status = entity.getStatus();
-            const behavior = entity.getBehavior();
 
-            // reset state
-            status.beingHit = false;
-            behavior.attacking = false;
-
-            const lifePercent = (status.health / status.maxHealth) * 100;
-            // Healing checks
-            if (lifePercent >= 40) {
-                behavior.healing = false;
-            }
-
-            if (lifePercent < 100) {
-                const attackRange = (PlayerLayer.MAX_ATTACK - status.attack) * 0.004;
-                status.health += clamp(attackRange, 0.009, 0.05);
-            }
-
-            // Update cooldown
-            behavior.refresh += deltaTime; 
-            behavior.stuck = behavior.staticCollide ? behavior.stuck + 1 : 0;
-
-            //by default, all entities are set to EXPLORE 
-            behavior.changeBehavior(strategy_Explore);
-            
-
-            // Life check
-            
-            if ((lifePercent < PlayerLayer.MAX_HEALTH * 0.25 || behavior.healing) && (!Behavior.berserker)) {
-                // RunAway decision
-                behavior.changeBehavior(strategy_Flee);        
-                behavior.healing = true;
-            // Collision checking
-            } else if (behavior.colliding.length > 0) {
-                behavior.changeBehavior(strategy_HitEnemy);
-            // Inrange check
-            } else if (behavior.inRange.length > 0) {
-                behavior.changeBehavior(strategy_Seek); 
-            // Out range check
-            } else if (behavior.inRange.length == 0) {
-                behavior.changeBehavior(strategy_SeekNearest); 
-            }
-
-            // execute behavior
-            behavior.current(entity, grid, deltaTime);
-
-        });
-    });
- 
-};
 
 export { entitiesAlive, sys_UpdateBehavior, sys_CheckInRange };
