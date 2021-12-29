@@ -7,7 +7,8 @@ const requests = {
 
 const msgTypes = {
     enemy: "enemy",
-    gameStatus: "game-status"
+    gameStatus: "game-status",
+    remainPlayers: "remain-players"
 };
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time" | "player-names";
