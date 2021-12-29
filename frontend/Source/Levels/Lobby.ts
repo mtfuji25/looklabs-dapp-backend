@@ -10,7 +10,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameStatus, Listener, msgTypes, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
+import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 
@@ -23,13 +23,8 @@ interface LobbyLevelContext extends ViewContext {
 
 class LobbyLevel extends Level {
 
-    private remaining: number = 0;
-    private responseParticipant: any | null = null;
-    private responseWinner: any | null = null;
-
     private gameStatusListener: Listener;
     private connectionListener: Listener;
-    private playerRemainsListener: Listener;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -49,11 +44,6 @@ class LobbyLevel extends Level {
         this.connectionListener = this.context.ws.addListener(
             "connection",
             (event) => this.onConnectionEvent(event)
-        );
-
-        this.playerRemainsListener = this.context.ws.addListener(
-            "remain-players",
-            (msg) => this.onPlayerRemainsMsg(msg)
         );
 
         // Sets bg color of main app
@@ -113,47 +103,13 @@ class LobbyLevel extends Level {
         );
     }
 
-    async onUpdate(deltaTime: number) {
-        if (this.remaining == 1) {
-
-            try {
-                const participants = await this.context.strapi.getGameParticipants(this.props.gameId);
-                this.responseParticipant = participants;
-                let splitId = (participants[0].nft_id).split('/')[1];
-                let address = (participants[0].nft_id).split('/')[0];
-                if(splitId > 50) splitId -= 50;
-                if(splitId == 0) splitId += 1;
-
-                this.responseWinner = await this.context.strapi.getParticipantDetails(address, splitId);
-            } catch(e) {
-                console.log("Failed to request game participants...");
-            }
-
-        }
-    }
+    async onUpdate(deltaTime: number) {}
 
     onClose(): void {
         this.layerStack.destroy();
 
         this.connectionListener.destroy();
         this.gameStatusListener.destroy();
-        this.playerRemainsListener.destroy();
-    }
-
-    onPlayerRemainsMsg(msg: ServerMsg) {
-
-        // Check the veracity of message type
-        if (msg.content.msgType == msgTypes.remainPlayers) {
-
-            // Perfom the cast to corret msg type
-            const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
-
-            this.remaining = remainingPlayers;
-        }
-
-        // Doesn't handles the event, allow event propagation
-        // in the event listeners queue
-        return false;
     }
 
     // Handles all game-status messages from backend
@@ -174,8 +130,6 @@ class LobbyLevel extends Level {
                     "Results",
                     {
                         gameId: content.gameId,
-                        responseParticipant: this.responseParticipant,
-                        responseWinner: this.responseWinner,
                     }
                 ));
             }
