@@ -13,6 +13,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { MapColliderLayer } from "../Layers/Lobby/MapCollider";
 import { ReplyableMsg } from "../Clients/WebSocket";
 import { GameStatus, GameStatusListener, OnConnectionListener, PlayerNames, PlayerNamesListener, requests } from "../Clients/Interfaces";
+import { GridUtils } from "../Utils/GridUtils";
 
 class LobbyLevel extends Level {
 
@@ -78,6 +79,8 @@ class LobbyLevel extends Level {
     }
 
     startGame() {
+        
+        GridUtils.createAStarFinder();
         const mapCollider = new MapColliderLayer(this.ecs);
         const grid = mapCollider.getSelf().getGrid();
         // Initial broadcast for players length
