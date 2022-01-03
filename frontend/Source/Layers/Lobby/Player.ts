@@ -140,7 +140,7 @@ class PlayerLayer extends Layer {
         });
 
 
-        this.container.children.sort(function(a,b) {
+        this.container.children.sort((a,b) => {
             if (a.position.y > b.position.y) return 1;
             if (a.position.y < b.position.y) return -1;
             if (a.position.x > b.position.x) return 1;
@@ -201,16 +201,20 @@ class PlayerLayer extends Layer {
         
 
         switch (char_class) {
-            case "Avian":
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`);
+            
+            case "Avians":
+            case "Avian":    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`);
                 break;
             case "Hounds":
+            case "Hound":
                 sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`); 
                 break;
             case "Insectoids":
+            case "Insectoid":
                 sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`);
                 break;
             case 'Serpents':
+            case 'Serpent':
                 sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`);
                 break;
             default:
