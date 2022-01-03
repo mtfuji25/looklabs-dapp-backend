@@ -23,9 +23,11 @@ const sys_CheckOverlap = (data: EcsData, deltaTime: number): void => {
     // Iterates through all grids in system
     data.grids.map((grid) => {
         for (let i = 0; i < grid.dynamics.length; ++i) {
+            if (grid.dynamics[i].entity.getStatus().health <= 0) continue;
             const rec1 = grid.dynamics[i].entity.getRectangle();
 
             for (let j = i + 1; j < grid.dynamics.length; ++j) {
+                if (grid.dynamics[j].entity.getStatus().health <= 0) continue;
                 const rec2 = grid.dynamics[j].entity.getRectangle();
 
                 if (aabbCheck(rec1, rec2)) {
