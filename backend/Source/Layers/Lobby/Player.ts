@@ -369,7 +369,7 @@ class PlayerLayer extends Layer {
         // Removes itself from the grid
         this.grid.removeDynamic(this.self);
 
-        // Destroy the self entity
+        // Removes itself from ecs
         this.self.destroy();
     }
 

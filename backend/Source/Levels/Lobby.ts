@@ -173,6 +173,8 @@ class LobbyLevel extends Level {
 
                 let deadPlayer: PlayerLayer;
 
+                console.log("Processing dead player: ", player.strapiID);
+
                 // Find the dead player and remove it from current player storage
                 this.players = this.players.filter((player) => {
                     if (player.strapiID === strapId) {
@@ -182,6 +184,8 @@ class LobbyLevel extends Level {
 
                     return true;
                 });
+
+                if (!deadPlayer) return;
 
                 // Removes the dead player from the layerstack
                 this.layerStack.popLayer(deadPlayer);
@@ -218,6 +222,9 @@ class LobbyLevel extends Level {
 
             // Iserts player in the layer stack
             this.layerStack.pushLayer(player);
+
+            // Saves a copy of player for on die use
+            this.players.push(player);
 
             // Create player entrant log in strapi
             try {
@@ -375,8 +382,6 @@ class LobbyLevel extends Level {
     // Default level's close method, called when engine
     // switch between levels or close itself
     onClose(): void {
-        this.layerStack.destroy();
-
         // Listeners destruction
         this.gameNamesListener.destroy();
         this.gameStatusListener.destroy();
