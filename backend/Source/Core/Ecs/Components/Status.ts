@@ -1,3 +1,5 @@
+import { PlayerLayer } from "../../../Layers/Lobby/Player";
+import { clamp } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 
 interface StatusResult {
@@ -61,18 +63,26 @@ class Status {
         this.lastHit = enemy;
         this.beingHit = true;
 
-        let damage = enemy.getStatus().attack;
-        let enemyHealth = enemy.getStatus().health;
+        const status = enemy.getStatus();
+        let damage = status.attack;
+        
 
-        if (enemyHealth > 0.0) {
+        if (status.health > 0.0) {
+
+            if (this.tier == "delta" && (status.tier == "sigma" || status.tier == "alpha")) {
+                if (Math.random() > 0.5) {
+                    const healthMult = status.health / PlayerLayer.MAX_HEALTH;
+                    damage *= clamp(healthMult, 0.7, 1.0);
+                }
+            }
             // 8% critical rate
             if (Math.random() < 0.08) {
-                damage += Math.random() * 30;
+                damage += Math.random() * (PlayerLayer.MAX_ATTACK * 2);
                 this.lastHit.getStatus().critical = true;
             } else {
                 // 15% miss rate
                 if (Math.random() < 0.15) {
-                    damage -= Math.random() * 30;
+                    damage -= Math.random() * (PlayerLayer.MAX_ATTACK * 2);
                 }
             }
 
@@ -95,6 +105,10 @@ class Status {
 
     setOnDamage(fn: OnDamageFn) {
         this.onDamage = fn;
+    }
+
+    log() {
+        console.log(`PLAYER TIER: ${this.tier} ATTACK: ${(100 * this.attack)/PlayerLayer.MAX_ATTACK}` );
     }
 }
 
