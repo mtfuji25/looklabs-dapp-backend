@@ -1,40 +1,62 @@
 import { PlayerLayer } from "../../../Layers/Lobby/Player";
 import { Entity } from "../Core/Ecs";
+import { PathData } from "../Interfaces";
 import { entitiesAlive } from "../Systems/Behavior";
 
 class Strategy {
 
-    public criticalHealth:number;
-    public okHealth:number;
+    public criticalHealth:number = 35;
+    public okHealth:number = 40;
+    public pathData:PathData;
     private entity:Entity;
-    private aggressive:boolean;
+    private tierPriority:string[];
 
     constructor (entity:Entity) {
         this.entity = entity;
 
         const status = entity.getStatus();
+        const r = Math.floor(Math.random() * 100);
         
         switch (status.tier) {
 
         case "sigma":
             this.criticalHealth = 20;
-            this.okHealth = 30;
+            this.okHealth = 25;
+            if (r > 70) {
+                this.tierPriority = ["sigma","beta","alpha",];
+            } else if (r > 50) {
+                this.tierPriority = ["beta","alpha","sigma"];
+            } else {
+                this.tierPriority = ["sigma", "alpha", "beta"];
+            }
+
             break;
         case "alpha":        
-            this.criticalHealth = 30;
-            this.okHealth = 40;
+            this.criticalHealth = 20;
+            this.okHealth = 25;
+            if (r > 70) {
+                this.tierPriority = ["alpha","beta","sigma"];
+            } else if (r > 50) {
+                this.tierPriority = ["beta","alpha","sigma",];
+            } else {
+                this.tierPriority = ["sigma","beta","alpha"];
+            }
+           
             break;
         case "beta":
-            this.criticalHealth = 35;            
-            this.okHealth = 45;
+            if (r > 50) {
+                this.tierPriority = ["beta","sigma","alpha"];
+            } else {
+                this.tierPriority = ["beta","alpha","sigma"];
+            }
             break;
         default:
             this.criticalHealth = 45;
-            this.okHealth = 55;
+            this.okHealth = 50;
+            this.tierPriority = ["beta","delta"];
             break;
         }
 
-        this.aggressive = Math.random() > 0.5;
     }
 
     public getTierPriority ():string[] {
@@ -42,41 +64,28 @@ class Strategy {
         const status = this.entity.getStatus();
         const lifePercent = (status.health / status.maxHealth) * 100;
         
-        if (entitiesAlive < 5) return ["sigma","alpha","beta","delta"];        
+        if (entitiesAlive < 5) return [];        
 
         switch (status.tier) {
             case "sigma":
-                if (this.aggressive) {
-                    return ["sigma","alpha"];                
-                }
-                return ["alpha","sigma","beta"];                
             case "alpha":    
-                if (this.aggressive) {
-                    return ["sigma","alpha"];                
-                } 
-                return ["alpha","sigma","beta"];                
-                    
+                return this.tierPriority;                
             case "beta":
                 if (lifePercent > this.criticalHealth) {
-                    if (status.attack > PlayerLayer.MAX_ATTACK * 0.7) {
+                    if (status.attack > PlayerLayer.MAX_ATTACK * 0.65 ) {
                         return ["alpha", "sigma", "beta"];
                     }
-                    if (this.aggressive) 
-                        return ["alpha", "beta", "delta", "sigma"];
-                    return ["beta", "delta", "alpha", "sigma"];
                 }
-                return ["beta", "delta"];
+                return this.tierPriority;
                 
             default:
                 if (lifePercent > this.criticalHealth) {
                     if (status.attack > PlayerLayer.MAX_ATTACK * 0.4) {
-                        if (this.aggressive) 
-                            return ["alpha", "beta", "sigma", "delta" ];
-                        return ["beta", "delta"];
+                        return ["beta",  "delta", "alpha",  "sigma"];
                     }
-                    return ["beta", "delta", "alpha", "sigma"];
+                    
                 } 
-                return ["delta"];
+                return this.tierPriority;
         }
     }
 
@@ -97,6 +106,7 @@ class Strategy {
             if (behavior.nearestByTier[tier] !== undefined) return behavior.nearestByTier[tier];
         });
 
+        //if all else fails, return nearest
         if (behavior.nearest) return behavior.nearest;
         return null;
     }
@@ -108,7 +118,7 @@ class Strategy {
             if (target) return target;
         });
     
-        // Sort based on attack
+        // If all else fails, Sort based on attack
         entities.sort((a, b) => {
             const attackA = a.getStatus().attack;
             const attackB = b.getStatus().attack;
