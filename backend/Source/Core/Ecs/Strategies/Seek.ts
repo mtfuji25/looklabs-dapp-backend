@@ -15,11 +15,9 @@ const strategy_Seek = (entity:Entity, grid:Grid, target?:Entity):void => {
         _seekNearestInRangeWithA(entity, grid);
         behavior.staticCollide = false;
     } else {
-        // console.log("Entered Searching inRange node");                    
-        if (entitiesAlive <= 5 || Math.random() > 0.8) {//the higher the value here, the longer the game
-            _seekNearestInRange(entity, grid);
+        if (entitiesAlive < 6 || Math.random() > 0.7) {//the higher the value here, the longer the game            
+            _seekNearestInRange(entity, grid, entitiesAlive > 20);
         } else {
-            // switch behavior to EXPLORE
             strategy_Explore(entity, grid);
         }
     }
@@ -29,30 +27,32 @@ const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => 
     const behavior = entity.getBehavior();
 
     if (behavior.staticCollide) {
-        // console.log("Entered Searching outRange node with A*");
         _seekNearestWithA(entity, grid, target);
         behavior.staticCollide = false;
     } else {
-        // console.log("Entered Searching outRange node");
         _seekNearest(entity, grid, target);
     }
 }
 
 const _seekNearest = (entity:Entity, grid:Grid, target?:Entity) => {
-    
+    // console.log("seek nearest ");
     let nearest:Entity =  _getNearest(entity, target);
     
     if (!nearest) {
-        _seekNearestInRange(entity, grid);
+        if (entity.getBehavior().inRange.length > 0) {
+            _seekNearestInRange(entity, grid);
+        } else {
+            strategy_Explore(entity, grid);
+        }
         return;
     }
         
     _seekTarget(nearest, entity, grid);
 }
 
-const _seekNearestInRange = (entity:Entity, grid:Grid) => {
-
-    let nearest: Entity = _getNearestInRange(entity);
+const _seekNearestInRange = (entity:Entity, grid:Grid, prioritize:boolean = false) => {
+    // console.log("seek Range ")
+    let nearest: Entity = prioritize ? _getNearestInTierRange(entity) : _getNearestInRange(entity);
 
     if (!nearest) {
         strategy_Explore(entity, grid);
@@ -74,40 +74,56 @@ const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
     if (!enemy.pos.equal(transform.pos)) {
         rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
         assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
+    } else {
+        strategy_Explore(entity, grid);
     }
 }
 
 const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
     
-    
+    // console.log("Seek Nearest A");
     let nearest:Entity =  _getNearest(entity, target);
     
-    if (!nearest) 
+    if (!nearest) {
+        if (entity.getBehavior().inRange.length > 0) {
+            _seekNearestInRangeWithA(entity, grid);
+        } else {
+            strategy_Explore(entity, grid);
+        }
         return;
+    }
+        
     
     const behavior = entity.getBehavior();
     const rigidbody = entity.getRigidbody();
     
     const other = grid.getDynamic(nearest);
     const dynamic = grid.getDynamic(entity);
-
+    
     // Sources and direction vectors
-    const sources: Vec2[] = _getFinderOrigins(behavior, dynamic, grid);
-    let dir: Vec2 | null = _getFinderDirection(entity, sources, other.index, grid);
-
-    rigidbody.velocity = dir;
+    const sources: Vec2[] = _getPathFinderOrigins(behavior, dynamic, grid);
+    let dir: Vec2 | null = _getPathFinderDirection(entity, sources, other.index, grid);
+    if (!dir) {
+        rigidbody.velocity = _unstuck(dynamic);
+    } else {
+        rigidbody.velocity = dir;
+    }
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
-
 }
 
-const _seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
-
+const _seekNearestInRangeWithA = (entity: Entity, grid: Grid, prioritize:boolean = false) => {
+    // console.log("Seek Range A");
     const rigidbody = entity.getRigidbody();
     const behavior = entity.getBehavior();
-
-    let nearest: Entity = _getNearestInRange(entity);
+    
+    let nearest: Entity = prioritize ? _getNearestInTierRange(entity) : _getNearestInRange(entity);
 
     if (!nearest) {
+        if (prioritize) {
+            strategy_Explore(entity, grid);
+        } else {
+            _seekNearestInRangeWithA(entity, grid, true);
+        }
         return;
     }
 
@@ -115,9 +131,15 @@ const _seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
     const dynamic = grid.getDynamic(entity);
 
     // Sources and direction vectors
-    const sources: Vec2[] =  _getFinderOrigins(behavior, dynamic, grid);
-    let dir: Vec2 | null = _getFinderDirection(entity, sources, other.index, grid);;
-    rigidbody.velocity = dir;
+    const sources: Vec2[] =  _getPathFinderOrigins(behavior, dynamic, grid);
+    let dir: Vec2 | null = _getPathFinderDirection(entity, sources, other.index, grid);
+    if (!dir) {
+        // console.log("getting unstuck");
+        rigidbody.velocity = _unstuck(dynamic);
+        
+    } else {
+        rigidbody.velocity = dir;
+    }
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 7: ${rigidbody} Is NaN, dir was ${dir}`);
 }
 
@@ -135,19 +157,11 @@ const _getNearest  = (entity:Entity, target?:Entity) => {
 }
 
 const _getNearestInRange = (entity:Entity) => {
-    const rigidbody = entity.getRigidbody();
+
     const behavior = entity.getBehavior();
     const transform = entity.getTransform();
-    const status = entity.getStatus();
-    const priorities = entity.getStrategy().getTierPriority();
 
     let targets:Entity[] = [...behavior.inRange];
-
-    if ((status.tier == "sigma" || status.tier == "alpha") && entitiesAlive > 5) {
-        const priorityTargets = Strategy.pickTargetsInRange(entity, priorities);
-        if (priorityTargets.length > 0) targets = priorityTargets;
-    }
-
     let nearest: Entity;
     let shortestDist = Number.MAX_SAFE_INTEGER;
 
@@ -164,23 +178,59 @@ const _getNearestInRange = (entity:Entity) => {
     return nearest;
 }
 
-const _getFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Grid):Vec2[] => {
-    const sources: Vec2[] = [];
+const _getNearestInTierRange = (entity:Entity) => {
+
+    const behavior = entity.getBehavior();
+    const transform = entity.getTransform();
+    const priorities = entity.getStrategy().getTierPriority();
+
+    let targets:Entity[] = [...behavior.inRange];
+
+    const priorityTargets = Strategy.pickTargetsInRange(entity, priorities);
+    if (priorityTargets.length > 0) targets = priorityTargets;
     
-    behavior.staticCenter.map((center) => {
-        const convertedCenter = GridUtils.convertPosToCell(GridUtils.convertFromNDC(center), grid);
-        dynamic.ocupations.map((ocupation) => {
-            const diff = convertedCenter.abs(ocupation);
-            // Checks if is axis aligned neighbor
-            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
-                sources.push(ocupation);
-            }
-        });
+    if (targets.length == 0) {
+        //add all tiers in range
+        targets = [ ...behavior.inRangeByTier['sigma'], ...behavior.inRangeByTier['alpha'], ...behavior.inRangeByTier['beta'], ...behavior.inRangeByTier['delta']];
+        return targets[Math.floor(Math.random() * targets.length)];
+    } 
+
+    let nearest: Entity;
+    let shortestDist = Number.MAX_SAFE_INTEGER;
+    targets.map((other) => {
+        const dist = transform.pos.sub(
+            other.getTransform().pos
+        ).squareLength();
+
+        if (dist < shortestDist) {
+            nearest = other;
+            shortestDist = dist;
+        }
     });
+    return nearest;
+}
+
+const _getPathFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Grid):Vec2[] => {
+    const sources: Vec2[] = [];
+    if (behavior.staticCenter.length == 0) {
+        sources.push(dynamic.index);
+    } else {
+        behavior.staticCenter.map((center) => {
+            const convertedCenter = GridUtils.convertPosToCell(GridUtils.convertFromNDC(center), grid);
+            dynamic.ocupations.map((ocupation) => {
+                const diff = convertedCenter.abs(ocupation);
+                // Checks if is axis aligned neighbor
+                if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
+                    sources.push(ocupation);
+                }
+            });
+        });
+    }
+    
     return sources;
 }
 
-const _getFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec2, grid:Grid):Vec2 => {
+const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec2, grid:Grid):Vec2 => {
     let dir: Vec2 | null = null;
     sources.map((source, index) => {
         if (!dir)
@@ -190,36 +240,68 @@ const _getFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec
             source, destinationIndex
         );
 
-        if (path === null || path.length < 2) {
-            // console.log("Source of null path: ", source)
-            // console.log("Source of null path: ", other.index)
+        if (!path || path.length < 2) {
             return;
-        }
+        } 
 
         const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
-        const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
+            const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
 
-        if (!dest.equal(origin)){
-            dir = dir.add(dest.sub(origin));
-            // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
-        }
+            if (!dest.equal(origin)){
+                dir = dir.add(dest.sub(origin));
+                // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
+            }    
     });
 
-    const nearest = entity.getBehavior().nearest;
     const speed = entity.getStatus().speed;
-    const pos = entity.getTransform().pos;
-
+    
     if (dir && (!dir.equal(new Vec2(0, 0)))) {
         dir = GridUtils.convertToNDC(dir).normalize().muls(speed);
-        // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 42: ${rigidbody} Is NaN`);
-    } else {
-        const enemyPos = nearest.getTransform().pos;
-        if (!enemyPos.equal(pos)) {
-            dir = enemyPos.sub(pos).normalize().muls(speed);
-            // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 43: ${rigidbody} Is NaN`);
+        return dir;
+    }
+
+    return null;
+}
+
+const escapePoints:Vec2[] = [  new Vec2(-0.3707,0.2155), new Vec2(-0.3707,-0.2845), new Vec2(0.3879,-0.2845), new Vec2(0.3879,0.2155)]
+
+const _unstuck = (dynamic:DynamicEntity):Vec2 => {
+    
+    const status = dynamic.entity.getStatus();
+
+    if (entitiesAlive > 2 ) {
+        const nearest = dynamic.entity.getBehavior().nearest;
+        const transform = dynamic.entity.getTransform();
+        
+        if (entitiesAlive > 20 && nearest) {
+            const enemyPos = nearest.getTransform().pos;
+            
+            if (!enemyPos.equal(transform.pos)) {
+               return enemyPos.sub(transform.pos).normalize().muls(status.speed);
+            }
+        } else {
+            // get nearest point in escapePoints
+            let nearestPoint: Vec2;
+            let shortestDist = Number.MAX_SAFE_INTEGER;
+            escapePoints.map((pos) => {
+                const dist = transform.pos.sub(
+                    pos
+                ).squareLength();
+
+                if (dist < shortestDist) {
+                    nearestPoint = pos;
+                    shortestDist = dist;
+                }
+            });
+            return nearestPoint.sub(transform.pos).normalize().muls(status.speed);
         }
     }
-    return dir;
+
+    const randomVecs = [new Vec2(0.7,-0.7), new Vec2(-0.7,-0.7), new Vec2(0.7,0.7), new Vec2(-0.7,0.7), new Vec2(1,0), new Vec2(-1,0), new Vec2(0,-1), new Vec2(0,1)];
+    const v = randomVecs[Math.floor(Math.random() * randomVecs.length)];
+
+    return v.muls(status.speed);
+    
 }
 
 export { strategy_Seek, strategy_SeekNearest }
