@@ -11,17 +11,13 @@ const strategy_Flee = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
     
     if (behavior.attacking) {
-        // console.log("Decided RunAway from current target");
         _runAwayFromTarget(entity, grid);
     } else if (behavior.inRange.length > 0) {
-        // console.log("Decided RunAway from relative range enemies");
         _runAwayFromRange(entity, grid);
     } else {
-        // console.log("Decided RunAway from all enemies");
         if ((Math.random() > 0.5 && entitiesAlive > 2)) {
             _runAwayFromAll(entity, grid);
         } else {
-            // switch behavior to EXPLORE
             strategy_Explore(entity, grid, target);
         }
     }   

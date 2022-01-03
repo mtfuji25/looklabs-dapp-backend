@@ -31,8 +31,6 @@ const _runAwayFromAll = (entity: Entity, grid: Grid) => {
 
     rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 3: ${rigidbody} Is NaN`);
-
-    // behavior.attacking = false;
 }
 
 const _solveWall = (enemyPosition:Vec2, entityPosition:Vec2, behavior:Behavior):Vec2 => {

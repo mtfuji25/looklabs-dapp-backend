@@ -35,11 +35,8 @@ class Behavior {
 
     public current:EcsSysStratFn;
     public previous:EcsSysStratFn;
-    public iterations:number = 0;
-    public stuck:number = 0
-
+    
     //wander
-    public wanderTheta:number = Math.PI / 2;
     public wanderVelocity:Vec2 = new Vec2();
     public wanderTimeMax:number = 80;
     public wanderTimeMin:number = 20;
