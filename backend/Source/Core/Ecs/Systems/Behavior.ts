@@ -1,16 +1,23 @@
-import { clamp } from "../../../Utils/Math";
 import { EcsData } from "../Interfaces";
-
-import { PlayerLayer } from "../../../Layers/Lobby/Player";
 import { strategy_Explore } from "../Strategies/Explore";
 import { strategy_Flee } from "../Strategies/Flee";
 import { strategy_HitEnemy } from "../Strategies/HitEnemy";
 import { strategy_Seek, strategy_SeekNearest } from "../Strategies/Seek";
 import { strategy_Evade } from "../Strategies/Evade";
+import { Behavior } from "../Components/Behavior";
+import { finalPlayersAreStuck, strategy_MoveOnPath } from "../Strategies/MoveOnPath";
 
 
 const ENTITY_RANGE = 0.1;
-const ENTITY_TIER_RANGE = 0.25;
+const ENTITY_TIER_RANGE = 0.5;
+
+const regeneration:Record<string, number> = {
+"sigma": 0.03,
+"alpha": 0.03,
+"beta": 0.03,
+"delta": 0.045,
+};
+
 let entitiesAlive = 0;
 
 const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
@@ -22,6 +29,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             const status = entity.getStatus();
             const behavior = entity.getBehavior();
             const strategy = entity.getStrategy();
+            const rigibody = entity.getRigidbody();
 
             // reset state
             status.beingHit = false;
@@ -35,42 +43,52 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             }
 
             if (lifePercent < 100) {
-                const attackRange = (PlayerLayer.MAX_ATTACK - status.attack) * 0.004;
-                status.health += clamp(attackRange, 0.02, 0.03);
+                status.health += regeneration[status.tier];
             }
 
             // Update cooldown
             behavior.refresh += deltaTime; 
-            behavior.stuck = behavior.staticCollide ? behavior.stuck + 1 : 0;
 
-            //by default, all entities are set to EXPLORE 
-            behavior.changeBehavior(strategy_Explore);
-            
-            if ((lifePercent < strategy.criticalHealth || behavior.healing) && entitiesAlive > 5) {
-                // RunAway decision
-                if (status.tier == "delta") {
-                    behavior.changeBehavior(strategy_Evade);
-                } else {
-                    behavior.changeBehavior(strategy_Flee);        
+            // special behavior designed to fix players who might get stuck at the end of the game
+            if (finalPlayersAreStuck(dynamic)) {
+                strategy_MoveOnPath(entity, grid);
+            } else {
+                //by default, all entities are set to EXPLORE 
+                behavior.changeBehavior(strategy_Explore);
+                
+                if ((lifePercent < strategy.criticalHealth || behavior.healing) && entitiesAlive > 5 && !Behavior.berserker) {
+                    // RunAway decision
+                    if (status.tier == "delta") {
+                        behavior.changeBehavior(strategy_Evade);
+                    } else {
+                        behavior.changeBehavior(strategy_Flee);        
+                    }
+                    behavior.healing = true;
+                // Collision checking
+                } else if (behavior.colliding.length > 0) {
+                    behavior.changeBehavior(strategy_HitEnemy);
+                // Inrange check
+                } else if (behavior.inRange.length > 0) {
+                    behavior.changeBehavior(strategy_Seek); 
+                // Out range check
+                } else if (behavior.inRange.length == 0) {
+                    behavior.changeBehavior(strategy_SeekNearest); 
                 }
-                behavior.healing = true;
-            // Collision checking
-            } else if (behavior.colliding.length > 0) {
-                behavior.changeBehavior(strategy_HitEnemy);
-            // Inrange check
-            } else if (behavior.inRange.length > 0) {
-                behavior.changeBehavior(strategy_Seek); 
-            // Out range check
-            } else if (behavior.inRange.length == 0) {
-                behavior.changeBehavior(strategy_SeekNearest); 
+                // execute behavior
+                behavior.current(entity, grid);
             }
-            // execute behavior
-            behavior.current(entity, grid);
-
         });
     });
- 
 };
+
+
+const sys_CheckForBerserker = (data: EcsData, deltaTime: number): void => {
+    if ((Date.now() - Behavior.lastDeath) >= 5000) {
+        Behavior.berserker = true;
+    } else {
+        Behavior.berserker = false;
+    }
+}
 
 const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
 
@@ -96,7 +114,7 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
         for (let i = 0; i < grid.dynamics.length; ++i) {
             // Get current entity
             const entity = grid.dynamics[i].entity;
-            // if (entity.destroyed || entity.getStatus().health <= 0) continue;
+            if (entity.destroyed || entity.getStatus().health <= 0) continue;
 
             // Get its components
             const behavior = entity.getBehavior();
@@ -176,7 +194,4 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
     });    
 }
 
-
-
-
-export { entitiesAlive, sys_UpdateBehavior, sys_CheckInRange };
+export { entitiesAlive, sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };
