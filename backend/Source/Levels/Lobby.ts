@@ -187,16 +187,16 @@ class LobbyLevel extends Level {
 
                 if (!deadPlayer) return;
 
+                // Removes the dead player from the layerstack
+                this.layerStack.popLayer(deadPlayer);
+                this.fighters--;
+
                 // Tells frontend how many palyers remains
                 this.context.ws.broadcast({
                     msgType: "remain-players",
                     remainingPlayers: this.fighters,
                     totalPlayers: this.participants.length
                 });
-
-                // Removes the dead player from the layerstack
-                this.layerStack.popLayer(deadPlayer);
-                this.fighters--;
 
                 this.dieEventQueue.push({
                     result: result,
