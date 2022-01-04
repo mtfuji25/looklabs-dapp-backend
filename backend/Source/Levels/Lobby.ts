@@ -370,8 +370,12 @@ class LobbyLevel extends Level {
             // Stores the start of await time of requests
             const startRequestTime = Date.now();
             // Await all opened request to change to other level
-            await Promise.all(this.dieEventRequestQueue);
-            await Promise.all(this.damageEventRequestQueue);
+            try {
+                await Promise.all(this.dieEventRequestQueue);
+                await Promise.all(this.damageEventRequestQueue);
+            } catch(e) {
+                console.log("Unable to complete save results from request queue.");
+            }
 
             // Get last player status
             const lastPlayerStatus = lastFigther.getSelf().getStatus();
