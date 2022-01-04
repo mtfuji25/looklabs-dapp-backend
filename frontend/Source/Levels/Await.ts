@@ -95,12 +95,8 @@ class AwaitLevel extends Level {
     onClose(): void {
 
         // Destroy event and message listeners
-        this.gameStatusListener.destroy()
+        this.gameStatusListener.destroy();
         this.connectionListener.destroy();
-
-        // Probally redundant
-        // Manually call layerstack destruction
-        this.layerStack.destroy();
     }
 
     // Handles all game-status messages from backend

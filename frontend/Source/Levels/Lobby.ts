@@ -106,8 +106,6 @@ class LobbyLevel extends Level {
     async onUpdate(deltaTime: number) {}
 
     onClose(): void {
-        this.layerStack.destroy();
-
         this.connectionListener.destroy();
         this.gameStatusListener.destroy();
     }
