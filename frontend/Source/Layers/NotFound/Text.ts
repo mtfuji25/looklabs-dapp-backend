@@ -77,9 +77,7 @@ class TextLayer extends Layer {
         }
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { TextLayer };

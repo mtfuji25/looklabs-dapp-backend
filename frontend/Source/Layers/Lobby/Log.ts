@@ -149,8 +149,6 @@ class LogsLayer extends Layer {
                 });
             }
         })
-
-        this.self.destroy();
     }
 
     // server msg when kill happens

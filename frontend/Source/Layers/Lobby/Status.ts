@@ -79,7 +79,6 @@ class BattleStatusLayer extends Layer {
     onUpdate(deltaTime: number) { }
 
     onDetach() {
-        this.self.destroy();
         this.title.remStage();
         this.card.remStage();
         this.timeLeft.remStage();

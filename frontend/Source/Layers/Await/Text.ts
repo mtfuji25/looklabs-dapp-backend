@@ -185,11 +185,10 @@ class TextLayer extends Layer {
         this.fiveSecCount += deltaTime;
     }
 
-    onDetach() {
+    async onDetach() {
         // Abort possible update request in course
-        Promise.reject(this.updateRequest);
+        await this.updateRequest;
 
-        this.self.destroy();
         this.countdown.remStage();
         this.subtitle.remStage();
         this.entered.remStage();

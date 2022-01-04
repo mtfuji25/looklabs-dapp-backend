@@ -92,9 +92,7 @@ class ViewLayer extends Layer {
         this.view.offsetY = this.offsetY + localOffY;
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { ViewLayer, ViewContext };

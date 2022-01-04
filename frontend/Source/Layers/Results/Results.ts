@@ -165,9 +165,7 @@ class ResultsLayer extends Layer {
             this.count += deltaTime; 
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { ResultsLayer };
