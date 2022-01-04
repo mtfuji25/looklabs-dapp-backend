@@ -209,7 +209,7 @@ class LobbyLevel extends Level {
                 this.damageEventQueue.push({
                     damage: damage,
                     participant: participant,
-                })
+                });
             };
 
             // Creates current player
@@ -259,9 +259,9 @@ class LobbyLevel extends Level {
             // Send message containing current game time
             this.context.ws.broadcast({
                 msgType: 'game-time',
-                hours: Number(hours), 
-                minutes: Number(minutes), 
-                seconds: Number(seconds)
+                hours: hours, 
+                minutes: minutes, 
+                seconds: seconds
             })
             this.oneSecondCounter -= 1.0;
         }
@@ -271,8 +271,8 @@ class LobbyLevel extends Level {
         this.dieEventQueue.map((event) => {
 
             // Push new promisse in the dispatch queue
-            this.damageEventRequestQueue.push(
-                new Promise(async () => {
+            this.dieEventRequestQueue.push(
+                new Promise(async (resolve, reject) => {
                     try {
                         await this.context.strapi.createParticipantResult({
                             scheduled_game_participant: event.result.scheduled_game_participant,
@@ -285,6 +285,7 @@ class LobbyLevel extends Level {
                             "Failed to create game participant result for player: ",
                             event.result.scheduled_game_participant
                         );
+                        reject();
                     }
 
                     try {
@@ -300,6 +301,7 @@ class LobbyLevel extends Level {
                             "Failed to dispatch kill log for player: ",
                             event.result.scheduled_game_participant
                         );
+                        reject();
                     }
                     
                     try {
@@ -315,7 +317,9 @@ class LobbyLevel extends Level {
                             "Failed to dispatch final rank log for player: ",
                             event.result.scheduled_game_participant
                         );
+                        reject();
                     }
+                    resolve();
                 })
             );
         });
@@ -328,14 +332,23 @@ class LobbyLevel extends Level {
 
             // Push new promisse in the dispatch queue
             this.damageEventRequestQueue.push(
-                new Promise(async () => {
-                    this.context.strapi.createLog({
-                        timestamp: Date.now().toString(),
-                        event: "damage",
-                        value: String(event.damage),
-                        scheduled_game: this.gameId,
-                        scheduled_game_participant: event.participant
-                    });
+                new Promise(async (resolve, reject) => {
+                    try {
+                        this.context.strapi.createLog({
+                            timestamp: Date.now().toString(),
+                            event: "damage",
+                            value: String(event.damage),
+                            scheduled_game: this.gameId,
+                            scheduled_game_participant: event.participant
+                        });
+                    } catch(e) {
+                        console.log(
+                            "Failed to dispatch damage log for player: ",
+                            event.participant
+                        );
+                        reject();
+                    }
+                    resolve();
                 })
             );
         });
@@ -357,8 +370,8 @@ class LobbyLevel extends Level {
             // Stores the start of await time of requests
             const startRequestTime = Date.now();
             // Await all opened request to change to other level
-            Promise.all(this.dieEventRequestQueue);
-            Promise.all(this.damageEventRequestQueue);
+            await Promise.all(this.dieEventRequestQueue);
+            await Promise.all(this.damageEventRequestQueue);
 
             // Get last player status
             const lastPlayerStatus = lastFigther.getSelf().getStatus();
@@ -377,7 +390,7 @@ class LobbyLevel extends Level {
                 event: "winners",
                 scheduled_game: this.gameId,
                 scheduled_game_participant: lastFigther.strapiID,
-            })
+            });
 
             const eleapsedRequestsTime = Date.now() - startRequestTime;
 
