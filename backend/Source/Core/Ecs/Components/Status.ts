@@ -74,8 +74,10 @@ class Status {
 
             if (damage <= this.defense) {
                 this.health -= 1;
+                this.onDamage(1);
             } else {
                 this.health -= damage -  this.defense;
+                this.onDamage(damage -  this.defense);
             }
         }
     }

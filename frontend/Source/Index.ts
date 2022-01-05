@@ -41,7 +41,6 @@ const main = async () => {
         tracesSampleRate: 1.0,
     });
 
-        
     // Creates PIXI application
     const app = new Application({
         resolution: devicePixelRatio,
@@ -49,7 +48,6 @@ const main = async () => {
         resizeTo: ROOT
     });
 
-    
     // Creates websocket client
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 

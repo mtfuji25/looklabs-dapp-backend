@@ -25,9 +25,9 @@ interface KillMsg {
 
 interface GameTimeMsg {
     msgType: "game-time",
-    hours: number,
-    minutes: number, 
-    seconds: number
+    hours: string,
+    minutes: string, 
+    seconds: string
 }
 
 interface RemainPlayersMsg {
