@@ -60,7 +60,7 @@ class ResultsLevel extends Level {
 
     onUpdate(deltaTime: number) {
         // after 300 seconds (5 minutes) load default level
-        if(this.counter >= 30.0) {
+        if(this.counter >= 300.0) {
             this.context.engine.loadLevel(new DefaultLevel(
                 this.context, "Default"
             ))
