@@ -8,7 +8,6 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { BTNS, Inputs } from "../../Core/Inputs/Inputs";
 import { Application } from "pixi.js";
 import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
-import { ServerMsg } from "../../Clients/Interfaces";
 
 // Required fields for view layer
 interface ViewContext {
@@ -93,9 +92,7 @@ class ViewLayer extends Layer {
         this.view.offsetY = this.offsetY + localOffY;
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { ViewLayer, ViewContext };

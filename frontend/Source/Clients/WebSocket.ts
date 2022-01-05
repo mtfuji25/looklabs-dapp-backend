@@ -206,9 +206,21 @@ class WSClient {
         }
     }
 
+    async whenReady(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const checkConnection = () => {
+                if (this.connected) {
+                    resolve();
+                } else {
+                    setTimeout(checkConnection, 1000);
+                }
+            };
+            checkConnection();
+        });
+    }
+
     //
     //  Listeners to add and remove ids
-    //
     //
 
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;

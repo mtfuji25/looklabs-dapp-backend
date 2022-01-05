@@ -184,9 +184,7 @@ class WinnerLayer extends Layer {
         
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 
     // scales image according to screen size
     scaleImg(sprite: Sprite) {

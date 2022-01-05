@@ -179,8 +179,6 @@ class PlayerLayer extends Layer {
 
     onDetach() {
         this.listener.destroy();
-
-        this.self.destroy();
     }
 
     createEnemy(content: PlayerCommand) {

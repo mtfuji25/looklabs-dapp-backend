@@ -28,6 +28,9 @@ class TextLayer extends Layer {
 
     private screenX: number;
     private screenY: number;
+
+    // Current Update Promisse
+    private updateRequest: Promise<ScheduledGame> = new Promise<ScheduledGame>(() => {});
     
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
@@ -105,15 +108,11 @@ class TextLayer extends Layer {
 
         this.renderText(this.subtitle, 33.375);
 
-        this.context.strapi
-            .getGameById(this.currentGame.id)
-            .then((updatedGame) => {
-                this.entered = this.ecs.createEntity().addText(
-                    `ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`,
-                    this.textStyle
-                );
-                this.renderText(this.entered, 59.25);
-            });
+        this.entered = this.ecs.createEntity().addText(
+            `ENTERED: ${this.currentGame.scheduled_game_participants.length} (MAX 100)`,
+            this.textStyle
+        );
+        this.renderText(this.entered, 59.25);
 
         this.countdown = this.ecs.createEntity().addText(
             `${hours}:${minutes}:${seconds}`,
@@ -169,11 +168,16 @@ class TextLayer extends Layer {
         }
 
         if (this.fiveSecCount >= 5) {
-            this.context.strapi
-                .getGameById(this.currentGame.id)
-                .then((updatedGame) => {
-                    this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`);
-                });
+            this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
+            
+            this.updateRequest.then((updatedGame) => {
+                this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`);
+            });
+
+            this.updateRequest.catch((e) => {
+                console.log("Level destroyed while requesting, aborting reponse action...");
+            });
+
             this.fiveSecCount -= 5.0;
         }
 
@@ -181,8 +185,10 @@ class TextLayer extends Layer {
         this.fiveSecCount += deltaTime;
     }
 
-    onDetach() {
-        this.self.destroy();
+    async onDetach() {
+        // Abort possible update request in course
+        await this.updateRequest;
+
         this.countdown.remStage();
         this.subtitle.remStage();
         this.entered.remStage();
@@ -196,7 +202,8 @@ class TextLayer extends Layer {
             return (n < 10 ? "0" : "") + n;
         };
 
-        const difference = +new Date(targetDate) - +new Date();
+        // The + signs return the number representation of date object
+        const difference = (+new Date(targetDate)) - (+new Date());
 
         let timeLeft = {};
 

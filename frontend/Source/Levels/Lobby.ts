@@ -10,7 +10,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameStatus, Listener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
+import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 
@@ -23,13 +23,8 @@ interface LobbyLevelContext extends ViewContext {
 
 class LobbyLevel extends Level {
 
-    private listener: Listener;
-    private listenerRemain: Listener;
-    private conListener: Listener;
-    private remaining: number = 0;
-    private responseParticipant: any | null = null;
-    private responseWinner: any | null = null;
-    private requested: boolean = false;
+    private gameStatusListener: Listener;
+    private connectionListener: Listener;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -40,22 +35,16 @@ class LobbyLevel extends Level {
 
     onStart(): void {
 
-        this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
-        this.listenerRemain = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
-        this.conListener = this.context.ws.addListener("connection", (ws) => {
+        // Add listeners
+        this.gameStatusListener = this.context.ws.addListener(
+            "game-status",
+            (msg) => this.onGameStatusMessage(msg)
+        );
 
-            this.context.engine.loadLevel(
-                new LobbyLevel(
-                    this.context, "Lobby",
-                    {
-                        gameId: this.props.gameId,
-                        playerNames: this.props.playerNames
-                    }
-                )
-            );
-
-            return false;
-        });
+        this.connectionListener = this.context.ws.addListener(
+            "connection",
+            (event) => this.onConnectionEvent(event)
+        );
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
@@ -114,55 +103,57 @@ class LobbyLevel extends Level {
         );
     }
 
-    onUpdate(deltaTime: number) {
-        if (this.remaining == 1 && (!this.requested)) {
-            this.requested = true;
-            this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
-                this.responseParticipant = participants;
-                let splitId = (participants[0].nft_id).split('/')[1];
-                let address = (participants[0].nft_id).split('/')[0];
-                if(splitId > 50) splitId -= 50;
-                if(splitId == 0) splitId += 1;
-                this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
-                    this.responseWinner = participant;
-                })
-            })
-        }
-    }
+    async onUpdate(deltaTime: number) {}
 
     onClose(): void {
-        this.layerStack.destroy();
-        this.conListener.destroy();
-        this.listener.destroy();
-        this.listenerRemain.destroy();
+        this.connectionListener.destroy();
+        this.gameStatusListener.destroy();
     }
 
-    onRemainPlayersMsg(msg: ServerMsg) {
-        
-        const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
-        
-        this.remaining = remainingPlayers;
+    // Handles all game-status messages from backend
+    onGameStatusMessage(msg: ServerMsg) {
+        let content: GameStatus;
 
-        return false;
-    }
+        // Check the veracity of message type
+        if (msg.content.msgType == msgTypes.gameStatus) {
 
-    onStatus(status: ServerMsg) {
+            // Perfom the cast to corret msg type
+            content = msg.content as GameStatus;
 
-        status.content = status.content as GameStatus;
+            // Checks for the interest type of message
+            if (content.gameStatus == "awaiting") {
 
-        if (status.content.gameStatus == "awaiting") {
-            console.log("Running")
-            this.context.engine.loadLevel(new ResultsLevel(
-                this.context, "Results",
-                {
-                    gameId: status.content.gameId,
-                    responseParticipant: this.responseParticipant,
-                    responseWinner: this.responseWinner,
-                }
-            ));
+                this.context.engine.loadLevel(new ResultsLevel(
+                    this.context,
+                    "Results",
+                    {
+                        gameId: content.gameId,
+                    }
+                ));
+            }
         }
 
+        // Doesn't handles the event, allow event propagation
+        // in the event listeners queue
         return false;
+    }
+
+    // Handles all connection events with backend
+    onConnectionEvent(event: Event) {
+        
+        this.context.engine.loadLevel(
+            new LobbyLevel(
+                this.context, "Lobby",
+                {
+                    gameId: this.props.gameId,
+                    playerNames: this.props.playerNames
+                }
+            )
+        );
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
     }
 }
 

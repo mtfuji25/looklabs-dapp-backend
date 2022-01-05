@@ -92,7 +92,6 @@ class MapLayer extends Layer {
     onUpdate(deltaTime: number) {}
 
     onDetach() {
-        this.self.destroy();
         this.app.stage.removeChild(this.mapContainer);
     }
 }
