@@ -8,7 +8,6 @@ dotenv.config({ path: "../.env" });
 const STRAPI_SERVER_HOST = String(process.env.STRAPI_SERVER_HOST);
 const STRAPI_BEARER_TOKEN = String(process.env.STRAPI_BEARER_TOKEN);
 
-// const EXPRESS_PORT = Number(process.env.EXPRESS_SERVER_PORT);
 const WS_PORT = Number(process.env.WS_SERVER_PORT);
 const WS_HOST = String(process.env.WS_SERVER_HOST);
 
