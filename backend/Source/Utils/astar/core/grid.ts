@@ -108,8 +108,7 @@ export class Grid {
    * @param position [position on the grid]
    */
   public isWalkableAt(position: IPoint): boolean {
-    if (this.gridNodes.length <= position.y) return false;
-    if (this.gridNodes[position.y].length <= position.x) return false;
+    if (!this.isOnTheGrid(position)) return false;
     if (this.gridNodes[position.y][position.x] == undefined) return false;
     return this.gridNodes[position.y][position.x].getIsWalkable();
   }

@@ -69,7 +69,7 @@ export class AStarFinder {
     const endNode = this.grid.getNodeAt(endPosition);
 
     // Break if start and/or end position is/are not walkable
-    if (
+    if (!this.isValidPosition(endPosition) || !this.isValidPosition(startPosition) ||
       !this.grid.isWalkableAt(endPosition) ||
       !this.grid.isWalkableAt(startPosition)
     ) {
@@ -202,5 +202,11 @@ export class AStarFinder {
    */
   public getGrid(): Grid {
     return this.grid;
+  }
+
+  private isValidPosition (position:IPoint):boolean {
+    if (position.x == NaN || position.y == NaN) return false;
+    if (Math.floor(position.x) != position.x || Math.floor(position.y) != position.y ) return false;
+    return true;
   }
 }
