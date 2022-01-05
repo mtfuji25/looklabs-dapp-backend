@@ -5,7 +5,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
@@ -187,6 +187,13 @@ class LobbyLevel extends Level {
 
                 if (!deadPlayer) return;
 
+                // Tells frontend how many palyers remains
+                this.context.ws.broadcast({
+                    msgType: "remain-players",
+                    remainingPlayers: this.fighters,
+                    totalPlayers: this.participants.length
+                });
+
                 // Removes the dead player from the layerstack
                 this.layerStack.popLayer(deadPlayer);
                 this.fighters--;
@@ -267,6 +274,20 @@ class LobbyLevel extends Level {
             this.damageEventRequestQueue.push(
                 new Promise(async () => {
                     try {
+                        await this.context.strapi.createParticipantResult({
+                            scheduled_game_participant: event.result.scheduled_game_participant,
+                            survived_for: Math.floor(event.result.survived_for),
+                            kills: Math.floor(event.result.kills),
+                            health: Math.ceil(event.result.health)
+                        });
+                    } catch(e) {
+                        console.log(
+                            "Failed to create game participant result for player: ",
+                            event.result.scheduled_game_participant
+                        );
+                    }
+
+                    try {
                         await this.context.strapi.createLog({
                             timestamp: Date.now().toString(),
                             event: "kills",
@@ -278,7 +299,7 @@ class LobbyLevel extends Level {
                         console.log(
                             "Failed to dispatch kill log for player: ",
                             event.result.scheduled_game_participant
-                        )
+                        );
                     }
                     
                     try {
@@ -293,7 +314,7 @@ class LobbyLevel extends Level {
                         console.log(
                             "Failed to dispatch final rank log for player: ",
                             event.result.scheduled_game_participant
-                        )
+                        );
                     }
                 })
             );
@@ -319,7 +340,7 @@ class LobbyLevel extends Level {
             );
         });
 
-        this.damageEventRequestQueue = [];
+        this.damageEventQueue = [];
 
         // When game finished
         if (this.fighters == 1) {
