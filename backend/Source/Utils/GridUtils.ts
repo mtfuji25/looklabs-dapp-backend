@@ -1,37 +1,29 @@
 // Map importing
 import { AStarFinder } from "../Utils/astar/astar";
-// from "astar-typescript";
-// from "../Utils/astar/astar";
 import levelCollider from "../Assets/level_collider.json";
 import { Grid } from "../Core/Ecs/Components/Grid";
 import { Vec2 } from "./Math";
 
-class GridUtils {
-
-    static finder:AStarFinder;
-
-    static createAStarFinder ():void {
-
-        const transposedCollider: Array<Array<number>> = [];
-        
-        for (let i = 0; i < levelCollider["height"]; ++i) {
-            const row: number[] = [];
-            for (let j = 0; j < levelCollider["width"]; ++j) {
-                const collider = levelCollider["data"][j][i];
-                row.push(collider);
-            }
-            transposedCollider.push(row);
-        }
-
-        this.finder = new AStarFinder({
-            grid: {
-                matrix: transposedCollider
-            },
-            diagonalAllowed: false,
-            includeStartNode: true,
-            includeEndNode: true
-        });
+const transposedCollider: Array<Array<number>> = [];        
+for (let i = 0; i < levelCollider["height"]; ++i) {
+    const row: number[] = [];
+    for (let j = 0; j < levelCollider["width"]; ++j) {
+        const collider = levelCollider["data"][j][i];
+        row.push(collider);
     }
+    transposedCollider.push(row);
+}
+
+const finder:AStarFinder = new AStarFinder({
+    grid: {
+        matrix: transposedCollider
+    },
+    diagonalAllowed: false,
+    includeStartNode: true,
+    includeEndNode: true
+});
+
+class GridUtils {
 
     static getCellWalkable (row:number,column:number):number {
         if (levelCollider["data"].length <= column) return 1;
@@ -93,7 +85,6 @@ class GridUtils {
             GridUtils.getCellWalkable(ocupations[2].y, ocupations[2].x + 1) == 1) return true;
 
         
-
         return false;
     }
 
