@@ -1,19 +1,20 @@
 import { Layer } from "../../Core/Layer";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 
-import { Application, ITextStyle } from "pixi.js";
+import { Application, IBitmapTextStyle, ITextStyle } from "pixi.js";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { Panel } from "../../Core/Ecs/Components/Panel";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { GameTimeListener, GameTimeMsg, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
+import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
 class BattleStatusLayer extends Layer {
     private app: Application;
     private title: Sprite;
     private card: Panel;
-    private timeLeft: Text;
-    private playersLeft: Text;
+    private timeLeft: BMPText;
+    private playersLeft: BMPText;
 
     // context
     private context: EngineContext;
@@ -22,12 +23,10 @@ class BattleStatusLayer extends Layer {
 
     private gameTimeListener: GameTimeListener;
 
-    private readonly textStyle: Partial<ITextStyle> = {
-        fontFamily: "Space Mono",
-        fontWeight: "700",
-        fontSize: "16px",
-        lineHeight: 23.7,
-        fill: "#000000",
+    private readonly textStyle: Partial<IBitmapTextStyle> = {
+        fontName: "SpaceMono-Regular",
+        fontSize: 16,
+        tint: 0x000000,
         align: "center",
     }
 
@@ -47,8 +46,8 @@ class BattleStatusLayer extends Layer {
         this.card = this.ecs.createEntity(30, 83).addPanel(this.app.loader.resources["infoCard"]);
 
         // Creates both texts
-        this.timeLeft = this.ecs.createEntity(62, 95).addText("00:00:00", this.textStyle);
-        this.playersLeft = this.ecs.createEntity(158, 95).addText(null, this.textStyle);
+        this.timeLeft = this.ecs.createEntity().addBMPText("00:00:00", this.textStyle);
+        this.playersLeft = this.ecs.createEntity().addBMPText(" ", this.textStyle);
 
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
@@ -65,11 +64,14 @@ class BattleStatusLayer extends Layer {
     updatePanel() {
         const txt1Size = this.timeLeft.getSize();
         const txt2Size = this.playersLeft.getSize();
-        this.card.setWidth(txt1Size.x + 64 + txt2Size.x);
+        this.card.setWidth(txt1Size.x + 70 + txt2Size.x);
     }
 
     onAttach() {
         // Add it to stage
+        this.timeLeft.setPos(62, 90);
+        this.playersLeft.setPos(158, 90);
+        
         this.title.addStage(this.app);
         this.card.addStage(this.app);
         this.timeLeft.addStage(this.app);
@@ -90,8 +92,8 @@ class BattleStatusLayer extends Layer {
     // Sets remaining player texts
     onRemainPlayersMsg(msg: ServerMsg) {
         const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
-
-        this.playersLeft.setText(`${remainingPlayers}/${totalPlayers} ALIVE`);
+       this.playersLeft.setText(`${remainingPlayers}/${totalPlayers} ALIVE`);
+    
         this.updatePanel();
         return false;
     }

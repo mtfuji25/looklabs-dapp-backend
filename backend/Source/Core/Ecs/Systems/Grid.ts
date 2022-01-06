@@ -105,7 +105,7 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
             const behavior = dynamic.entity.getBehavior();
 
             behavior.colliding = [];
-            dynamic.entity.getBehavior().staticColide = false;
+            dynamic.entity.getBehavior().staticCollide = false;
             dynamic.entity.getBehavior().staticNormal = [];
             dynamic.entity.getBehavior().staticCenter = [];
         });
@@ -121,7 +121,7 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
         });
 
         staticColide.map((collision) => {
-            collision.entity.getBehavior().staticColide = true;
+            collision.entity.getBehavior().staticCollide = true;
             collision.entity.getBehavior().staticNormal.push(collision.normal);
             collision.entity.getBehavior().staticCenter.push(collision.center);
         });

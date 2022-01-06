@@ -4,6 +4,8 @@ import { Rectangle } from "./Components/Rectangle";
 import { Transform } from "./Components/Transform";
 import { Rigidbody } from "./Components/Rigidbody";
 import { Behavior } from "./Components/Behavior";
+import { Strategy } from "./Components/Strategy";
+import { Entity } from "./Core/Ecs";
 
 interface EcsData {
     grids: Grid[];
@@ -12,6 +14,14 @@ interface EcsData {
     rectangles: Rectangle[];
     rigidbodys: Rigidbody[];
     transforms: Transform[];
+    strategies: Strategy[];
 }
 
-export { EcsData };
+interface PathData {
+    entity:Entity;
+    pathIndex:number;
+    direction:number;
+
+}
+
+export { EcsData, PathData };

@@ -16,8 +16,9 @@ import { Panel } from "../Components/Panel";
 import { startSystems } from "../Systems/Index";
 
 // Pixi imports
-import { LoaderResource } from "pixi.js";
+import { IBitmapTextStyle, LoaderResource } from "pixi.js";
 import { ITextStyle } from "@pixi/text";
+import { BMPText } from "../Components/BMPText";
 
 // Systems functions types
 type EcsSysEntFn = (entity: Entity, deltaTime: number) => (void);
@@ -34,6 +35,7 @@ const masks = {
     animsprite:     0b000100,
     coloredRec:     0b001000,
     panel:          0b010000,
+    bmpText:        0b100000,
 }
 
 // Key of index in identification array
@@ -48,6 +50,7 @@ class ECS {
 
     public id = {
         text: 0,
+        bmpText: 0,
         sprite: 0,
         transform: 0,
         animSprite: 0,
@@ -58,6 +61,7 @@ class ECS {
 
     // Data containers
     public texts: Record<number, Text> = {};
+    public bmpTexts: Record<number, BMPText> = {};
     public sprites: Record<number, Sprite> = {};
     public transforms: Record<number, Transform> = {};
     public animsprites: Record<number, AnimSprite> = {};
@@ -77,6 +81,7 @@ class ECS {
         this.containerSystems.map((fn) => {
             fn({
                texts: Object.values(this.texts),
+               bmpTexts: Object.values(this.bmpTexts),
                sprites: Object.values(this.sprites),
                transforms: Object.values(this.transforms),
                animsprites: Object.values(this.animsprites),
@@ -122,6 +127,10 @@ class ECS {
         entity.remAnimSprite();
 
         entity.remColoredRectangle();
+
+        entity.remPanel();
+
+        entity.remBMPText();
 
         // Remove the entity itself from the identification array
         delete this.entities[id[EntityKey]];
@@ -184,6 +193,13 @@ class Entity {
         return this.addText();
     }
 
+    getBMPText(): BMPText {
+        if (this.layout & masks.bmpText)
+            return this.ecs.bmpTexts[this.id[masks.bmpText]];
+        
+        return this.addBMPText();
+    }
+
     getSprite(): Sprite {
         if (this.layout & masks.sprite)
             return this.ecs.sprites[this.id[masks.sprite]];
@@ -238,6 +254,31 @@ class Entity {
 
         this.layout |= masks.text;
         this.ecs.texts[this.id[masks.text]] = text;
+        return text;
+    }
+
+    addBMPText(
+        content: string = " ",
+        styles: Partial<IBitmapTextStyle> = {
+            fontName: "SpaceMono-Regular",
+            fontSize: 16,
+            align: "center"
+        }
+    ): BMPText {
+        if (this.layout & masks.bmpText)
+            return this.getBMPText();
+
+        const text = new BMPText(
+            this.getTransform(),
+            content, styles
+        );
+        text.refresh = this.refresh;
+
+        this.id[masks.bmpText] = this.ecs.id.bmpText;
+        this.ecs.id.bmpText++;
+
+        this.layout |= masks.bmpText;
+        this.ecs.bmpTexts[this.id[masks.bmpText]] = text;
         return text;
     }
 
@@ -313,6 +354,15 @@ class Entity {
 
             delete this.ecs.texts[this.id[masks.text]];
             this.layout &= (~masks.text);
+        }
+    }
+
+    remBMPText(): void {
+        if (this.layout & masks.bmpText) {
+            this.ecs.bmpTexts[this.id[masks.bmpText]].remStage();
+
+            delete this.ecs.bmpTexts[this.id[masks.bmpText]];
+            this.layout &= (~masks.bmpText);
         }
     }
 

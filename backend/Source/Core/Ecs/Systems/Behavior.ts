@@ -1,603 +1,86 @@
-import { Vec2 } from "../../../Utils/Math";
-import { Entity } from "../Core/Ecs";
 import { EcsData } from "../Interfaces";
-
-// AStar import
-import { AStarFinder } from "astar-typescript";
-
-// Map importing
-import levelCollider from "../../../Assets/level_collider.json";
-import { Grid } from "../Components/Grid";
+import { strategy_Explore } from "../Strategies/Explore";
+import { strategy_Flee } from "../Strategies/Flee";
+import { strategy_HitEnemy } from "../Strategies/HitEnemy";
+import { strategy_Seek, strategy_SeekNearest } from "../Strategies/Seek";
+import { strategy_Evade } from "../Strategies/Evade";
 import { Behavior } from "../Components/Behavior";
-import { assert } from "console";
+import { finalPlayersAreStuck, strategy_MoveOnPath } from "../Strategies/MoveOnPath";
 
-const transposedCollider: Array<Array<number>> = [];
-for (let i = 0; i < levelCollider["height"]; ++i) {
-    const row: number[] = [];
-    for (let j = 0; j < levelCollider["width"]; ++j) {
-        const collider = levelCollider["data"][j][i];
-        row.push(collider);
-    }
-    transposedCollider.push(row);
-}
-
-const finder = new AStarFinder({
-    grid: {
-        matrix: transposedCollider
-    },
-    diagonalAllowed: false,
-    includeStartNode: true,
-    includeEndNode: true
-});
 
 const ENTITY_RANGE = 0.1;
+const ENTITY_TIER_RANGE = 0.5;
 
-const runAwayFromTarget = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const tranform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
+const regeneration:Record<string, number> = {
+"sigma": 0.03,
+"alpha": 0.03,
+"beta": 0.03,
+"delta": 0.045,
+};
 
-    const target = behavior.target ?? null;
+let entitiesAlive = 0;
 
-    if (!target)
-        return;
+const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
+   
+    data.grids.map((grid) => {     
+        grid.dynamics.map((dynamic) => {
+            const entity = dynamic.entity;
+            // Get current player components
+            const status = entity.getStatus();
+            const behavior = entity.getBehavior();
+            const strategy = entity.getStrategy();
+            const rigibody = entity.getRigidbody();
 
-    const enemy = target.getTransform();
-    
-    // Começo do solver
+            // reset state
+            status.beingHit = false;
+            behavior.attacking = false;
 
-    let runAwayDir = new Vec2();
+            const lifePercent = (status.health / status.maxHealth) * 100;
 
-    if (behavior.staticColide) {
+            // Healing checks
+            if (lifePercent >= strategy.okHealth) {
+                behavior.healing = false;
+            }
 
-        let resNormal = new Vec2();
+            if (lifePercent < 100) {
+                status.health += regeneration[status.tier];
+            }
 
-        behavior.staticNormal.map((normal) => {
-            resNormal = resNormal.add(normal);
-        });
+            // Update cooldown
+            behavior.refresh += deltaTime; 
 
-        // Performs suffle operation
-        const tempX = resNormal.x;
-        resNormal.x = resNormal.y;
-        resNormal.y = tempX;
-
-        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
-            runAwayDir = resNormal.muls(-1.0);
-
-            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
-
-            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
-                if (Math.random() < 0.5) {
-                    runAwayDir.x = 0.0;
-                } else {
-                    runAwayDir.y = 0.0;
+            // special behavior designed to fix players who might get stuck at the end of the game
+            if (finalPlayersAreStuck(dynamic)) {
+                strategy_MoveOnPath(entity, grid);
+            } else {
+                //by default, all entities are set to EXPLORE 
+                behavior.changeBehavior(strategy_Explore);
+                
+                if ((lifePercent < strategy.criticalHealth || behavior.healing) && entitiesAlive > 5 && !Behavior.berserker) {
+                    // RunAway decision
+                    if (status.tier == "delta") {
+                        behavior.changeBehavior(strategy_Evade);
+                    } else {
+                        behavior.changeBehavior(strategy_Flee);        
+                    }
+                    behavior.healing = true;
+                // Collision checking
+                } else if (behavior.colliding.length > 0) {
+                    behavior.changeBehavior(strategy_HitEnemy);
+                // Inrange check
+                } else if (behavior.inRange.length > 0) {
+                    behavior.changeBehavior(strategy_Seek); 
+                // Out range check
+                } else if (behavior.inRange.length == 0) {
+                    behavior.changeBehavior(strategy_SeekNearest); 
                 }
-            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = 0.0;
-            }
-
-        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
-            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
-
-            if (relativeEnemyPos.y < 0) {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = 1.0;
-            } else {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = -1.0;
-            }
-        } else {
-            const relativeEnemyPos = enemy.pos.sub(tranform.pos);
-
-            if (relativeEnemyPos.x < 0) {
-                runAwayDir.x = 1.0;
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = -1.0;
-                runAwayDir.y = 0.0;
-            }
-        }
-    } else {
-        runAwayDir = tranform.pos.sub(enemy.pos).normalize();
-    }
-
-    rigidbody.velocity = runAwayDir.normalize().muls(status.speed);
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 1: ${rigidbody} Is NaN`);
-
-    behavior.attacking = false;
-}
-
-const runAwayFromRange = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const tranform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    const range = behavior.inRange;
-
-    let relativeEnemy = new Vec2();
-
-    range.map((enemy) => {
-        const { pos } = enemy.getTransform();
-
-        relativeEnemy = relativeEnemy.add(pos);
-    });
-
-    let runAwayDir = new Vec2();
-
-    if (behavior.staticColide) {
-
-        let resNormal = new Vec2();
-
-        behavior.staticNormal.map((normal) => {
-            resNormal = resNormal.add(normal);
-        });
-
-        // Performs suffle operation
-        const tempX = resNormal.x;
-        resNormal.x = resNormal.y;
-        resNormal.y = tempX;
-
-        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
-            runAwayDir = resNormal.muls(-1.0);
-
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
-                if (Math.random() < 0.5) {
-                    runAwayDir.x = 0.0;
-                } else {
-                    runAwayDir.y = 0.0;
-                }
-            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = 0.0;
-            }
-
-        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (relativeEnemyPos.y < 0) {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = 1.0;
-            } else {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = -1.0;
-            }
-        } else {
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (relativeEnemyPos.x < 0) {
-                runAwayDir.x = 1.0;
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = -1.0;
-                runAwayDir.y = 0.0;
-            }
-        }
-    } else {
-        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
-    }
-
-    rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 2: ${rigidbody} Is NaN`);
-
-    behavior.attacking = false;
-}
-
-const runAwayFromAll = (entity: Entity, grid: Grid) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const tranform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    let relativeEnemy = new Vec2();
-
-    grid.dynamics.map((enemy) => {
-        const { pos } = enemy.entity.getTransform();
-    
-        relativeEnemy = relativeEnemy.add(pos);
-    })
-
-    let runAwayDir = new Vec2();
-
-    if (behavior.staticColide) {
-
-        let resNormal = new Vec2();
-
-        behavior.staticNormal.map((normal) => {
-            resNormal = resNormal.add(normal);
-        });
-
-        // Performs suffle operation
-        const tempX = resNormal.x;
-        resNormal.x = resNormal.y;
-        resNormal.y = tempX;
-
-        if (Math.abs(resNormal.x) === Math.abs(resNormal.y)) {
-            runAwayDir = resNormal.muls(-1.0);
-
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (Math.abs(relativeEnemyPos.x) === Math.abs(relativeEnemyPos.y)) {
-                if (Math.random() < 0.5) {
-                    runAwayDir.x = 0.0;
-                } else {
-                    runAwayDir.y = 0.0;
-                }
-            } else if (Math.abs(relativeEnemyPos.x) < Math.abs(relativeEnemyPos.y)) {
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = 0.0;
-            }
-
-        } else if (Math.abs(resNormal.x) < Math.abs(resNormal.y)) {
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (relativeEnemyPos.y < 0) {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = 1.0;
-            } else {
-                runAwayDir.x = 0.0;
-                runAwayDir.y = -1.0;
-            }
-        } else {
-            const relativeEnemyPos = relativeEnemy.sub(tranform.pos);
-
-            if (relativeEnemyPos.x < 0) {
-                runAwayDir.x = 1.0;
-                runAwayDir.y = 0.0;
-            } else {
-                runAwayDir.x = -1.0;
-                runAwayDir.y = 0.0;
-            }
-        }
-    } else {
-        runAwayDir = tranform.pos.sub(relativeEnemy).normalize();
-    }
-
-    rigidbody.velocity= runAwayDir.normalize().muls(status.speed);
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 3: ${rigidbody} Is NaN`);
-
-    behavior.attacking = false;
-}
-
-const hitTarget = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-
-    let enemy = behavior.colliding[0];
-
-    if (!enemy)
-        return;
-
-    // Checks if is able to hit other enemy
-    if (behavior.refresh >= status.cooldown) {
-        const enemyStatus = enemy.getStatus();
-
-        enemyStatus.hit(entity);
-
-        behavior.target = enemy;
-        behavior.attacking = true;
-        behavior.refresh = 0.0;
-    } else {
-        behavior.attacking = false;
-    }
-}
-
-const hitStrongest = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-
-    // Sort based on attack
-    behavior.colliding.sort((a, b) => {
-        const attackA = a.getStatus().attack;
-        const attackB = b.getStatus().attack;
-        if (attackA > attackB)
-            return -1;
-        if (attackA < attackB)
-            return 1;
-        return 0;
-    });
-
-    // Get strongest enemy
-    const enemy = behavior.colliding[0];
-
-    // Checks if is able to hit other enemy
-    if (behavior.refresh >= status.cooldown) {
-
-        const enemyStatus = enemy.getStatus();
-
-        enemyStatus.hit(entity);
-
-        behavior.target = enemy;
-        behavior.attacking = true;
-        behavior.refresh = 0.0;
-    } else {
-        behavior.attacking = false;
-    }
-}
-
-const seekNearestWithA = (entity: Entity, grid: Grid) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    const nearest = behavior.nearest;
-    
-    if (!nearest)
-        return;
-    
-    const other = grid.getDynamic(nearest);
-    const dynamic = grid.getDynamic(entity);
-
-    // Começo do solver
-
-    const convertFromNDC = (pos: Vec2): Vec2 => {
-        const position = pos.adds(1.0).divs(2.0);
-        position.y = 1 - position.y;
-
-        return position;
-    };
-
-    const convertToNDC = (pos: Vec2): Vec2 => {
-        const position = new Vec2(
-            pos.x,
-            0 - pos.y
-        );
-
-        return position;
-    };
-
-    const convertCellToPos = (cell: Vec2): Vec2 => {
-        const position = new Vec2(
-            (cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0),
-            (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0)
-        );
-
-        return position;
-    };
-
-    const convertPosToCell = (pos: Vec2): Vec2 => {
-        const index = new Vec2(
-            Math.floor(pos.x / (grid.intervalX / 2.0)),
-            Math.floor(pos.y / (grid.intervalY / 2.0)),
-        );
-
-        return index;
-    };
-
-    // Sources and direction vectors
-    const sources: Vec2[] = [];
-    let dir: Vec2 | null = null;
-
-    behavior.staticCenter.map((center) => {
-        const convertedCenter = convertPosToCell(convertFromNDC(center));
-        dynamic.ocupations.map((ocupation) => {
-            const diff = convertedCenter.abs(ocupation);
-
-            // Checks if is axis aligned neighbor
-            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
-                sources.push(ocupation);
+                // execute behavior
+                behavior.current(entity, grid);
             }
         });
     });
+};
 
-    sources.map((source, index) => {
-        if (!dir)
-            dir = new Vec2();
-
-        const path = finder.findPath(
-            source, other.index
-        );
-
-        if (path === null || path.length < 2) {
-            console.log("Source of null path: ", source)
-            console.log("Source of null path: ", other.index)
-            return;
-        }
-
-        const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
-        const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
-
-        if (!dest.equal(origin)){
-            dir = dir.add(dest.sub(origin));
-            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
-        }
-    });
-
-    if (dir && (!dir.equal(new Vec2(0, 0)))) {
-        dir = convertToNDC(dir).normalize().muls(status.speed);
-        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 42: ${rigidbody} Is NaN`);
-    } else {
-        const enemyPos = nearest.getTransform().pos;
-        if (!enemyPos.equal(transform.pos)) {
-            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
-            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 43: ${rigidbody} Is NaN`);
-        }
-    }
-
-    rigidbody.velocity = dir;
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
-
-    behavior.attacking = false;
-}
-
-const seekNearestInRangeWithA = (entity: Entity, grid: Grid) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    let nearest: Entity;
-    let shortestDist = Number.MAX_SAFE_INTEGER;
-
-    behavior.inRange.map((other) => {
-        const dist = transform.pos.sub(
-            other.getTransform().pos
-        ).length();
-
-        if (dist < shortestDist) {
-            nearest = other;
-            shortestDist = dist;
-        }
-    });
-
-    if (!nearest)
-        return;
-
-    const other = grid.getDynamic(nearest);
-    const dynamic = grid.getDynamic(entity);
-
-    // Começo do solver
-
-    const convertFromNDC = (pos: Vec2): Vec2 => {
-        const position = pos.adds(1.0).divs(2.0);
-        position.y = 1 - position.y;
-
-        return position;
-    };
-
-    const convertToNDC = (pos: Vec2): Vec2 => {
-        const position = new Vec2(
-            pos.x,
-            0 - pos.y
-        );
-
-        return position;
-    };
-
-    const convertCellToPos = (cell: Vec2): Vec2 => {
-        const position = new Vec2(
-            (cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0),
-            (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0)
-        );
-
-        return position;
-    };
-
-    const convertPosToCell = (pos: Vec2): Vec2 => {
-        const index = new Vec2(
-            Math.floor(pos.x / (grid.intervalX / 2.0)),
-            Math.floor(pos.y / (grid.intervalY / 2.0)),
-        );
-
-        return index;
-    };
-
-    // Sources and direction vectors
-    const sources: Vec2[] = [];
-    let dir: Vec2 | null = null;
-
-    behavior.staticCenter.map((center) => {
-        const convertedCenter = convertPosToCell(convertFromNDC(center));
-        dynamic.ocupations.map((ocupation) => {
-            const diff = convertedCenter.abs(ocupation);
-
-            // Checks if is axis aligned neighbor
-            if ((diff.x == 0 && diff.y == 1) || (diff.x == 1 && diff.y == 0)) {
-                sources.push(ocupation);
-            }
-        });
-    });
-
-    sources.map((source, index) => {
-        if (!dir)
-            dir = new Vec2();
-
-        const path = finder.findPath(
-            source, other.index
-        );
-
-        if (path === null || path.length < 2) {
-            console.log("Source of null path: ", source)
-            console.log("Dest of null path: ", other.index)
-            return;
-        }
-
-        const dest = convertCellToPos(new Vec2(path[1][0], path[1][1]));
-        const origin = convertCellToPos(new Vec2(path[0][0], path[0][1]));
-
-        if (!dest.equal(origin)){
-            dir = dir.add(dest.sub(origin));
-            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 71: ${rigidbody} Is NaN`);
-        }
-    });
-    if (dir && (!dir.equal(new Vec2(0, 0)))) {
-        dir = convertToNDC(dir).normalize().muls(status.speed);
-        assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 72: ${rigidbody} Is NaN`);
-    } else {
-        const enemyPos = nearest.getTransform().pos;
-        if (!enemyPos.equal(transform.pos)) {
-            dir = enemyPos.sub(transform.pos).normalize().muls(status.speed);
-            assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 73: ${rigidbody} Is NaN`);
-        }
-    }
-
-    rigidbody.velocity = dir;
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 7: ${rigidbody} Is NaN, dir was ${dir}`);
-
-    behavior.attacking = false;
-}
-
-const seekNearest = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    const target = behavior.nearest;
-
-    if (!target)
-        return;
-    
-    const enemy = target.getTransform();
-
-    if (!enemy.pos.equal(transform.pos)) {
-        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
-        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
-    }
-
-    behavior.attacking = false;
-}
-
-const seekNearestInRange = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-    let nearest: Entity;
-    let shortestDist = Number.MAX_SAFE_INTEGER;
-
-    behavior.inRange.map((other) => {
-        const dist = transform.pos.sub(
-            other.getTransform().pos
-        ).length();
-
-        if (dist < shortestDist) {
-            nearest = other;
-            shortestDist = dist;
-        }
-    });
-
-    if (!nearest)
-        return;
-
-    const enemy = nearest.getTransform();
-    
-    if (!enemy.pos.equal(transform.pos)) {
-        rigidbody.velocity = enemy.pos.sub(transform.pos).normalize().muls(status.speed);
-        assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 5: ${rigidbody} Is NaN`);
-    }
-
-    behavior.attacking = false;
-}
 
 const sys_CheckForBerserker = (data: EcsData, deltaTime: number): void => {
     if ((Date.now() - Behavior.lastDeath) >= 5000) {
@@ -608,54 +91,75 @@ const sys_CheckForBerserker = (data: EcsData, deltaTime: number): void => {
 }
 
 const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
-    data.grids.map((grid) => {
 
+    //reset battle state
+    entitiesAlive = 0;
+
+    data.grids.map((grid) => {
         // Clear last inRange check
         grid.dynamics.map((dynamic) => {
             const behavior = dynamic.entity.getBehavior();
-
+            const status = dynamic.entity.getStatus();
             behavior.inRange = [];
             behavior.nearest = null;
-        })
-
+            behavior.inRangeByTier = {};
+            behavior.nearestByTier = {};
+            if (status.health > 0) {
+                entitiesAlive += 1;
+            }
+        });
+        
+        const shotestByTier:Record<string, number> = {};
+        
         for (let i = 0; i < grid.dynamics.length; ++i) {
             // Get current entity
             const entity = grid.dynamics[i].entity;
+            if (entity.destroyed || entity.getStatus().health <= 0) continue;
 
             // Get its components
             const behavior = entity.getBehavior();
             const transform = entity.getTransform();
-
+            const status = entity.getStatus();
+            
             // Init max int to sort distances
             let shortestDist = Number.MAX_SAFE_INTEGER;
+            shotestByTier['delta'] = Number.MAX_SAFE_INTEGER;
+            shotestByTier['beta'] = Number.MAX_SAFE_INTEGER;
+            shotestByTier['alpha'] = Number.MAX_SAFE_INTEGER;
+            shotestByTier['sigma'] = Number.MAX_SAFE_INTEGER;
 
             // For any other non checked entity
             for (let j = i + 1; j < grid.dynamics.length; ++j) {
                 // Get other entity
                 const other = grid.dynamics[j].entity;
 
-                if (entity.destroyed || other.destroyed)
-                        return;
-
+                if (other.destroyed || other.getStatus().health <= 0) continue;
+                
                 // Get other entity tranform
                 const otherBehavior = other.getBehavior();
                 const otherTransform = other.getTransform();
-
-                if (!otherBehavior)
-                    return;
-
-                if (!otherTransform)
-                    return;
+                const otherTier = other.getStatus().tier;
+                
+                if (!otherBehavior || !otherTransform)
+                    continue;
 
                 // Calculates the dist to other entity
                 const dist = transform.pos.sub(
                     otherTransform.pos
                 ).length();
-
+                
                 // If other entity is in range add to array
                 if (dist <= ENTITY_RANGE) {
                     behavior.inRange.push(other);
                     otherBehavior.inRange.push(entity);
+                }
+
+                if (!otherBehavior.inRangeByTier[status.tier]) otherBehavior.inRangeByTier[status.tier] = [];
+                if (!behavior.inRangeByTier[otherTier]) behavior.inRangeByTier[otherTier] = [];
+
+                if (dist <= ENTITY_TIER_RANGE) {
+                    otherBehavior.inRangeByTier[status.tier].push(entity); 
+                    behavior.inRangeByTier[otherTier].push(other); 
                 }
 
                 // If other entity is the nearest
@@ -663,9 +167,18 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
                     behavior.nearest = other;
                     shortestDist = dist;
                 }
+                if (dist < shotestByTier[otherTier]) {
+                    behavior.nearestByTier[otherTier] = other;
+                    shotestByTier[otherTier] = dist;
+                }
 
-                if (!otherBehavior.nearest)
+                if (!otherBehavior.nearest) {
                     otherBehavior.nearest = entity;
+                }
+                
+                if (!otherBehavior.nearestByTier[status.tier]) {
+                    otherBehavior.nearestByTier[status.tier] = entity;
+                }
 
                 // Checks if other entity nearest will change
                 const otherShortestDist = otherTransform.pos.sub(
@@ -674,137 +187,11 @@ const sys_CheckInRange = (data: EcsData, deltaTime: number): void => {
 
                 if (dist < otherShortestDist) {
                     otherBehavior.nearest = entity;
+                    otherBehavior.nearestByTier[status.tier] = entity;
                 }
             }
         }
-    });
+    });    
 }
 
-const wander = (entity: Entity) => {
-    const status = entity.getStatus();
-    const behavior = entity.getBehavior();
-    const transform = entity.getTransform();
-    const rigidbody = entity.getRigidbody();
-
-
-    if (behavior.wanderTime-- <= 0) {
-        const angle =
-        rigidbody.velocity.angle() + Math.random() * (Math.PI / 8) * behavior.wanderSteer;
-        behavior.wanderVelocity = Vec2.fromAngle(angle, status.speed);
-        behavior.wanderTime = Math.round(
-          Math.random() * behavior.wanderTimeMax + behavior.wanderTimeMin
-        );
-      }
-    
-
-      if (behavior.wanderSteerChangeTime-- <= 0) {
-        behavior.wanderSteer = Math.floor(Math.random() * 2) === 0 ? 1 : -1;
-        behavior.wanderSteerChangeTime = Math.round(
-          Math.random() * behavior.wanderTimeMax  * 5 + behavior.wanderTimeMin * 2
-        );
-      }
-  
-    rigidbody.velocity = behavior.wanderVelocity;
-    assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 6: ${rigidbody} Is NaN`);
-    behavior.attacking = false;
-}
-
-
-const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
-   
-    const alive = data.status.filter((s) => s.health > 0).length;
-    
-    data.grids.map((grid) => {
-        
-        grid.dynamics.map((dynamic) => {
-            
-            const entity = dynamic.entity;
-            
-            // Get current player components
-            const status = entity.getStatus();
-            const behavior = entity.getBehavior();
-
-            // Get current life percent of player
-            const lifePercent = (status.health / status.maxHealth) * 100;
-            
-            // Removes attacking
-            behavior.attacking = false;
-
-            // Update cooldown
-            behavior.refresh += deltaTime;
-
-            // Healing checks
-            if (lifePercent >= 40) {
-                behavior.healing = false;
-            }
-
-            // Curando caramba
-            if (lifePercent < 100) {
-                status.health += 0.03
-            }
-
-            // Life check
-            if ((lifePercent < 35 || behavior.healing) && (!Behavior.berserker)) {
-                // console.log("Entered healing node");
-                // RunAway decision
-                if (behavior.attacking) {
-                    // console.log("Decided RunAway from current target");
-                    runAwayFromTarget(entity);
-                } else if (behavior.inRange.length > 0) {
-                    // console.log("Decided RunAway from relative range enemies");
-                    runAwayFromRange(entity);
-                } else {
-                    // console.log("Decided RunAway from all enemies");
-                    if (Math.random() > 0.5 && alive > 2) {
-                        runAwayFromAll(entity, grid);
-                    } else {
-                        wander(entity);
-                    }
-                    
-                }
-                behavior.healing = true;
-
-            // Collision checking
-            } else if (behavior.colliding.length > 0) {
-                // console.log("Entered collision node");
-                // How many attacking
-                if (behavior.colliding.length == 1) {
-                    // console.log("Decided hit current target");
-                    hitTarget(entity);
-                } else if (behavior.colliding.length > 1) {
-                    // console.log("Decided hit strongest player in hit area");
-                    hitStrongest(entity);
-                }
-
-            // Inrange check
-            } else if (behavior.inRange.length > 0) {
-                if (behavior.staticColide) {
-                    // console.log("Entered Searching inRange node with A*");
-                    seekNearestInRangeWithA(entity, grid);
-                    behavior.staticColide = false;
-                } else {
-                    // console.log("Entered Searching inRange node");                    
-                    if (alive <= 5 || Math.random() > 0.8) {//the higher the value here, the longer the game
-                        seekNearestInRange(entity);
-                    } else {
-                        wander(entity);
-                    }
-                }
-                
-            // Out range check
-            } else if (behavior.inRange.length == 0) {
-                if (behavior.staticColide) {
-                    // console.log("Entered Searching outRange node with A*");
-                    seekNearestWithA(entity, grid);
-                    behavior.staticColide = false;
-                } else {
-                    // console.log("Entered Searching outRange node");
-                    seekNearest(entity);
-                }
-            }
-        });
-    });
-    
-};
-
-export { sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };
+export { entitiesAlive, sys_UpdateBehavior, sys_CheckInRange, sys_CheckForBerserker };

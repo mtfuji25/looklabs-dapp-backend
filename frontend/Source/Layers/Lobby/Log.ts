@@ -2,22 +2,23 @@ import { Layer } from "../../Core/Layer";
 
 // Ecs and Components imports
 import { ECS } from "../../Core/Ecs/Core/Ecs";
-import { Text } from "../../Core/Ecs/Components/Text";
+import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, IBitmapTextStyle } from "pixi.js";
 import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 import { sleep, syncSleep } from "../../Utils/Sleep";
+
 
 interface KillLog {
     killer: string;
     action: string;
     killed: string;
     text?: {
-        killer: Text;
-        action: Text;
-        killed: Text;
+        killer: BMPText;
+        action: BMPText;
+        killed: BMPText;
     };
 }
 
@@ -35,18 +36,16 @@ class LogsLayer extends Layer {
 
     private percentX: number;
 
-    private readonly normalStyle: Partial<ITextStyle> = {
-        fontFamily: "Space Mono",
-        fontStyle: "normal",
-        fontWeight: "400",
+    private readonly normalStyle: Partial<IBitmapTextStyle> = {
+        fontName: "Rubik-Regular",
+        align: "left",
         fontSize: 15,
-        fill: 0xffffff,
-        lineHeight: 21,
     };
 
-    private readonly boldStyle: Partial<ITextStyle> = {
-        ...this.normalStyle,
-        fontWeight: "700"
+    private readonly boldStyle: Partial<IBitmapTextStyle> = {
+        fontName: "Rubik-Bold",
+        align: "left",
+        fontSize: 15
     };
 
     constructor(ecs: ECS, app: Application, context: EngineContext) {
@@ -109,19 +108,19 @@ class LogsLayer extends Layer {
             killer.setPos(initialX - xOffset, yOffset);
         } else {
             // Render the text for participants killed
-            const killed = this.ecs.createEntity().addText(`${log.killed}`, this.boldStyle);
+            const killed = this.ecs.createEntity().addBMPText(`${log.killed}`, this.boldStyle);
 
             xOffset += killed.text.width;
             killed.setPos(initialX - xOffset, yOffset);
 
             // render the text for participant name
-            const action = this.ecs.createEntity().addText(`${log.action}`, this.normalStyle);
+            const action = this.ecs.createEntity().addBMPText(`${log.action}`, this.normalStyle);
 
             xOffset += action.text.width + 10;
             action.setPos(initialX - xOffset, yOffset);
 
             // Render the text for the position
-            const killer = this.ecs.createEntity().addText(`${log.killer}`, this.boldStyle);
+            const killer = this.ecs.createEntity().addBMPText(`${log.killer}`, this.boldStyle);
 
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
