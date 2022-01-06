@@ -14,16 +14,18 @@ for (let i = 0; i < levelCollider["height"]; ++i) {
     transposedCollider.push(row);
 }
 
-const finder:AStarFinder = new AStarFinder({
-    grid: {
-        matrix: transposedCollider
-    },
-    diagonalAllowed: false,
-    includeStartNode: true,
-    includeEndNode: true
-});
 
 class GridUtils {
+
+    static finder:AStarFinder = new AStarFinder({
+        grid: {
+            matrix: transposedCollider
+        },
+        diagonalAllowed: false,
+        includeStartNode: true,
+        includeEndNode: true
+    });
+    
 
     static getCellWalkable (row:number,column:number):number {
         if (levelCollider["data"].length <= column) return 1;
