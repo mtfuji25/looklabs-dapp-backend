@@ -104,10 +104,10 @@ class WinnerLayer extends Layer {
         this.participant = participant;
 
         // sets percents
-        this.percentX = this.app.view.width / 100.0;
-        this.percentY = this.app.view.height / 100.0;
-        this.screenX = this.app.view.width;
-        this.screenY = this.app.view.height;
+        this.percentX = this.app.view.clientWidth / 100.0;
+        this.percentY = this.app.view.clientHeight / 100.0;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
         // generate all sprites
         Object.entries(this.spriteConstructors).map(([key, value]) => {
@@ -160,16 +160,16 @@ class WinnerLayer extends Layer {
     }
 
     onUpdate(deltaTime: number) {
-        this.winnerImg.setSize(200 * this.app.view.width / 1440, 200 * this.app.view.height / 800);
+        this.winnerImg.setSize(200 * this.app.view.clientWidth / 1440, 200 * this.app.view.clientHeight / 800);
 
         // on window resize 
-        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
             // resets percentages
-            this.percentX = this.app.view.width / 100.0;
-            this.percentY = this.app.view.height / 100.0;
+            this.percentX = this.app.view.clientWidth / 100.0;
+            this.percentY = this.app.view.clientHeight / 100.0;
 
-            this.screenX = this.app.view.width;
-            this.screenY = this.app.view.height;
+            this.screenX = this.app.view.clientWidth;
+            this.screenY = this.app.view.clientHeight;
 
             // repositions all objects
             Object.entries(this.spriteConstructors).map(([key, value], index) => {
@@ -188,8 +188,8 @@ class WinnerLayer extends Layer {
 
     // scales image according to screen size
     scaleImg(sprite: Sprite) {
-        const xScale = this.app.view.width / 1440;
-        const yScale = this.app.view.height / 800;
+        const xScale = this.app.view.clientWidth / 1440;
+        const yScale = this.app.view.clientHeight / 800;
         sprite.setScale(xScale, yScale);
     }
 

@@ -52,12 +52,12 @@ class ResultsLayer extends Layer {
         this.resContainer = new Container();
 
         // Set current percents
-        this.percentX = this.app.view.width / 100.0;
-        this.percentY = this.app.view.height / 100.0;
+        this.percentX = this.app.view.clientWidth / 100.0;
+        this.percentY = this.app.view.clientHeight / 100.0;
 
         // sets screen size
-        this.screenX = this.app.view.width;
-        this.screenY = this.app.view.height;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
         // Create results title
         this.ecs
@@ -133,13 +133,13 @@ class ResultsLayer extends Layer {
 
     onUpdate(deltaTime: number) {
         // on window resize 
-        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
             // resets percentages
-            this.percentX = this.app.view.width / 100.0;
-            this.percentY = this.app.view.height / 100.0;
+            this.percentX = this.app.view.clientWidth / 100.0;
+            this.percentY = this.app.view.clientHeight / 100.0;
 
-            this.screenX = this.app.view.width;
-            this.screenY = this.app.view.height;
+            this.screenX = this.app.view.clientWidth;
+            this.screenY = this.app.view.clientHeight;
 
             // resizes text
         }
@@ -148,7 +148,7 @@ class ResultsLayer extends Layer {
             if (this.firstPass) {
                 this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
             } else {
-                this.resContainer.y = lerp(this.app.view.height, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+                this.resContainer.y = lerp(this.app.view.clientHeight, -(this.resContainer.height + this.initialResY), this.count / 20.0);
             }
         } else {
             if (this.count >= 2.0) {
