@@ -5,7 +5,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
 // Pixi imports
-import { Application, IBitmapTextStyle } from "pixi.js";
+import { Application, Container, IBitmapTextStyle } from "pixi.js";
 import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 import { sleep, syncSleep } from "../../Utils/Sleep";
@@ -23,6 +23,9 @@ interface KillLog {
 }
 
 class LogsLayer extends Layer {
+
+    static MAX_LOG:number = 12;
+
     // Current app instance
     private app: Application;
 
@@ -36,16 +39,18 @@ class LogsLayer extends Layer {
 
     private percentX: number;
 
+    private container:Container;
+
     private readonly normalStyle: Partial<IBitmapTextStyle> = {
         fontName: "Rubik-Regular",
         align: "left",
-        fontSize: 15,
+        fontSize: 18,
     };
 
     private readonly boldStyle: Partial<IBitmapTextStyle> = {
         fontName: "Rubik-Bold",
         align: "left",
-        fontSize: 15
+        fontSize: 18
     };
 
     constructor(ecs: ECS, app: Application, context: EngineContext) {
@@ -54,12 +59,15 @@ class LogsLayer extends Layer {
         this.app = app;
         this.context = context;
 
-        this.percentX = this.app.screen.width / 100;
+        this.percentX = this.app.view.clientWidth / 100;
+        this.container = new Container();
 
         this.listener = this.context.ws.addListener("kill", msg => this.onKill(msg));
     }
 
-    onAttach() {}
+    onAttach() {
+        this.app.stage.addChild(this.container);
+    }
 
     onUpdate(deltaTime: number) {}
 
@@ -87,9 +95,9 @@ class LogsLayer extends Layer {
     // create result for a specific participant
     renderLog(log: KillLog, index: number) {
         // represents how much the y coordinate is offset, according to current index
-        const yOffset = 30 + index * 25;
-        const initialX = 97.222 * this.percentX;
-        let xOffset = 0;
+        const yOffset = 30 + index * 30;
+        const initialX = 100 * this.percentX;
+        let xOffset = 40;
 
         // if text already exists, just reposition it
         if (log.text) {
@@ -106,6 +114,12 @@ class LogsLayer extends Layer {
             // set killer pos
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
+
+            if (index == LogsLayer.MAX_LOG - 1) {
+                killer.text.alpha = 0.6;
+                action.text.alpha = 0.6;
+                killed.text.alpha = 0.6;
+            }
         } else {
             // Render the text for participants killed
             const killed = this.ecs.createEntity().addBMPText(`${log.killed}`, this.boldStyle);
@@ -126,9 +140,9 @@ class LogsLayer extends Layer {
             killer.setPos(initialX - xOffset, yOffset);
 
             // stage all texts
-            killed.addStage(this.app);
-            action.addStage(this.app);
-            killer.addStage(this.app);
+            killed.addStage(this.container);
+            action.addStage(this.container);
+            killer.addStage(this.container);
 
             log.text = {
                 killed: killed,
@@ -147,7 +161,9 @@ class LogsLayer extends Layer {
                     text.remStage();
                 });
             }
-        })
+        });
+        this.container.removeChildren();
+        this.app.stage.removeChild(this.container);
     }
 
     // server msg when kill happens
@@ -160,7 +176,7 @@ class LogsLayer extends Layer {
             killed: killed
         });
 
-        if (this.logs.length > 12) {
+        if (this.logs.length > LogsLayer.MAX_LOG) {
             this.remLog();
         }
         // after all operations, render updated logs

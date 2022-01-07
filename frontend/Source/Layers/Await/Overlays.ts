@@ -10,16 +10,13 @@ import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 // Pixi imports
 import { Application, Container, filters } from "pixi.js";
 
-// Lobby level context
-import { LobbyLevelContext } from "../../Levels/Lobby";
-
 // Files import
-import levelMapFile from "../../Assets/level_map.json"
+import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
-import { ColoredRectangle } from "../../Core/Ecs/Components/ColoredRectangle";
+
 const levelMap: Record<string, any> = levelMapFile;
 
-class MapLayer extends Layer {
+class OverlayMap extends Layer {
     // Entities storage
     protected entities: Entity[] = [];
 
@@ -29,17 +26,14 @@ class MapLayer extends Layer {
     // Application related
     protected app: Application;
     protected res: Record<string, any>;
-
-    // Current level's context
-    private levelContext: LobbyLevelContext;
-    
-
+    private screenX: number;
+    private screenY: number;
     // Dimension
     private dim: Vec2 = new Vec2();
-
+    
+    
     constructor(
         ecs: ECS,
-        levelContext: LobbyLevelContext,
         app: Application,
         resource: Record<string, any>
     ) {
@@ -47,7 +41,8 @@ class MapLayer extends Layer {
 
         this.app = app;
         this.res = resource;
-        this.levelContext = levelContext;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
         // Creates new pixi container
         this.mapContainer = new Container();
@@ -66,7 +61,6 @@ class MapLayer extends Layer {
             y += step;
             for (let j = 0; j < cols; ++j) {
                 x += step;
-
                 // Creates entity and add sprite to it
                 const entity = this.ecs.createEntity(x, y, false)
                 const sprite = entity.addSprite();
@@ -77,7 +71,7 @@ class MapLayer extends Layer {
 
                 // Load the cuted image to sprite
                 sprite.setCutImg(
-                    this.app.loader.resources["basemap_raw"],
+                    this.app.loader.resources["overlaymap_raw"],
                     pw, ph, SPRITE_SIZE, SPRITE_SIZE
                 );
 
@@ -88,36 +82,32 @@ class MapLayer extends Layer {
             x = 0;
             y += step;
         }
-        
 
+        
     }
 
     onAttach() {
         this.loadMap();
 
-        // Apply a ligth blur on the soil
-        //
-
         this.dim.x = this.mapContainer.width;
         this.dim.y = this.mapContainer.height;
 
+        this.mapContainer.x = (this.screenX - this.dim.x) * 0.5;
+        this.mapContainer.y = (this.screenY - this.dim.y) * 0.5;
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
     }
 
     onUpdate(deltaTime: number) {
-
-        let fixFactorX =
-            (this.dim.x - this.dim.x * (1 - this.levelContext.zoom)) / 2.0;
-
-        let fixFactorY =
-            (this.dim.y - this.dim.y * (1 - this.levelContext.zoom)) / 2.0;
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
+            this.screenX = this.app.view.clientWidth;
+            this.screenY = this.app.view.clientHeight;
             
-        // Translate and scale soil
-        this.mapContainer.x = this.levelContext.offsetX + fixFactorX;
-        this.mapContainer.y = this.levelContext.offsetY + fixFactorY;
-        this.mapContainer.scale.x = 1 - this.levelContext.zoom;
-        this.mapContainer.scale.y = 1 - this.levelContext.zoom;
+            this.mapContainer.x = (this.screenX - this.dim.x) * 0.5;
+            this.mapContainer.y = (this.screenY - this.dim.y) * 0.5;
+
+        }
+
     }
 
     onDetach() {
@@ -125,4 +115,4 @@ class MapLayer extends Layer {
     }
 }
 
-export { MapLayer };
+export { OverlayMap };

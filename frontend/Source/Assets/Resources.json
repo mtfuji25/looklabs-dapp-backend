@@ -34,7 +34,12 @@
         {
             "name": "user",
             "url": "./assets/await-pack/users.svg"
+        },
+        {
+            "name": "notfound-bg",
+            "url": "./assets/await-pack/notfound_bg.png"
         }
+        
     ],
     "results-pack": [
         {

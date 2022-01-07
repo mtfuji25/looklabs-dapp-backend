@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // Web Clients imports
 import { GameStatus } from "../Clients/Interfaces";
+import { BackgroundLayer } from "../Layers/NotFound/Background";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x000;
@@ -24,7 +25,8 @@ class NotFoundLevel extends Level {
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
-        this.layerStack.pushLayer(new MapLayer(
+
+        this.layerStack.pushLayer(new BackgroundLayer(
             this.ecs,
             this.context.app,
             this.context.res

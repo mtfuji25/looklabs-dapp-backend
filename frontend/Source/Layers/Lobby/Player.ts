@@ -151,6 +151,8 @@ class PlayerLayer extends Layer {
 
     onDetach() {
         this.listener.destroy();
+        this.container.removeChildren();
+        this.app.stage.removeChild(this.container);
     }
 
     createEnemy(content: PlayerCommand) {

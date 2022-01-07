@@ -4,6 +4,8 @@ import { LobbyLevel } from "./Lobby";
 // Layers imports
 import { TextLayer } from "../Layers/Await/Text";
 import { MapLayer } from "../Layers/Await/Basemap";
+import { OverlayMap } from "../Layers/Await/Overlays";
+import { LogsLayer } from "../Layers/Await/Log";
 
 // Utils
 import { v4 as uuidv4 } from "uuid";
@@ -13,7 +15,8 @@ import { ScheduledGame } from "../Clients/Strapi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 
 // Await level bg color
-const BLACK_BG_COLOR = 0x000;
+const BLACK_BG_COLOR = 0x18215d;
+
 
 class AwaitLevel extends Level {
 
@@ -65,11 +68,21 @@ class AwaitLevel extends Level {
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
         // Connect background layer
+        
         this.layerStack.pushLayer(new MapLayer(
             this.ecs,
             this.context.app,
             this.context.res
         ));
+
+        // Load all overlays
+        this.layerStack.pushLayer(
+            new OverlayMap(
+                this.ecs,                
+                this.context.app,
+                this.context.res
+            )
+        );
 
         // Request current game infos from strapi
         let game: ScheduledGame;
@@ -80,6 +93,15 @@ class AwaitLevel extends Level {
             console.log(e);
             this.context.close = true;
         }
+    
+        this.layerStack.pushOverlay(
+            new LogsLayer(
+                this.ecs,
+                this.context.app,
+                this.context,
+                game
+            )
+        );
 
         // Connect infos layer
         this.layerStack.pushLayer(new TextLayer(
