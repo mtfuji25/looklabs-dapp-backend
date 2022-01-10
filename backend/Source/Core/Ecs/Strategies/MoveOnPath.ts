@@ -75,7 +75,7 @@ const finalPlayersAreStuck = (dynamic:DynamicEntity):boolean => {
     }
 
     // check if we have to reset everything
-    if (entitiesAlive == 1) {
+    if (entitiesAlive == 1 && finalFighters.length > 0) {
         _resetFinalFight();
         return false;
     }
@@ -97,14 +97,14 @@ const finalPlayersAreStuck = (dynamic:DynamicEntity):boolean => {
     // check if they're not on the same quadrant
     if (_stuckTogether(finalFighters[0].index, finalFighters[1].index)) return false;
 
-    //wait here for 10 seconds 
+    //wait here for 20 seconds 
     if (stuckTimer == 0) {
         stuckTimer = Date.now();
         return false;
     } else {
         const timeNow = Date.now();
         const timer = timeNow - stuckTimer;
-        if (timer < 10000) {
+        if (timer < 20000) {
             return false;
         }
     }
@@ -187,7 +187,6 @@ const _closestPathPointToPos = (pos:Vec2):number => {
 const _resetFinalFight = ():void => {
     finalFighters.splice(0,finalFighters.length);
     stuckTimer = 0;
-    // strategyTimer = 0;
     stuck = false;
 }
 
