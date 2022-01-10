@@ -24,7 +24,7 @@ interface KillLog {
 
 class LogsLayer extends Layer {
 
-    static MAX_LOG:number = 12;
+    static MAX_LOG:number = 7;
 
     // Current app instance
     private app: Application;

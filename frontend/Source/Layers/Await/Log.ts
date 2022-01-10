@@ -46,13 +46,13 @@ class LogsLayer extends Layer {
     private readonly normalStyle: Partial<IBitmapTextStyle> = {
         fontName: "Rubik-Regular",
         align: "left",
-        fontSize: 18,
+        fontSize: 20,
     };
 
     private readonly boldStyle: Partial<IBitmapTextStyle> = {
         fontName: "Rubik-Bold",
         align: "left",
-        fontSize: 18
+        fontSize: 20
     };
 
     private container:Container;
@@ -140,7 +140,7 @@ class LogsLayer extends Layer {
     // create result for a specific participant
     renderLog(log: JoinLog, index: number) {
         // represents how much the y coordinate is offset, according to current index
-        const yOffset = 30 + index * 30;
+        const yOffset = 30 + index * 35;
         const initialX = this.screenX ;
         let xOffset = 40;
 
@@ -153,7 +153,7 @@ class LogsLayer extends Layer {
             xOffset += action.text.width;
             action.setPos(initialX - xOffset, yOffset);
 
-            xOffset += player.text.width + 10;
+            xOffset += player.text.width + 5;
             player.setPos(initialX - xOffset, yOffset);
 
             if (index == LogsLayer.MAX_LOG - 1) {
@@ -173,7 +173,7 @@ class LogsLayer extends Layer {
             xOffset += action.text.width;
             action.setPos(initialX - xOffset, yOffset);
 
-            xOffset += player.text.width + 10;
+            xOffset += player.text.width + 5;
             player.setPos(initialX - xOffset, yOffset);
 
             // stage all texts

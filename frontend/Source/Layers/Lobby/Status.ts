@@ -24,7 +24,7 @@ class BattleStatusLayer extends Layer {
     private gameTimeListener: GameTimeListener;
 
     private readonly textStyle: Partial<IBitmapTextStyle> = {
-        fontName: "SpaceMono-Regular",
+        fontName: "SpaceMono-Bold",
         fontSize: 16,
         tint: 0x000000,
         align: "center",
