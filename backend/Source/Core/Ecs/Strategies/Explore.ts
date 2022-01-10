@@ -11,7 +11,7 @@ const strategy_Explore = (entity:Entity, grid:Grid, target?:Entity):void => {
   const status = entity.getStatus();
   const strategy = entity.getStrategy();
   const behavior = entity.getBehavior();  
-  if (entitiesAlive > 80) {
+  if (entitiesAlive > 80 || entitiesAlive == 1) {
     _wander(entity);
   } else {
     // if (behavior.staticCollide == false ) {
@@ -29,8 +29,7 @@ const strategy_Explore = (entity:Entity, grid:Grid, target?:Entity):void => {
   
 }
 
-const exploreVectors:Vec2[] = [ new Vec2(1,0), new Vec2(-1,0), new Vec2(0,1), new Vec2(0,-1), new Vec2(0.7,0.7),  new Vec2(-0.7,0.7), new Vec2(-0.7,-0.7), new Vec2(0.7,-0.7),]
-
+const NEW_DIRECTION_RANGE = Math.PI / 8;
 
 const _wander = (entity: Entity) => {
     const status = entity.getStatus();
@@ -40,9 +39,8 @@ const _wander = (entity: Entity) => {
     if (rigidbody.velocity.x === 0 && rigidbody.velocity.y === 0) return;
 
     if (behavior.wanderTime-- <= 0) {
-        const angle = rigidbody.velocity.angle() + Math.random() * Math.PI * behavior.wanderSteer;
+        const angle = rigidbody.velocity.angle() + Math.random() *  NEW_DIRECTION_RANGE * behavior.wanderSteer;
         behavior.wanderVelocity = Vec2.fromAngle(angle, status.speed);
-        // behavior.wanderVelocity = exploreVectors[Math.floor(Math.random() * exploreVectors.length)].muls(status.speed);       
         behavior.wanderTime = Math.round(
           Math.random() * behavior.wanderTimeMax + behavior.wanderTimeMin
         );

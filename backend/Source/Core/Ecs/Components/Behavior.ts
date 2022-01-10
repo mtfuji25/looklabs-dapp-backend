@@ -39,7 +39,7 @@ class Behavior {
     //wander
     public wanderVelocity:Vec2 = new Vec2();
     public wanderTimeMax:number = 80;
-    public wanderTimeMin:number = 20;
+    public wanderTimeMin:number = 30;
     public wanderTime:number = 0;
     public wanderSteer:number = 1;
     public wanderSteerChangeTime:number = 0;

@@ -35,7 +35,6 @@ const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => 
 }
 
 const _seekNearest = (entity:Entity, grid:Grid, target?:Entity) => {
-    // console.log("seek nearest ");
     let nearest:Entity =  _getNearest(entity, target);
     
     if (!nearest) {
@@ -51,7 +50,7 @@ const _seekNearest = (entity:Entity, grid:Grid, target?:Entity) => {
 }
 
 const _seekNearestInRange = (entity:Entity, grid:Grid, prioritize:boolean = false) => {
-    // console.log("seek Range ")
+    
     let nearest: Entity = prioritize ? _getNearestInTierRange(entity) : _getNearestInRange(entity);
 
     if (!nearest) {
@@ -81,7 +80,6 @@ const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
 
 const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
     
-    // console.log("Seek Nearest A");
     let nearest:Entity =  _getNearest(entity, target);
     
     if (!nearest) {
@@ -112,7 +110,7 @@ const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
 }
 
 const _seekNearestInRangeWithA = (entity: Entity, grid: Grid, prioritize:boolean = false) => {
-    // console.log("Seek Range A");
+    
     const rigidbody = entity.getRigidbody();
     const behavior = entity.getBehavior();
     
@@ -132,9 +130,19 @@ const _seekNearestInRangeWithA = (entity: Entity, grid: Grid, prioritize:boolean
 
     // Sources and direction vectors
     const sources: Vec2[] =  _getPathFinderOrigins(behavior, dynamic, grid);
-    let dir: Vec2 | null = _getPathFinderDirection(entity, sources, other.index, grid);
+    let destination = other.index;
+    if (GridUtils.getCellWalkable(other.index.y, other.index.x) == 1) {
+        other.ocupations.forEach( o => {
+            if (GridUtils.getCellWalkable(o.y, o.x) == 0) {
+                destination = o;
+                return;
+            }
+        });
+    }
+
+    let dir: Vec2 | null = _getPathFinderDirection(entity, sources, destination, grid);
+    
     if (!dir) {
-        // console.log("getting unstuck");
         rigidbody.velocity = _unstuck(dynamic);
         
     } else {
@@ -232,25 +240,27 @@ const _getPathFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Gr
 
 const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec2, grid:Grid):Vec2 => {
     let dir: Vec2 | null = null;
+    sources = sources.filter( s => GridUtils.getCellWalkable(s.y, s.x) == 0);
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
-
+        
         const path = GridUtils.finder.findPath(
             source, destinationIndex
         );
 
         if (!path || path.length < 2) {
             return;
-        } 
+        }    
 
         const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
-            const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
+        const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
 
-            if (!dest.equal(origin)){
-                dir = dir.add(dest.sub(origin));
-                // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
-            }    
+        if (!dest.equal(origin)){
+            dir = dir.add(dest.sub(origin));
+            // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
+        }    
+        
     });
 
     const speed = entity.getStatus().speed;
@@ -268,39 +278,32 @@ const escapePoints:Vec2[] = [  new Vec2(-0.3707,0.2155), new Vec2(-0.3707,-0.284
 const _unstuck = (dynamic:DynamicEntity):Vec2 => {
     
     const status = dynamic.entity.getStatus();
-
-    if (entitiesAlive > 2 ) {
-        const nearest = dynamic.entity.getBehavior().nearest;
+    const nearest = dynamic.entity.getBehavior().nearest;
+    if (entitiesAlive > 20 && nearest) {        
         const transform = dynamic.entity.getTransform();
+        const enemyPos = nearest.getTransform().pos;
         
-        if (entitiesAlive > 20 && nearest) {
-            const enemyPos = nearest.getTransform().pos;
-            
-            if (!enemyPos.equal(transform.pos)) {
-               return enemyPos.sub(transform.pos).normalize().muls(status.speed);
-            }
-        } else {
-            // get nearest point in escapePoints
-            let nearestPoint: Vec2;
-            let shortestDist = Number.MAX_SAFE_INTEGER;
-            escapePoints.map((pos) => {
-                const dist = transform.pos.sub(
-                    pos
-                ).squareLength();
-
-                if (dist < shortestDist) {
-                    nearestPoint = pos;
-                    shortestDist = dist;
-                }
-            });
-            return nearestPoint.sub(transform.pos).normalize().muls(status.speed);
+        if (!enemyPos.equal(transform.pos)) {
+            return enemyPos.sub(transform.pos).normalize().muls(status.speed);
         }
-    }
+    } 
 
-    const randomVecs = [new Vec2(0.7,-0.7), new Vec2(-0.7,-0.7), new Vec2(0.7,0.7), new Vec2(-0.7,0.7), new Vec2(1,0), new Vec2(-1,0), new Vec2(0,-1), new Vec2(0,1)];
-    const v = randomVecs[Math.floor(Math.random() * randomVecs.length)];
+    const transform = dynamic.entity.getTransform();
+    // get nearest point in escapePoints
+    let nearestPoint: Vec2;
+    let shortestDist = Number.MAX_SAFE_INTEGER;
+    escapePoints.map((pos) => {
+        const dist = transform.pos.sub(
+            pos
+        ).squareLength();
 
-    return v.muls(status.speed);
+        if (dist < shortestDist) {
+            nearestPoint = pos;
+            shortestDist = dist;
+        }
+    });
+    return nearestPoint.sub(transform.pos).normalize().muls(status.speed);
+
     
 }
 

@@ -256,6 +256,8 @@ class PlayerLayer extends Layer {
             clamp(PlayerLayer.MAX_DEFENSE * (attributesMap["Defence"] / 100.0), PlayerLayer.MAX_DEFENSE * 0.5, PlayerLayer.MAX_DEFENSE),
             // Cooldown
             0.5,
+            // Name
+            this.self.name,
             //Tier
             attributesMap["Tier"].toLower()
         );

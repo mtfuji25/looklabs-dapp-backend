@@ -182,7 +182,7 @@
     "sheets": [ "player-sheet","overlay-sheet" ],
     "player-sheet": {
         "resource": "",
-        "speed": 0.3,
+        "speed": 0.25,
         "loop": false,
         "texWidth": 128,
         "texHeight": 192,
