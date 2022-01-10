@@ -27,8 +27,8 @@ const sys_UpdatePos = (data: EcsData, deltaTime: number): void => {
         );
 
         if (GridUtils.getCellWalkable(nextIndex.y, nextIndex.x) == 0) {
-            transform.pos.x += rigidbody.velocity.x * deltaTime;
-            transform.pos.y += rigidbody.velocity.y * deltaTime;
+            transform.pos.x = nextPosition.x;
+            transform.pos.y = nextPosition.y;
         }
         
     });
