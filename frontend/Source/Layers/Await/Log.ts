@@ -200,7 +200,6 @@ class LogsLayer extends Layer {
         })
         this.container.removeChildren();
         this.app.stage.removeChild(this.container);
-        this.darkOverlay.remStage();
     }
 
 
