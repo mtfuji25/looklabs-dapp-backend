@@ -240,7 +240,7 @@ class PlayerLayer extends Layer {
 
         this.details.attributes.map((attribute) => {
             attributesMap[attribute.trait_type] = attribute.value;
-        })
+        });
 
         const status = this.self.addStatus(
             // Attack
@@ -259,7 +259,7 @@ class PlayerLayer extends Layer {
             // Name
             this.self.name,
             //Tier
-            attributesMap["Tier"].toLower()
+            attributesMap["Tier"].toLowerCase()
         );
 
         status.setOnDie((status) => this.onDie(status));
