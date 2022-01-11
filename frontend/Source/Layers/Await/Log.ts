@@ -22,6 +22,7 @@ interface JoinLog {
 class LogsLayer extends Layer {
 
     static MAX_LOG:number = 12;
+    static LOG_REFRESH_TIME:number = 3.0;
     // Current app instance
     private app: Application;
 
@@ -94,14 +95,15 @@ class LogsLayer extends Layer {
             this.darkOverlay.graphics.height = this.app.screen.height;
         }
         
-        if (this.refreshCount >= 3) {
+        if (this.refreshCount >= LogsLayer.LOG_REFRESH_TIME) {
             this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
             
             this.updateRequest.then((updatedGame) => {
                 updatedGame.scheduled_game_participants.forEach( player => {
                     if (!this.playersInBattle.has(player.nft_id)) {
                         this.playersInBattle.add(player.nft_id);
-                        this.addPlayerToLog(player.name);
+                        if (player.name != undefined)
+                            this.addPlayerToLog(player.name);
                     }
                 });                
             });
@@ -110,7 +112,7 @@ class LogsLayer extends Layer {
                 console.log("Level destroyed while requesting, aborting reponse action...");
             });
 
-            this.refreshCount -= 3.0;
+            this.refreshCount -= LogsLayer.LOG_REFRESH_TIME;
         }
 
         this.refreshCount += deltaTime;
