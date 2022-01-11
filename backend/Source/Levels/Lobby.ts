@@ -23,9 +23,12 @@ import {
     GameStatusListener,
     PlayerNamesListener,
     OnConnectionListener,
+    GameStateListener,
+    GameState,
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
+import { Layer } from "../Core/Layer";
 
 //
 // Types
@@ -39,6 +42,12 @@ interface TimeLeft {
     seconds: string;
 }
 
+export enum GameStateValues {
+    SPAWN,
+    COUNTDOWN,
+    FIGHT
+}
+
 //
 // Constants
 //
@@ -46,6 +55,9 @@ interface TimeLeft {
 // Delay to await when new client connect to respond
 // Represented in miliseconds
 const ON_WS_CONNECTION_RESPONSE_DELAY: number = 1000;
+const INTRO_SETUP_DELAY: number = 500;
+const INTRO_SPAWN_DELAY: number  = 4000;
+const INTRO_COUNTDOWN_DELAY: number = 1000;
 
 //
 // Level implementation
@@ -54,6 +66,8 @@ class LobbyLevel extends Level {
 
     // Current running game id
     private gameId: number;
+
+    private gameState:GameStateValues = GameStateValues.SPAWN;
 
     // Number of figthers remaining in the lobby
     private fighters: number = 0;
@@ -65,12 +79,14 @@ class LobbyLevel extends Level {
     private oneSecondCounter: number = 0.0;
 
     // Store game start time
-    private readonly initialDate: number = Date.now();
+    private initialDate: number;
 
     // WebSockets listeners
     private gameNamesListener: PlayerNamesListener;
     private gameStatusListener: GameStatusListener;
     private wsConnectionListener: OnConnectionListener;
+    private gameStateListener: GameStateListener;
+
 
     // Event Dispatchers queue
     private dieEventQueue: OnDieEvent[] = [];
@@ -106,9 +122,16 @@ class LobbyLevel extends Level {
             "player-names", (msg) => this.onGameNamesMsg(msg)
         );
 
+        this.gameStateListener = this.context.ws.addListener(
+            "game-state", (msg) => this.OnGameStateMsg(msg)
+        );
+
         this.wsConnectionListener = this.context.ws.addListener(
             "connection", (ws) => this.onWsConnectionEvent(ws)
         );
+
+       
+
     }
 
     // Default level's start method, called when engine loads the level
@@ -133,6 +156,8 @@ class LobbyLevel extends Level {
             // Closes the engine
             this.context.close = true;
         }
+
+       
     }
 
     async startGame(): Promise<void> {
@@ -248,9 +273,50 @@ class LobbyLevel extends Level {
 
         // Put the map in the stack
         this.layerStack.pushLayer(mapCollider);
+
+        // sleep and start intro
+        await sleep(INTRO_SETUP_DELAY);
+
+        this.gameState = GameStateValues.SPAWN;
+        this.context.ws.broadcast({
+            msgType: "game-state",
+            gameId: this.gameId,
+            gameState: "spawn"
+        });
+
+        await sleep(INTRO_SPAWN_DELAY);
+        
+        this.gameState = GameStateValues.COUNTDOWN;
+        this.context.ws.broadcast({
+            msgType: "game-state",
+            gameId: this.gameId,
+            gameState: "countdown3"
+        });
+
+        [1, 2, 3].forEach( async state => {
+            await sleep(INTRO_COUNTDOWN_DELAY);
+            this.context.ws.broadcast({
+                msgType: "game-state",
+                gameId: this.gameId,
+                gameState: state == 1 ? "countdown2" : state == 2 ? "countdown1" : "countdown0"
+            });
+        });
+
+        await sleep(INTRO_COUNTDOWN_DELAY);
+
+        this.initialDate =  Date.now();
+        this.gameState = GameStateValues.FIGHT;
+        this.context.ws.broadcast({
+            msgType: "game-state",
+            gameId: this.gameId,
+            gameState: "fight"
+        });
+
     }
 
     async onUpdate(deltaTime: number) {
+
+        if (this.gameState != GameStateValues.FIGHT) return;
 
         // Update timer
         if (this.oneSecondCounter >= 1) {
@@ -417,6 +483,24 @@ class LobbyLevel extends Level {
         }
     }
 
+    async runPendings(deltaTime: number) {
+        switch (this.gameState) {
+            case GameStateValues.SPAWN:
+                break;
+            case GameStateValues.COUNTDOWN:
+                break;    
+            case GameStateValues.FIGHT:
+                this.ecs.onUpdate(deltaTime);
+                break;
+        }
+        
+        // Update all level's layers
+        this.layerStack.layers.map((layer: Layer) => {
+            layer.onUpdate(deltaTime);
+        })
+    }
+
+
     // Default level's close method, called when engine
     // switch between levels or close itself
     onClose(): void {
@@ -424,6 +508,7 @@ class LobbyLevel extends Level {
         this.gameNamesListener.destroy();
         this.gameStatusListener.destroy();
         this.wsConnectionListener.destroy();
+        this.gameStateListener.destroy();
     }
 
     // Handles all requests from frontends that relate with current game-status
@@ -449,6 +534,8 @@ class LobbyLevel extends Level {
         return true;
     }
 
+
+
     // Handles all requests from frontends that relate with current player names
     onGameNamesMsg(msg: ReplyableMsg): boolean {
 
@@ -473,6 +560,19 @@ class LobbyLevel extends Level {
 
         // Handles the event, doesn't allow event propagation
         // in the event listeners queue
+        return true;
+    }
+
+    OnGameStateMsg (msg: ReplyableMsg): boolean {
+        if (msg.content.type == requests.gameState) {
+            const reply: GameState = {
+                msgType: "game-state",
+                gameId: this.gameId,
+                gameState: this.gameState == GameStateValues.FIGHT ? "fight" : "spawn"
+            }
+            msg.reply(reply);
+        }
+
         return true;
     }
 

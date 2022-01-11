@@ -18,7 +18,10 @@ import {
     OnListenerFns,
     msgHandlerFn,
     MsgInterfaces,
-    PlayerNames
+    PlayerNames,
+    GameState,
+    GameStateListener,
+    OnGameStateFn
 } from "./Interfaces";
 
 class WSClient {
@@ -87,7 +90,37 @@ class WSClient {
                     if ((listener as PlayerNamesListener).callback(replyable)) break;
                 }
             }
+        },
+
+        "lobby-state": (data: IncomingMsg, client: WebSocket): void => {
+            // Just allow one response
+            let replied = false;
+
+            // Generates replyable msg
+            const replyable: ReplyableMsg = {
+                content: data.content,
+                reply: (msg: GameState) => {
+                    if (!replied) {
+                        const serverMsg: ServerMsg = {
+                            uuid: data.uuid,
+                            type: "response",
+                            content: msg
+                        };
+
+                        client.send(JSON.stringify(serverMsg));
+
+                        replied = true;
+                    }
+                }
+            };
+
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "game-state") {
+                    if ((listener as GameStateListener).callback(replyable)) break;
+                }
+            }
         }
+
     };
 
     constructor(host: string, port: number) {
@@ -152,6 +185,7 @@ class WSClient {
     }
 
     addListener(type: "game-status", fn: OnGameStatusFn): GameStatusListener;
+    addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
     addListener(type: "player-names", fn: OnPlayerNamesFn): PlayerNamesListener;
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
