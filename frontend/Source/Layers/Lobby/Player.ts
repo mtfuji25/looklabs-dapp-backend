@@ -30,9 +30,9 @@ interface Player {
     healthOutline: Entity;
     healthBackground: Entity;
     idNumber: Entity;
-    animSlot1: Entity;
-    animSlot2: Entity;
-    animSlot3: Entity;
+    animLayer1: Entity;
+    animLayer2: Entity;
+    animLayer3: Entity;
 }
 
 class PlayerLayer extends Layer {
@@ -115,31 +115,19 @@ class PlayerLayer extends Layer {
             animsprite.sprite.scale.y = (1.0 - this.levelContext.zoom);  
             
             // Update animations slots
-            const animSpriteSlot1 = player.animSlot1.getAnimSprite();
-            const animSpriteSlot2 = player.animSlot2.getAnimSprite();
-            const animSpriteSlot3 = player.animSlot3.getAnimSprite();
+            const animSpriteBackground = player.animLayer1.getAnimSprite();
+            const animSpriteMiddleground = player.animLayer2.getAnimSprite();
+            const animSpriteForeground = player.animLayer3.getAnimSprite();
 
-            animSpriteSlot3.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            animSpriteSlot3.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
+            animSpriteForeground.sprite.x = animSpriteMiddleground.sprite.x = animSpriteBackground.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
+            animSpriteForeground.sprite.y = animSpriteMiddleground.sprite.y = animSpriteBackground.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
 
-            animSpriteSlot3.sprite.scale.x = (1.0 - this.levelContext.zoom);
-            animSpriteSlot3.sprite.scale.y = (1.0 - this.levelContext.zoom);
-
-            animSpriteSlot2.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            animSpriteSlot2.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY) - 32;
-
-            animSpriteSlot2.sprite.scale.x = (1.0 - this.levelContext.zoom);
-            animSpriteSlot2.sprite.scale.y = (1.0 - this.levelContext.zoom);
-
-            animSpriteSlot1.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            animSpriteSlot1.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY) -64;
-
-            animSpriteSlot1.sprite.scale.x = (1.0 - this.levelContext.zoom);
-            animSpriteSlot1.sprite.scale.y = (1.0 - this.levelContext.zoom); 
+            animSpriteForeground.sprite.scale.x = animSpriteMiddleground.sprite.scale.x = animSpriteBackground.sprite.scale.x = (1.0 - this.levelContext.zoom);
+            animSpriteForeground.sprite.scale.y = animSpriteMiddleground.sprite.scale.y = animSpriteBackground.sprite.scale.y = (1.0 - this.levelContext.zoom);
          
         });
 
-
+        // sort sprite containers on the y axis
         this.container.children.sort((a,b) => {
             if (a.position.y > b.position.y) return 1;
             if (a.position.y < b.position.y) return -1;
@@ -176,21 +164,19 @@ class PlayerLayer extends Layer {
         const healthBackground = this.ecs.createEntity(0, 0, false);
 
         // Animations slots
-        const animSlot1 = this.ecs.createEntity(pos.x, pos.y - 64, false);
-        const animSlot2 = this.ecs.createEntity(pos.x, pos.y - 32, false);
-        const animSlot3 = this.ecs.createEntity(pos.x, pos.y, false);
+        const animLayer1 = this.ecs.createEntity(pos.x, pos.y - 64, false);
+        const animLayer2 = this.ecs.createEntity(pos.x, pos.y - 64, false);
+        const animLayer3 = this.ecs.createEntity(pos.x, pos.y - 16, false);
 
-        const animSpriteSlot1 = animSlot1.addAnimSprite();
-        const animSpriteSlot2 = animSlot2.addAnimSprite();
-        const animSpriteSlot3 = animSlot3.addAnimSprite();
+        const animSpriteBackground = animLayer1.addAnimSprite();
+        const animSpriteMiddleground = animLayer2.addAnimSprite();
+        const animSpriteForeground = animLayer3.addAnimSprite();
 
-        animSpriteSlot1.loadFromConfig(this.app, this.res["overlay-sheet"]);
-        animSpriteSlot2.loadFromConfig(this.app, this.res["overlay-sheet"]);
-        animSpriteSlot3.loadFromConfig(this.app, this.res["overlay-sheet"]);
-
-        animSpriteSlot1.sprite.visible = false;
-        animSpriteSlot2.sprite.visible = false;
-        animSpriteSlot3.sprite.visible = false;
+        animSpriteBackground.loadFromConfig(this.app, this.res["overlay-sheet"], null, true);
+        
+        animSpriteBackground.sprite.visible = false;
+        animSpriteMiddleground.sprite.visible = false;
+        animSpriteForeground.sprite.visible = false;
 
         // Add animsprite component
         const sprite = entity.addAnimSprite();
@@ -198,35 +184,34 @@ class PlayerLayer extends Layer {
         // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
 
-        
-
         switch (char_class) {
             
             case "Avians":
-            case "Avian":    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`);
+            case "Avian":    
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`, false);
                 break;
             case "Hounds":
             case "Hound":
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`); 
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`, false); 
                 break;
             case "Insectoids":
             case "Insectoid":
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
                 break;
             case 'Serpents':
             case 'Serpent':
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`, false);
                 break;
             default:
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`);
+                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
                 break;
         }
 
         sprite.addStage(this.container);
 
-        animSpriteSlot1.addStage(this.container);
-        animSpriteSlot2.addStage(this.container);
-        animSpriteSlot3.addStage(this.container);
+        animSpriteBackground.addStage(this.container);
+        animSpriteMiddleground.addStage(this.container);
+        animSpriteForeground.addStage(this.container);
         
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
@@ -256,9 +241,9 @@ class PlayerLayer extends Layer {
             healthOutline: healthOutline,
             healthBackground: healthBackground,
             health: health,
-            animSlot1: animSlot1,
-            animSlot2: animSlot2,
-            animSlot3: animSlot3
+            animLayer1: animLayer1,
+            animLayer2: animLayer2,
+            animLayer3: animLayer3
         };
     }
 
@@ -284,9 +269,9 @@ class PlayerLayer extends Layer {
         const entitySprite = entity.getAnimSprite();
         const entityTransform = entity.getTransform();
 
-        const animSpriteSlot1 = this.players[id].animSlot1.getAnimSprite();
-        const animSpriteSlot2 = this.players[id].animSlot2.getAnimSprite();
-        const animSpriteSlot3 = this.players[id].animSlot3.getAnimSprite();
+        const animLayer1 = this.players[id].animLayer1.getAnimSprite();
+        const animLayer2 = this.players[id].animLayer2.getAnimSprite();
+        const animLayer3 = this.players[id].animLayer3.getAnimSprite();
 
         const lifeRecSize = Math.floor((health / maxHealth) * 22);
         const lifeRectangle = healthBar.getColoredRectangle();
@@ -314,31 +299,21 @@ class PlayerLayer extends Layer {
             if (action == 4) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][0]);
 
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer3.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // critical R
             if (action == 14) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
-                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
-                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+                animLayer1.sprite.visible = true;
             }
             // healing
             if (action == 24) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayer1.sprite.visible = true;
             }
 
             //
@@ -347,31 +322,22 @@ class PlayerLayer extends Layer {
             if (action == 5) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][1]);
 
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer2.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // critical L
             if (action == 15) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
-                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
-                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
+                animLayer1.sprite.visible = true;
 
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
             }
             // healing
             if (action == 25) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayer1.sprite.visible = true;
             }
 
             //
@@ -380,62 +346,42 @@ class PlayerLayer extends Layer {
             if (action == 0) {
                 entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
 
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer2.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // critical R
             if (action == 10) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][2]);
-                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
-                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
-                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+                animLayer1.sprite.visible = true;
             }
             // Healing
             if (action == 20) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][2]);
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayer1.sprite.visible = true;                
             }
 
             // Fourth set
             if (action == 1) {
                 entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
 
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer2.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // critical L
             if (action == 11) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][3]);
-                animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
-                animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
-                animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
+                animLayer1.sprite.visible = true;
             }
             // Healing
             if (action == 21) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][3]);
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayer1.sprite.visible = true;
             }
             
             //
@@ -447,28 +393,22 @@ class PlayerLayer extends Layer {
                 } else {
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                 }
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer2.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // Critical
             if (action == 12 || action == 13) {
                 if (Math.random() < 0.5) {
                     // Right
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
-                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
-                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
                 } else {
                     // Left
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
-                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
-                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
                 }
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.sprite.visible = true;
             }
             // Healing
             if (action == 22 || action == 23) {
@@ -477,13 +417,8 @@ class PlayerLayer extends Layer {
                 } else {
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                 }
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);                
+                animLayer1.sprite.visible = true;
             }
 
             //
@@ -495,29 +430,25 @@ class PlayerLayer extends Layer {
                 } else {
                     entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 }
-                animSpriteSlot1.sprite.visible = false;
-                animSpriteSlot2.sprite.visible = false;
-                animSpriteSlot3.sprite.visible = false;
+                animLayer1.sprite.visible = false;
+                animLayer2.sprite.visible = false;
+                animLayer3.sprite.visible = false;
             }
             // Critical
             if (action == 16 || action == 17) {
                 if (Math.random() < 0.5) {
                     // Right
                     entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][3]);
-                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][4]);
-                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][5]);
+                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+                    
                 } else {
                     // Left
                     entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                    animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][6]);
-                    animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][7]);
-                    animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][8]);
+                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);                    
                 }
 
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.sprite.visible = true;
+                
             }
             // Healing
             if (action == 26 || action == 27) {
@@ -526,13 +457,9 @@ class PlayerLayer extends Layer {
                 } else {
                     entitySprite.animate(this.res["player-sheet"]["animations"][1]);
                 }
-                animSpriteSlot1.animate(this.res["overlay-sheet"]["animations"][9]);
-                animSpriteSlot2.animate(this.res["overlay-sheet"]["animations"][10]);
-                animSpriteSlot3.animate(this.res["overlay-sheet"]["animations"][11]);
-
-                animSpriteSlot1.sprite.visible = true;
-                animSpriteSlot2.sprite.visible = true;
-                animSpriteSlot3.sprite.visible = true;
+                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayer1.sprite.visible = true;
+                
             }
         }
     }
@@ -540,18 +467,13 @@ class PlayerLayer extends Layer {
     deleteEnemy(command:PlayerCommand) {
         const { id } = command;
 
-        const animSpriteSlot1 = this.players[id].animSlot1.getAnimSprite();
-        const animSpriteSlot2 = this.players[id].animSlot2.getAnimSprite();
-        const animSpriteSlot3 = this.players[id].animSlot3.getAnimSprite();
-
+        const animLayer1 = this.players[id].animLayer1.getAnimSprite();
+                
         // death animation
         this.players[id].entity.getAnimSprite().forceAnimate(this.res["player-sheet"]["animations"][4]);
-        animSpriteSlot1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
-        animSpriteSlot2.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
-        animSpriteSlot3.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
-        animSpriteSlot1.sprite.visible = true;
-        animSpriteSlot2.sprite.visible = true;
-        animSpriteSlot3.sprite.visible = true;
+
+        animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
+        animLayer1.sprite.visible = true;
 
         setTimeout(() => {
             this.players[id].idNumber.destroy();
@@ -559,9 +481,9 @@ class PlayerLayer extends Layer {
             this.players[id].healthOutline.destroy();
             this.players[id].healthBackground.destroy();
             this.players[id].entity.destroy();
-            this.players[id].animSlot1.destroy();
-            this.players[id].animSlot2.destroy();
-            this.players[id].animSlot3.destroy();
+            this.players[id].animLayer1.destroy();
+            this.players[id].animLayer2.destroy();
+            this.players[id].animLayer3.destroy();
             delete this.players[id];
         }, 400);
     }

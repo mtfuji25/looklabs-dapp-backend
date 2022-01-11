@@ -302,6 +302,7 @@ class Entity {
             return this.getAnimSprite()
 
         const animsprite = new AnimSprite(this.getTransform());
+        animsprite.createContainer();
         animsprite.refresh = this.refresh;
 
         this.id[masks.animsprite] = this.ecs.id.animSprite;
