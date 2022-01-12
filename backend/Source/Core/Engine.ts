@@ -10,6 +10,7 @@ import { sleep } from "../Utils/Sleep";
 // Web clients imports
 import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
+import { LogStorageClient } from "../Clients/LogStorage";
 
 class Engine {
 
@@ -19,20 +20,25 @@ class Engine {
     // Strapi client Instance
     private strapiClient: StrapiClient;
 
+    // Log Storage Client Instance
+    private logStorageClient: LogStorageClient;
+
     // Current level instnace
     private level: Level;
 
     // Engine context
     private context: EngineContext;
 
-    constructor(wsClient: WSClient, strapiClient: StrapiClient) {
+    constructor(wsClient: WSClient, strapiClient: StrapiClient, logStorageClient: LogStorageClient) {
         this.wsClient = wsClient;
         this.strapiClient = strapiClient;
+        this.logStorageClient = logStorageClient;
 
         this.context = {
             engine: this,
             ws: this.wsClient,
             strapi: this.strapiClient,
+            logStorage: this.logStorageClient,
             stats: {
                 dt: 0.0,
                 fps: 0.0,
@@ -54,6 +60,9 @@ class Engine {
 
         // Start strapi client
         this.strapiClient.start();
+
+        // Start Log storage client
+        await this.logStorageClient.start();
 
         // Finally load the default level
         console.log("Loading level: ", this.level.getName());
@@ -96,6 +105,9 @@ class Engine {
 
         // Close engine Web Socket client
         this.wsClient.close();
+
+        // Disconnect log storage client
+        await this.logStorageClient.close();
     }
 
     async loadLevel(level: Level) {

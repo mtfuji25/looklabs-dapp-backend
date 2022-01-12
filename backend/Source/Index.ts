@@ -2,6 +2,7 @@ import { Engine } from "./Core/Engine";
 import { WSClient } from "./Clients/WebSocket";
 import { StrapiClient } from "./Clients/Strapi";
 import * as Sentry from "@sentry/node";
+import { LogStorageClient } from "./Clients/LogStorage";
 
 import * as dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
@@ -19,6 +20,8 @@ const STRAPI_BEARER_TOKEN = String(process.env.STRAPI_BEARER_TOKEN);
 const WS_PORT = Number(process.env.WS_SERVER_PORT);
 const WS_HOST = String(process.env.WS_SERVER_HOST);
 
+const PROJECT_ID = String(process.env.PROJECT_ID);
+
 const main = async () => {
     // Start strapi client
     const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
@@ -26,7 +29,10 @@ const main = async () => {
     // Start websocket client
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 
-    const engine = new Engine(wsClient, strapiClient);
+    // Log storage client
+    const logStorageClient = new LogStorageClient(PROJECT_ID);
+
+    const engine = new Engine(wsClient, strapiClient, logStorageClient);
 
     // Start the engine systems
     await engine.start();
