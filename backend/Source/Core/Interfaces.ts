@@ -4,6 +4,7 @@ import { Engine } from "./Engine";
 // Web clients imports
 import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
+import { LogStorageClient } from "../Clients/LogStorage";
 
 interface EngineStats {
     // Level's deltatime
@@ -23,6 +24,7 @@ interface EngineContext {
     // Web Clients instances
     ws: WSClient;
     strapi: StrapiClient;
+    logStorage: LogStorageClient
 
     // Engine control
     stats: EngineStats;
