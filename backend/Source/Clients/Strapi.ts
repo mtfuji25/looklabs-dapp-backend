@@ -47,14 +47,6 @@ interface DetailAttribute {
     value: number | string;
 }
 
-interface Log {
-    event: "entrants" | "damage" | "kills" | "winners" | "final_rank";
-    value?: string;
-    timestamp: string;
-    scheduled_game: number;
-    scheduled_game_participant: number;
-}
-
 class StrapiClient {
     private host: string;
 
@@ -166,13 +158,6 @@ class StrapiClient {
         return (await this.restApi.get(`${tokenAddr}/${tokenId}`)).data;
     }
 
-    async createLog(log: Log) {
-        // return this.post('logs', {
-        //     data: log
-        // });
-        return new Promise((resolve, reject) => resolve("Success"));
-    }
-
     // Default engine start call
     start(): void {}
 
@@ -186,6 +171,5 @@ export {
     ScheduledGameParticipant,
     GameParticipantsResult,
     ParticipantDetails,
-    DetailAttribute,
-    Log
+    DetailAttribute
 };
