@@ -92,7 +92,7 @@ class WSClient {
             }
         },
 
-        "lobby-state": (data: IncomingMsg, client: WebSocket): void => {
+        "game-state": (data: IncomingMsg, client: WebSocket): void => {
             // Just allow one response
             let replied = false;
 

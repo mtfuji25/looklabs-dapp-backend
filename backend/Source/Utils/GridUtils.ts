@@ -28,9 +28,10 @@ class GridUtils {
     
 
     static getCellWalkable (row:number,column:number):number {
-        if (levelCollider["data"].length <= column) return 1;
-        if (levelCollider["data"][column].length <= row) return 1;
-        return levelCollider["data"][column][row];
+        if (row < 0 || column < 0) return 1;
+        if (transposedCollider.length <= row) return 1;
+        if (transposedCollider[row].length <= column) return 1;
+        return transposedCollider[row][column];
     }
 
     static convertFromNDC  (pos: Vec2): Vec2  {

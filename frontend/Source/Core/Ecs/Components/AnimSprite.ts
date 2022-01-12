@@ -80,7 +80,6 @@ class AnimSprite {
             this.animSprite.y = -this.animSprite.height * 0.25;
         }
         
-        
         this.sprite.addChild(this.animSprite);
     }
 
@@ -142,4 +141,4 @@ class AnimSprite {
 
 }
 
-export { AnimSprite };
+export { AnimSprite, AnimConfig };

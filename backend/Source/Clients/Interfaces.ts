@@ -12,7 +12,7 @@ const msgTypes = {
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "game-state" | "remain-players" | "game-time";
 type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus |  GameState | PlayerCommand | GameTimeMsg | PlayerNames;
-
+type GameStateTypes = "spawn" | "countdown3" | "countdown2" | "countdown1" | "countdown0" | "fight"
 //
 //  Msgs interfaces
 //
@@ -47,7 +47,7 @@ interface GameStatus {
 interface GameState {
     msgType: "game-state";
     gameId: number;
-    gameState: "spawn" | "countdown3" |  "countdown2" |  "countdown1" | "countdown0" | "fight"
+    gameState: GameStateTypes;
 }
 
 interface PlayerNames {
@@ -175,5 +175,6 @@ export {
     OnGameStateFn,
     OnConnectionFn,
     msgHandlerFn,
-    MsgInterfaces
+    MsgInterfaces,
+    GameStateTypes
 };

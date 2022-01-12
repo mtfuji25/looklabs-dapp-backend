@@ -19,7 +19,7 @@ import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
-import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
+import { GameStateTypes, Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
 import { Container } from "pixi.js";
 import { StrapiClient } from "../../Clients/Strapi";
@@ -37,11 +37,7 @@ interface Player {
 
 class PlayerLayer extends Layer {
 
-    public static MAX_ATTACK:number = 20;
-    public static MAX_SPEED:number = 0.05;
-    public static MAX_DEFENSE:number = 5;
-    
-    // Entites storage
+    // Entities storage
     private players: Record<string, Player> = {};
 
     // Listener id
@@ -113,18 +109,7 @@ class PlayerLayer extends Layer {
 
             animsprite.sprite.scale.x = (1.0 - this.levelContext.zoom);
             animsprite.sprite.scale.y = (1.0 - this.levelContext.zoom);  
-            
-            // Update animations slots
-            const animSpriteBackground = player.animLayer1.getAnimSprite();
-            const animSpriteMiddleground = player.animLayer2.getAnimSprite();
-            const animSpriteForeground = player.animLayer3.getAnimSprite();
-
-            animSpriteForeground.sprite.x = animSpriteMiddleground.sprite.x = animSpriteBackground.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            animSpriteForeground.sprite.y = animSpriteMiddleground.sprite.y = animSpriteBackground.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
-
-            animSpriteForeground.sprite.scale.x = animSpriteMiddleground.sprite.scale.x = animSpriteBackground.sprite.scale.x = (1.0 - this.levelContext.zoom);
-            animSpriteForeground.sprite.scale.y = animSpriteMiddleground.sprite.scale.y = animSpriteBackground.sprite.scale.y = (1.0 - this.levelContext.zoom);
-         
+                  
         });
 
         // sort sprite containers on the y axis
@@ -164,9 +149,9 @@ class PlayerLayer extends Layer {
         const healthBackground = this.ecs.createEntity(0, 0, false);
 
         // Animations slots
-        const animLayer1 = this.ecs.createEntity(pos.x, pos.y - 64, false);
-        const animLayer2 = this.ecs.createEntity(pos.x, pos.y - 64, false);
-        const animLayer3 = this.ecs.createEntity(pos.x, pos.y - 16, false);
+        const animLayer1 = this.ecs.createEntity(0,0, false);
+        const animLayer2 = this.ecs.createEntity(0,0, false);
+        const animLayer3 = this.ecs.createEntity(0,0, false);
 
         const animSpriteBackground = animLayer1.addAnimSprite();
         const animSpriteMiddleground = animLayer2.addAnimSprite();
@@ -180,6 +165,8 @@ class PlayerLayer extends Layer {
 
         // Add animsprite component
         const sprite = entity.addAnimSprite();
+        // hide sprite so we can spawn them during intro
+        sprite.sprite.visible = false;
 
         // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
@@ -209,9 +196,9 @@ class PlayerLayer extends Layer {
 
         sprite.addStage(this.container);
 
-        animSpriteBackground.addStage(this.container);
-        animSpriteMiddleground.addStage(this.container);
-        animSpriteForeground.addStage(this.container);
+        animSpriteBackground.addStage(sprite.sprite);
+        animSpriteMiddleground.addStage(sprite.sprite);
+        animSpriteForeground.addStage(sprite.sprite);
         
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
@@ -515,6 +502,14 @@ class PlayerLayer extends Layer {
         // Does not handle the event
         return false;
     }
+
+    getContainer ():Container {
+        return this.container;
+    }
+
+    getPlayers ():Player[] {
+        return Object.values(this.players);
+    }
 }
 
-export { PlayerLayer };
+export { PlayerLayer, Player };

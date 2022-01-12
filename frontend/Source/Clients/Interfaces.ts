@@ -15,6 +15,7 @@ const msgTypes = {
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "game-state"  | "remain-players" | "game-time" | "player-names";
 type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | GameState | PlayerCommand | GameTimeMsg | PlayerNames;
+type GameStateTypes = "spawn" | "countdown3" |  "countdown2" |  "countdown1" | "countdown0" | "fight"
 
 type ListenerTypes =
     | "game-status"
@@ -39,7 +40,7 @@ interface GameStatus {
 interface GameState {
     msgType: "game-state";
     gameId: number;
-    gameState: "spawn" | "countdown3" |  "countdown2" |  "countdown1" | "countdown0" | "fight"
+    gameState: GameStateTypes
 }
 
 interface GameTimeMsg {
@@ -211,5 +212,6 @@ export {
     OnKillFn,
     OnRemainPlayersFn,
     ServerMsg,
-    msgHandlerFn
+    msgHandlerFn,
+    GameStateTypes
 };

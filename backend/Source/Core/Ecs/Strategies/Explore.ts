@@ -29,7 +29,7 @@ const strategy_Explore = (entity:Entity, grid:Grid, target?:Entity):void => {
   
 }
 
-const NEW_DIRECTION_RANGE = Math.PI / 8;
+const NEW_DIRECTION_RANGE = Math.PI ;
 
 const _wander = (entity: Entity) => {
     const status = entity.getStatus();
