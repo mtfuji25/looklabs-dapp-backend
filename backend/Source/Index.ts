@@ -1,6 +1,7 @@
 import { Engine } from "./Core/Engine";
 import { WSClient } from "./Clients/WebSocket";
 import { StrapiClient } from "./Clients/Strapi";
+import { Logger } from "./Utils/Logger";
 import * as Sentry from "@sentry/node";
 import { LogStorageClient } from "./Clients/LogStorage";
 
@@ -22,7 +23,13 @@ const WS_HOST = String(process.env.WS_SERVER_HOST);
 
 const PROJECT_ID = String(process.env.PROJECT_ID);
 
+const LOGGER_LEVEL = Number("0b" + String(process.env.LOGGER_LEVEL));
+
 const main = async () => {
+
+    // Starts logger class
+    Logger.start(LOGGER_LEVEL);
+
     // Start strapi client
     const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
