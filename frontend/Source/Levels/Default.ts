@@ -9,6 +9,7 @@ import { AwaitLevel } from "./Await";
 import { LobbyLevel } from "./Lobby";
 import { NotFoundLevel } from "./NotFound";
 import { ResultsLevel } from "./Results";
+import { Logger } from "../Utils/Logger";
 
 class DefaultLevel extends Level {
 
@@ -27,11 +28,13 @@ class DefaultLevel extends Level {
             });
 
             const content = response.content as GameStatus;
-            console.log(response);
+            Logger.trace(JSON.stringify(response, null, 4));
             await this.startLevels(content);
 
-        } catch(e) {
-            console.log(e);
+        } catch(err) {
+            Logger.fatal("Failed to request game status.")
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
             this.context.close = true;
         }
     }
@@ -72,10 +75,11 @@ class DefaultLevel extends Level {
                 break;
 
             default:
-                console.log(
+                Logger.fatal(
                     "Expected lobby | awaiting | not-found but got: ", 
                     response.gameStatus
                 );
+                Logger.capture(new Error("Unexpected game status response: " + response.gameStatus));
                 // Should show error screen
 
                 this.context.close = true;

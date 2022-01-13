@@ -9,6 +9,7 @@ import { ColoredRectangle } from "../../Core/Ecs/Components/ColoredRectangle";
 import { Application, Container, IBitmapTextStyle } from "pixi.js";
 import { EngineContext } from "../../Core/Interfaces";
 import { ScheduledGame } from "../../Clients/Strapi";
+import { Logger } from "../../Utils/Logger";
 
 
 interface JoinLog {
@@ -107,7 +108,7 @@ class LogsLayer extends Layer {
             });
 
             this.updateRequest.catch((e) => {
-                console.log("Level destroyed while requesting, aborting reponse action...");
+                Logger.info("Level destroyed while requesting, aborting reponse action...");
             });
 
             this.refreshCount -= 3.0;
