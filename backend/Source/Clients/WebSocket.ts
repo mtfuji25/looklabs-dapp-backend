@@ -20,6 +20,7 @@ import {
     MsgInterfaces,
     PlayerNames
 } from "./Interfaces";
+import { Logger } from "../Utils/Logger";
 
 class WSClient {
     private host: string;
@@ -107,7 +108,7 @@ class WSClient {
     }
 
     private handleConnection(ws: WebSocket) {
-        console.log("New client connected in WebSocketServer.");
+        Logger.info("New client connected in WebSocketServer.");
 
         for (let listener of Object.values(this.listeners)) {
             if (listener.type == "connection") {
@@ -141,13 +142,13 @@ class WSClient {
     }
 
     start(): void {
-        console.log("WebSocket client initing in port: ", this.port);
+        Logger.info("WebSocket client initing in port: ", this.port);
 
         this.server.on("connection", (ws) => this.handleConnection(ws));
     }
 
     close(): void {
-        console.log("WebSocket client closing in port: ", this.port);
+        Logger.info("WebSocket client closing in port: ", this.port);
         this.server.close();
     }
 
