@@ -23,6 +23,7 @@ import {
     WS_PORT,
     LOGGER_LEVEL
 } from "./Constants/Constants";
+import { Logger } from "./Utils/Logger";
 
 // Jquery like query selector
 const $ = (name: string) => {
