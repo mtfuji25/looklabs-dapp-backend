@@ -14,15 +14,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
 import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi";
-
-
-//
-//  Frontend actions mapping
-//  "attackright": 0, "attackleft": 1,
-//  "attackup": 2, "attackdown": 3,
-//  "walkright": 4, "walkleft": 5,
-//  "walkup": 6, "walkdown": 7
-//
+import { PlayerActions } from "./PlayerActions";
 
 const spawnPos = [
     // these spawn positions will place sprites around central square, where they might get stuck
@@ -187,7 +179,7 @@ const spawnPos = [
 class PlayerLayer extends Layer {
 
     public static MAX_ATTACK:number = 18;
-    public static MAX_SPEED:number = 0.04;
+    public static MAX_SPEED:number = 0.05;
     public static MAX_DEFENSE:number = 5;
     public static MAX_HEALTH:number = 180;
 
@@ -298,68 +290,67 @@ class PlayerLayer extends Layer {
         const { attacking, healing } = this.self.getBehavior();
         const { velocity } = this.self.getRigidbody();
 
-        // Updating phase
-        const theta = rad2deg(
-            Math.atan2(velocity.y, velocity.x)
-        );
+        const walkH = velocity.x >= 0 ? PlayerActions.DIRECTION_RIGHT : PlayerActions.DIRECTION_LEFT;
+        // const walkV = velocity.y >= 0 ? PlayerActions.DIRECTION_UP : PlayerActions.DIRECTION_DOWN;
 
-        if (-45.0 < theta && theta <= 45.0) {
+        if (walkH == PlayerActions.DIRECTION_RIGHT) {
             if (attacking) {
                 if (critical) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 10));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_RIGHT_CRITICAL));
                 } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 0));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_RIGHT));
                 }
             } else {
                 if (healing) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 24));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_RIGHT_HEALING));
                 } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 4));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_RIGHT));
                 }
             }
-        } else if (45.0 < theta && theta <= 135.0) {
+        // } else if (walkV == PlayerActions.DIRECTION_UP) {
+        //     if (attacking) {
+        //         if (critical) {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_UP_CRITICAL));
+        //         } else {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_UP));
+        //         }
+        //     } else {
+        //         if (healing) {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_UP_HEALING));
+        //         } else {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_UP));
+        //         }
+        //     }
+        } else if (walkH == PlayerActions.DIRECTION_LEFT) {
             if (attacking) {
                 if (critical) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 12));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_LEFT_CRITICAL));
                 } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 2));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_LEFT));
                 }
             } else {
                 if (healing) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 26));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_LEFT_HEALING));
                 } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 6));
-                }
-            }
-        } else if (135.0 < theta && theta <= 180 || theta <= -135.0 && theta >= -180) {
-            if (attacking) {
-                if (critical) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 11));
-                } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 1));
-                }
-            } else {
-                if (healing) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 25));
-                } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 5));
-                }
-            }
-        } else if (-135.0 < theta && theta <= -45.0) {
-            if (attacking) {
-                if (critical) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 13));
-                } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 3));
-                }
-            } else {
-                if (healing) {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 27));
-                } else {
-                    this.wsClient.broadcast(this.getBaseMsg("update", 7));
+                    this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_LEFT));
                 }
             }
         }
+        //  else if (walkV == PlayerActions.DIRECTION_DOWN) {
+        //     if (attacking) {
+        //         if (critical) {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_DOWN_CRITICAL));
+        //         } else {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.ATTACK_DOWN));
+        //         }
+        //     } else {
+        //         if (healing) {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_DOWN_HEALING));
+        //         } else {
+        //             this.wsClient.broadcast(this.getBaseMsg("update", PlayerActions.WALK_DOWN));
+        //         }
+        //     }
+        // }
     }
 
     onDetach() {

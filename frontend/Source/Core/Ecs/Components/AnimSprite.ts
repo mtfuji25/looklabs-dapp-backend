@@ -97,25 +97,33 @@ class AnimSprite {
         }
     }
 
-    addStage(app: Application | Container) {
+    addStage(app: Application | Container, index:number = -1) {
         if (app instanceof Application) {
             if (!this.app) {
                 this.app = app;
-                app.stage.addChild(this.sprite);
             } else {
                 this.remStage();
                 this.app = app;
+            }
+            if (index >= 0) {
+                app.stage.addChildAt(this.sprite, index);
+            } else {
                 app.stage.addChild(this.sprite);
             }
+            
         } else {
             if (!this.container) {
                 this.container = app;
-                app.addChild(this.sprite);
             } else {
                 this.remStage();
                 this.container = app;
+            }
+            if (index >= 0) {
+                app.addChildAt(this.sprite, index);
+            } else {
                 app.addChild(this.sprite);
             }
+            
         }
     }
 

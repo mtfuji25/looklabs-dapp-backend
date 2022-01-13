@@ -2,8 +2,10 @@ import { AnimatedSprite, Application, BaseTexture, BitmapText, Container, IBitma
 import { GameStateTypes } from "../../Clients/Interfaces";
 import { AnimConfig } from "../../Core/Ecs/Components/AnimSprite";
 import { Random, Vec2 } from "../../Utils/Math";
+import { LogsLayer } from "./Log";
 import { OverlayMap } from "./Overlays";
 import { Player, PlayerLayer } from "./Player";
+import { ViewLayer } from "./View";
 
 class IntroSequence {
 
@@ -11,6 +13,7 @@ class IntroSequence {
     private state:GameStateTypes;
     private playerLayer:PlayerLayer;
     private overlay:OverlayMap;
+    private viewLayer:ViewLayer;
     private entities:IntroEntity[];
     private entityContainer:Container;
     private overlayContainer:Container;
@@ -24,22 +27,20 @@ class IntroSequence {
         fontSize: 400,
     };
 
-    constructor (app: Application, playerLayer:PlayerLayer, overlay:OverlayMap, resource: Record<string, any>) {
+    constructor (app: Application, playerLayer:PlayerLayer, overlay:OverlayMap, viewLayer:ViewLayer, resource: Record<string, any>) {
         this.app = app;
         this.playerLayer = playerLayer;
         this.overlay = overlay;
+        this.viewLayer = viewLayer;
         this.entities = [];
         this.res = resource;
         this.entityContainer = new Container();
         this.overlayContainer = new Container();
         this.fightText = new BitmapText("", this.fightStyle);
-        // this.fightText.anchor.x = 0.5;
-        // this.fightText.anchor.y = 0.5;
-        
         
         this.playerLayer.getPlayers().forEach (player => {
             this.entities.push( 
-                new IntroEntity( app, player, this.res, this.entityContainer)
+                new IntroEntity( app, player, this.res, this.entityContainer, this.overlayContainer)
             );
         });
 
@@ -52,7 +53,7 @@ class IntroSequence {
     }
 
     updateIntroState (state:GameStateTypes) {
-        console.log(state);
+        
         switch (state) {
             case "spawn":
                 break;                
@@ -77,31 +78,10 @@ class IntroSequence {
                 this.showAllEntities();
                 this.reset();              
                 this.destroy();
+                this.viewLayer.interactive = true;
                 break;  
-                
-                
         }
         this.state = state;
-        // state == "spawn" 
-            // show entities randomly in player layer
-            // add bubble to some of them in player layer, hide them after 2 seconds
-            // randomly set them facing one side or the other?
-        // state ==  "countdown3" 
-            // show all entities in player layer
-            // show countdown 3 in overlay
-        // state == "countdown2"
-            // show countdown 2 in overlay
-        // state == "countdown1" 
-            // show countdown 1 in overlay
-        // state == "countdown0" 
-            // show FIGHT in overlay
-        // state ==  "fight"
-            // remove FIGHT from overlay
-            // remove bubbles from player layer
-            // add all health to entities
-        
-        // this.playerLayer.updateGameState(state);
-        // this.overlay.updateGameState(state);
     }
 
     showAllEntities () {
@@ -111,12 +91,19 @@ class IntroSequence {
     }
 
     showText (txt:string) {
-        if (!this.fightText.parent)
+        if (this.fightText && !this.fightText.parent)
             this.overlayContainer.addChild(this.fightText);
     
         this.fightText.text = txt;
-        this.fightText.x = (this.overlay.getContainer().width - this.fightText.width) * 0.5;
-        this.fightText.y = (this.overlay.getContainer().height - this.fightText.height) * 0.5;
+        this.alignText();
+        
+    }
+
+    alignText () {
+        if (this.fightText) {
+            this.fightText.x = (this.overlay.getContainer().width - this.fightText.width) * 0.5;
+            this.fightText.y = (this.overlay.getContainer().height - this.fightText.height) * 0.5;
+        }
         
     }
 
@@ -159,6 +146,10 @@ class IntroSequence {
         if (this.state === "spawn") {
             this.spawn(deltaTime);
         }
+        if (this.entities) {
+            this.entities.forEach( e => e.onUpdate());
+        }
+        this.alignText();
     }
 
     destroy () {
@@ -181,12 +172,14 @@ class IntroEntity {
     private playerContainer:Container;
     private playerPosition:Vec2;
     private flameAnimation:AnimatedSprite;
-    private container:Container;
+    private entityContainer:Container;
+    private overlayContainer:Container;
     private bubble:PixiSprite;
     private app:Application;
     private res: Record<string, any>;
+    private showing:boolean = true;
 
-    constructor (app: Application, player:Player, resources: Record<string, any>, container:Container) {
+    constructor (app: Application, player:Player, resources: Record<string, any>, entityContainer:Container, overlayContainer:Container) {
         this.app = app;
         this.res = resources;
         this.player = player;
@@ -195,7 +188,8 @@ class IntroEntity {
 
         this.playerPosition = new Vec2(sprite.x, sprite.y - 16);
         this.playerContainer = this.player.entity.getAnimSprite().sprite;
-        this.container = container;
+        this.entityContainer = entityContainer;
+        this.overlayContainer = overlayContainer;
         this.createFlames ();
     }
 
@@ -206,7 +200,6 @@ class IntroEntity {
         const ssheet = BaseTexture.from(url);
         const animation = config["flames"];
         animation.forEach((frame) => {
-            
             flameTextures.push(
                 new Texture(ssheet, new Rectangle(
                     frame.x, frame.y, frame.width, frame.height
@@ -225,16 +218,22 @@ class IntroEntity {
         }
         this.flameAnimation.onComplete = () => {
             this.flameAnimation.visible = false;
+            
             if (this.bubble) {
-                this.bubble.x = this.flameAnimation.x + 8;
-                this.bubble.y = this.flameAnimation.y + 8;
-                this.container.addChild(this.bubble);
+                const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
+                this.bubble.x = pos.x ;
+                this.bubble.y = pos.y + 8;
+                this.overlayContainer.addChild(this.bubble);
                 this.hideShowHealth(false);
                 setTimeout( () => { 
-                    this.container.removeChild(this.bubble); 
+                    this.entityContainer.removeChild(this.bubble); 
                     this.hideShowHealth(true);
-                }, Math.random() * 1000 + 2000);
+                }, Math.random() * 1000 + 1000);
             }
+            // start to fade out elements
+            setTimeout( () => { 
+                this.showing = false;
+            }, 1000);
         }
     }
 
@@ -260,14 +259,28 @@ class IntroEntity {
         );
         this.bubble.anchor.x = 0.5;
         this.bubble.anchor.y = 1.0;
+        this.bubble.alpha = 0.0;
     }
 
     show () {
         if (!this.visible) {
             this.visible = true;
-            this.container.addChild(this.flameAnimation);
+            this.entityContainer.addChild(this.flameAnimation);
             this.flameAnimation.play();
             if (Math.random() > 0.6) this.createBubble();
+        }
+    }
+
+    onUpdate () {
+        if (this.bubble) {
+            if (this.showing) {
+                this.bubble.alpha += 0.2;
+            } else {
+                this.bubble.alpha -= 0.2;
+            }    
+            const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
+            this.bubble.x = pos.x ;
+            this.bubble.y = pos.y + 8;
         }
     }
 

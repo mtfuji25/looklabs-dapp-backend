@@ -2,7 +2,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { Application, IBitmapTextStyle, ITextStyle } from "pixi.js";
+import { AnimatedSprite, Application, BaseTexture, IBitmapTextStyle, ITextStyle, Rectangle, Texture } from "pixi.js";
 
 // Web client imports
 import { WSClient } from "../../Clients/WebSocket";
@@ -23,6 +23,8 @@ import { GameStateTypes, Listener, msgTypes, PlayerCommand, ServerMsg } from "..
 
 import { Container } from "pixi.js";
 import { StrapiClient } from "../../Clients/Strapi";
+import { AnimConfig } from "../../Core/Ecs/Components/AnimSprite";
+import { PlayerActions } from "./PlayerActions";
 
 interface Player {
     entity: Entity;
@@ -30,9 +32,9 @@ interface Player {
     healthOutline: Entity;
     healthBackground: Entity;
     idNumber: Entity;
-    animLayer1: Entity;
-    animLayer2: Entity;
-    animLayer3: Entity;
+    animLayerBg: Entity;
+    animLayerOverlay1: Entity;
+    animLayerOverlay2: Entity;
 }
 
 class PlayerLayer extends Layer {
@@ -140,7 +142,6 @@ class PlayerLayer extends Layer {
 
         const splitId = id.split('/')[1];
 
-
         // Creates and stores entity
         const idNumber = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 60, false);  
         const entity = this.ecs.createEntity(pos.x, pos.y, false);
@@ -149,19 +150,21 @@ class PlayerLayer extends Layer {
         const healthBackground = this.ecs.createEntity(0, 0, false);
 
         // Animations slots
-        const animLayer1 = this.ecs.createEntity(0,0, false);
-        const animLayer2 = this.ecs.createEntity(0,0, false);
-        const animLayer3 = this.ecs.createEntity(0,0, false);
+        const animBg = this.ecs.createEntity(0,0, false);
+        const animOverlay1 = this.ecs.createEntity(0,0, false);
+        const animOverlay2 = this.ecs.createEntity(0,0, false);
 
-        const animSpriteBackground = animLayer1.addAnimSprite();
-        const animSpriteMiddleground = animLayer2.addAnimSprite();
-        const animSpriteForeground = animLayer3.addAnimSprite();
+        const animSpriteBg = animBg.addAnimSprite();
+        const animSpriteOverlay1 = animOverlay1.addAnimSprite();
+        const animSpriteOverlay2 = animOverlay2.addAnimSprite();
 
-        animSpriteBackground.loadFromConfig(this.app, this.res["overlay-sheet"], null, true);
+        animSpriteBg.loadFromConfig(this.app, this.res["overlay-sheet"], null, true);
+        animSpriteOverlay1.loadFromConfig(this.app, this.res["overlay-sheet"], null, true);
+        animSpriteOverlay2.loadFromConfig(this.app, this.res["overlay-sheet"], null, true);
         
-        animSpriteBackground.sprite.visible = false;
-        animSpriteMiddleground.sprite.visible = false;
-        animSpriteForeground.sprite.visible = false;
+        animSpriteBg.sprite.visible = false;
+        animSpriteOverlay1.sprite.visible = false;
+        animSpriteOverlay2.sprite.visible = false;
 
         // Add animsprite component
         const sprite = entity.addAnimSprite();
@@ -170,40 +173,76 @@ class PlayerLayer extends Layer {
 
         // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
-
+        console.log(content.tier);
         switch (char_class) {
             
             case "Avians":
             case "Avian":    
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`, false);
+                if (content.tier == "delta" || content.tier == "beta") {
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_chicken", false);
+                } else {    
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`, false);
+                }
                 break;
             case "Hounds":
             case "Hound":
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`, false); 
+                if (content.tier == "delta" || content.tier == "beta") {
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_hound", false);
+                } else {    
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`, false);
+                }
                 break;
             case "Insectoids":
             case "Insectoid":
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
+                if (content.tier == "delta" || content.tier == "beta") {
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_beetle", false);
+                } else {    
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
+                }
                 break;
             case 'Serpents':
             case 'Serpent':
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`, false);
+                if (content.tier == "delta" || content.tier == "beta") {
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_snake", false);
+                } else {    
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`, false);
+                }
+                
                 break;
             default:
-                sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
+                if (content.tier == "delta" || content.tier == "beta") {
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_beetle", false);
+                } else {    
+                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
+                }
                 break;
+        }
+        
+        if(content.tier == "alpha" || content.tier == "sigma") {
+            animSpriteBg.forceAnimate(`glow-${content.tier}`);
+            animSpriteBg.animSprite.loop = true;
+            animSpriteBg.sprite.visible = true;
+            animSpriteBg.animSprite.alpha = 0.6;
+            animSpriteBg.sprite.position.set(0, -16);
+
+            animSpriteOverlay2.forceAnimate(content.tier == "alpha" ? "silver-star" : "gold-star");
+            animSpriteOverlay2.sprite.visible = true;
+            animSpriteOverlay2.animSprite.loop = true;
+            animSpriteOverlay2.sprite.scale.set(0.8, 0.8);
+            animSpriteOverlay2.sprite.x = 10;
+            animSpriteOverlay2.sprite.y = 20;
         }
 
         sprite.addStage(this.container);
 
-        animSpriteBackground.addStage(sprite.sprite);
-        animSpriteMiddleground.addStage(sprite.sprite);
-        animSpriteForeground.addStage(sprite.sprite);
+        animSpriteBg.addStage(sprite.sprite, 0);
+        animSpriteOverlay1.addStage(sprite.sprite);
+        animSpriteOverlay2.addStage(sprite.sprite);
         
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
         const r2 = healthBackground.addColoredRectangle(22, 4, 0x373232);
-        const r3 = health.addColoredRectangle(22,4, 0xF32D2D);
+        const r3 = health.addColoredRectangle(22,4, content.tier == "alpha" ? 0xDDE9F3 : content.tier == "sigma" ? 0xB4F32D : 0xF32D2D);
         r1.addStage(sprite.sprite);
         r2.addStage(sprite.sprite);
         r3.addStage(sprite.sprite);
@@ -228,9 +267,9 @@ class PlayerLayer extends Layer {
             healthOutline: healthOutline,
             healthBackground: healthBackground,
             health: health,
-            animLayer1: animLayer1,
-            animLayer2: animLayer2,
-            animLayer3: animLayer3
+            animLayerBg: animBg,
+            animLayerOverlay1: animOverlay1,
+            animLayerOverlay2: animOverlay2
         };
     }
 
@@ -256,9 +295,9 @@ class PlayerLayer extends Layer {
         const entitySprite = entity.getAnimSprite();
         const entityTransform = entity.getTransform();
 
-        const animLayer1 = this.players[id].animLayer1.getAnimSprite();
-        const animLayer2 = this.players[id].animLayer2.getAnimSprite();
-        const animLayer3 = this.players[id].animLayer3.getAnimSprite();
+        const animLayerBg = this.players[id].animLayerBg.getAnimSprite();
+        const animLayerOverlay1 = this.players[id].animLayerOverlay1.getAnimSprite();
+        const animLayerOverlay2 = this.players[id].animLayerOverlay2.getAnimSprite();
 
         const lifeRecSize = Math.floor((health / maxHealth) * 22);
         const lifeRectangle = healthBar.getColoredRectangle();
@@ -273,179 +312,116 @@ class PlayerLayer extends Layer {
         
         // if else generator
         if (health <= 0) {
-            if (action == 0 || action == 4) {
+            // die right
+            if (action == PlayerActions.ATTACK_RIGHT || action == PlayerActions.WALK_RIGHT) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][4]);
             }
-            if (action == 1 || action == 5) {
+            // die left
+            if (action == PlayerActions.ATTACK_LEFT || action == PlayerActions.WALK_LEFT) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][5]);
             }
         } else {
             //
             // First set
             //
-            if (action == 4) {
+            if (action == PlayerActions.WALK_RIGHT) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-
-                animLayer1.sprite.visible = false;
-                animLayer3.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                animLayerOverlay1.sprite.visible = false;
             }
-            // critical R
-            if (action == 14) {
-                entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
-                animLayer1.sprite.visible = true;
-            }
+         
             // healing
-            if (action == 24) {
+            if (action == PlayerActions.WALK_RIGHT_HEALING) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
-                animLayer1.sprite.visible = true;
+                animLayerOverlay1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayerOverlay1.sprite.visible = true;
             }
 
             //
             // Second set
             //
-            if (action == 5) {
+            if (action == PlayerActions.WALK_LEFT) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-
-                animLayer1.sprite.visible = false;
-                animLayer2.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                animLayerOverlay1.sprite.visible = false;
             }
-            // critical L
-            if (action == 15) {
-                entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
-                animLayer1.sprite.visible = true;
-
-            }
+           
             // healing
-            if (action == 25) {
+            if (action == PlayerActions.WALK_LEFT_HEALING) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
-                animLayer1.sprite.visible = true;
+                animLayerOverlay1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayerOverlay1.sprite.visible = true;
             }
-
             //
             // Third set
             //
-            if (action == 0) {
+            if (action == PlayerActions.ATTACK_RIGHT) {
                 entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-
-                animLayer1.sprite.visible = false;
-                animLayer2.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                animLayerOverlay1.sprite.visible = false;
             }
             // critical R
-            if (action == 10) {
+            if (action == PlayerActions.ATTACK_RIGHT_CRITICAL) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][2]);
-                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
-                animLayer1.sprite.visible = true;
+                animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+                animLayerOverlay1.sprite.visible = true;
             }
-            // Healing
-            if (action == 20) {
-                entitySprite.animate(this.res["player-sheet"]["animations"][2]);
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
-                animLayer1.sprite.visible = true;                
-            }
-
+        
             // Fourth set
-            if (action == 1) {
+            if (action == PlayerActions.ATTACK_LEFT) {
                 entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-
-                animLayer1.sprite.visible = false;
-                animLayer2.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                animLayerOverlay1.sprite.visible = false;
             }
             // critical L
-            if (action == 11) {
+            if (action == PlayerActions.ATTACK_LEFT_CRITICAL) {
                 entitySprite.animate(this.res["player-sheet"]["animations"][3]);
-                animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
-                animLayer1.sprite.visible = true;
+                animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
+                animLayerOverlay1.sprite.visible = true;
             }
-            // Healing
-            if (action == 21) {
-                entitySprite.animate(this.res["player-sheet"]["animations"][3]);
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
-                animLayer1.sprite.visible = true;
-            }
-            
+          
             //
             // Fifth set
             //
-            if (action == 2 || action == 3) {
+            if (action == PlayerActions.ATTACK_UP || action == PlayerActions.ATTACK_DOWN) {
                 if (Math.random() < 0.5) {
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
                 } else {
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
                 }
-                animLayer1.sprite.visible = false;
-                animLayer2.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                animLayerOverlay1.sprite.visible = false;
             }
             // Critical
-            if (action == 12 || action == 13) {
+            if (action == PlayerActions.ATTACK_UP_CRITICAL || action == PlayerActions.ATTACK_DOWN_CRITICAL) {
                 if (Math.random() < 0.5) {
                     // Right
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
+                    animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
                 } else {
                     // Left
                     entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
+                    animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
                 }
-                animLayer1.sprite.visible = true;
+                animLayerOverlay1.sprite.visible = true;
             }
-            // Healing
-            if (action == 22 || action == 23) {
-                if (Math.random() < 0.5) {
-                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-                } else {
-                    entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-                }
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);                
-                animLayer1.sprite.visible = true;
-            }
-
             //
             // Sixth set
             //
-            if (action == 6 || action == 7) {
-                if (Math.random() < 0.5) {
+            if (action == PlayerActions.WALK_UP || action == PlayerActions.WALK_DOWN) {
+                // if (Math.random() < 0.5) {
                     entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                } else {
-                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                }
-                animLayer1.sprite.visible = false;
-                animLayer2.sprite.visible = false;
-                animLayer3.sprite.visible = false;
+                // } else {
+                    // entitySprite.animate(this.res["player-sheet"]["animations"][1]);
+                // }
+                animLayerOverlay1.sprite.visible = false;
             }
-            // Critical
-            if (action == 16 || action == 17) {
-                if (Math.random() < 0.5) {
-                    // Right
-                    entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
-                    
-                } else {
-                    // Left
-                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                    animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);                    
-                }
-
-                animLayer1.sprite.visible = true;
-                
-            }
+            
             // Healing
-            if (action == 26 || action == 27) {
-                if (Math.random() < 0.5) {
-                    entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-                } else {
-                    entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-                }
-                animLayer1.animate(this.res["overlay-sheet"]["animations"][3]);
-                animLayer1.sprite.visible = true;
+            if (action == PlayerActions.WALK_UP_HEALING || action == PlayerActions.WALK_DOWN_HEALING) {
+                entitySprite.animate(this.res["player-sheet"]["animations"][0]);
+                // if (Math.random() < 0.5) {
+                //     entitySprite.animate(this.res["player-sheet"]["animations"][0]);
+                // } else {
+                //     entitySprite.animate(this.res["player-sheet"]["animations"][1]);
+                // }
+                animLayerOverlay1.animate(this.res["overlay-sheet"]["animations"][3]);
+                animLayerOverlay1.sprite.visible = true;
                 
             }
         }
@@ -454,13 +430,13 @@ class PlayerLayer extends Layer {
     deleteEnemy(command:PlayerCommand) {
         const { id } = command;
 
-        const animLayer1 = this.players[id].animLayer1.getAnimSprite();
+        const animLayerOverlay1 = this.players[id].animLayerOverlay1.getAnimSprite();
                 
         // death animation
         this.players[id].entity.getAnimSprite().forceAnimate(this.res["player-sheet"]["animations"][4]);
 
-        animLayer1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
-        animLayer1.sprite.visible = true;
+        animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
+        animLayerOverlay1.sprite.visible = true;
 
         setTimeout(() => {
             this.players[id].idNumber.destroy();
@@ -468,9 +444,9 @@ class PlayerLayer extends Layer {
             this.players[id].healthOutline.destroy();
             this.players[id].healthBackground.destroy();
             this.players[id].entity.destroy();
-            this.players[id].animLayer1.destroy();
-            this.players[id].animLayer2.destroy();
-            this.players[id].animLayer3.destroy();
+            this.players[id].animLayerBg.destroy();
+            this.players[id].animLayerOverlay1.destroy();
+            this.players[id].animLayerOverlay2.destroy();
             delete this.players[id];
         }, 400);
     }
@@ -513,3 +489,4 @@ class PlayerLayer extends Layer {
 }
 
 export { PlayerLayer, Player };
+

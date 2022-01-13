@@ -70,19 +70,21 @@ class LobbyLevel extends Level {
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
 
+        const viewLayer = new ViewLayer(this.ecs, this.levelContext, this.context.app, this.context.inputs);
         // Pushs view controller
         this.layerStack.pushLayer(
-            new ViewLayer(this.ecs, this.levelContext, this.context.app, this.context.inputs)
+            viewLayer
         );
 
+        const mapLayer = new MapLayer(
+            this.ecs,
+            this.levelContext,
+            this.context.app,
+            this.context.res
+        );
         // Pushs map generator
         this.layerStack.pushLayer(
-            new MapLayer(
-                this.ecs,
-                this.levelContext,
-                this.context.app,
-                this.context.res
-            )
+            mapLayer
         );
         
        const playerLayer = new PlayerLayer(
@@ -109,20 +111,23 @@ class LobbyLevel extends Level {
             overlayLayer
         );
 
-        this.layerStack.pushOverlay(
-            new BattleStatusLayer(
-                this.ecs,
-                this.context.app,
-                this.context
-            )
+        const statusLayer = new BattleStatusLayer(
+            this.ecs,
+            this.context.app,
+            this.context
         );
 
         this.layerStack.pushOverlay(
-            new LogsLayer(
-                this.ecs,
-                this.context.app,
-                this.context
-            )
+            statusLayer
+        );
+
+        const logsLayer = new LogsLayer(
+            this.ecs,
+            this.context.app,
+            this.context
+        );
+        this.layerStack.pushOverlay(
+          logsLayer  
         );
         
         await this.context.ws.whenReady();
@@ -138,12 +143,11 @@ class LobbyLevel extends Level {
         );    
 
         const content = response.content as GameState;
+       
         // if we're showing the intro, create intro sequence
         // create intro sequence controller
-        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer,this.context.res);
+        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
-        
-        
     }
 
     async onUpdate(deltaTime: number) {

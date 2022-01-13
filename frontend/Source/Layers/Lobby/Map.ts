@@ -103,6 +103,7 @@ class MapLayer extends Layer {
 
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
+        this.onUpdate(0);
     }
 
     onUpdate(deltaTime: number) {
