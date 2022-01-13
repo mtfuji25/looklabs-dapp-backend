@@ -20,7 +20,8 @@ import {
     STRAPI_SERVER_HOST,
     STRAPI_BEARER_TOKEN,
     WS_HOST,
-    WS_PORT
+    WS_PORT,
+    LOGGER_LEVEL
 } from "./Constants/Constants";
 
 // Jquery like query selector
@@ -33,13 +34,15 @@ const ROOT = $(ROOT_DIV_ID);
 
 const main = async () => {
 
-    // Sentry.init({
-    //     dsn: "https://0310fb88d0254835be8a3d60b9a17bd6@o1091574.ingest.sentry.io/6108697",            
-    //     // Set tracesSampleRate to 1.0 to capture 100%
-    //     // of transactions for performance monitoring.
-    //     // We recommend adjusting this value in production
-    //     tracesSampleRate: 1.0,
-    // });
+    Sentry.init({
+        dsn: "https://0310fb88d0254835be8a3d60b9a17bd6@o1091574.ingest.sentry.io/6108697",            
+        // Set tracesSampleRate to 1.0 to capture 100%
+        // of transactions for performance monitoring.
+        // We recommend adjusting this value in production
+        tracesSampleRate: 1.0,
+    });
+
+    Logger.start(LOGGER_LEVEL);
 
     // Creates PIXI application
     const app = new Application({
