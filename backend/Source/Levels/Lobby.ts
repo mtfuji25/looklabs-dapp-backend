@@ -235,14 +235,18 @@ class LobbyLevel extends Level {
 
             // Create player entrant log in strapi
             try {
-                await this.context.strapi.createLog({
+                await this.context.logStorage.createLog({
                     event: "entrants",
-                    timestamp: Date.now().toString(),
+                    timestamp: Date.now(),
                     scheduled_game: this.gameId,
                     scheduled_game_participant: participant.id,
                 });
             } catch(e) {
-                console.log("Failed to create entrants log");
+                console.log(
+                    "Failed to create game entrant log for player: ",
+                    participant.id
+                );
+                console.log(e);
             }
         }));
 
@@ -289,10 +293,10 @@ class LobbyLevel extends Level {
                     }
 
                     try {
-                        await this.context.strapi.createLog({
-                            timestamp: Date.now().toString(),
+                        await this.context.logStorage.createLog({
                             event: "kills",
-                            value: String(event.result.scheduled_game_participant),
+                            timestamp: Date.now(),
+                            value: event.result.scheduled_game_participant,
                             scheduled_game: this.gameId,
                             scheduled_game_participant: event.killer,
                         });
@@ -305,10 +309,10 @@ class LobbyLevel extends Level {
                     }
                     
                     try {
-                        await this.context.strapi.createLog({
-                            timestamp: Date.now().toString(),
+                        await this.context.logStorage.createLog({
                             event: "final_rank",
-                            value: String(this.fighters),
+                            timestamp: Date.now(),
+                            value: this.fighters,
                             scheduled_game: this.gameId,
                             scheduled_game_participant: event.result.scheduled_game_participant,
                         });
@@ -334,10 +338,10 @@ class LobbyLevel extends Level {
             this.damageEventRequestQueue.push(
                 new Promise(async (resolve, reject) => {
                     try {
-                        this.context.strapi.createLog({
-                            timestamp: Date.now().toString(),
+                        this.context.logStorage.createLog({
                             event: "damage",
-                            value: String(event.damage),
+                            timestamp: Date.now(),
+                            value: event.damage,
                             scheduled_game: this.gameId,
                             scheduled_game_participant: event.participant
                         });
@@ -389,12 +393,19 @@ class LobbyLevel extends Level {
             });
 
             // Winner log
-            await this.context.strapi.createLog({
-                timestamp: Date.now().toString(),
-                event: "winners",
-                scheduled_game: this.gameId,
-                scheduled_game_participant: lastFigther.strapiID,
-            });
+            try {
+                await this.context.logStorage.createLog({
+                    event: "winners",
+                    timestamp: Date.now(),
+                    scheduled_game: this.gameId,
+                    scheduled_game_participant: lastFigther.strapiID,
+                });
+            } catch(e) {
+                console.log(
+                    "Failed to dispatch winner log for player: ",
+                    lastFigther.strapiID
+                );
+            }
 
             const eleapsedRequestsTime = Date.now() - startRequestTime;
 
