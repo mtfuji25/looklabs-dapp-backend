@@ -110,11 +110,14 @@ class IntroSequence {
     reset () {
         this.playerLayer.getPlayers().forEach (player => {
             player.entity.getAnimSprite().animSprite.scale.x = 1.0;
+            player.entity.getAnimSprite().sprite.alpha = 1.0;
             player.health.getColoredRectangle().graphics.visible = true;
             player.healthBackground.getColoredRectangle().graphics.visible = true;
             player.healthOutline.getColoredRectangle().graphics.visible = true;
-            player.idNumber.getBMPText().text.visible = true;
+            player.idNumber.getBMPText().text.visible = true;   
+            
         }); 
+        
         
     }
 
@@ -218,7 +221,7 @@ class IntroEntity {
         }
         this.flameAnimation.onComplete = () => {
             this.flameAnimation.visible = false;
-            
+            this.playerContainer.alpha = 1.0;
             if (this.bubble) {
                 const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
                 this.bubble.x = pos.x ;
