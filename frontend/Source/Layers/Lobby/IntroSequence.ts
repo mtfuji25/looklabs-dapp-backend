@@ -197,7 +197,7 @@ class IntroEntity {
     }
 
     createFlames () {
-        const config:AnimConfig = this.res["overlay-sheet"];
+        const config:AnimConfig = this.res["flames-sheet"];
         const flameTextures: Texture[] = [];
         const url: string = this.app.loader.resources[config["resource"]].url;
         const ssheet = BaseTexture.from(url);
@@ -249,7 +249,7 @@ class IntroEntity {
     }
 
     createBubble () {
-        const config:AnimConfig =  this.res["bubbles"];
+        const config:AnimConfig =  this.res["bubbles-sheet"];
         const url: string = this.app.loader.resources[config["resource"]].url;
         const ssheet = BaseTexture.from(url);
         const bubble = config["bubbles"];
