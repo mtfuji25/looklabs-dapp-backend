@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { Logger } from "../Utils/Logger";
 
 interface ScheduledGame {
     id: number;
@@ -206,7 +207,7 @@ class StrapiClient {
     // Default engine close call
     // closes express server
     close(): void {
-        console.log("Closing express server.");
+        Logger.info("Closing express server.");
         this.expressServer.close();
     }
 }

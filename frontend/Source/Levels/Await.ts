@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 // Web Clients imports
 import { ScheduledGame } from "../Clients/Strapi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { Logger } from "../Utils/Logger";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x18215d;
@@ -48,8 +49,10 @@ class AwaitLevel extends Level {
                 ))
             }
 
-        } catch(e) {
-            console.log(e);
+        } catch(err) {
+            Logger.fatal("Failed to request game status.")
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
             this.context.close = true;
         }
 
@@ -89,8 +92,10 @@ class AwaitLevel extends Level {
 
         try {
             game = await this.context.strapi.getGameById(this.props.gameId);
-        } catch(e) {
-            console.log(e);
+        } catch(err) {
+            Logger.fatal("Cannot get game for current game id.");
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
             this.context.close = true;
         }
     

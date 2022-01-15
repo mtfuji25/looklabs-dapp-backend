@@ -1,4 +1,5 @@
 import { PlayerLayer } from "../../../Layers/Lobby/Player";
+import { Logger } from "../../../Utils/Logger";
 import { clamp } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 
@@ -110,7 +111,7 @@ class Status {
     }
 
     log() {
-        console.log(`PLAYER TIER: ${this.tier} ATTACK: ${(100 * this.attack)/PlayerLayer.MAX_ATTACK}` );
+        Logger.info(`PLAYER TIER: ${this.tier} ATTACK: ${(100 * this.attack)/PlayerLayer.MAX_ATTACK}` );
     }
 }
 

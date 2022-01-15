@@ -16,6 +16,7 @@ import {
 
 // Strapi related imports
 import { ScheduledGame } from "../Clients/Strapi";
+import { Logger } from "../Utils/Logger";
 
 //
 // Constants
@@ -66,19 +67,20 @@ class AwaitLevel extends Level {
         // Request nearest game for strapi
         try {
             game = await this.context.strapi.getNearestGame();
-        } catch(e) {
-            console.log(`Failed while seraching game in strapi. Will try again in ${GAME_SEARCH_INTERVAL}s`);
-            console.log(JSON.stringify(e, null, 4));
+        } catch(err) {
+            Logger.warn(`Failed while seraching game in strapi. Will try again in ${GAME_SEARCH_INTERVAL}s`);
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
 
             setTimeout(() => this.checkForGame(), GAME_SEARCH_INTERVAL);
         }
 
         // If there is no game, retry the search in some interval
         if (!game) {
-            console.log("No scheduled game, awaiting ...");
+            Logger.info("No scheduled game, awaiting ...");
             setTimeout(() => this.checkForGame(), GAME_SEARCH_INTERVAL);
         } else {
-            console.log("Game found, awaiting to start ...");
+            Logger.info("Game found, awaiting to start ...");
 
             // Set game found true for game status requests purpose
             this.gameFound = true;
@@ -100,7 +102,7 @@ class AwaitLevel extends Level {
     }
 
     startLobby(): void {
-        console.log("Initializing new game ...");
+        Logger.info("Initializing new game ...");
 
         // Generate game status message
         const msg: GameStatus = {

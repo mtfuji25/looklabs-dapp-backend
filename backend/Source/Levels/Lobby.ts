@@ -26,6 +26,7 @@ import {
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
+import { Logger } from "../Utils/Logger";
 
 //
 // Types
@@ -126,9 +127,11 @@ class LobbyLevel extends Level {
 
             // Effectivelly starts the game
             await this.startGame();
-        } catch(e) {
-            console.log("Failed to request game in strapi");
-            console.log(JSON.stringify(e, null, 4));
+        } catch(err) {
+            Logger.fatal("Failed to request game in strapi");
+            Logger.trace(JSON.stringify(err, null, 4));
+
+            Logger.capture(err);
 
             // Closes the engine
             this.context.close = true;
@@ -160,8 +163,6 @@ class LobbyLevel extends Level {
             // Request participant details from strapi
             const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
 
-            // console.log("Participant: ", participant, "Details: ", details);
-
             // Add current player name to the playerNames storage
             LobbyLevel.playerNames[participant.nft_id] = details.name;
 
@@ -173,7 +174,7 @@ class LobbyLevel extends Level {
 
                 let deadPlayer: PlayerLayer;
 
-                console.log("Processing dead player: ", player.strapiID);
+                Logger.info("Processing dead player: ", player.strapiID);
 
                 // Find the dead player and remove it from current player storage
                 this.players = this.players.filter((player) => {
@@ -241,12 +242,13 @@ class LobbyLevel extends Level {
                     scheduled_game: this.gameId,
                     scheduled_game_participant: participant.id,
                 });
-            } catch(e) {
-                console.log(
+            } catch(err) {
+                Logger.error(
                     "Failed to create game entrant log for player: ",
                     participant.id
                 );
-                console.log(e);
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
             }
         }));
 
@@ -274,57 +276,74 @@ class LobbyLevel extends Level {
         // Checks if there are events to dispatch
         this.dieEventQueue.map((event) => {
 
+            const diePromise: Promise<void> = new Promise(async (resolve, reject) => {
+                try {
+                    await this.context.strapi.createParticipantResult({
+                        scheduled_game_participant: event.result.scheduled_game_participant,
+                        survived_for: Math.floor(event.result.survived_for),
+                        kills: Math.floor(event.result.kills),
+                        health: Math.ceil(event.result.health)
+                    });
+                } catch(err) {
+                    Logger.error(
+                        "Failed to create game participant result for player: ",
+                        event.result.scheduled_game_participant
+                    );
+                    Logger.trace(JSON.stringify(err, null, 4));
+                    Logger.capture(err);
+                    reject();
+                }
+
+                try {
+                    await this.context.logStorage.createLog({
+                        event: "kills",
+                        timestamp: Date.now(),
+                        value: event.result.scheduled_game_participant,
+                        scheduled_game: this.gameId,
+                        scheduled_game_participant: event.killer,
+                    });
+                } catch(err) {
+                    Logger.error(
+                        "Failed to dispatch kill log for player: ",
+                        event.result.scheduled_game_participant
+                    );
+                    Logger.trace(JSON.stringify(err, null, 4));
+                    Logger.capture(err);
+                    reject();
+                }
+                
+                try {
+                    await this.context.logStorage.createLog({
+                        event: "final_rank",
+                        timestamp: Date.now(),
+                        value: this.fighters,
+                        scheduled_game: this.gameId,
+                        scheduled_game_participant: event.result.scheduled_game_participant,
+                    });
+                } catch(err) {
+                    Logger.error(
+                        "Failed to dispatch final rank log for player: ",
+                        event.result.scheduled_game_participant
+                    );
+                    Logger.trace(JSON.stringify(err, null, 4));
+                    Logger.capture(err);
+                    reject();
+                }
+                resolve();
+            })
+
+            diePromise.catch((err) => {
+                Logger.error(
+                    "Failed to push in damage event queue new async: ",
+                    event.result.scheduled_game_participant
+                );
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
+            });
+
             // Push new promisse in the dispatch queue
             this.dieEventRequestQueue.push(
-                new Promise(async (resolve, reject) => {
-                    try {
-                        await this.context.strapi.createParticipantResult({
-                            scheduled_game_participant: event.result.scheduled_game_participant,
-                            survived_for: Math.floor(event.result.survived_for),
-                            kills: Math.floor(event.result.kills),
-                            health: Math.ceil(event.result.health)
-                        });
-                    } catch(e) {
-                        console.log(
-                            "Failed to create game participant result for player: ",
-                            event.result.scheduled_game_participant
-                        );
-                        reject();
-                    }
-
-                    try {
-                        await this.context.logStorage.createLog({
-                            event: "kills",
-                            timestamp: Date.now(),
-                            value: event.result.scheduled_game_participant,
-                            scheduled_game: this.gameId,
-                            scheduled_game_participant: event.killer,
-                        });
-                    } catch(e) {
-                        console.log(
-                            "Failed to dispatch kill log for player: ",
-                            event.result.scheduled_game_participant
-                        );
-                        reject();
-                    }
-                    
-                    try {
-                        await this.context.logStorage.createLog({
-                            event: "final_rank",
-                            timestamp: Date.now(),
-                            value: this.fighters,
-                            scheduled_game: this.gameId,
-                            scheduled_game_participant: event.result.scheduled_game_participant,
-                        });
-                    } catch(e) {
-                        console.log(
-                            "Failed to dispatch final rank log for player: ",
-                            event.result.scheduled_game_participant
-                        );
-                        reject();
-                    }
-                    resolve();
-                })
+                diePromise
             );
         });
 
@@ -334,26 +353,39 @@ class LobbyLevel extends Level {
         // Checks if there are events to dispatch
         this.damageEventQueue.map((event) => {
 
+            const damagePromise: Promise<void> = new Promise(async (resolve, reject) => {
+                try {
+                    await this.context.logStorage.createLog({
+                        event: "damage",
+                        timestamp: Date.now(),
+                        value: event.damage,
+                        scheduled_game: this.gameId,
+                        scheduled_game_participant: event.participant
+                    });
+                } catch(err) {
+                    Logger.error(
+                        "Failed to dispatch damage log for player: ",
+                        event.participant
+                    );
+                    Logger.trace(JSON.stringify(err, null, 4));
+                    Logger.capture(err);
+                    reject();
+                }
+                resolve();
+            });
+
+            damagePromise.catch((err) => {
+                Logger.error(
+                    "Failed to push in damage event queue new async: ",
+                    event.participant
+                );
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
+            });
+
             // Push new promisse in the dispatch queue
             this.damageEventRequestQueue.push(
-                new Promise(async (resolve, reject) => {
-                    try {
-                        this.context.logStorage.createLog({
-                            event: "damage",
-                            timestamp: Date.now(),
-                            value: event.damage,
-                            scheduled_game: this.gameId,
-                            scheduled_game_participant: event.participant
-                        });
-                    } catch(e) {
-                        console.log(
-                            "Failed to dispatch damage log for player: ",
-                            event.participant
-                        );
-                        reject();
-                    }
-                    resolve();
-                })
+                damagePromise
             );
         });
 
@@ -377,8 +409,10 @@ class LobbyLevel extends Level {
             try {
                 await Promise.all(this.dieEventRequestQueue);
                 await Promise.all(this.damageEventRequestQueue);
-            } catch(e) {
-                console.log("Unable to complete save results from request queue.");
+            } catch(err) {
+                Logger.error("Unable to complete save results from request queue.");
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
             }
 
             // Get last player status
@@ -400,11 +434,13 @@ class LobbyLevel extends Level {
                     scheduled_game: this.gameId,
                     scheduled_game_participant: lastFigther.strapiID,
                 });
-            } catch(e) {
-                console.log(
+            } catch(err) {
+                Logger.error(
                     "Failed to dispatch winner log for player: ",
                     lastFigther.strapiID
                 );
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
             }
 
             const eleapsedRequestsTime = Date.now() - startRequestTime;

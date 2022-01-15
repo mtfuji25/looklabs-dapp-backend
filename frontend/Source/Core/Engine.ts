@@ -19,6 +19,7 @@ import { Application } from "pixi.js";
 
 // Require the resources.json
 import resourceFile from "../Assets/Resources.json";
+import { Logger } from "../Utils/Logger";
 // Cast to something that typescript can understand
 const resources: Record<string, any> = resourceFile;
 
@@ -70,7 +71,7 @@ class Engine {
     }
 
     async start(): Promise<void> {
-        console.log("Starting backend engine.");
+        Logger.info("Starting frontedn engine.");
 
         // Configure pixi application
         // Append the base application to the root div of index.html
@@ -91,12 +92,12 @@ class Engine {
         this.app.loader.load();
 
         // Finally load the default level
-        console.log("Loading level: ", this.level.getName());
+        Logger.info("Loading level: ", this.level.getName());
         await this.level.onStart();
     }
 
     async loop(): Promise<void> {
-        console.log("Entering main engine loop");
+        Logger.info("Entering main engine loop");
         
         while (!this.context.close) {
             // Calculates the delta time of the loop
@@ -116,7 +117,7 @@ class Engine {
     }
 
     async close(): Promise<void> {
-        console.log("Closing backend engine.");
+        Logger.info("Closing frontend engine.");
 
         // Close current active level
         this.closeLevel(this.level);
@@ -130,7 +131,7 @@ class Engine {
         // First close the current running level
         await this.closeLevel(this.level);
             
-        console.log("Loading level: ", level.getName());
+        Logger.info("Loading level: ", level.getName());
 
         // Set level as current in context
         this.level = level;
@@ -141,7 +142,7 @@ class Engine {
 
     async closeLevel(level: Level): Promise<void> {
 
-        console.log("Closing level: ", level.getName());
+        Logger.info("Closing level: ", level.getName());
 
         // Close all level's systems
         await level.closeSystems();

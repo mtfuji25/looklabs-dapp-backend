@@ -13,6 +13,7 @@ import { EngineContext } from "../../Core/Interfaces";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
+import { Logger } from "../../Utils/Logger";
 
 class TextLayer extends Layer {
     private app: Application;
@@ -183,7 +184,7 @@ class TextLayer extends Layer {
             });
 
             this.updateRequest.catch((e) => {
-                console.log("Level destroyed while requesting, aborting reponse action...");
+                Logger.info("Level destroyed while requesting, aborting reponse action...");
             });
 
             this.fiveSecCount -= 5.0;

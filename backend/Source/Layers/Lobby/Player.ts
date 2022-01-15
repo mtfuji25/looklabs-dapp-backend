@@ -14,6 +14,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
 import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi";
+import { Logger } from "../../Utils/Logger";
 
 
 //
@@ -411,8 +412,8 @@ class PlayerLayer extends Layer {
 
     // When player dies callback
     onDie(status: StatusResult) {
-        console.log("Morreu: ", this.name)
-        console.log("Resultados: ", status);
+        Logger.info("Morreu: ", this.name)
+        Logger.info("Resultados: ", status);
         const killerName = this.self.getStatus().lastHit.name;
         const killerId = this.self.getStatus().lastHit.strapiId;
 

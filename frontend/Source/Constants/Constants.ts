@@ -8,6 +8,8 @@ const WS_PORT = Number(process.env.WS_SERVER_PORT);
 const STRAPI_SERVER_HOST = process.env.STRAPI_SERVER_HOST;
 const STRAPI_BEARER_TOKEN = process.env.STRAPI_BEARER_TOKEN;
 
+const LOGGER_LEVEL = Number("0b" + process.env.LOGGER_LEVEL);
+
 // Canva view div id
 const ROOT_DIV_ID = "#root";
 
@@ -31,5 +33,6 @@ export {
     MAIN_BG_COLOR,
     CONTAINER_DIM_X,
     CONTAINER_DIM_Y,
-    SPRITE_SIZE
+    SPRITE_SIZE,
+    LOGGER_LEVEL
 };

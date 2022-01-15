@@ -11,6 +11,7 @@ import { sleep } from "../Utils/Sleep";
 import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
 import { LogStorageClient } from "../Clients/LogStorage";
+import { Logger } from "../Utils/Logger";
 
 class Engine {
 
@@ -53,7 +54,7 @@ class Engine {
 
     // Default engine's start method
     async start() {
-        console.log("Starting backend engine.");
+        Logger.info("Starting backend engine.");
 
         // Start engine Web Socket client
         this.wsClient.start();
@@ -65,7 +66,7 @@ class Engine {
         await this.logStorageClient.start();
 
         // Finally load the default level
-        console.log("Loading level: ", this.level.getName());
+        Logger.info("Loading level: ", this.level.getName());
 
         // Maybe IDE tells that await has no effect, but is because
         // it is an abstract method, but it's necessary to await
@@ -74,7 +75,7 @@ class Engine {
 
     // Default engine's loop method
     async loop() {
-        console.log("Entering main engine loop");
+        Logger.info("Entering main engine loop");
         
         while (!this.context.close) {
             // Calculates the delta time of the loop
@@ -95,7 +96,7 @@ class Engine {
 
     // Default engine's close method
     async close() {
-        console.log("Closing backend engine.");
+        Logger.info("Closing backend engine.");
 
         // Close current active level
         await this.closeLevel(this.level);
@@ -115,7 +116,7 @@ class Engine {
         // First close the current running level
         await this.closeLevel(this.level);
             
-        console.log("Loading level: ", level.getName());
+        Logger.info("Loading level: ", level.getName());
 
         // Set level as current in context
         this.level = level;
@@ -126,7 +127,7 @@ class Engine {
 
     async closeLevel(level: Level) {
 
-        console.log("Closing level: ", level.getName());
+        Logger.info("Closing level: ", level.getName());
 
         // Close all level's systems
         level.closeSystems();

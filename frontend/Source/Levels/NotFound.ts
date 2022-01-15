@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 // Web Clients imports
 import { GameStatus } from "../Clients/Interfaces";
 import { BackgroundLayer } from "../Layers/NotFound/Background";
+import { Logger } from "../Utils/Logger";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x000;
@@ -60,7 +61,8 @@ class NotFoundLevel extends Level {
                 break;
 
             default:
-                console.log("Expected lobby | awaiting | not-found but got: ", response.gameStatus);
+                Logger.fatal("Expected lobby | awaiting | not-found but got: ", response.gameStatus);
+                Logger.capture(new Error("Unexpected game status response: " + response.gameStatus));
                 // Should show error screen
 
                 this.context.close = true;
@@ -85,8 +87,10 @@ class NotFoundLevel extends Level {
 
                 const content = response.content as GameStatus;
                 this.startLevels(content);
-            } catch(e) {
-                console.log("Cannot obtain current game-status from backend.");
+            } catch(err) {
+                Logger.error("Cannot obtain current game-status from backend.");
+                Logger.trace(JSON.stringify(err, null, 4));
+                Logger.capture(err);
             }
 
             this.fiveSecondsCounter -= 5.0;
