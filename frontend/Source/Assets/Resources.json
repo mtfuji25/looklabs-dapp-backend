@@ -36,10 +36,6 @@
             "url": "./assets/await-pack/thepit.png"
         },
         {
-            "name": "user",
-            "url": "./assets/await-pack/users.svg"
-        },
-        {
             "name": "notfound-bg",
             "url": "./assets/await-pack/notfound_bg.png"
         }
@@ -91,19 +87,7 @@
             "url": "./assets/results-pack/character-left.svg"
         }
     ],
-    "dungeon-pack": [
-        {
-            "name": "dungeon",
-            "url": "./assets/dungeon-pack/dungeon-pack.png"
-        },
-        {
-            "name": "basemap",
-            "url": "./assets/dungeon-pack/base_sheet.png"
-        },
-        {
-            "name": "overlaymap",
-            "url": "./assets/dungeon-pack/overlay_sheet.png"
-        },
+    "dungeon-pack": [        
         {
             "name": "basemap_raw",
             "url": "./assets/dungeon-pack/basemap.png"
@@ -119,10 +103,6 @@
             "url": "./assets/enemy-pack/delta_chicken.png"
         },
         {
-            "name": "beta_chicken",
-            "url": "./assets/enemy-pack/beta_chicken.png"
-        },
-        {
             "name": "alpha_chicken",
             "url": "./assets/enemy-pack/alpha_chicken.png"
         },
@@ -133,10 +113,6 @@
         {
             "name": "delta_hound",
             "url": "./assets/enemy-pack/delta_hound.png"
-        },
-        {
-            "name": "beta_hound",
-            "url": "./assets/enemy-pack/beta_hound.png"
         },
         {
             "name": "alpha_hound",
@@ -151,10 +127,6 @@
             "url": "./assets/enemy-pack/delta_beetle.png"
         },
         {
-            "name": "beta_beetle",
-            "url": "./assets/enemy-pack/beta_beetle.png"
-        },
-        {
             "name": "alpha_beetle",
             "url": "./assets/enemy-pack/alpha_beetle.png"
         },
@@ -165,10 +137,6 @@
         {
             "name": "delta_snake",
             "url": "./assets/enemy-pack/delta_snake.png"
-        },
-        {
-            "name": "beta_snake",
-            "url": "./assets/enemy-pack/beta_snake.png"
         },
         {
             "name": "alpha_snake",
