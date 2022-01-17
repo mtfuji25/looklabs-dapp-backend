@@ -12,7 +12,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameState, GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
@@ -39,6 +39,10 @@ class LobbyLevel extends Level {
     private gameStatusListener: Listener;
     private connectionListener: Listener;
     private gameStateListener: Listener;
+    private remainPlayerlistener: RemainPlayersListener;
+
+    private remaining: number = 0;
+    private showDownStart: boolean = false;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -67,6 +71,11 @@ class LobbyLevel extends Level {
             (msg) => this.onGameStateMessage(msg)
         );
 
+        this.remainPlayerlistener = this.context.ws.addListener(
+            "remain-players", 
+            msg => this.onRemainPlayersMsg(msg)
+        );
+
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
 
@@ -87,7 +96,7 @@ class LobbyLevel extends Level {
             mapLayer
         );
         
-       const playerLayer = new PlayerLayer(
+      const playerLayer = new PlayerLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
@@ -148,18 +157,26 @@ class LobbyLevel extends Level {
         // create intro sequence controller
         this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
+        this.playBackgroundMusic(Level.LOBBY_SOUND);
     }
 
     async onUpdate(deltaTime: number) {
         if (this.introSequence) {
             this.introSequence.onUpdate(deltaTime);
         }
+        if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
+            this.showDownStart = true;
+            // switch BG music to showdown
+            this.playBackgroundMusic(Level.SHOWDOWN_SOUND);
+        }
+
     }
 
     onClose(): void {
         this.connectionListener.destroy();
         this.gameStatusListener.destroy();
         this.gameStateListener.destroy();
+        this.remainPlayerlistener.destroy();
         if (this.introSequence) {
             this.introSequence.destroy();
         }
@@ -224,6 +241,12 @@ class LobbyLevel extends Level {
                 this.introSequence.updateIntroState(content.gameState);
             }
         }
+        return false;
+    }
+
+    onRemainPlayersMsg(msg: ServerMsg) {
+        const { remainingPlayers } = msg.content as RemainPlayersMsg;
+       this.remaining = remainingPlayers;
         return false;
     }
 }

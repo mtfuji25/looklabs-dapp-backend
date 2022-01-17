@@ -115,6 +115,8 @@ class AwaitLevel extends Level {
             this.context,
             game
         ));
+
+        this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
 
     onUpdate(deltaTime: number) {}

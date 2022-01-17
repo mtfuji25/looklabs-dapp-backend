@@ -56,6 +56,8 @@ class ResultsLevel extends Level {
         this.layerStack.pushLayer(
             new WinnerLayer(this.ecs, this.context.app, participants[0], winnerDetails)
         );
+
+        this.playBackgroundMusic(Level.RESULTS_SOUND);
     }
 
     onUpdate(deltaTime: number) {
