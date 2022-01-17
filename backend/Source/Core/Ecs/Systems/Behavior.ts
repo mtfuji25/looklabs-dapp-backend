@@ -6,6 +6,7 @@ import { strategy_Seek, strategy_SeekNearest } from "../Strategies/Seek";
 import { strategy_Evade } from "../Strategies/Evade";
 import { Behavior } from "../Components/Behavior";
 import { finalPlayersAreStuck, strategy_MoveOnPath } from "../Strategies/MoveOnPath";
+import { isPlayerStuck, strategy_Unstuck } from "../Strategies/Unstuck";
 
 
 const ENTITY_RANGE = 0.1;
@@ -48,12 +49,14 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
 
             // Update cooldown
             behavior.refresh += deltaTime; 
-
-            // special behavior designed to fix players who might get stuck at the end of the game
+            // special behavior designed to fix last two players who might get stuck at the end of the game
             if (finalPlayersAreStuck(dynamic)) {
-                strategy_MoveOnPath(entity, grid);
+                behavior.changeBehavior(strategy_MoveOnPath);                
+            // temporary fix to check if individual players are stuck in other parts of the map                
+            } else if (isPlayerStuck(dynamic)) {
+                behavior.changeBehavior(strategy_Unstuck);
             } else {
-                //by default, all entities are set to EXPLORE 
+                //otherwise by default, all entities are set to EXPLORE 
                 behavior.changeBehavior(strategy_Explore);
                 
                 if ((lifePercent < strategy.criticalHealth || behavior.healing) && entitiesAlive > 5 && !Behavior.berserker) {
@@ -73,10 +76,10 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                 // Out range check
                 } else if (behavior.inRange.length == 0) {
                     behavior.changeBehavior(strategy_SeekNearest); 
-                }
-                // execute behavior
-                behavior.current(entity, grid);
+                }                
             }
+            // execute behavior
+            behavior.current(entity, grid);
         });
     });
 };
