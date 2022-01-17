@@ -377,8 +377,8 @@ class PlayerLayer extends Layer {
 
     // When player dies callback
     onDie(status: StatusResult) {
-        Logger.info("Morreu: ", this.name)
-        Logger.info("Resultados: ", status);
+        Logger.info("Player Died: ", this.name)
+        Logger.info("Results: ", status);
         const killerName = this.self.getStatus().lastHit.name;
         const killerId = this.self.getStatus().lastHit.strapiId;
 
