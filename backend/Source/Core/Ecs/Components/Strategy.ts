@@ -1,6 +1,8 @@
 import { PlayerLayer } from "../../../Layers/Lobby/Player";
+import { Vec2 } from "../../../Utils/Math";
 import { Entity } from "../Core/Ecs";
 import { PathData } from "../Interfaces";
+import { DangerZone } from "../Strategies/Unstuck";
 import { entitiesAlive } from "../Systems/Behavior";
 
 class Strategy {
@@ -8,6 +10,8 @@ class Strategy {
     public criticalHealth:number = 35;
     public okHealth:number = 40;
     public pathData:PathData;
+    public dangerZone:DangerZone | null;
+    public stuckStartTime:number;
     private entity:Entity;
     private tierPriority:string[];
 
