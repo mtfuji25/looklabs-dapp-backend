@@ -1,4 +1,8 @@
+import { GridUtils } from "../../../Utils/GridUtils";
+import { Vec2 } from "../../../Utils/Math";
+import { Grid } from "../Components/Grid";
 import { Rectangle } from "../Components/Rectangle";
+import { Rigidbody } from "../Components/Rigidbody";
 import { EcsData } from "../Interfaces";
 import { collisionsResults } from "./Grid";
 
@@ -46,15 +50,28 @@ const sys_CheckOverlap = (data: EcsData, deltaTime: number): void => {
                     if ((!transform) || (!otherTransform))
                         continue;
 
-                    rigidbody.rectangle.transform.pos.x -= rigidbody.velocity.x * deltaTime;
-                    rigidbody.rectangle.transform.pos.y -= rigidbody.velocity.y * deltaTime;
-
-                    otherRigidbody.rectangle.transform.pos.x -= otherRigidbody.velocity.x * deltaTime;
-                    otherRigidbody.rectangle.transform.pos.y -= otherRigidbody.velocity.y * deltaTime;
+                    
+                    updateTransform (rigidbody, rigidbody.rectangle.transform.pos.sub( rigidbody.velocity.muls(deltaTime)), grid);
+                    updateTransform (otherRigidbody, otherRigidbody.rectangle.transform.pos.sub( otherRigidbody.velocity.muls(deltaTime)), grid);
                 }
             }
         }
     });
 };
+
+const updateTransform = (rigidbody:Rigidbody, nextPosition:Vec2, grid:Grid) => {
+    const position = nextPosition.adds(1.0).divs(2.0);
+    position.y = 1 - position.y;
+
+    // Find new index of entity
+    const nextIndex = new Vec2(
+        Math.floor(position.x / (grid.intervalX / 2.0)),
+        Math.floor(position.y / (grid.intervalY / 2.0)),
+    );
+
+    if (GridUtils.getCellWalkable(nextIndex.y, nextIndex.x) == 0) {
+        rigidbody.rectangle.transform.pos = nextPosition;
+    }
+}
 
 export { sys_CheckOverlap };
