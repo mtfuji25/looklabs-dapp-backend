@@ -15,9 +15,7 @@ class LogStorageClient {
     private connection: Datastore;
 
     constructor(projectId: string) {
-        this.connection = new Datastore({
-            projectId: projectId ?? null,
-        });
+        this.connection = projectId ? new Datastore({projectId: projectId}) : new Datastore();
     }
 
     async createLog(log: Log) {
