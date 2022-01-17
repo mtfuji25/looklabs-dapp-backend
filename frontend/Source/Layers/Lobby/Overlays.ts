@@ -16,6 +16,7 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 // Files import
 import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
+
 const levelMap: Record<string, any> = levelMapFile;
 
 class OverlayMap extends Layer {
@@ -49,6 +50,8 @@ class OverlayMap extends Layer {
 
         // Creates new pixi container
         this.mapContainer = new Container();
+        
+       
     }
 
     loadMap() {
@@ -98,6 +101,7 @@ class OverlayMap extends Layer {
 
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
+        this.onUpdate(0);
     }
 
     onUpdate(deltaTime: number) {
@@ -117,6 +121,11 @@ class OverlayMap extends Layer {
     onDetach() {
         this.app.stage.removeChild(this.mapContainer);
     }
+
+    getContainer ():Container {
+        return this.mapContainer;
+    }
+
 }
 
 export { OverlayMap };

@@ -3,6 +3,7 @@ import { Logger } from "../Utils/Logger";
 import {
     ConnectionLostListener,
     EnemyListener,
+    GameStateListener,
     GameStatusListener,
     GameTimeListener,
     KillListener,
@@ -13,6 +14,7 @@ import {
     OnConnectionListener,
     OnConnectionLostFn,
     OnEnemyFn,
+    OnGameStateFn,
     OnGameStatusFn,
     OnGameTimeFn,
     OnKillFn,
@@ -80,7 +82,16 @@ class WSClient {
                     if ((listener as GameTimeListener).callback(data)) break;
                 }
             }
+        },
+
+        "game-state": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "game-state") {
+                    if ((listener as GameStateListener).callback(data)) break;
+                }
+            }
         }
+
     };
 
     constructor(host: string, port: number) {
@@ -231,6 +242,8 @@ class WSClient {
     addListener(type: "kill", fn: OnKillFn): KillListener;
     addListener(type: "enemy", fn: OnEnemyFn): EnemyListener;
     addListener(type: "response", fn: OnResponseFn): ResponseListener;
+    addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
+
     addListener(type: "game-time", fn: OnGameTimeFn): GameTimeListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();

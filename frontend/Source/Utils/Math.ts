@@ -1,3 +1,22 @@
+class Random {
+    static shuffle<T>(array:T[]):T[] {
+        let currentIndex = array.length,  randomIndex;
+      
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+      
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+      
+          // And swap it with the current element.
+          [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+      
+        return array;
+    }
+}
 class Vec2 {
 
     x: number;
@@ -91,6 +110,9 @@ class Vec2 {
         return this.muls(1.0 / this.length());
     }
 
+    
+      
+
 }
 
 const deg2rad = (deg: number): number => {
@@ -105,4 +127,4 @@ const lerp = (a: number, b: number, t: number): number => {
     return (1 - t) * a + t * b;
 }
 
-export { Vec2, deg2rad, rad2deg, lerp };
+export { Vec2, deg2rad, rad2deg, lerp, Random };

@@ -15,11 +15,11 @@ import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
 
 // Pixi imports
-import { Application } from "pixi.js";
-
+import { Application, SCALE_MODES, settings } from "pixi.js";
+import { Logger } from "../Utils/Logger";
 // Require the resources.json
 import resourceFile from "../Assets/Resources.json";
-import { Logger } from "../Utils/Logger";
+
 // Cast to something that typescript can understand
 const resources: Record<string, any> = resourceFile;
 
@@ -89,6 +89,9 @@ class Engine {
         this.wsClient.start();
 
         // Effectlly load all the resources
+        // set settings for texturs (settings ideal for pixel based game)
+        settings.SCALE_MODE = SCALE_MODES.NEAREST;
+        
         this.app.loader.load();
 
         // Finally load the default level

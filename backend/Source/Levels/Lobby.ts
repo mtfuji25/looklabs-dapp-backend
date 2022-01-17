@@ -9,6 +9,7 @@ import { GameParticipantsResult, ScheduledGame, ScheduledGameParticipant } from 
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
+import { Layer } from "../Core/Layer";
 
 // Layers import
 import { PlayerLayer } from "../Layers/Lobby/Player";
@@ -23,10 +24,14 @@ import {
     GameStatusListener,
     PlayerNamesListener,
     OnConnectionListener,
+    GameStateListener,
+    GameState,
+    GameStateTypes,
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
+
 
 //
 // Types
@@ -40,6 +45,15 @@ interface TimeLeft {
     seconds: string;
 }
 
+export enum GameStateValues {
+    SPAWN,
+    COUNTDOWN3,
+    COUNTDOWN2,
+    COUNTDOWN1,
+    COUNTDOWN0,
+    FIGHT
+}
+
 //
 // Constants
 //
@@ -47,6 +61,9 @@ interface TimeLeft {
 // Delay to await when new client connect to respond
 // Represented in miliseconds
 const ON_WS_CONNECTION_RESPONSE_DELAY: number = 1000;
+const INTRO_SETUP_DELAY: number = 500;
+const INTRO_SPAWN_DELAY: number  = 5000;
+const INTRO_COUNTDOWN_DELAY: number = 1000;
 
 //
 // Level implementation
@@ -55,6 +72,8 @@ class LobbyLevel extends Level {
 
     // Current running game id
     private gameId: number;
+
+    private gameState:GameStateValues = GameStateValues.SPAWN;
 
     // Number of figthers remaining in the lobby
     private fighters: number = 0;
@@ -66,12 +85,13 @@ class LobbyLevel extends Level {
     private oneSecondCounter: number = 0.0;
 
     // Store game start time
-    private readonly initialDate: number = Date.now();
+    private initialDate: number;
 
     // WebSockets listeners
     private gameNamesListener: PlayerNamesListener;
     private gameStatusListener: GameStatusListener;
     private wsConnectionListener: OnConnectionListener;
+    private gameStateListener: GameStateListener;
 
     // Event Dispatchers queue
     private dieEventQueue: OnDieEvent[] = [];
@@ -105,6 +125,10 @@ class LobbyLevel extends Level {
 
         this.gameNamesListener = this.context.ws.addListener(
             "player-names", (msg) => this.onGameNamesMsg(msg)
+        );
+
+        this.gameStateListener = this.context.ws.addListener(
+            "game-state", (msg) => this.OnGameStateMsg(msg)
         );
 
         this.wsConnectionListener = this.context.ws.addListener(
@@ -254,9 +278,51 @@ class LobbyLevel extends Level {
 
         // Put the map in the stack
         this.layerStack.pushLayer(mapCollider);
+
+        // sleep and start intro
+        await sleep(INTRO_SETUP_DELAY);
+
+        // start spawning entities on the map
+        this.gameState = GameStateValues.SPAWN;
+        this.context.ws.broadcast({
+            msgType: "game-state",
+            gameId: this.gameId,
+            gameState: "spawn"
+        });
+
+        await sleep(INTRO_SPAWN_DELAY);
+        
+        // run final count down
+        const countdown:GameStateTypes[] = ["countdown0","countdown1","countdown2","countdown3"];
+        const countdownStates:GameStateValues[] = [GameStateValues.COUNTDOWN0,GameStateValues.COUNTDOWN1,GameStateValues.COUNTDOWN2,GameStateValues.COUNTDOWN3];
+        while (countdown.length > 0) {
+            const count = countdown.pop();
+            const state = countdownStates.pop();
+            this.gameState = state;
+            this.context.ws.broadcast({
+                msgType: "game-state",
+                gameId: this.gameId,
+                gameState: count
+            });
+            await sleep(INTRO_COUNTDOWN_DELAY);
+        }   
+
+        //sleep to display FIGHT! text
+        await sleep(INTRO_COUNTDOWN_DELAY);
+
+        //start game
+        this.initialDate =  Date.now();
+        this.gameState = GameStateValues.FIGHT;
+        this.context.ws.broadcast({
+            msgType: "game-state",
+            gameId: this.gameId,
+            gameState: "fight"
+        });
     }
 
     async onUpdate(deltaTime: number) {
+
+        if (this.gameState != GameStateValues.FIGHT) return;
 
         // Update timer
         if (this.oneSecondCounter >= 1) {
@@ -464,6 +530,28 @@ class LobbyLevel extends Level {
         }
     }
 
+    async runPendings(deltaTime: number) {
+        switch (this.gameState) {
+            case GameStateValues.SPAWN:
+                break;
+            
+            case GameStateValues.COUNTDOWN3:
+            case GameStateValues.COUNTDOWN2:
+            case GameStateValues.COUNTDOWN1:                
+            case GameStateValues.COUNTDOWN0:
+                break;    
+            case GameStateValues.FIGHT:
+                this.ecs.onUpdate(deltaTime);
+                break;
+        }
+        
+        // Update all level's layers
+        this.layerStack.layers.map((layer: Layer) => {
+            layer.onUpdate(deltaTime);
+        })
+    }
+
+
     // Default level's close method, called when engine
     // switch between levels or close itself
     onClose(): void {
@@ -471,6 +559,7 @@ class LobbyLevel extends Level {
         this.gameNamesListener.destroy();
         this.gameStatusListener.destroy();
         this.wsConnectionListener.destroy();
+        this.gameStateListener.destroy();
     }
 
     // Handles all requests from frontends that relate with current game-status
@@ -496,6 +585,8 @@ class LobbyLevel extends Level {
         return true;
     }
 
+
+
     // Handles all requests from frontends that relate with current player names
     onGameNamesMsg(msg: ReplyableMsg): boolean {
 
@@ -520,6 +611,27 @@ class LobbyLevel extends Level {
 
         // Handles the event, doesn't allow event propagation
         // in the event listeners queue
+        return true;
+    }
+
+    OnGameStateMsg (msg: ReplyableMsg): boolean {
+
+        let state:GameStateTypes = "fight";
+        if (this.gameState == GameStateValues.COUNTDOWN0) state = "countdown0";
+        if (this.gameState == GameStateValues.COUNTDOWN1) state = "countdown1";
+        if (this.gameState == GameStateValues.COUNTDOWN2) state = "countdown2";
+        if (this.gameState == GameStateValues.COUNTDOWN3) state = "countdown3";
+        if (this.gameState == GameStateValues.SPAWN) state = "spawn";
+
+        if (msg.content.type == requests.gameState) {
+            const reply: GameState = {
+                msgType: "game-state",
+                gameId: this.gameId,
+                gameState: state
+            }
+            msg.reply(reply);
+        }
+
         return true;
     }
 

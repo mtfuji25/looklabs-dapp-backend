@@ -184,6 +184,8 @@ class LogsLayer extends Layer {
 
         return true;
     }
+
+    getContainer():Container { return this.container; }
 }
 
 export { LogsLayer };

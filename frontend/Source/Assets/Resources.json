@@ -24,16 +24,16 @@
         {
             "name": "nftNumber",
             "url": "./assets/fonts/nftNumber.fnt"
+        },
+        {
+            "name": "intro",
+            "url": "./assets/fonts/fight.fnt"
         }
     ],
     "await-pack": [
         {
             "name": "thepit",
             "url": "./assets/await-pack/thepit.png"
-        },
-        {
-            "name": "user",
-            "url": "./assets/await-pack/users.svg"
         },
         {
             "name": "notfound-bg",
@@ -87,19 +87,7 @@
             "url": "./assets/results-pack/character-left.svg"
         }
     ],
-    "dungeon-pack": [
-        {
-            "name": "dungeon",
-            "url": "./assets/dungeon-pack/dungeon-pack.png"
-        },
-        {
-            "name": "basemap",
-            "url": "./assets/dungeon-pack/base_sheet.png"
-        },
-        {
-            "name": "overlaymap",
-            "url": "./assets/dungeon-pack/overlay_sheet.png"
-        },
+    "dungeon-pack": [        
         {
             "name": "basemap_raw",
             "url": "./assets/dungeon-pack/basemap.png"
@@ -115,10 +103,6 @@
             "url": "./assets/enemy-pack/delta_chicken.png"
         },
         {
-            "name": "beta_chicken",
-            "url": "./assets/enemy-pack/beta_chicken.png"
-        },
-        {
             "name": "alpha_chicken",
             "url": "./assets/enemy-pack/alpha_chicken.png"
         },
@@ -129,10 +113,6 @@
         {
             "name": "delta_hound",
             "url": "./assets/enemy-pack/delta_hound.png"
-        },
-        {
-            "name": "beta_hound",
-            "url": "./assets/enemy-pack/beta_hound.png"
         },
         {
             "name": "alpha_hound",
@@ -147,10 +127,6 @@
             "url": "./assets/enemy-pack/delta_beetle.png"
         },
         {
-            "name": "beta_beetle",
-            "url": "./assets/enemy-pack/beta_beetle.png"
-        },
-        {
             "name": "alpha_beetle",
             "url": "./assets/enemy-pack/alpha_beetle.png"
         },
@@ -161,10 +137,6 @@
         {
             "name": "delta_snake",
             "url": "./assets/enemy-pack/delta_snake.png"
-        },
-        {
-            "name": "beta_snake",
-            "url": "./assets/enemy-pack/beta_snake.png"
         },
         {
             "name": "alpha_snake",
@@ -179,53 +151,142 @@
             "url": "./assets/enemy-pack/overlays.png"
         }
     ],
-    "sheets": [ "player-sheet","overlay-sheet" ],
+    "sheets": [ "player-sheet","overlay-sheet", "flames-sheet", "bubbles-sheet" ],
     "player-sheet": {
         "resource": "",
         "speed": 0.25,
         "loop": false,
+        "anchor": 0.5,
         "texWidth": 128,
         "texHeight": 192,
-        "frameWidth": 32,
-        "frameHeigth": 32,
         "animations": [ "walkright", "walkleft", "jumpright", "jumpleft", "dieright", "dieleft" ],
-        "walkright": [ [3, 0], [3, 1] ],
-        "walkleft": [ [0, 0], [0, 1] ],
-        "jumpright": [ [4, 0], [4, 1], [4, 2] ],
-        "jumpleft": [  [1, 0], [1, 1], [1, 2] ],
-        "dieright": [ [2, 0], [2, 1], [2, 2], [2, 3] ],
-        "dieleft": [ [5, 0], [5, 1], [5, 2], [5, 3] ]
+        "walkright": [ {"x": 0, "y":96, "width":32, "height": 32},  {"x": 32, "y":96, "width":32, "height": 32}],
+        "walkleft": [ {"x": 0, "y":0, "width":32, "height": 32}, {"x": 32, "y":0, "width":32, "height": 32} ],
+        "jumpright": [ {"x": 0, "y":128, "width":32, "height": 32}, {"x": 32, "y":128, "width":32, "height": 32}, {"x": 64, "y":128, "width":32, "height": 32} ],
+        "jumpleft": [  {"x": 0, "y":32, "width":32, "height": 32}, {"x": 32, "y":32, "width":32, "height": 32}, {"x": 64, "y":32, "width":32, "height": 32} ],
+        "dieright": [ {"x": 0, "y":64, "width":32, "height": 32}, {"x": 32, "y":64, "width":32, "height": 32}, {"x": 64, "y":64, "width":32, "height": 32}, {"x": 96, "y":64, "width":32, "height": 32} ],
+        "dieleft": [ {"x": 0, "y":160, "width":32, "height": 32}, {"x": 32, "y":160, "width":32, "height": 32}, {"x": 64, "y":160, "width":32, "height": 32}, {"x": 96, "y":160, "width":32, "height": 32} ]    
     },
     "overlay-sheet": {
         "resource": "overlays",
         "speed": 0.3,
+        "anchor": 0.5,
         "loop": false,
         "texWidth": 416,
-        "texHeight": 192,
-        "frameWidth": 32,
-        "frameHeigth": 32,
-        "animations": [ 
-            "death1", "death2", "death3",
-            "criticalR1", "criticalR2", "criticalR3",
-            "criticalL1", "criticalL2", "criticalL3",
-            "healing1", "healing2", "healing3"
+        "texHeight": 352,
+        "animations": [ "death", "criticalR", "criticalL", "healing", "glow-alpha","glow-sigma"],
+
+        "criticalL": [
+            {"x": 0, "y":0, "width":32, "height": 32},
+            {"x": 32, "y":0, "width":32, "height": 32},
+            {"x": 64, "y":0, "width":32, "height": 32},
+            {"x": 96, "y":0, "width":32, "height": 32},
+            {"x": 128, "y":0, "width":32, "height": 32},
+            {"x": 160, "y":0, "width":32, "height": 32},
+            {"x": 192, "y":0, "width":32, "height": 32}
+            ],
+            
+        "criticalR": [
+            {"x": 0, "y":32, "width":32, "height": 32},
+            {"x": 32, "y":32, "width":32, "height": 32},
+            {"x": 64, "y":32, "width":32, "height": 32},
+            {"x": 96, "y":32, "width":32, "height": 32},
+            {"x": 128, "y":32, "width":32, "height": 32},
+            {"x": 160, "y":32, "width":32, "height": 32},
+            {"x": 192, "y":32, "width":32, "height": 32}
+            
+            ],
+            
+        "death": [   
+            {"x": 0, "y":64, "width":32, "height": 64},
+            {"x": 32, "y":64, "width":32, "height": 64},
+            {"x": 64, "y":64, "width":32, "height": 64},
+            {"x": 96, "y":64, "width":32, "height": 64},
+            {"x": 128, "y":64, "width":32, "height": 64},
+            {"x": 160, "y":64, "width":32, "height": 64},
+            {"x": 192, "y":64, "width":32, "height": 64},
+            {"x": 224, "y":64, "width":32, "height": 64},
+            {"x": 256, "y":64, "width":32, "height": 64},
+            {"x": 288, "y":64, "width":32, "height": 64},
+            {"x": 320, "y":64, "width":32, "height": 64},
+            {"x": 352, "y":64, "width":32, "height": 64},
+            {"x": 384, "y":64, "width":32, "height": 64}],
+            
+        "healing" : [
+            {"x": 0, "y":128, "width":32, "height": 64}, 
+            {"x": 32, "y":128, "width":32, "height": 64}, 
+            {"x": 64, "y":128, "width":32, "height": 64}, 
+            {"x": 96, "y":128, "width":32, "height": 64}, 
+            {"x": 128, "y":128, "width":32, "height": 64}, 
+            {"x": 160, "y":128, "width":32, "height": 64}, 
+            {"x": 192, "y":128, "width":32, "height": 64}
+            ],
+        "glow-alpha" : [
+            {"x": 0, "y":256, "width":32, "height": 96},
+            {"x": 32, "y":256, "width":32, "height": 96},
+            {"x": 64, "y":256, "width":32, "height": 96},
+            {"x": 96, "y":256, "width":32, "height": 96},
+            {"x": 128, "y":256, "width":32, "height": 96},
+            {"x": 160, "y":256, "width":32, "height": 96},
+            {"x": 192, "y":256, "width":32, "height": 96},
+            {"x": 224, "y":256, "width":32, "height": 96},
+            {"x": 256, "y":256, "width":32, "height": 96},
+            {"x": 288, "y":256, "width":32, "height": 96},
+            {"x": 320, "y":256, "width":32, "height": 96},
+            {"x": 352, "y":256, "width":32, "height": 96},
+            {"x": 384, "y":256, "width":32, "height": 96}
         ],
+        "glow-sigma" : [
+            {"x": 0, "y":352, "width":32, "height": 96},
+            {"x": 32, "y":352, "width":32, "height": 96},
+            {"x": 64, "y":352, "width":32, "height": 96},
+            {"x": 96, "y":352, "width":32, "height": 96},
+            {"x": 128, "y":352, "width":32, "height": 96},
+            {"x": 160, "y":352, "width":32, "height": 96},
+            {"x": 192, "y":352, "width":32, "height": 96},
+            {"x": 224, "y":352, "width":32, "height": 96},
+            {"x": 256, "y":352, "width":32, "height": 96},
+            {"x": 288, "y":352, "width":32, "height": 96},
+            {"x": 320, "y":352, "width":32, "height": 96},
+            {"x": 352, "y":352, "width":32, "height": 96},
+            {"x": 384, "y":352, "width":32, "height": 96}
+        ]
+    },
+    "flames-sheet": {
+        "resource": "overlays",
+        "speed": 0.3,
+        "anchor": 0.5,
+        "loop": false,
+        "texWidth": 416,
+        "texHeight": 352,
+        "animations": [ "flames"],
+        "flames" : [
+            {"x": 0, "y":192, "width":32, "height": 64},
+            {"x": 32, "y":192, "width":32, "height": 64},
+            {"x": 64, "y":192, "width":32, "height": 64},
+            {"x": 96, "y":192, "width":32, "height": 64},
+            {"x": 128, "y":192, "width":32, "height": 64},
+            {"x": 160, "y":192, "width":32, "height": 64},
+            {"x": 192, "y":192, "width":32, "height": 64},
+            {"x": 224, "y":192, "width":32, "height": 64}
+        ]
+    },
+    "bubbles-sheet": {
+        "resource": "overlays",
+        "speed": 0,
+        "anchor": 0,
+        "loop": false,
+        "texWidth": 416,
+        "texHeight": 352,
+        "animations": [ "bubbles"],
 
-        "death1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12]  ],
-        "death2": [ [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10], [2, 11], [2, 12]],
-        "death3": [ [3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [3, 11], [3, 12]],
-
-        "criticalR1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
-        "criticalR2": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
-        "criticalR3": [ [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6] ],
-
-        "criticalL1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
-        "criticalL2": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
-        "criticalL3": [ [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6] ],
-        
-        "healing1": [ [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12], [0, 12] ],
-        "healing2": [ [4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6] ],
-        "healing3": [ [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6] ]
-        
-    }
+        "bubbles": [
+            {"x": 256, "y":154, "width":34, "height": 34},
+            {"x": 352, "y":192, "width":34, "height": 34},
+            {"x": 256, "y":192, "width":34, "height": 34},
+            {"x": 292, "y":160, "width":28, "height": 28},
+            {"x": 292, "y":192, "width":28, "height": 28},
+            {"x": 322, "y":192, "width":28, "height": 28}
+            ]
+        }
 }
