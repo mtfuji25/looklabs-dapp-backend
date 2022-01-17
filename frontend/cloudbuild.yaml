@@ -7,6 +7,7 @@ steps:
           - "WS_SERVER_PORT=${_WS_SERVER_PORT}"
           - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
           - "STRAPI_BEARER_TOKEN=${_STRAPI_BEARER_TOKEN}"
+          - "LOGGER_LEVEL=${_LOGGER_LEVEL}"
       id: "set-env"
       dir: "frontend"
 
