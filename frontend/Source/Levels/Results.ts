@@ -16,6 +16,9 @@ class ResultsLevel extends Level {
     private counter: number = 0.0;
 
     async onStart(): Promise<void> {
+
+        this.playBackgroundMusic(Level.RESULTS_SOUND);
+        
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
         
         await this.context.ws.whenReady();

@@ -157,7 +157,9 @@ class LobbyLevel extends Level {
         // create intro sequence controller
         this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
-        this.playBackgroundMusic(Level.LOBBY_SOUND);
+        if (content.gameState == "fight")
+            this.playBackgroundMusic(Level.LOBBY_SOUND);
+        
     }
 
     async onUpdate(deltaTime: number) {
@@ -237,7 +239,8 @@ class LobbyLevel extends Level {
             // Perfom the cast to corret msg type
             if (this.introSequence) {
                 content = msg.content as GameState;
-               
+                if (content.gameState == "fight")
+                    this.playBackgroundMusic(Level.LOBBY_SOUND);
                 this.introSequence.updateIntroState(content.gameState);
             }
         }
