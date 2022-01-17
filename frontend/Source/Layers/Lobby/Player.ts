@@ -2,7 +2,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { AnimatedSprite, Application, BaseTexture, IBitmapTextStyle, ITextStyle, Rectangle, Texture } from "pixi.js";
+import { Application, IBitmapTextStyle } from "pixi.js";
 
 // Web client imports
 import { WSClient } from "../../Clients/WebSocket";
@@ -19,11 +19,10 @@ import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 
 // Current Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
-import { GameStateTypes, Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
+import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
 import { Container } from "pixi.js";
 import { StrapiClient } from "../../Clients/Strapi";
-import { AnimConfig } from "../../Core/Ecs/Components/AnimSprite";
 import { PlayerActions } from "./PlayerActions";
 
 interface Player {
@@ -223,16 +222,8 @@ class PlayerLayer extends Layer {
             animSpriteBg.forceAnimate(`glow-${content.tier}`);
             animSpriteBg.animSprite.loop = true;
             animSpriteBg.sprite.visible = true;
-            animSpriteBg.animSprite.alpha = 0.6;
+            animSpriteBg.animSprite.alpha = 0.9;
             animSpriteBg.sprite.position.set(0, -16);
-
-            // gold star
-            // animSpriteOverlay2.forceAnimate(content.tier == "alpha" ? "silver-star" : "gold-star");
-            // animSpriteOverlay2.sprite.visible = true;
-            // animSpriteOverlay2.animSprite.loop = true;
-            // animSpriteOverlay2.sprite.scale.set(0.8, 0.8);
-            // animSpriteOverlay2.sprite.x = 10;
-            // animSpriteOverlay2.sprite.y = 20;
         }
 
         animSpriteBg.addStage(sprite.sprite, 0);
@@ -376,55 +367,6 @@ class PlayerLayer extends Layer {
                 animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
                 animLayerOverlay1.sprite.visible = true;
             }
-          
-            //
-            // Fifth set
-            //
-            // if (action == PlayerActions.ATTACK_UP || action == PlayerActions.ATTACK_DOWN) {
-            //     if (Math.random() < 0.5) {
-            //         entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-            //     } else {
-            //         entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-            //     }
-            //     animLayerOverlay1.sprite.visible = false;
-            // }
-            // Critical
-            // if (action == PlayerActions.ATTACK_UP_CRITICAL || action == PlayerActions.ATTACK_DOWN_CRITICAL) {
-            //     if (Math.random() < 0.5) {
-            //         // Right
-            //         entitySprite.forceAnimate(this.res["player-sheet"]["animations"][2]);
-            //         animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][1]);
-            //     } else {
-            //         // Left
-            //         entitySprite.forceAnimate(this.res["player-sheet"]["animations"][3]);
-            //         animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][2]);
-            //     }
-            //     animLayerOverlay1.sprite.visible = true;
-            // }
-            //
-            // Sixth set
-            //
-            // if (action == PlayerActions.WALK_UP || action == PlayerActions.WALK_DOWN) {
-            //     // if (Math.random() < 0.5) {
-            //         entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-            //     // } else {
-            //         // entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-            //     // }
-            //     animLayerOverlay1.sprite.visible = false;
-            // }
-            
-            // Healing
-            // if (action == PlayerActions.WALK_UP_HEALING || action == PlayerActions.WALK_DOWN_HEALING) {
-            //     entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-            //     // if (Math.random() < 0.5) {
-            //     //     entitySprite.animate(this.res["player-sheet"]["animations"][0]);
-            //     // } else {
-            //     //     entitySprite.animate(this.res["player-sheet"]["animations"][1]);
-            //     // }
-            //     animLayerOverlay1.animate(this.res["overlay-sheet"]["animations"][3]);
-            //     animLayerOverlay1.sprite.visible = true;
-                
-            // }
         }
     }
 

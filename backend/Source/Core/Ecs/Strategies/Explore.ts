@@ -14,15 +14,13 @@ const strategy_Explore = (entity:Entity, grid:Grid, target?:Entity):void => {
   if (entitiesAlive > 80 || entitiesAlive == 1) {
     _wander(entity);
   } else {
-    // if (behavior.staticCollide == false ) {
-      if ( ((entitiesAlive > 60 || entitiesAlive < 15) &&  (status.tier == "sigma" || status.tier == "alpha" || status.tier == "beta")) ) {
-        const targets = Strategy.pickTargetsInRange(entity, strategy.getTierPriority());
-        if (targets && targets.length > 0) {
-          strategy_SeekNearest(entity, grid, targets[0]);
-          return;
-        }
+    if ( ((entitiesAlive > 60 || entitiesAlive < 15) &&  (status.tier == "sigma" || status.tier == "alpha" || status.tier == "beta")) ) {
+      const targets = Strategy.pickTargetsInRange(entity, strategy.getTierPriority());
+      if (targets && targets.length > 0) {
+        strategy_SeekNearest(entity, grid, targets[0]);
+        return;
       }
-    // } 
+    }
     _wander(entity);
   }
   

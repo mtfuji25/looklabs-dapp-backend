@@ -4,7 +4,6 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Application, IBitmapTextStyle, ITextStyle } from "pixi.js";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { Panel } from "../../Core/Ecs/Components/Panel";
-import { Text } from "../../Core/Ecs/Components/Text";
 import { GameTimeListener, GameTimeMsg, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 import { BMPText } from "../../Core/Ecs/Components/BMPText";

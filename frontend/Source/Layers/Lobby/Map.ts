@@ -8,7 +8,7 @@ import { SPRITE_SIZE } from "../../Constants/Constants";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, Container, filters } from "pixi.js";
+import { Application, Container } from "pixi.js";
 
 // Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
@@ -16,7 +16,7 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 // Files import
 import levelMapFile from "../../Assets/level_map.json"
 import { Vec2 } from "../../Utils/Math";
-import { ColoredRectangle } from "../../Core/Ecs/Components/ColoredRectangle";
+
 const levelMap: Record<string, any> = levelMapFile;
 
 class MapLayer extends Layer {

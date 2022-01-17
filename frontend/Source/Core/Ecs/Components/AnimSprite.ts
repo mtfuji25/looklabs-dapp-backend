@@ -4,7 +4,7 @@ import { Transform } from "./Transform";
 
 // Pixi imports
 import { Application, Container, BaseTexture, Texture, Rectangle, AnimatedSprite } from "pixi.js";
-import { Vec2 } from "../../../Utils/Math";
+
 type Frame = {
     x: number;
     y: number;
