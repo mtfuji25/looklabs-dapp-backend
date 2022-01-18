@@ -87,14 +87,14 @@
             "url": "./assets/results-pack/character-left.svg"
         }
     ],
-    "dungeon-pack": [        
+    "dungeon-pack": [                
         {
-            "name": "basemap_raw",
-            "url": "./assets/dungeon-pack/basemap.png"
+            "name": "map",
+            "url": "./assets/dungeon-pack/map_tiles.png"
         },
         {
-            "name": "overlaymap_raw",
-            "url": "./assets/dungeon-pack/overlays.png"
+            "name": "map-overlay",
+            "url": "./assets/dungeon-pack/overlay-tiles.png"
         }
     ],
     "enemy-pack": [

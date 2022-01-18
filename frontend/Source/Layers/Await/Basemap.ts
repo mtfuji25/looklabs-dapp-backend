@@ -48,6 +48,7 @@ class MapLayer extends Layer {
         this.mapContainer = new Container();
     }
 
+    //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
     loadMap() {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
@@ -61,23 +62,22 @@ class MapLayer extends Layer {
             y += step;
             for (let j = 0; j < cols; ++j) {
                 x += step;
-
-                // Creates entity and add sprite to it
-                const entity = this.ecs.createEntity(x, y, false)
-                const sprite = entity.addSprite();
-
-                // Calculates base cuts in spritesheet
-                const pw = j * SPRITE_SIZE;
-                const ph = i * SPRITE_SIZE;
-
-                // Load the cuted image to sprite
-                sprite.setCutImg(
-                    this.app.loader.resources["basemap_raw"],
-                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
-                );
-
-                this.entities.push(entity);
-                this.mapContainer.addChild(sprite.sprite);
+                const currentCell = levelMap["data"][i][j];
+                if (currentCell != 0) {
+                    const entity = this.ecs.createEntity(x, y, false);
+                    const sprite = entity.addSprite();
+                    sprite.setCutImg(
+                        this.app.loader.resources["map"],
+                        Math.floor(((currentCell - 1) % 19)) * 16,
+                        Math.floor((currentCell - 1) / 19) * 16,
+                        16,
+                        16
+                    );
+                    this.entities.push(entity);
+                    this.mapContainer.addChild(sprite.sprite);
+                }
+                
+            
                 x += step;
             }
             x = 0;
@@ -96,7 +96,7 @@ class MapLayer extends Layer {
         
         this.app.stage.addChild(this.mapContainer);
         
-
+        this.onUpdate(0);
     }
 
     onUpdate(deltaTime: number) {
@@ -110,6 +110,19 @@ class MapLayer extends Layer {
         }
 
     }
+    // onUpdate(deltaTime: number) {
+    //     let fixFactorX =
+    //         (this.dim.x - this.dim.x * (1 )) / 2.0;
+
+    //     let fixFactorY =
+    //         (this.dim.y - this.dim.y * (1 )) / 2.0;
+            
+    //     // Translate and scale soil
+    //     this.mapContainer.x =  fixFactorX;
+    //     this.mapContainer.y =  fixFactorY;
+    //     this.mapContainer.scale.x = 1 ;
+    //     this.mapContainer.scale.y = 1 ;
+    // }
 
     onDetach() {
         this.app.stage.removeChild(this.mapContainer);

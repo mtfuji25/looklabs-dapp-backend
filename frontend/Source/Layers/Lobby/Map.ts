@@ -53,6 +53,8 @@ class MapLayer extends Layer {
         this.mapContainer = new Container();
     }
 
+
+    //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
     loadMap() {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
@@ -66,30 +68,25 @@ class MapLayer extends Layer {
             y += step;
             for (let j = 0; j < cols; ++j) {
                 x += step;
-
-                // Creates entity and add sprite to it
-                const entity = this.ecs.createEntity(x, y, false)
-                const sprite = entity.addSprite();
-
-                // Calculates base cuts in spritesheet
-                const pw = j * SPRITE_SIZE;
-                const ph = i * SPRITE_SIZE;
-
-                // Load the cuted image to sprite
-                sprite.setCutImg(
-                    this.app.loader.resources["basemap_raw"],
-                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
-                );
-
-                this.entities.push(entity);
-                this.mapContainer.addChild(sprite.sprite);
+                const currentCell = levelMap["data"][i][j];
+                if (currentCell != 1) {
+                    const entity = this.ecs.createEntity(x, y, false);
+                    const sprite = entity.addSprite();
+                    sprite.setCutImg(
+                        this.app.loader.resources["map"],
+                        Math.floor(((currentCell - 1) % 19)) * 16,
+                        Math.floor((currentCell - 1) / 19) * 16,
+                        16,
+                        16
+                    );
+                    this.entities.push(entity);
+                    this.mapContainer.addChild(sprite.sprite);
+                }
                 x += step;
             }
             x = 0;
             y += step;
         }
-        
-
     }
 
     onAttach() {
