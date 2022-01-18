@@ -19,6 +19,7 @@ import { Application, SCALE_MODES, settings } from "pixi.js";
 import { Logger } from "../Utils/Logger";
 // Require the resources.json
 import resourceFile from "../Assets/Resources.json";
+import { AssetLoader } from "./AssetLoader";
 
 // Cast to something that typescript can understand
 const resources: Record<string, any> = resourceFile;
@@ -42,13 +43,14 @@ class Engine {
 
     // Running Level
     private level: Level;
+    private assetLoader:AssetLoader;
 
     constructor(wsClient: WSClient, strapiClient: StrapiClient, app: Application, root: HTMLElement) {
         this.wsClient = wsClient;
         this.strapiClient = strapiClient;
         this.app = app;
         this.root = root;
-
+        this.assetLoader = new AssetLoader(this.app);
         initInputs(this.app);
 
         this.context = {
@@ -64,6 +66,7 @@ class Engine {
                 start: Date.now(),
                 dt: 0.0
             },
+            assetLoader: this.assetLoader,
             close: false
         };
 
@@ -71,7 +74,7 @@ class Engine {
     }
 
     async start(): Promise<void> {
-        Logger.info("Starting frontedn engine.");
+        Logger.info("Starting frontend engine.");
 
         // Configure pixi application
         // Append the base application to the root div of index.html
@@ -80,19 +83,10 @@ class Engine {
         // Make sure that the application is able to listen to events
         this.app.stage.interactive = true;
 
-        // Add all resources to loader queue
-        resources["packs"].forEach((pack: string) => {
-            this.app.loader.add(resources[pack]);
-        });
+        this.assetLoader.loadFromJSON(resources);
 
         // Start engine Web Socket client
         this.wsClient.start();
-
-        // Effectlly load all the resources
-        // set settings for texturs (settings ideal for pixel based game)
-        settings.SCALE_MODE = SCALE_MODES.NEAREST;
-        
-        this.app.loader.load();
 
         // Finally load the default level
         Logger.info("Loading level: ", this.level.getName());
