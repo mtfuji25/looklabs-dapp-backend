@@ -63,19 +63,18 @@ class MapLayer extends Layer {
             for (let j = 0; j < cols; ++j) {
                 x += step;
                 const currentCell = levelMap["data"][i][j];
-                if (currentCell != 0) {
-                    const entity = this.ecs.createEntity(x, y, false);
-                    const sprite = entity.addSprite();
-                    sprite.setCutImg(
-                        this.app.loader.resources["map"],
-                        Math.floor(((currentCell - 1) % 19)) * 16,
-                        Math.floor((currentCell - 1) / 19) * 16,
-                        16,
-                        16
-                    );
-                    this.entities.push(entity);
-                    this.mapContainer.addChild(sprite.sprite);
-                }
+                const entity = this.ecs.createEntity(x, y, false);
+                const sprite = entity.addSprite();
+                sprite.setCutImg(
+                    this.app.loader.resources["map"],
+                    Math.floor(((currentCell - 1) % 19)) * 16,
+                    Math.floor((currentCell - 1) / 19) * 16,
+                    16,
+                    16
+                );
+                this.entities.push(entity);
+                this.mapContainer.addChild(sprite.sprite);
+              
                 
             
                 x += step;
@@ -110,19 +109,7 @@ class MapLayer extends Layer {
         }
 
     }
-    // onUpdate(deltaTime: number) {
-    //     let fixFactorX =
-    //         (this.dim.x - this.dim.x * (1 )) / 2.0;
-
-    //     let fixFactorY =
-    //         (this.dim.y - this.dim.y * (1 )) / 2.0;
-            
-    //     // Translate and scale soil
-    //     this.mapContainer.x =  fixFactorX;
-    //     this.mapContainer.y =  fixFactorY;
-    //     this.mapContainer.scale.x = 1 ;
-    //     this.mapContainer.scale.y = 1 ;
-    // }
+  
 
     onDetach() {
         this.app.stage.removeChild(this.mapContainer);

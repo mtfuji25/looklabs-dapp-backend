@@ -69,19 +69,18 @@ class MapLayer extends Layer {
             for (let j = 0; j < cols; ++j) {
                 x += step;
                 const currentCell = levelMap["data"][i][j];
-                if (currentCell != 1) {
-                    const entity = this.ecs.createEntity(x, y, false);
-                    const sprite = entity.addSprite();
-                    sprite.setCutImg(
-                        this.app.loader.resources["map"],
-                        Math.floor(((currentCell - 1) % 19)) * 16,
-                        Math.floor((currentCell - 1) / 19) * 16,
-                        16,
-                        16
-                    );
-                    this.entities.push(entity);
-                    this.mapContainer.addChild(sprite.sprite);
-                }
+                const entity = this.ecs.createEntity(x, y, false);
+                const sprite = entity.addSprite();
+                sprite.setCutImg(
+                    this.app.loader.resources["map"],
+                    Math.floor(((currentCell - 1) % 19)) * 16,
+                    Math.floor((currentCell - 1) / 19) * 16,
+                    16,
+                    16
+                );
+                this.entities.push(entity);
+                this.mapContainer.addChild(sprite.sprite);
+              
                 x += step;
             }
             x = 0;
