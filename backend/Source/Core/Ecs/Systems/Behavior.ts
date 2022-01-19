@@ -13,7 +13,7 @@ const ENTITY_RANGE = 0.1;
 const ENTITY_TIER_RANGE = 0.5;
 
 const regeneration:Record<string, number> = {
-"sigma": 0.03,
+"sigma": 0.035,
 "alpha": 0.03,
 "beta": 0.03,
 "delta": 0.045,

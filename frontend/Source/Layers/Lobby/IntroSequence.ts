@@ -229,7 +229,7 @@ class IntroEntity {
                 this.overlayContainer.addChild(this.bubble);
                 this.hideShowHealth(false);
                 setTimeout( () => { 
-                    this.entityContainer.removeChild(this.bubble); 
+                    this.overlayContainer.removeChild(this.bubble); 
                     this.hideShowHealth(true);
                 }, Math.random() * 1000 + 1000);
             }
