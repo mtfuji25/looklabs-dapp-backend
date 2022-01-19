@@ -9,7 +9,6 @@ steps:
           - "-f"
           - backend/Dockerfile
       id: Build
-      waitFor: ["set-env"]
 
     - name: gcr.io/cloud-builders/dockervm
       args:
