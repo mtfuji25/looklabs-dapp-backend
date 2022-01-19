@@ -1,0 +1,40 @@
+steps:
+    # Copies env set in Cloud Build into the file system for docker to run with correct vars
+    - name: "gcr.io/cloud-builders/yarn:current"
+      args:
+          - "set-env"
+          - "WS_SERVER_HOST=${_WS_SERVER_HOST}"
+          - "WS_SERVER_PORT=${_WS_SERVER_PORT}"
+          - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
+          - "STRAPI_BEARER_TOKEN=${_STRAPI_BEARER_TOKEN}"
+          - "LOGGER_LEVEL=${_LOGGER_LEVEL}"
+      id: "set-env"
+      dir: "backend"
+
+    - name: gcr.io/cloud-builders/docker
+      args:
+          - build
+          - "--no-cache"
+          - "-t"
+          - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+          - backend
+          - "-f"
+          - backend/Dockerfile
+      id: Build
+      waitFor: ["set-env"]
+
+    - name: gcr.io/cloud-builders/docker
+      args:
+          - push
+          - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+      id: Push
+
+    - name: gcr.io/cloud-builders/docker 
+      args: [ compute, instances, update-container, thepit-backend, reset, --container-image="$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA", --container-privileged ]
+
+      id: Deploy
+      entrypoint: gcloud
+timeout: 3600s
+images:
+    - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+
