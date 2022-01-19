@@ -1,5 +1,5 @@
 steps:
-    - name: gcr.io/cloud-builders/docker
+    - name: gcr.io/cloud-builders/dockervm
       args:
           - build
           - "--no-cache"
@@ -10,16 +10,16 @@ steps:
           - backend/Dockerfile
       id: Build
 
-    - name: gcr.io/cloud-builders/docker
+    - name: gcr.io/cloud-builders/dockervm
       args:
           - push
           - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
       id: Push
 
-    - name: gcr.io/cloud-builders/docker 
+    - name: gcr.io/cloud-builders/dockervm 
       args: [ compute, instances, update-container, thepit-backend, reset, --container-image="$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA", --container-privileged ]
       id: Deploy
-      
+
       entrypoint: gcloud
 timeout: 3600s
 images:
