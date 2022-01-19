@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ScheduledGame } from "../Clients/Strapi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { Logger } from "../Utils/Logger";
+import { Resource } from "../Core/AssetLoader";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x18215d;
@@ -91,7 +92,22 @@ class AwaitLevel extends Level {
         let game: ScheduledGame;
 
         try {
+            
             game = await this.context.strapi.getGameById(this.props.gameId);
+            /*
+            TODO: When we're ready to load assets from NFT data, do preloading here
+            // load sprite assets here
+            const newAssets:Resource[] = [];
+
+            game.scheduled_game_participants.forEach( p => {
+                // const url = p. GET IMG URL
+                // const name = p.SPECIAL NFT TYPE OR TIER
+                // newAssets.push( { name: name, url: url } )
+            });
+            // add to asset loader
+            this.context.assetLoader.loadResources(newAssets);
+            */
+
         } catch(err) {
             Logger.fatal("Cannot get game for current game id.");
             Logger.trace(JSON.stringify(err, null, 4));

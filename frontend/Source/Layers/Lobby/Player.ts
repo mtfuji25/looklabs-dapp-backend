@@ -169,10 +169,13 @@ class PlayerLayer extends Layer {
         const sprite = entity.addAnimSprite();
         // hide sprite so we can spawn them during intro
         sprite.sprite.visible = false;
-
-        // console.log("ID: ", id, " Nome: ", name);
         PlayerLayer.lastGamePlayerNames[id] = name;
-        console.log(content.tier);
+        
+        /*
+        TODO: When we're ready to load assets from NFT data, do it here 
+        content.url
+        */
+
         switch (char_class) {
             
             case "Avians":

@@ -44,4 +44,4 @@ class AssetLoader {
     }
 }
 
-export { AssetLoader }
+export { AssetLoader, Resource }
