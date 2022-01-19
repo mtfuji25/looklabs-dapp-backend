@@ -5,7 +5,7 @@ steps:
           - "--no-cache"
           - "-t"
           - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-          - "./backend"
+          - "./backend/"
           - "-f"
           - backend/Dockerfile
       id: Build
@@ -17,7 +17,14 @@ steps:
       id: Push
 
     - name: gcr.io/cloud-builders/docker
-      args: [ compute, instances, update-container, thepit-backend, reset, --container-image="$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA", --container-privileged ]
+      args: 
+          - compute
+          - instances
+          - update-container
+          - thepit-backend
+          - reset
+          - "--container-image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+          - "--container-privileged"
       id: Deploy
 
       entrypoint: gcloud
