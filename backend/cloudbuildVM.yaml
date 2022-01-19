@@ -1,5 +1,4 @@
 steps:
-    # Copies env set in Cloud Build into the file system for docker to run with correct vars
     - name: gcr.io/cloud-builders/docker
       args:
           - build
