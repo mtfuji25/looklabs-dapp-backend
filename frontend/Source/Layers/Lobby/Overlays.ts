@@ -8,7 +8,7 @@ import { SPRITE_SIZE } from "../../Constants/Constants";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, Container, filters } from "pixi.js";
+import { Application, Container } from "pixi.js";
 
 // Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
@@ -61,38 +61,33 @@ class OverlayMap extends Layer {
 
         const step = SPRITE_SIZE / 2.0;
 
-        let x = 0.0;
-        let y = 0.0;
+   
 
         for (let i = 0; i < rows; ++i) {
-            y += step;
+            
             for (let j = 0; j < cols; ++j) {
-                x += step;
                 const currentCell = levelMap["data"][i][j];
-                const entity = this.ecs.createEntity(x, y, false);
+                const entity = this.ecs.createEntity(j * SPRITE_SIZE, i * SPRITE_SIZE, false);
                 const sprite = entity.addSprite();
                 sprite.setCutImg(
                     this.app.loader.resources["map-overlay"],
-                    Math.floor(((currentCell) % 26)) * 16,
-                    Math.floor((currentCell) / 26) * 16,
-                    16,
-                    16
+                    // 26 is the number of columns in the sprite sheet
+                    Math.floor(((currentCell) % 26)) * SPRITE_SIZE,
+                    Math.floor((currentCell) / 26) * SPRITE_SIZE,
+                    SPRITE_SIZE,
+                    SPRITE_SIZE
                 );
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
-                x += step;
+               
             }
-            x = 0;
-            y += step;
+
         }
     }
     
 
     onAttach() {
         this.loadMap();
-
-        // Apply a ligth blur on the soil
-        //this.mapContainer.filters = [new filters.BlurFilter(1, 8)];
 
         this.dim.x = this.mapContainer.width;
         this.dim.y = this.mapContainer.height;
@@ -110,8 +105,8 @@ class OverlayMap extends Layer {
             (this.dim.y - this.dim.y * (1 - this.levelContext.zoom)) / 2.0;
             
         // Translate and scale soil
-        this.mapContainer.x = this.levelContext.offsetX + fixFactorX;
-        this.mapContainer.y = this.levelContext.offsetY + fixFactorY;
+        this.mapContainer.x = this.levelContext.offsetX + fixFactorX + SPRITE_SIZE * 0.5;
+        this.mapContainer.y = this.levelContext.offsetY + fixFactorY + SPRITE_SIZE * 0.5;
         this.mapContainer.scale.x = 1 - this.levelContext.zoom;
         this.mapContainer.scale.y = 1 - this.levelContext.zoom;
     }
