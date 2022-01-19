@@ -1,4 +1,12 @@
 steps:
+# Copies env set in Cloud Build into the file system for docker to run with correct vars
+    - name: "gcr.io/cloud-builders/yarn:current"
+      args:
+          - "set-env"
+          - "WS_SERVER_PORT=${_WS_SERVER_PORT}"
+      id: "set-env"
+      dir: "backend"
+
     - name: gcr.io/cloud-builders/dockervm
       args:
           - build
@@ -9,6 +17,7 @@ steps:
           - "-f"
           - backend/Dockerfile
       id: Build
+      waitFor: ["set-env"]
 
     - name: gcr.io/cloud-builders/dockervm
       args:
