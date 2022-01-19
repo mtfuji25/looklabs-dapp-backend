@@ -9,7 +9,6 @@ steps:
           - "-f"
           - backend/Dockerfile
       id: Build
-      waitFor: ["set-env"]
 
     - name: gcr.io/cloud-builders/docker
       args:
@@ -19,8 +18,8 @@ steps:
 
     - name: gcr.io/cloud-builders/docker 
       args: [ compute, instances, update-container, thepit-backend, reset, --container-image="$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA", --container-privileged ]
-
       id: Deploy
+      
       entrypoint: gcloud
 timeout: 3600s
 images:
