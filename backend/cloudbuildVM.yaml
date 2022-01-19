@@ -1,5 +1,5 @@
 steps:
-    - name: "gcr.io/cloud-builders/yarn:current"
+    - name: gcr.io/cloud-builders/docker
       args:
           - build
           - "--no-cache"
@@ -10,13 +10,13 @@ steps:
           - backend/Dockerfile
       id: Build
 
-    - name: gcr.io/cloud-builders/dockervm
+    - name: gcr.io/cloud-builders/docker
       args:
           - push
           - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
       id: Push
 
-    - name: gcr.io/cloud-builders/dockervm 
+    - name: gcr.io/cloud-builders/docker
       args: [ compute, instances, update-container, thepit-backend, reset, --container-image="$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA", --container-privileged ]
       id: Deploy
 
