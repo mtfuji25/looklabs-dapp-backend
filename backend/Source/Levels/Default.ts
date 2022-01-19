@@ -20,6 +20,7 @@ class DefaultLevel extends Level {
     onUpdate(deltaTime: number) {}
 
     onClose(): void {}
+    
 };
 
 export { DefaultLevel };
