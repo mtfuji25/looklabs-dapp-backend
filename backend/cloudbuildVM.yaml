@@ -3,10 +3,6 @@ steps:
     - name: "gcr.io/cloud-builders/yarn:current"
       args:
           - "set-env"
-          - "WS_SERVER_HOST=${_WS_SERVER_HOST}"
-          - "WS_SERVER_PORT=${_WS_SERVER_PORT}"
-          - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
-          - "STRAPI_BEARER_TOKEN=${_STRAPI_BEARER_TOKEN}"
           - "LOGGER_LEVEL=${_LOGGER_LEVEL}"
       id: "set-env"
       dir: "backend"
