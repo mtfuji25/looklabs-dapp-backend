@@ -1,12 +1,5 @@
 steps:
     # Copies env set in Cloud Build into the file system for docker to run with correct vars
-    - name: "gcr.io/cloud-builders/yarn:current"
-      args:
-          - "set-env"
-          - "LOGGER_LEVEL=${_LOGGER_LEVEL}"
-      id: "set-env"
-      dir: "backend"
-
     - name: gcr.io/cloud-builders/docker
       args:
           - build
