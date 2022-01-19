@@ -22,9 +22,10 @@ steps:
           - compute
           - instances
           - update-container
-          - thepit-backend
+          - "thepit-backend
           - "--container-image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
           - "--container-privileged"
+          - "--zone europe-west2-c"
       id: Deploy
 timeout: 3600s
 images:
