@@ -56,6 +56,7 @@ class IntroSequence {
         
         switch (state) {
             case "spawn":
+                console.log("SPAWN!!!!");
                 break;                
             case "countdown3":
                 this.showText("3");
@@ -146,7 +147,8 @@ class IntroSequence {
 
     onUpdate (deltaTime:number) {
         this.timer += deltaTime;
-        if (this.state === "spawn") {
+        if (this.state == "spawn") {
+            console.log("update spawn");
             this.spawn(deltaTime);
         }
         if (this.entities) {

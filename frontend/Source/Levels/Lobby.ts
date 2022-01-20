@@ -139,6 +139,10 @@ class LobbyLevel extends Level {
           logsLayer  
         );
         
+         // create intro sequence controller
+         this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
+
+
         await this.context.ws.whenReady();
 
         const response = await this.context.ws.request(
@@ -152,10 +156,8 @@ class LobbyLevel extends Level {
         );    
 
         const content = response.content as GameState;
-       
-        // if we're showing the intro, create intro sequence
-        // create intro sequence controller
-        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
+    
+        console.log("INIT",  content.gameState);
         this.introSequence.updateIntroState(content.gameState);
         if (content.gameState == "fight")
             this.playBackgroundMusic(Level.LOBBY_SOUND);
@@ -241,6 +243,7 @@ class LobbyLevel extends Level {
                 content = msg.content as GameState;
                 if (content.gameState == "fight")
                     this.playBackgroundMusic(Level.LOBBY_SOUND);
+                console.log("NEW STATE", content.gameState);
                 this.introSequence.updateIntroState(content.gameState);
             }
         }
