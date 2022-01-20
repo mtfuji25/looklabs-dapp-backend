@@ -89,7 +89,7 @@ class LogsLayer extends Layer {
     onUpdate(deltaTime: number) {
 
         // on window resize 
-        if(this.app.view.width !== this.screenX ) {
+        if(this.app.view.clientWidth != this.screenX ) {
             this.screenX = this.app.view.clientWidth;
             this.logs.forEach((log, index) => this.renderLog(log, index));
             this.darkOverlay.graphics.width = this.screenX;

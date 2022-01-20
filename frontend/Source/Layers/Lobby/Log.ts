@@ -52,6 +52,7 @@ class LogsLayer extends Layer {
         align: "left",
         fontSize: 18
     };
+    private screenX: number;
 
     constructor(ecs: ECS, app: Application, context: EngineContext) {
         super("TesteLayer", ecs);
@@ -60,6 +61,7 @@ class LogsLayer extends Layer {
         this.context = context;
 
         this.percentX = this.app.view.clientWidth / 100;
+        this.screenX = this.app.view.clientWidth;
         this.container = new Container();
 
         this.listener = this.context.ws.addListener("kill", msg => this.onKill(msg));
@@ -69,7 +71,14 @@ class LogsLayer extends Layer {
         this.app.stage.addChild(this.container);
     }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        if(this.app.view.clientWidth != this.screenX ) {
+            console.log(this.app.view.clientWidth, this.screenX);
+            this.screenX = this.app.view.clientWidth;
+            this.percentX = this.screenX / 100;
+            this.logs.forEach((log, index) => this.renderLog(log, index));
+        }
+    }
 
     // adds log on top of queue
     addLog(log: KillLog) {
