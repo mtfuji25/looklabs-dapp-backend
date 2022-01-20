@@ -8,6 +8,7 @@ steps:
           - "STRAPI_SERVER_HOST=${_STRAPI_SERVER_HOST}"
           - "STRAPI_BEARER_TOKEN=${_STRAPI_BEARER_TOKEN}"
           - "LOGGER_LEVEL=${_LOGGER_LEVEL}"
+          - "PROJECT_ID=${PROJECT_ID}"
       id: "set-env"
       dir: "frontend"
 
