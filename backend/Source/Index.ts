@@ -37,7 +37,7 @@ const main = async () => {
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 
     // Log storage client
-    const logStorageClient = new LogStorageClient(PROJECT_ID);
+    const logStorageClient = new LogStorageClient("the-pit-328710");
 
     const engine = new Engine(wsClient, strapiClient, logStorageClient);
 
