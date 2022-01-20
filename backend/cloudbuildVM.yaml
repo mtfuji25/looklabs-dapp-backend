@@ -18,10 +18,12 @@ steps:
 
     - name: "gcr.io/cloud-builders/gcloud"
       args:
-          - compute
-          - instances
-          - list
-      
+          - config   
+          - set
+          - compute/zone
+          - "europe-west2-c"
+      id: Config
+
     - name: "gcr.io/cloud-builders/gcloud"
       entrypoint: gcloud
       args: 
@@ -29,7 +31,6 @@ steps:
           - instances
           - update-container
           - "thepit-backend"
-          - "--zone europe-west2-c"
           - "--container-image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
           - "--container-privileged"
       id: Deploy
