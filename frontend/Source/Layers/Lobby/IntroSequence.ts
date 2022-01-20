@@ -56,7 +56,10 @@ class IntroSequence {
         
         switch (state) {
             case "spawn":
-                console.log("SPAWN!!!!");
+                this.playerLayer.getPlayers().forEach (player => {
+                    player.entity.getAnimSprite().sprite.alpha = 0.0;
+                    player.entity.getAnimSprite().sprite.visible = true;
+                }); 
                 break;                
             case "countdown3":
                 this.showText("3");
@@ -87,6 +90,7 @@ class IntroSequence {
 
     showAllEntities () {
         this.playerLayer.getPlayers().forEach (player => {
+            player.entity.getAnimSprite().sprite.alpha = 1.0;
             player.entity.getAnimSprite().sprite.visible = true;
         }); 
     }
@@ -148,7 +152,6 @@ class IntroSequence {
     onUpdate (deltaTime:number) {
         this.timer += deltaTime;
         if (this.state == "spawn") {
-            console.log("update spawn");
             this.spawn(deltaTime);
         }
         if (this.entities) {

@@ -156,8 +156,7 @@ class LobbyLevel extends Level {
         );    
 
         const content = response.content as GameState;
-    
-        console.log("INIT",  content.gameState);
+
         this.introSequence.updateIntroState(content.gameState);
         if (content.gameState == "fight")
             this.playBackgroundMusic(Level.LOBBY_SOUND);
@@ -243,7 +242,6 @@ class LobbyLevel extends Level {
                 content = msg.content as GameState;
                 if (content.gameState == "fight")
                     this.playBackgroundMusic(Level.LOBBY_SOUND);
-                console.log("NEW STATE", content.gameState);
                 this.introSequence.updateIntroState(content.gameState);
             }
         }
