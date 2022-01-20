@@ -21,7 +21,6 @@ steps:
           - compute
           - instances
           - list
-      id: Deploy
       
     - name: "gcr.io/cloud-builders/gcloud"
       entrypoint: gcloud
