@@ -16,6 +16,13 @@ steps:
           - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
       id: Push
 
+    - name: gcr.io/cloud-builders/docker
+      args:
+          - compute
+          - instances
+          - list
+      id: Deploy
+      
     - name: "gcr.io/cloud-builders/gcloud"
       entrypoint: gcloud
       args: 
@@ -23,9 +30,11 @@ steps:
           - instances
           - update-container
           - "thepit-backend"
+          - "--zone europe-west2-c"
           - "--container-image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
           - "--container-privileged"
       id: Deploy
+
 timeout: 3600s
 images:
     - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
