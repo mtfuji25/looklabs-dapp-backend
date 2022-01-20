@@ -136,11 +136,11 @@ class IntroSequence {
             const numToSpawn = Math.floor((this.entities.length / totalIterations) * iterations);
             let alreadyShown = 0;
             let i = 0;
-            console.log(alreadyShown, numToSpawn);
+            console.log(this.timer, totalIterations, iterations, this.entities.length);
+            // console.log(alreadyShown, numToSpawn);
             while (alreadyShown < numToSpawn) {
                 const entity  = this.entities[i];
                 if (!entity.visible) {
-                    console.log("SHOW");
                     entity.show();
                 }
                 i++;
