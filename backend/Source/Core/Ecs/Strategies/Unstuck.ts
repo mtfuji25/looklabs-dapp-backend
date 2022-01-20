@@ -29,6 +29,10 @@ const dangerZones:DangerZone[] = [
     { quadrant: [new Vec2(51,78), new Vec2(45,89)], target: new Vec2(-0.2500,-0.4224)},
     { quadrant: [new Vec2(35,74),  new Vec2(1,79)], target: new Vec2(-0.6638,-0.1983)},
     { quadrant: [new Vec2(36,80), new Vec2(1,87)], target: new Vec2(-0.2155,-0.4569)},
+    { quadrant: [new Vec2(79,49), new Vec2(69,57)], target: new Vec2(0.3879,0.2672)},
+    { quadrant: [new Vec2(78,62), new Vec2(69,70)], target: new Vec2(0.3879,-0.3190)},
+    { quadrant: [new Vec2(47,48), new Vec2(39,57)], target: new Vec2(-0.3534,0.2328)},
+    { quadrant: [new Vec2(48,62), new Vec2(39,70)], target: new Vec2(-0.3534,-0.2845)},
 ];
 
 const strategy_Unstuck = (entity:Entity, grid:Grid, target?:Entity):void => {
