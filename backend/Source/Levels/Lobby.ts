@@ -61,8 +61,8 @@ export enum GameStateValues {
 // Delay to await when new client connect to respond
 // Represented in miliseconds
 const ON_WS_CONNECTION_RESPONSE_DELAY: number = 1000;
-const INTRO_SETUP_DELAY: number = 500;
-const INTRO_SPAWN_DELAY: number  = 5000;
+const INTRO_SETUP_DELAY: number = 1000;
+const INTRO_SPAWN_DELAY: number  = 4000;
 const INTRO_COUNTDOWN_DELAY: number = 1000;
 
 //

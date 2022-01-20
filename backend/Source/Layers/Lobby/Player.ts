@@ -41,7 +41,7 @@ const spawnPos = [
     new Vec2(0.326, -0.5),
     new Vec2(0.41, -0.5),
     new Vec2(0.8879, -0.3017),
-    new Vec2(0.1297, 0.4145),
+    new Vec2(0.1897, 0.3045),
     new Vec2(-0.286, 0.21),
     new Vec2(-0.1638, -0.4569),
     new Vec2(-0.926, -0.09),
@@ -79,7 +79,7 @@ const spawnPos = [
     new Vec2(-0.632, -0.15),
     new Vec2(0.6121, -0.3534),
     new Vec2(-0.5948, 0.2155),
-    new Vec2(-0.1181, 0.3941),
+    new Vec2(-0.1581, 0.3041),
     new Vec2(0.578, -0.5),
     new Vec2(0.422, 0.0),
     new Vec2(-0.2328, -0.3879),
@@ -182,7 +182,7 @@ const spawnPos = [
 class PlayerLayer extends Layer {
 
     public static MAX_ATTACK:number = 18;
-    public static MAX_SPEED:number = 0.05;
+    public static MAX_SPEED:number = 0.055;
     public static MAX_DEFENSE:number = 5;
     public static MAX_HEALTH:number = 180;
 
@@ -293,8 +293,9 @@ class PlayerLayer extends Layer {
         const { attacking, healing } = this.self.getBehavior();
         const { velocity } = this.self.getRigidbody();
 
-        const walkH = velocity.x >= 0 ? PlayerActions.DIRECTION_RIGHT : PlayerActions.DIRECTION_LEFT;
-        // const walkV = velocity.y >= 0 ? PlayerActions.DIRECTION_UP : PlayerActions.DIRECTION_DOWN;
+        let walkH = PlayerActions.DIRECTION_RIGHT;
+        if (velocity.x < 0) walkH = PlayerActions.DIRECTION_LEFT;
+        else if (velocity.x == 0) walkH = Math.random() > 0.5 ? PlayerActions.DIRECTION_RIGHT : PlayerActions.DIRECTION_LEFT;
 
         if (walkH == PlayerActions.DIRECTION_RIGHT) {
             if (attacking) {

@@ -58,6 +58,8 @@ class PlayerLayer extends Layer {
     // Lobby level context
     private levelContext: LobbyLevelContext;
 
+    private whooping:boolean = false;
+
     static lastGamePlayerNames: Record<string, string> = {};
 
 
@@ -169,6 +171,7 @@ class PlayerLayer extends Layer {
         const sprite = entity.addAnimSprite();
         // hide sprite so we can spawn them during intro
         sprite.sprite.visible = false;
+        sprite.sprite.alpha = 0;
         PlayerLayer.lastGamePlayerNames[id] = name;
         
         /*
@@ -269,6 +272,7 @@ class PlayerLayer extends Layer {
     }
 
     updateEnemy(command: PlayerCommand) {
+        
         const { id, pos, action, health, maxHealth } = command;
         
         pos.x = Math.floor(pos.x);
@@ -280,6 +284,7 @@ class PlayerLayer extends Layer {
 
         const entity = this.players[id].entity;
         const splitId = id.split('/')[1];
+        
 
         if (!entity) {
             this.createEnemy(command);
@@ -432,6 +437,8 @@ class PlayerLayer extends Layer {
     getPlayers ():Player[] {
         return Object.values(this.players);
     }
+
+    
 }
 
 export { PlayerLayer, Player };

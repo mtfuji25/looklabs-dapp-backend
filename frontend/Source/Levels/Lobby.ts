@@ -17,6 +17,7 @@ import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
 
+
 interface LobbyLevelContext extends ViewContext {
     // View properties
     zoom: number;
@@ -52,6 +53,7 @@ class LobbyLevel extends Level {
     };
 
     private introSequence:IntroSequence;
+    private playerLayer:PlayerLayer;
 
     async onStart(): Promise<void> {
 
@@ -96,7 +98,7 @@ class LobbyLevel extends Level {
             mapLayer
         );
         
-      const playerLayer = new PlayerLayer(
+      this.playerLayer = new PlayerLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
@@ -106,7 +108,7 @@ class LobbyLevel extends Level {
         );
         // Pushs the player controller
         this.layerStack.pushLayer(
-            playerLayer
+            this.playerLayer
         );
         
         const overlayLayer = new OverlayMap(
@@ -139,6 +141,8 @@ class LobbyLevel extends Level {
           logsLayer  
         );
         
+         
+
         await this.context.ws.whenReady();
 
         const response = await this.context.ws.request(
@@ -152,10 +156,8 @@ class LobbyLevel extends Level {
         );    
 
         const content = response.content as GameState;
-       
-        // if we're showing the intro, create intro sequence
         // create intro sequence controller
-        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
+        this.introSequence = new IntroSequence(this.context.app, this.playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
         if (content.gameState == "fight")
             this.playBackgroundMusic(Level.LOBBY_SOUND);
@@ -166,12 +168,13 @@ class LobbyLevel extends Level {
         if (this.introSequence) {
             this.introSequence.onUpdate(deltaTime);
         }
+
+    
         if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
             this.showDownStart = true;
             // switch BG music to showdown
             this.playBackgroundMusic(Level.SHOWDOWN_SOUND);
         }
-
     }
 
     onClose(): void {

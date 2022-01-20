@@ -7,6 +7,7 @@ import { OverlayMap } from "./Overlays";
 import { Player, PlayerLayer } from "./Player";
 import { ViewLayer } from "./View";
 
+
 class IntroSequence {
 
     private app:Application;
@@ -20,6 +21,9 @@ class IntroSequence {
     private res: Record<string, any>;
     private timer:number = 0;
     private fightText:BitmapText;
+    private loadedPlayers:Set<string> = new Set();
+    // we have 5 seconds to show all players
+    static SPAWN_TIME:number = 4.0;
 
     private readonly fightStyle: Partial<IBitmapTextStyle> = {
         fontName: "DealersSolid",
@@ -37,25 +41,35 @@ class IntroSequence {
         this.entityContainer = new Container();
         this.overlayContainer = new Container();
         this.fightText = new BitmapText("", this.fightStyle);
-        
-        this.playerLayer.getPlayers().forEach (player => {
-            this.entities.push( 
-                new IntroEntity( app, player, this.res, this.entityContainer, this.overlayContainer)
-            );
-        });
-
-        this.entities = Random.shuffle(this.entities);
-
         this.playerLayer.getContainer().addChild(this.entityContainer);
         this.overlay.getContainer().addChild(this.overlayContainer);
-        
+        this.loadPlayers();
+    }
 
+    loadPlayers () {
+        this.playerLayer.getPlayers().forEach (player => {
+            if (player.entity.getTransform() && player.entity.getAnimSprite().sprite) {
+                const id = player.idNumber.getBMPText().text.text;
+                if (!this.loadedPlayers.has(id)) {
+                    this.entities.push( 
+                        new IntroEntity( this.app, player, this.res, this.entityContainer)
+                    );
+                    
+                    player.entity.getAnimSprite().sprite.alpha = 0.0;
+                    player.entity.getAnimSprite().sprite.visible = true;
+                    
+                    this.loadedPlayers.add(id);
+                }
+            }
+        });
+        
     }
 
     updateIntroState (state:GameStateTypes) {
         
         switch (state) {
             case "spawn":
+                
                 break;                
             case "countdown3":
                 this.showText("3");
@@ -86,6 +100,7 @@ class IntroSequence {
 
     showAllEntities () {
         this.playerLayer.getPlayers().forEach (player => {
+            player.entity.getAnimSprite().sprite.alpha = 1.0;
             player.entity.getAnimSprite().sprite.visible = true;
         }); 
     }
@@ -122,14 +137,14 @@ class IntroSequence {
     }
 
     spawn (delta:number) {
-        // we have 5 seconds to show all players
-        const totalTime = 5.0;
-        if (this.timer < totalTime) {
-            const totalIterations = totalTime/delta;
+        
+        if (this.timer < IntroSequence.SPAWN_TIME) {
+            const totalIterations = IntroSequence.SPAWN_TIME/delta;
             const iterations = this.timer/delta;
             const numToSpawn = Math.floor((this.entities.length / totalIterations) * iterations);
             let alreadyShown = 0;
             let i = 0;
+            
             while (alreadyShown < numToSpawn) {
                 const entity  = this.entities[i];
                 if (!entity.visible) {
@@ -146,7 +161,9 @@ class IntroSequence {
 
     onUpdate (deltaTime:number) {
         this.timer += deltaTime;
-        if (this.state === "spawn") {
+        this.loadPlayers();
+        
+        if (this.state == "spawn") {
             this.spawn(deltaTime);
         }
         if (this.entities) {
@@ -173,26 +190,20 @@ class IntroEntity {
     public visible:boolean = false;
     private player:Player;
     private playerContainer:Container;
-    private playerPosition:Vec2;
     private flameAnimation:AnimatedSprite;
     private entityContainer:Container;
-    private overlayContainer:Container;
     private bubble:PixiSprite;
     private app:Application;
     private res: Record<string, any>;
     private showing:boolean = true;
 
-    constructor (app: Application, player:Player, resources: Record<string, any>, entityContainer:Container, overlayContainer:Container) {
+    constructor (app: Application, player:Player, resources: Record<string, any>, entityContainer:Container) {
         this.app = app;
         this.res = resources;
         this.player = player;
-        const sprite = this.player.entity.getAnimSprite().sprite;
         this.player.entity.getAnimSprite().animSprite.scale.x = Math.random() > 0.5 ? 1 : -1;
-
-        this.playerPosition = new Vec2(sprite.x, sprite.y - 16);
         this.playerContainer = this.player.entity.getAnimSprite().sprite;
         this.entityContainer = entityContainer;
-        this.overlayContainer = overlayContainer;
         this.createFlames ();
     }
 
@@ -214,8 +225,7 @@ class IntroEntity {
         this.flameAnimation.animationSpeed = config["speed"];
         this.flameAnimation.loop = false;
         this.flameAnimation.anchor.set(config["anchor"]);        
-        this.flameAnimation.x = this.playerPosition.x;
-        this.flameAnimation.y = this.playerPosition.y;
+        
         this.flameAnimation.onFrameChange = () => {
             this.showSprite(this.flameAnimation.currentFrame);
         }
@@ -223,13 +233,11 @@ class IntroEntity {
             this.flameAnimation.visible = false;
             this.playerContainer.alpha = 1.0;
             if (this.bubble) {
-                const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
-                this.bubble.x = pos.x ;
-                this.bubble.y = pos.y + 8;
-                this.overlayContainer.addChild(this.bubble);
+                this.bubble.alpha = 0.0;
+                this.playerContainer.addChild(this.bubble);
                 this.hideShowHealth(false);
                 setTimeout( () => { 
-                    this.overlayContainer.removeChild(this.bubble); 
+                    this.playerContainer.removeChild(this.bubble); 
                     this.hideShowHealth(true);
                 }, Math.random() * 1000 + 1000);
             }
@@ -238,13 +246,18 @@ class IntroEntity {
                 this.showing = false;
             }, 1000);
         }
+        
+       
     }
 
     hideShowHealth (visible:boolean) {
-        this.player.health.getColoredRectangle().graphics.visible = visible;
-        this.player.healthBackground.getColoredRectangle().graphics.visible = visible;
-        this.player.healthOutline.getColoredRectangle().graphics.visible = visible;
-        this.player.idNumber.getBMPText().text.visible = visible;
+        if  ( this.player.entity.getTransform()) {
+            this.player.health.getColoredRectangle().graphics.visible = visible;
+            this.player.healthBackground.getColoredRectangle().graphics.visible = visible;
+            this.player.healthOutline.getColoredRectangle().graphics.visible = visible;
+            this.player.idNumber.getBMPText().text.visible = visible;
+        }
+        
 
     }
 
@@ -260,14 +273,21 @@ class IntroEntity {
                 textureFrame.x, textureFrame.y, textureFrame.width, textureFrame.height
             ))
         );
-        this.bubble.anchor.x = 0.5;
-        this.bubble.anchor.y = 1.0;
+
+        this.bubble.anchor.set(0.5, 0.0);
+        this.bubble.y = -42;        
         this.bubble.alpha = 0.0;
     }
 
     show () {
         if (!this.visible) {
             this.visible = true;
+            
+            const sprite = this.player.entity.getAnimSprite().sprite;
+            const playerPosition = new Vec2(sprite.x, sprite.y - 16);
+            this.flameAnimation.x = playerPosition.x;
+            this.flameAnimation.y = playerPosition.y;
+            
             this.entityContainer.addChild(this.flameAnimation);
             this.flameAnimation.play();
             if (Math.random() > 0.6) this.createBubble();
@@ -281,22 +301,20 @@ class IntroEntity {
             } else {
                 this.bubble.alpha -= 0.2;
             }    
-            const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
-            this.bubble.x = pos.x ;
-            this.bubble.y = pos.y + 8;
         }
     }
+    
 
     showSprite (frame:number) {
+        this.playerContainer.visible = true;
         if (frame >= 3) {
             if (frame == 3) {
                 this.playerContainer.alpha = 0.5;    
             } else if (frame == 4) {
                 this.playerContainer.alpha = 0.75;
-            } else if (frame == 5) {
+            } else {
                 this.playerContainer.alpha = 1.0;
             }
-            this.playerContainer.visible = true;
         }
     }
 

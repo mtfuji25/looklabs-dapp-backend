@@ -66,6 +66,10 @@ abstract class Level {
         }
     }
 
+    stopBackgroundMusic ():void {
+        sound.stopAll();
+    }
+
     static AWAIT_SOUND:string = "lobby_sound";
     static LOBBY_SOUND:string = "battle_sound";
     static RESULTS_SOUND:string = "results_sound";
