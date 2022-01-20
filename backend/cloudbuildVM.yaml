@@ -17,6 +17,7 @@ steps:
       id: Push
 
     - name: "gcr.io/cloud-builders/gcloud"
+      entrypoint: gcloud
       args:
           - config   
           - set
