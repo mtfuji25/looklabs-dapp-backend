@@ -130,14 +130,17 @@ class IntroSequence {
         // we have 5 seconds to show all players
         const totalTime = 5.0;
         if (this.timer < totalTime) {
+            console.log("TICK");
             const totalIterations = totalTime/delta;
             const iterations = this.timer/delta;
             const numToSpawn = Math.floor((this.entities.length / totalIterations) * iterations);
             let alreadyShown = 0;
             let i = 0;
+            console.log(alreadyShown, numToSpawn);
             while (alreadyShown < numToSpawn) {
                 const entity  = this.entities[i];
                 if (!entity.visible) {
+                    console.log("SHOW");
                     entity.show();
                 }
                 i++;
@@ -222,6 +225,7 @@ class IntroEntity {
         this.flameAnimation.x = this.playerPosition.x;
         this.flameAnimation.y = this.playerPosition.y;
         this.flameAnimation.onFrameChange = () => {
+            console.log("ON FRAME CHANGE");
             this.showSprite(this.flameAnimation.currentFrame);
         }
         this.flameAnimation.onComplete = () => {
@@ -293,6 +297,7 @@ class IntroEntity {
     }
 
     showSprite (frame:number) {
+        console.log("ON FRAME CHANGE", frame);
         if (frame >= 3) {
             if (frame == 3) {
                 this.playerContainer.alpha = 0.5;    
