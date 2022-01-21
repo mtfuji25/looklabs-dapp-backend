@@ -8,7 +8,7 @@ import { MAIN_BG_COLOR } from "../Constants/Constants";
 
 // Layers imports
 import { MapLayer } from "../Layers/Lobby/Map";
-import { PlayerLayer } from "../Layers/Lobby/Player";
+import { Player, PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
@@ -16,6 +16,7 @@ import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, Remai
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
+import { Fatina } from "fatina/build/code/fatina";
 
 interface LobbyLevelContext extends ViewContext {
     // View properties
@@ -52,8 +53,13 @@ class LobbyLevel extends Level {
     };
 
     private introSequence:IntroSequence;
+    private tweenEngine:Fatina;
+    private playerLayer:PlayerLayer;
 
     async onStart(): Promise<void> {
+
+        this.tweenEngine = new Fatina();
+        this.tweenEngine.init();
 
         // Add listeners
         this.gameStatusListener = this.context.ws.addListener(
@@ -96,7 +102,7 @@ class LobbyLevel extends Level {
             mapLayer
         );
         
-      const playerLayer = new PlayerLayer(
+      this.playerLayer = new PlayerLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
@@ -106,7 +112,7 @@ class LobbyLevel extends Level {
         );
         // Pushs the player controller
         this.layerStack.pushLayer(
-            playerLayer
+            this.playerLayer
         );
         
         const overlayLayer = new OverlayMap(
@@ -155,7 +161,7 @@ class LobbyLevel extends Level {
 
         const content = response.content as GameState;
         // create intro sequence controller
-        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
+        this.introSequence = new IntroSequence(this.context.app, this.playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
         if (content.gameState == "fight")
             this.playBackgroundMusic(Level.LOBBY_SOUND);
@@ -166,12 +172,16 @@ class LobbyLevel extends Level {
         if (this.introSequence) {
             this.introSequence.onUpdate(deltaTime);
         }
+
+        if (this.remaining == 1) {
+            this.playerLayer.celebrate(this.tweenEngine);
+        }
+
         if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
             this.showDownStart = true;
             // switch BG music to showdown
             this.playBackgroundMusic(Level.SHOWDOWN_SOUND);
         }
-
     }
 
     onClose(): void {

@@ -293,8 +293,9 @@ class PlayerLayer extends Layer {
         const { attacking, healing } = this.self.getBehavior();
         const { velocity } = this.self.getRigidbody();
 
-        const walkH = velocity.x >= 0 ? PlayerActions.DIRECTION_RIGHT : PlayerActions.DIRECTION_LEFT;
-        // const walkV = velocity.y >= 0 ? PlayerActions.DIRECTION_UP : PlayerActions.DIRECTION_DOWN;
+        let walkH = PlayerActions.DIRECTION_RIGHT;
+        if (velocity.x < 0) walkH = PlayerActions.DIRECTION_LEFT;
+        else if (velocity.x == 0) walkH = Math.random() > 0.5 ? PlayerActions.DIRECTION_RIGHT : PlayerActions.DIRECTION_LEFT;
 
         if (walkH == PlayerActions.DIRECTION_RIGHT) {
             if (attacking) {

@@ -56,8 +56,8 @@ class IntroSequence {
                 this.loadedPlayers.add(id);
             }
         });
-        if (this.entities && this.entities.length > 0)
-            this.entities = Random.shuffle<IntroEntity>(this.entities);
+        // if (this.entities && this.entities.length > 0)
+        //     this.entities = Random.shuffle<IntroEntity>(this.entities);
     }
 
     updateIntroState (state:GameStateTypes) {
@@ -238,13 +238,11 @@ class IntroEntity {
             this.flameAnimation.visible = false;
             this.playerContainer.alpha = 1.0;
             if (this.bubble) {
-                const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
-                this.bubble.x = pos.x ;
-                this.bubble.y = pos.y + 8;
-                this.overlayContainer.addChild(this.bubble);
+                this.bubble.alpha = 0.0;
+                this.playerContainer.addChild(this.bubble);
                 this.hideShowHealth(false);
                 setTimeout( () => { 
-                    this.overlayContainer.removeChild(this.bubble); 
+                    this.playerContainer.removeChild(this.bubble); 
                     this.hideShowHealth(true);
                 }, Math.random() * 1000 + 1000);
             }
@@ -253,6 +251,8 @@ class IntroEntity {
                 this.showing = false;
             }, 1000);
         }
+        
+       
     }
 
     hideShowHealth (visible:boolean) {
@@ -275,8 +275,9 @@ class IntroEntity {
                 textureFrame.x, textureFrame.y, textureFrame.width, textureFrame.height
             ))
         );
-        this.bubble.anchor.x = 0.5;
-        this.bubble.anchor.y = 1.0;
+
+        this.bubble.anchor.set(0.5, 0.0);
+        this.bubble.y = -42;        
         this.bubble.alpha = 0.0;
     }
 
@@ -296,9 +297,6 @@ class IntroEntity {
             } else {
                 this.bubble.alpha -= 0.2;
             }    
-            const pos = this.overlayContainer.toLocal(this.flameAnimation.position);
-            this.bubble.x = pos.x ;
-            this.bubble.y = pos.y + 8;
         }
     }
 

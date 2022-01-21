@@ -39,7 +39,7 @@ class LogsLayer extends Layer {
     private refreshCount: number = 0.0;
 
     // Current Update Promisse
-    private updateRequest: Promise<ScheduledGame> = new Promise<ScheduledGame>(() => {});
+    private updateRequest: ScheduledGame;
 
     private currentGame: ScheduledGame;
     private playersInBattle:Set<string> = new Set();
@@ -86,7 +86,7 @@ class LogsLayer extends Layer {
         this.app.stage.addChild(this.container);
     }
 
-    onUpdate(deltaTime: number) {
+    async onUpdate(deltaTime: number) {
 
         // on window resize 
         if(this.app.view.clientWidth != this.screenX ) {
@@ -97,21 +97,27 @@ class LogsLayer extends Layer {
         }
         
         if (this.refreshCount >= LogsLayer.LOG_REFRESH_TIME) {
-            this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
-            
-            this.updateRequest.then((updatedGame) => {
-                updatedGame.scheduled_game_participants.forEach( player => {
+
+            try {
+                // Request the game using gameId passed in the constructor
+                this.updateRequest = await this.context.strapi.getGameById(this.currentGame.id);
+    
+                this.updateRequest.scheduled_game_participants.map((player) => {
                     if (!this.playersInBattle.has(player.nft_id)) {
                         this.playersInBattle.add(player.nft_id);
-                        if (player.name != undefined)
+                        if (player.name && player.name !== undefined)
                             this.addPlayerToLog(player.name);
                     }
-                });                
-            });
-
-            this.updateRequest.catch((e) => {
-                Logger.info("Level destroyed while requesting, aborting reponse action...");
-            });
+                });
+    
+                
+            } catch(e) {
+                console.log("Failed to request game in strapi");
+                console.log(JSON.stringify(e, null, 4));
+    
+                // Closes the engine
+                this.context.close = true;
+            }           
 
             this.refreshCount -= LogsLayer.LOG_REFRESH_TIME;
         }
