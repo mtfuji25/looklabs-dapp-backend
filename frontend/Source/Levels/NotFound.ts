@@ -23,6 +23,8 @@ class NotFoundLevel extends Level {
     private fiveSecondsCounter: number = 0;
 
     onStart(): void {
+
+        this.stopBackgroundMusic();
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 

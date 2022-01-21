@@ -139,9 +139,7 @@ class LobbyLevel extends Level {
           logsLayer  
         );
         
-         // create intro sequence controller
-         this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
-
+         
 
         await this.context.ws.whenReady();
 
@@ -156,7 +154,8 @@ class LobbyLevel extends Level {
         );    
 
         const content = response.content as GameState;
-
+        // create intro sequence controller
+        this.introSequence = new IntroSequence(this.context.app, playerLayer, overlayLayer, viewLayer, this.context.res);
         this.introSequence.updateIntroState(content.gameState);
         if (content.gameState == "fight")
             this.playBackgroundMusic(Level.LOBBY_SOUND);

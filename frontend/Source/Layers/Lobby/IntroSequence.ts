@@ -7,6 +7,7 @@ import { OverlayMap } from "./Overlays";
 import { Player, PlayerLayer } from "./Player";
 import { ViewLayer } from "./View";
 
+
 class IntroSequence {
 
     private app:Application;
@@ -20,6 +21,9 @@ class IntroSequence {
     private res: Record<string, any>;
     private timer:number = 0;
     private fightText:BitmapText;
+    private loadedPlayers:Set<string> = new Set();
+    // we have 5 seconds to show all players
+    static SPAWN_TIME:number = 5.0;
 
     private readonly fightStyle: Partial<IBitmapTextStyle> = {
         fontName: "DealersSolid",
@@ -37,19 +41,23 @@ class IntroSequence {
         this.entityContainer = new Container();
         this.overlayContainer = new Container();
         this.fightText = new BitmapText("", this.fightStyle);
-        
-        this.playerLayer.getPlayers().forEach (player => {
-            this.entities.push( 
-                new IntroEntity( app, player, this.res, this.entityContainer, this.overlayContainer)
-            );
-        });
-
-        this.entities = Random.shuffle(this.entities);
-
         this.playerLayer.getContainer().addChild(this.entityContainer);
         this.overlay.getContainer().addChild(this.overlayContainer);
-        
+        this.loadPlayers();
+    }
 
+    loadPlayers () {
+        this.playerLayer.getPlayers().forEach (player => {
+            const id = player.idNumber.getBMPText().text.text;
+            if (!this.loadedPlayers.has(id)) {
+                this.entities.push( 
+                    new IntroEntity( this.app, player, this.res, this.entityContainer, this.overlayContainer)
+                );
+                this.loadedPlayers.add(id);
+            }
+        });
+        if (this.entities && this.entities.length > 0)
+            this.entities = Random.shuffle<IntroEntity>(this.entities);
     }
 
     updateIntroState (state:GameStateTypes) {
@@ -127,17 +135,14 @@ class IntroSequence {
     }
 
     spawn (delta:number) {
-        // we have 5 seconds to show all players
-        const totalTime = 5.0;
-        if (this.timer < totalTime) {
-            console.log("TICK");
-            const totalIterations = totalTime/delta;
+        
+        if (this.timer < IntroSequence.SPAWN_TIME) {
+            const totalIterations = IntroSequence.SPAWN_TIME/delta;
             const iterations = this.timer/delta;
             const numToSpawn = Math.floor((this.entities.length / totalIterations) * iterations);
             let alreadyShown = 0;
             let i = 0;
-            console.log(this.timer, totalIterations, iterations, this.entities.length);
-            // console.log(alreadyShown, numToSpawn);
+            
             while (alreadyShown < numToSpawn) {
                 const entity  = this.entities[i];
                 if (!entity.visible) {
@@ -154,6 +159,8 @@ class IntroSequence {
 
     onUpdate (deltaTime:number) {
         this.timer += deltaTime;
+        this.loadPlayers();
+        
         if (this.state == "spawn") {
             this.spawn(deltaTime);
         }
@@ -225,7 +232,6 @@ class IntroEntity {
         this.flameAnimation.x = this.playerPosition.x;
         this.flameAnimation.y = this.playerPosition.y;
         this.flameAnimation.onFrameChange = () => {
-            console.log("ON FRAME CHANGE");
             this.showSprite(this.flameAnimation.currentFrame);
         }
         this.flameAnimation.onComplete = () => {
@@ -297,7 +303,6 @@ class IntroEntity {
     }
 
     showSprite (frame:number) {
-        console.log("ON FRAME CHANGE", frame);
         if (frame >= 3) {
             if (frame == 3) {
                 this.playerContainer.alpha = 0.5;    
