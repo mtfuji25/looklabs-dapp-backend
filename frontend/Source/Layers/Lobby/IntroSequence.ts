@@ -48,12 +48,14 @@ class IntroSequence {
 
     loadPlayers () {
         this.playerLayer.getPlayers().forEach (player => {
-            const id = player.idNumber.getBMPText().text.text;
-            if (!this.loadedPlayers.has(id)) {
-                this.entities.push( 
-                    new IntroEntity( this.app, player, this.res, this.entityContainer, this.overlayContainer)
-                );
-                this.loadedPlayers.add(id);
+            if (player.entity.getTransform()) {
+                const id = player.idNumber.getBMPText().text.text;
+                if (!this.loadedPlayers.has(id)) {
+                    this.entities.push( 
+                        new IntroEntity( this.app, player, this.res, this.entityContainer, this.overlayContainer)
+                    );
+                    this.loadedPlayers.add(id);
+                }
             }
         });
         // if (this.entities && this.entities.length > 0)
@@ -256,10 +258,13 @@ class IntroEntity {
     }
 
     hideShowHealth (visible:boolean) {
-        this.player.health.getColoredRectangle().graphics.visible = visible;
-        this.player.healthBackground.getColoredRectangle().graphics.visible = visible;
-        this.player.healthOutline.getColoredRectangle().graphics.visible = visible;
-        this.player.idNumber.getBMPText().text.visible = visible;
+        if  ( this.player.entity.getTransform()) {
+            this.player.health.getColoredRectangle().graphics.visible = visible;
+            this.player.healthBackground.getColoredRectangle().graphics.visible = visible;
+            this.player.healthOutline.getColoredRectangle().graphics.visible = visible;
+            this.player.idNumber.getBMPText().text.visible = visible;
+        }
+        
 
     }
 
@@ -306,7 +311,7 @@ class IntroEntity {
                 this.playerContainer.alpha = 0.5;    
             } else if (frame == 4) {
                 this.playerContainer.alpha = 0.75;
-            } else if (frame == 5) {
+            } else {
                 this.playerContainer.alpha = 1.0;
             }
             this.playerContainer.visible = true;

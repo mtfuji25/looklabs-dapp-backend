@@ -105,7 +105,7 @@ class LogsLayer extends Layer {
                 this.updateRequest.scheduled_game_participants.map((player) => {
                     if (!this.playersInBattle.has(player.nft_id)) {
                         this.playersInBattle.add(player.nft_id);
-                        if (player.name && player.name !== undefined)
+                        if (player.name && player.name !== "undefined")
                             this.addPlayerToLog(player.name);
                     }
                 });
@@ -114,9 +114,6 @@ class LogsLayer extends Layer {
             } catch(e) {
                 console.log("Failed to request game in strapi");
                 console.log(JSON.stringify(e, null, 4));
-    
-                // Closes the engine
-                this.context.close = true;
             }           
 
             this.refreshCount -= LogsLayer.LOG_REFRESH_TIME;
