@@ -171,6 +171,7 @@ class PlayerLayer extends Layer {
         const sprite = entity.addAnimSprite();
         // hide sprite so we can spawn them during intro
         sprite.sprite.visible = false;
+        sprite.sprite.alpha = 0;
         PlayerLayer.lastGamePlayerNames[id] = name;
         
         /*
@@ -287,18 +288,6 @@ class PlayerLayer extends Layer {
 
         if (!entity) {
             this.createEnemy(command);
-        }
-
-        // make sure player is visible
-        if (!entity.getAnimSprite().sprite.visible) {
-            entity.getAnimSprite().sprite.visible = true;
-            entity.getAnimSprite().animSprite.scale.x = 1.0;
-            entity.getAnimSprite().sprite.alpha = 1.0;
-            this.players[id].health.getColoredRectangle().graphics.visible = true;
-            this.players[id].healthBackground.getColoredRectangle().graphics.visible = true;
-            this.players[id].healthOutline.getColoredRectangle().graphics.visible = true;
-            this.players[id].idNumber.getBMPText().text.visible = true;
-            
         }
 
         const textTransform = this.players[id].idNumber.getTransform();
