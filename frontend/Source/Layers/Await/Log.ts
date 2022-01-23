@@ -74,7 +74,9 @@ class LogsLayer extends Layer {
             this.currentGame.scheduled_game_participants.forEach( player => {
                 if (!this.playersInBattle.has(player.nft_id)) {
                     this.playersInBattle.add(player.nft_id);
-                    this.addPlayerToLog(player.name);
+                    if (player.name && player.name !== "undefined") {
+                         this.addPlayerToLog(player.name);
+                    }
                 }
             });         
         }
