@@ -54,6 +54,10 @@ class IntroSequence {
                     this.entities.push( 
                         new IntroEntity( this.app, player, this.res, this.entityContainer, this.overlayContainer)
                     );
+                    
+                    player.entity.getAnimSprite().sprite.alpha = 0.0;
+                    player.entity.getAnimSprite().sprite.visible = true;
+                    
                     this.loadedPlayers.add(id);
                 }
             }
@@ -65,10 +69,7 @@ class IntroSequence {
         
         switch (state) {
             case "spawn":
-                this.playerLayer.getPlayers().forEach (player => {
-                    player.entity.getAnimSprite().sprite.alpha = 0.0;
-                    player.entity.getAnimSprite().sprite.visible = true;
-                }); 
+                
                 break;                
             case "countdown3":
                 this.showText("3");
@@ -305,6 +306,7 @@ class IntroEntity {
     }
 
     showSprite (frame:number) {
+        this.playerContainer.visible = true;
         if (frame >= 3) {
             if (frame == 3) {
                 this.playerContainer.alpha = 0.5;    
@@ -313,7 +315,6 @@ class IntroEntity {
             } else {
                 this.playerContainer.alpha = 1.0;
             }
-            this.playerContainer.visible = true;
         }
     }
 
