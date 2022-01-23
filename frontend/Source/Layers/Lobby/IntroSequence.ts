@@ -23,7 +23,7 @@ class IntroSequence {
     private fightText:BitmapText;
     private loadedPlayers:Set<string> = new Set();
     // we have 5 seconds to show all players
-    static SPAWN_TIME:number = 5.0;
+    static SPAWN_TIME:number = 4.0;
 
     private readonly fightStyle: Partial<IBitmapTextStyle> = {
         fontName: "DealersSolid",
@@ -48,7 +48,7 @@ class IntroSequence {
 
     loadPlayers () {
         this.playerLayer.getPlayers().forEach (player => {
-            if (player.entity.getTransform()) {
+            if (player.entity.getTransform() && player.entity.getAnimSprite().sprite) {
                 const id = player.idNumber.getBMPText().text.text;
                 if (!this.loadedPlayers.has(id)) {
                     this.entities.push( 
@@ -58,8 +58,7 @@ class IntroSequence {
                 }
             }
         });
-        // if (this.entities && this.entities.length > 0)
-        //     this.entities = Random.shuffle<IntroEntity>(this.entities);
+        
     }
 
     updateIntroState (state:GameStateTypes) {

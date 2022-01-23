@@ -272,6 +272,7 @@ class PlayerLayer extends Layer {
     }
 
     updateEnemy(command: PlayerCommand) {
+        
         const { id, pos, action, health, maxHealth } = command;
         
         pos.x = Math.floor(pos.x);
@@ -283,9 +284,22 @@ class PlayerLayer extends Layer {
 
         const entity = this.players[id].entity;
         const splitId = id.split('/')[1];
+        
 
         if (!entity) {
             this.createEnemy(command);
+        }
+
+        // make sure player is visible
+        if (!entity.getAnimSprite().sprite.visible) {
+            entity.getAnimSprite().sprite.visible = true;
+            entity.getAnimSprite().animSprite.scale.x = 1.0;
+            entity.getAnimSprite().sprite.alpha = 1.0;
+            this.players[id].health.getColoredRectangle().graphics.visible = true;
+            this.players[id].healthBackground.getColoredRectangle().graphics.visible = true;
+            this.players[id].healthOutline.getColoredRectangle().graphics.visible = true;
+            this.players[id].idNumber.getBMPText().text.visible = true;
+            
         }
 
         const textTransform = this.players[id].idNumber.getTransform();
