@@ -182,7 +182,7 @@ const spawnPos = [
 class PlayerLayer extends Layer {
 
     public static MAX_ATTACK:number = 18;
-    public static MAX_SPEED:number = 0.05;
+    public static MAX_SPEED:number = 0.055;
     public static MAX_DEFENSE:number = 5;
     public static MAX_HEALTH:number = 180;
 
