@@ -304,6 +304,7 @@ class IntroEntity {
             }    
         }
     }
+    
 
     showSprite (frame:number) {
         this.playerContainer.visible = true;
