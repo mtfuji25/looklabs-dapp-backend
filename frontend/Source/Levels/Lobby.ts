@@ -8,7 +8,7 @@ import { MAIN_BG_COLOR } from "../Constants/Constants";
 
 // Layers imports
 import { MapLayer } from "../Layers/Lobby/Map";
-import { Player, PlayerLayer } from "../Layers/Lobby/Player";
+import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
@@ -16,7 +16,7 @@ import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, Remai
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
-import { Fatina } from "fatina/build/code/fatina";
+
 
 interface LobbyLevelContext extends ViewContext {
     // View properties
@@ -53,13 +53,9 @@ class LobbyLevel extends Level {
     };
 
     private introSequence:IntroSequence;
-    private tweenEngine:Fatina;
     private playerLayer:PlayerLayer;
 
     async onStart(): Promise<void> {
-
-        this.tweenEngine = new Fatina();
-        this.tweenEngine.init();
 
         // Add listeners
         this.gameStatusListener = this.context.ws.addListener(
@@ -173,10 +169,7 @@ class LobbyLevel extends Level {
             this.introSequence.onUpdate(deltaTime);
         }
 
-        if (this.remaining == 1) {
-            this.playerLayer.celebrate(this.tweenEngine);
-        }
-
+    
         if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
             this.showDownStart = true;
             // switch BG music to showdown

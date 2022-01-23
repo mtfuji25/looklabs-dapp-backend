@@ -24,7 +24,6 @@ import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Inte
 import { Container } from "pixi.js";
 import { StrapiClient } from "../../Clients/Strapi";
 import { PlayerActions } from "./PlayerActions";
-import { Fatina } from "fatina/build/code/fatina";
 
 interface Player {
     entity: Entity;
@@ -450,32 +449,7 @@ class PlayerLayer extends Layer {
         return Object.values(this.players);
     }
 
-    celebrate (tweenEngine:Fatina) {
-        if (!this.whooping) {
-            this.whooping = true;
-            Object.values(this.players).map((player) => {
-                const transform = player.entity.getTransform();
-                if (transform) {
-                    const props = {y: 0};
-
-                    const sprite = player.entity.getAnimSprite();
-                    const tween = tweenEngine.sequence()
-                    .appendInterval(Math.random() * 500)
-                    .append(tweenEngine.tween(props)
-                    .to({y: -15}, 200)
-                    .setEasing("inOutCubic")
-                    .yoyo(1000)
-                    .onUpdate((dt, progress) => {
-                        sprite.animSprite.position.y = props.y;      
-                    })
-                    ).start(); 
-                }
-                
-            });
-        }
-        
-		
-    }
+    
 }
 
 export { PlayerLayer, Player };
