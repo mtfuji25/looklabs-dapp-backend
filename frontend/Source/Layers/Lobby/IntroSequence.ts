@@ -52,7 +52,7 @@ class IntroSequence {
                 const id = player.idNumber.getBMPText().text.text;
                 if (!this.loadedPlayers.has(id)) {
                     this.entities.push( 
-                        new IntroEntity( this.app, player, this.res, this.entityContainer, this.overlayContainer)
+                        new IntroEntity( this.app, player, this.res, this.entityContainer)
                     );
                     
                     player.entity.getAnimSprite().sprite.alpha = 0.0;
@@ -190,26 +190,20 @@ class IntroEntity {
     public visible:boolean = false;
     private player:Player;
     private playerContainer:Container;
-    private playerPosition:Vec2;
     private flameAnimation:AnimatedSprite;
     private entityContainer:Container;
-    private overlayContainer:Container;
     private bubble:PixiSprite;
     private app:Application;
     private res: Record<string, any>;
     private showing:boolean = true;
 
-    constructor (app: Application, player:Player, resources: Record<string, any>, entityContainer:Container, overlayContainer:Container) {
+    constructor (app: Application, player:Player, resources: Record<string, any>, entityContainer:Container) {
         this.app = app;
         this.res = resources;
         this.player = player;
-        const sprite = this.player.entity.getAnimSprite().sprite;
         this.player.entity.getAnimSprite().animSprite.scale.x = Math.random() > 0.5 ? 1 : -1;
-
-        this.playerPosition = new Vec2(sprite.x, sprite.y - 16);
         this.playerContainer = this.player.entity.getAnimSprite().sprite;
         this.entityContainer = entityContainer;
-        this.overlayContainer = overlayContainer;
         this.createFlames ();
     }
 
@@ -231,8 +225,7 @@ class IntroEntity {
         this.flameAnimation.animationSpeed = config["speed"];
         this.flameAnimation.loop = false;
         this.flameAnimation.anchor.set(config["anchor"]);        
-        this.flameAnimation.x = this.playerPosition.x;
-        this.flameAnimation.y = this.playerPosition.y;
+        
         this.flameAnimation.onFrameChange = () => {
             this.showSprite(this.flameAnimation.currentFrame);
         }
@@ -289,6 +282,12 @@ class IntroEntity {
     show () {
         if (!this.visible) {
             this.visible = true;
+            
+            const sprite = this.player.entity.getAnimSprite().sprite;
+            const playerPosition = new Vec2(sprite.x, sprite.y - 16);
+            this.flameAnimation.x = playerPosition.x;
+            this.flameAnimation.y = playerPosition.y;
+            
             this.entityContainer.addChild(this.flameAnimation);
             this.flameAnimation.play();
             if (Math.random() > 0.6) this.createBubble();
