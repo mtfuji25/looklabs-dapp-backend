@@ -1,4 +1,4 @@
-import { captureException, captureMessage } from "@sentry/node";
+// import { captureException, captureMessage } from "@sentry/node";
 
 const Mask: Record<string, number> = {
     info:       0b000001,
@@ -55,9 +55,9 @@ class Logger {
     }
 
     static capture(err: Error, msg: string | null = null) {
-        captureException(err);
+        // captureException(err);
 
-        if (msg) captureMessage(msg);
+        // if (msg) captureMessage(msg);
     }
 };
 
