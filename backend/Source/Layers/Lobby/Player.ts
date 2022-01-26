@@ -363,13 +363,7 @@ class PlayerLayer extends Layer {
             pos: { x: pos.x, y: pos.y },
             action: action,
             health: status.health,
-            attack: status.attack,
-            speed: status.speed,
-            defense: status.defense,
-            cooldown: status.cooldown,
             maxHealth: status.maxHealth,
-            survived: status.survived,
-            kills: status.kills,
             char_class: this.self.name.split(' ')[0],
             name: this.self.name,
             tier: status.tier

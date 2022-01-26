@@ -133,7 +133,7 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos, char_class, name, attack } = content;
+        const { id, pos, char_class, name } = content;
 
         const prevPlayer = this.players[id];
 

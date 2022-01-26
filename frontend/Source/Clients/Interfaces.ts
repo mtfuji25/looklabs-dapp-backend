@@ -66,13 +66,7 @@ interface PlayerCommand {
     };
     action: number;
     health: number;
-    attack: number;
-    speed: number;
-    defense: number;
-    cooldown: number;
     maxHealth: number;
-    survived: number;
-    kills: number;
     char_class: string;
     name: string;
     tier: string;
