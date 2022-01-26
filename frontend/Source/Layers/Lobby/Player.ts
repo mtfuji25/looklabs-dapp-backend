@@ -133,7 +133,7 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos, char_class, name } = content;
+        const { id, pos, spritesheet, name } = content;
 
         const prevPlayer = this.players[id];
 
@@ -174,53 +174,10 @@ class PlayerLayer extends Layer {
         sprite.sprite.alpha = 0;
         PlayerLayer.lastGamePlayerNames[id] = name;
         
-        /*
-        TODO: When we're ready to load assets from NFT data, do it here 
-        content.url
-        */
-
-        switch (char_class) {
-            
-            case "Avians":
-            case "Avian":    
-                if (content.tier == "delta" || content.tier == "beta") {
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_chicken", false);
-                } else {    
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_chicken`, false);
-                }
-                break;
-            case "Hounds":
-            case "Hound":
-                if (content.tier == "delta" || content.tier == "beta") {
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_hound", false);
-                } else {    
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_hound`, false);
-                }
-                break;
-            case "Insectoids":
-            case "Insectoid":
-                if (content.tier == "delta" || content.tier == "beta") {
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_beetle", false);
-                } else {    
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
-                }
-                break;
-            case 'Serpents':
-            case 'Serpent':
-                if (content.tier == "delta" || content.tier == "beta") {
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_snake", false);
-                } else {    
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_snake`, false);
-                }
-                
-                break;
-            default:
-                if (content.tier == "delta" || content.tier == "beta") {
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], "delta_beetle", false);
-                } else {    
-                    sprite.loadFromConfig(this.app, this.res["player-sheet"], `${content.tier}_beetle`, false);
-                }
-                break;
+        if (spritesheet.indexOf("_beta") == -1) {
+            sprite.loadFromConfig(this.app, this.res["player-sheet"], spritesheet, false);
+        } else {
+            sprite.loadFromConfig(this.app, this.res["player-sheet"], `${spritesheet.split("_")[0]}_delta.png`, false);
         }
         
         if(content.tier == "alpha" || content.tier == "sigma") {

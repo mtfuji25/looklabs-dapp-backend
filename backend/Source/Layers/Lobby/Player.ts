@@ -236,6 +236,7 @@ class PlayerLayer extends Layer {
         this.details.attributes.map((attribute) => {
             attributesMap[attribute.trait_type] = attribute.value;
         });
+        if (!attributesMap["Tier"]) attributesMap["Tier"] = "beta";
 
         const status = this.self.addStatus(
             // Attack
@@ -364,7 +365,7 @@ class PlayerLayer extends Layer {
             action: action,
             health: status.health,
             maxHealth: status.maxHealth,
-            char_class: this.self.name.split(' ')[0],
+            spritesheet: this.details.spritesheet,
             name: this.self.name,
             tier: status.tier
         };

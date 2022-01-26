@@ -67,7 +67,7 @@ interface PlayerCommand {
     action: number;
     health: number;
     maxHealth: number;
-    char_class: string;
+    spritesheet: string;
     name: string;
     tier: string;
 }
