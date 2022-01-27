@@ -147,10 +147,6 @@
             "url": "./assets/enemy-pack/sigma_snake.png"
         },
         {
-            "name": "sheep.png",
-            "url": "./assets/enemy-pack/delta_sheep.png"
-        },
-        {
             "name": "wolf.png",
             "url": "./assets/enemy-pack/delta_wolf.png"
         },
