@@ -23,26 +23,15 @@ interface JoinLog {
 class LogsLayer extends Layer {
 
     static MAX_LOG:number = 12;
-    static LOG_REFRESH_TIME:number = 3.0;
     // Current app instance
     private app: Application;
 
     // context
     private context: EngineContext;
-
     //  queue for storing the kills
     private logs: Array<JoinLog> = [];
-
     private screenX: number;
 
-    // count that resets every 3 seconds
-    private refreshCount: number = 0.0;
-
-    // Current Update Promisse
-    private updateRequest: ScheduledGame;
-
-    private currentGame: ScheduledGame;
-    private playersInBattle:Set<string> = new Set();
     private darkOverlay:ColoredRectangle;
 
     private readonly normalStyle: Partial<IBitmapTextStyle> = {
@@ -59,28 +48,16 @@ class LogsLayer extends Layer {
 
     private container:Container;
 
-    constructor(ecs: ECS, app: Application, context: EngineContext,currentGame: ScheduledGame) {
+    constructor(ecs: ECS, app: Application, context: EngineContext) {
         super("TesteLayer", ecs);
         this.app = app;
         this.context = context;
-        this.currentGame = currentGame;
         this.screenX = this.app.view.clientWidth;
         this.container = new Container();
     }
 
     onAttach() {
-        if (this.currentGame.scheduled_game_participants.length > 0) {
-
-            this.currentGame.scheduled_game_participants.forEach( player => {
-                if (!this.playersInBattle.has(player.nft_id)) {
-                    this.playersInBattle.add(player.nft_id);
-                    if (player.name && player.name !== "undefined") {
-                         this.addPlayerToLog(player.name);
-                    }
-                }
-            });         
-        }
-
+        
         this.darkOverlay = this.ecs.createEntity(0,0,false).addColoredRectangle(this.app.view.clientWidth, this.app.view.clientHeight, 0x000000);
         this.darkOverlay.graphics.alpha = 0.4;
         this.container.addChildAt(this.darkOverlay.graphics, 0);
@@ -97,31 +74,7 @@ class LogsLayer extends Layer {
             this.darkOverlay.graphics.width = this.screenX;
             this.darkOverlay.graphics.height = this.app.screen.height;
         }
-        
-        if (this.refreshCount >= LogsLayer.LOG_REFRESH_TIME) {
-
-            try {
-                // Request the game using gameId passed in the constructor
-                this.updateRequest = await this.context.strapi.getGameById(this.currentGame.id);
     
-                this.updateRequest.scheduled_game_participants.map((player) => {
-                    if (!this.playersInBattle.has(player.nft_id)) {
-                        this.playersInBattle.add(player.nft_id);
-                        if (player.name && player.name !== "undefined")
-                            this.addPlayerToLog(player.name);
-                    }
-                });
-    
-                
-            } catch(e) {
-                console.log("Failed to request game in strapi");
-                console.log(JSON.stringify(e, null, 4));
-            }           
-
-            this.refreshCount -= LogsLayer.LOG_REFRESH_TIME;
-        }
-
-        this.refreshCount += deltaTime;
     }
 
     // adds log on top of queue

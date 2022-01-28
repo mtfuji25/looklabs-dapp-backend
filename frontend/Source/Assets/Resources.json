@@ -98,62 +98,7 @@
         }
     ],
     "enemy-pack": [
-        {
-            "name": "avian_delta.png",
-            "url": "./assets/enemy-pack/delta_chicken.png"
-        },
-        {
-            "name": "avian_alpha.png",
-            "url": "./assets/enemy-pack/alpha_chicken.png"
-        },
-        {
-            "name": "avian_sigma.png",
-            "url": "./assets/enemy-pack/sigma_chicken.png"
-        },
-        {
-            "name": "hound_delta.png",
-            "url": "./assets/enemy-pack/delta_hound.png"
-        },
-        {
-            "name": "hound_alpha.png",
-            "url": "./assets/enemy-pack/alpha_hound.png"
-        },
-        {
-            "name": "hound_sigma.png",
-            "url": "./assets/enemy-pack/sigma_hound.png"
-        },
-        {
-            "name": "insectoid_delta.png",
-            "url": "./assets/enemy-pack/delta_beetle.png"
-        },
-        {
-            "name": "insectoid_alpha.png",
-            "url": "./assets/enemy-pack/alpha_beetle.png"
-        },
-        {
-            "name": "insectoid_sigma.png",
-            "url": "./assets/enemy-pack/sigma_beetle.png"
-        },
-        {
-            "name": "serpent_delta.png",
-            "url": "./assets/enemy-pack/delta_snake.png"
-        },
-        {
-            "name": "serpent_alpha.png",
-            "url": "./assets/enemy-pack/alpha_snake.png"
-        },
-        {
-            "name": "serpent_sigma.png",
-            "url": "./assets/enemy-pack/sigma_snake.png"
-        },
-        {
-            "name": "sheep.png",
-            "url": "./assets/enemy-pack/delta_sheep.png"
-        },
-        {
-            "name": "wolf.png",
-            "url": "./assets/enemy-pack/delta_wolf.png"
-        },
+        
         {
             "name": "overlays",
             "url": "./assets/enemy-pack/overlays.png"

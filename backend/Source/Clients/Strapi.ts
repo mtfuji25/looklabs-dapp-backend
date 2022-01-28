@@ -38,6 +38,7 @@ interface ParticipantDetails {
     dna: string;
     edition: number;
     date: number;
+    spritesheet: string;
     attributes: DetailAttribute[];
 }
 

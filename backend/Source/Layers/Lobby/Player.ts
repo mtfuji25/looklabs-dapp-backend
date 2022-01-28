@@ -252,6 +252,8 @@ class PlayerLayer extends Layer {
             clamp(PlayerLayer.MAX_DEFENSE * (attributesMap["Defence"] / 100.0), PlayerLayer.MAX_DEFENSE * 0.5, PlayerLayer.MAX_DEFENSE),
             // Cooldown
             0.5,
+            // Creature
+            attributesMap["Creature"],
             // Name
             this.self.name,
             //Tier
@@ -363,11 +365,7 @@ class PlayerLayer extends Layer {
             id: this.playerID,
             pos: { x: pos.x, y: pos.y },
             action: action,
-            health: status.health,
-            maxHealth: status.maxHealth,
-            spritesheet: this.details.spritesheet,
-            name: this.self.name,
-            tier: status.tier
+            health: status.health
         };
     }
 

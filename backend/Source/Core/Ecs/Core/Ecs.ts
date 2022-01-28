@@ -290,13 +290,14 @@ class Entity {
         health: number = 0.0,
         defense: number = 0.0,
         cooldown: number = 0.0,
+        creature: string = "",
         name: string = "",
         tier: string = "delta",
     ): Status {
         if (this.layout & masks.status)
             return this.getStatus();
 
-        const status = new Status(attack, speed, health, defense, cooldown, name, tier);
+        const status = new Status(attack, speed, health, defense, cooldown, creature, name, tier );
 
         this.id[masks.status] = this.ecs.statusId;
         this.ecs.statusId++;

@@ -16,6 +16,8 @@ import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, Remai
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
+import { Logger } from "../Utils/Logger";
+import { Resource } from "../Core/AssetLoader";
 
 
 interface LobbyLevelContext extends ViewContext {
@@ -97,14 +99,16 @@ class LobbyLevel extends Level {
         this.layerStack.pushLayer(
             mapLayer
         );
+
+       
         
-      this.playerLayer = new PlayerLayer(
+        this.playerLayer = new PlayerLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
             this.context.ws,
-            this.context.strapi,
             this.context.res,
+            this.context.participantDetails,
         );
         // Pushs the player controller
         this.layerStack.pushLayer(
@@ -169,7 +173,6 @@ class LobbyLevel extends Level {
             this.introSequence.onUpdate(deltaTime);
         }
 
-    
         if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
             this.showDownStart = true;
             // switch BG music to showdown
@@ -255,6 +258,8 @@ class LobbyLevel extends Level {
        this.remaining = remainingPlayers;
         return false;
     }
+
+    
 }
 
 export { LobbyLevel, LobbyLevelContext };

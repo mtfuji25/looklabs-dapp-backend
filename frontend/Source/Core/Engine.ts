@@ -20,6 +20,7 @@ import { Logger } from "../Utils/Logger";
 // Require the resources.json
 import resourceFile from "../Assets/Resources.json";
 import { AssetLoader } from "./AssetLoader";
+import { ParticipantDetailsModel } from "./PlayerModel";
 
 // Cast to something that typescript can understand
 const resources: Record<string, any> = resourceFile;
@@ -44,6 +45,8 @@ class Engine {
     // Running Level
     private level: Level;
     private assetLoader:AssetLoader;
+    private participantDetails:ParticipantDetailsModel;
+
 
     constructor(wsClient: WSClient, strapiClient: StrapiClient, app: Application, root: HTMLElement) {
         this.wsClient = wsClient;
@@ -51,6 +54,7 @@ class Engine {
         this.app = app;
         this.root = root;
         this.assetLoader = new AssetLoader(this.app);
+        this.participantDetails = new ParticipantDetailsModel(this.strapiClient);
         initInputs(this.app);
 
         this.context = {
@@ -67,6 +71,7 @@ class Engine {
                 dt: 0.0
             },
             assetLoader: this.assetLoader,
+            participantDetails: this.participantDetails,
             close: false
         };
 
