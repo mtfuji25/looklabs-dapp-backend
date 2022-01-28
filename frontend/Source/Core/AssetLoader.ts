@@ -1,6 +1,7 @@
 import { BaseTextureCache } from "@pixi/utils";
 import { Application, BaseRenderTexture, Loader, LoaderResource, SCALE_MODES, settings } from "pixi.js";
 import { ParticipantDetails } from "../Clients/Strapi";
+import { Random } from "../Utils/Math";
 
 type Resource = {
     name:string;
@@ -23,12 +24,11 @@ class AssetLoader {
     async loadSpriteSheets (playerDetails:ParticipantDetails[], callBack?:()=>void):Promise<void> {
 
         playerDetails.map (d => {
-            if(d.spritesheet.indexOf ("_beta") == -1) {
-                const url = this.getImageURL(d, d.spritesheet);
-                if (!this.assets.has(url)) {
-                    this.assets.add(url);
-                    this.app.loader.add(d.spritesheet, url);
-                }
+            const url = this.getImageURL(d, d.spritesheet);
+            if (!this.assets.has(url)) {
+                this.assets.add(url);
+                console.log(url);
+                this.app.loader.add(d.spritesheet, `${url}?${Random.randString()}`);
             }
         });
         
