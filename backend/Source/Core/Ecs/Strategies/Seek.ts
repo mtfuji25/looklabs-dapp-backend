@@ -252,7 +252,13 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
         if (!path || path.length < 2) {
             return;
         }    
-
+        entity.getStrategy().pathData = (
+        {   entity : entity,
+            pathIndex : 0,
+            direction : 1,
+            path : GridUtils.convertPathToVec2(path)
+        }
+        );
         const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
         const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
 

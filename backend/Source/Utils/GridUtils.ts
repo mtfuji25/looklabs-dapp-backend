@@ -58,6 +58,17 @@ class GridUtils {
         return position;
     }
 
+    static convertPathToVec2 (path:number[][]):Vec2[] {
+        const result:Vec2[] = [];
+        let goodPath = true;
+        path.map( n => {
+            const v = Vec2.fromArray(n);
+            if (goodPath) goodPath = this.getCellWalkable(v.y, v.x) == 0;
+            result.push(Vec2.fromArray(n));
+        });
+        if (!goodPath) return null;
+        return result;
+    }
     static convertPosToCell  (pos: Vec2, grid: Grid): Vec2 {
         const index = new Vec2(
             Math.floor(pos.x / (grid.intervalX / 2.0)),
