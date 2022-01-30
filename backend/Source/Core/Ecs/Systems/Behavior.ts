@@ -5,8 +5,9 @@ import { strategy_HitEnemy } from "../Strategies/HitEnemy";
 import { strategy_Seek, strategy_SeekNearest } from "../Strategies/Seek";
 import { strategy_Evade } from "../Strategies/Evade";
 import { Behavior } from "../Components/Behavior";
-import { finalPlayersAreStuck, strategy_MoveOnPath } from "../Strategies/MoveOnPath";
+import { finalPlayersAreStuck, strategy_MoveAroundSquare } from "../Strategies/MoveAroundSquare";
 import { isPlayerStuck, strategy_Unstuck } from "../Strategies/Unstuck";
+import { strategy_moveOnPath } from "../Strategies/MonveOnPath";
 
 
 const ENTITY_RANGE = 0.1;
@@ -51,10 +52,12 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
             behavior.refresh += deltaTime; 
             // special behavior designed to fix last two players who might get stuck at the end of the game
             if (finalPlayersAreStuck(dynamic)) {
-                behavior.changeBehavior(strategy_MoveOnPath);                
+                behavior.changeBehavior(strategy_MoveAroundSquare);                
             // temporary fix to check if individual players are stuck in other parts of the map                
             } else if (isPlayerStuck(dynamic)) {
                 behavior.changeBehavior(strategy_Unstuck);
+            // } else if (strategy.pathData && strategy.pathData.path) {
+            //     behavior.changeBehavior(strategy_moveOnPath);
             } else {
                 //otherwise by default, all entities are set to EXPLORE 
                 behavior.changeBehavior(strategy_Explore);
