@@ -9,10 +9,6 @@ import { Vec2 } from "../../Utils/Math";
 // Pixi imports
 import { Application, Container, Sprite as PixiSprite } from "pixi.js";
 
-import levelMapFile from "../../Assets/AwaitLevelMap.json";
-
-// Cast to something that typescript can understand
-const levelMap: Record<string, any> = levelMapFile;
 
 class BackgroundLayer extends Layer {
     // Entities storage

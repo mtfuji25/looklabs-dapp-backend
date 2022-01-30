@@ -69,6 +69,7 @@ class MapLayer extends Layer {
                     SPRITE_SIZE,
                     SPRITE_SIZE
                 );
+                if (currentCell == 1) entity.getSprite().sprite.alpha = 0.0;
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
             

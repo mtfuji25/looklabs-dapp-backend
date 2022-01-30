@@ -2,7 +2,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { Application, IBitmapTextStyle } from "pixi.js";
+import { Application, IBitmapTextStyle, Container } from "pixi.js";
 
 // Web client imports
 import { WSClient } from "../../Clients/WebSocket";
@@ -21,7 +21,6 @@ import { CONTAINER_DIM_X, CONTAINER_DIM_Y } from "../../Constants/Constants";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
-import { Container } from "pixi.js";
 import { PlayerActions } from "./PlayerActions";
 import { ParticipantDetailsModel } from "../../Core/PlayerModel";
 
@@ -62,7 +61,8 @@ class PlayerLayer extends Layer {
     private detailsModel:ParticipantDetailsModel;
 
     static lastGamePlayerNames: Record<string, string> = {};
-
+    private whooping:boolean = false;
+    private fixtures:Entity[] = [];
 
     private readonly idStyle: Partial<IBitmapTextStyle> = {
         fontName: "8BITWONDERNominal",
@@ -90,30 +90,25 @@ class PlayerLayer extends Layer {
         );
         this.detailsModel = details;
         this.container = new Container();
+        this.addFixtures();
     }
 
     onAttach() {
         this.app.stage.addChild(this.container);
     }
 
+    
     onUpdate(deltaTime: number) {
         Object.values(this.players).map((player) => {
             const transform = player.entity.getTransform();
             const animsprite = player.entity.getAnimSprite();
+            this.transformEntity (transform.pos, animsprite.sprite);
+        });
 
-            // Calculates offsets to fix view
-            const centerFactorX = (transform.pos.x - CONTAINER_DIM_X / 2.0) / (CONTAINER_DIM_X / 2.0);
-            const centerFactorY = (transform.pos.y - CONTAINER_DIM_Y / 2.0) / (CONTAINER_DIM_Y / 2.0);
-            const fixFactorX = (CONTAINER_DIM_X - CONTAINER_DIM_X * (1 - this.levelContext.zoom)) / 2.0;
-            const fixFactorY = (CONTAINER_DIM_Y - CONTAINER_DIM_Y * (1 - this.levelContext.zoom)) / 2.0;
-
-            // Fix the position for the player
-            animsprite.sprite.x = Math.floor(transform.pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
-            animsprite.sprite.y = Math.floor(transform.pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
-
-            animsprite.sprite.scale.x = (1.0 - this.levelContext.zoom);
-            animsprite.sprite.scale.y = (1.0 - this.levelContext.zoom);  
-                  
+        this.fixtures.map(e => {
+            const transform = e.getTransform();
+            const sprite = e.getSprite();
+            this.transformEntity (transform.pos, sprite.sprite);
         });
 
         // sort sprite containers on the y axis
@@ -184,20 +179,17 @@ class PlayerLayer extends Layer {
         PlayerLayer.lastGamePlayerNames[id] = name;
         
         sprite.loadFromConfig(this.app, this.res["player-sheet"], spritesheet, false);
-        // } else {
-        //     sprite.loadFromConfig(this.app, this.res["player-sheet"], `${spritesheet.split("_")[0]}_delta.png`, false);
-        // }
         
-        if(tier == "alpha" || tier == "sigma") {
+        // if(tier == "alpha" || tier == "sigma") {
             // glow effect
-            animSpriteBg.forceAnimate(`glow-${tier}`);
-            animSpriteBg.animSprite.loop = true;
-            animSpriteBg.sprite.visible = true;
-            animSpriteBg.animSprite.alpha = 0.9;
-            animSpriteBg.sprite.position.set(0, -16);
-        }
-
+        animSpriteBg.forceAnimate("glow-sigma");
+        animSpriteBg.animSprite.loop = true;
+        animSpriteBg.sprite.visible = false;
+        animSpriteBg.animSprite.alpha = 0.9;
+        animSpriteBg.sprite.position.set(0, -16);
+        // }
         animSpriteBg.addStage(sprite.sprite, 0);
+
         sprite.addStage(this.container);
         animSpriteOverlay1.addStage(sprite.sprite);
         animSpriteOverlay2.addStage(sprite.sprite);
@@ -205,7 +197,8 @@ class PlayerLayer extends Layer {
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
         const r2 = healthBackground.addColoredRectangle(22, 4, 0x373232);
-        const r3 = health.addColoredRectangle(22,4, tier == "alpha" ? 0xDDE9F3 : tier == "sigma" ? 0xB4F32D : 0xF32D2D);
+        const r3 = health.addColoredRectangle(22,4,0xF32D2D);
+        // health.addColoredRectangle(22,4, tier == "alpha" ? 0xDDE9F3 : tier == "sigma" ? 0xB4F32D : 0xF32D2D);
         r1.addStage(sprite.sprite);
         r2.addStage(sprite.sprite);
         r3.addStage(sprite.sprite);
@@ -406,6 +399,59 @@ class PlayerLayer extends Layer {
 
     getPlayers ():Player[] {
         return Object.values(this.players);
+    }
+
+    showWinner () {
+        if (!this.whooping) {
+            this.whooping = true;
+            Object.values(this.players).map((player) => {
+                const transform = player.entity.getTransform();
+                if (transform) {
+                    player.animLayerBg.getAnimSprite().sprite.visible = true;
+                }
+            }
+        );
+        }
+    }
+
+    addFixtures () {
+        const fix = [{tex: "lockers", pos: [new Vec2(1375, 687), 
+                                            new Vec2(1535, 687),
+                                            new Vec2(1695, 687),
+                                            new Vec2(1375, 817),
+                                            new Vec2(1535, 817),
+                                            new Vec2(1695, 817)]},
+                     {tex: "tubes", pos: [new Vec2(543, 685), 
+                                            new Vec2(351, 685),
+                                            new Vec2(159, 685),
+                                            new Vec2(543, 1293),
+                                            new Vec2(351, 1293),
+                                            new Vec2( 159, 1293)]},                                
+                    ]
+        fix.map( f => {
+            f.pos.map ( p => {
+                const entity = this.ecs.createEntity( p.x, p.y, false);
+                const sprite = entity.addSprite(this.app.loader.resources[f.tex]);
+                sprite.sprite.anchor.y = 1.0;
+                sprite.addStage(this.container);
+                this.fixtures.push(entity);
+            });
+        });
+    }
+    
+    transformEntity (pos:Vec2, container:Container) {
+        // Calculates offsets to fix view
+        const centerFactorX = (pos.x - CONTAINER_DIM_X / 2.0) / (CONTAINER_DIM_X / 2.0);
+        const centerFactorY = (pos.y - CONTAINER_DIM_Y / 2.0) / (CONTAINER_DIM_Y / 2.0);
+        const fixFactorX = (CONTAINER_DIM_X - CONTAINER_DIM_X * (1 - this.levelContext.zoom)) / 2.0;
+        const fixFactorY = (CONTAINER_DIM_Y - CONTAINER_DIM_Y * (1 - this.levelContext.zoom)) / 2.0;
+
+        // Fix the position for the player
+        container.x = Math.floor(pos.x + this.levelContext.offsetX - fixFactorX * centerFactorX);
+        container.y = Math.floor(pos.y + this.levelContext.offsetY - fixFactorY * centerFactorY);
+    
+        container.scale.x = (1.0 - this.levelContext.zoom);
+        container.scale.y = (1.0 - this.levelContext.zoom);  
     }
 
     

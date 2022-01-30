@@ -87,7 +87,15 @@
             "url": "./assets/results-pack/character-left.svg"
         }
     ],
-    "dungeon-pack": [                
+    "dungeon-pack": [   
+        {
+            "name": "tubes",
+            "url": "./assets/dungeon-pack/tubes.png"
+        },
+        {
+            "name": "lockers",
+            "url": "./assets/dungeon-pack/lockers.png"
+        },             
         {
             "name": "map",
             "url": "./assets/dungeon-pack/map_tiles.png"

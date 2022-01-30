@@ -16,8 +16,6 @@ import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, Remai
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
-import { Logger } from "../Utils/Logger";
-import { Resource } from "../Core/AssetLoader";
 
 
 interface LobbyLevelContext extends ViewContext {
@@ -55,7 +53,7 @@ class LobbyLevel extends Level {
     };
 
     private introSequence:IntroSequence;
-    private playerLayer:PlayerLayer;
+    private playerLayer:PlayerLayer;    
 
     async onStart(): Promise<void> {
 
@@ -146,7 +144,7 @@ class LobbyLevel extends Level {
         );
         
          
-
+        overlayLayer.hideFixtures();
         await this.context.ws.whenReady();
 
         const response = await this.context.ws.request(
@@ -171,6 +169,10 @@ class LobbyLevel extends Level {
     async onUpdate(deltaTime: number) {
         if (this.introSequence) {
             this.introSequence.onUpdate(deltaTime);
+        }
+
+        if (this.remaining == 1) {
+            this.playerLayer.showWinner();
         }
 
         if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
