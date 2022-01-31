@@ -15,6 +15,7 @@ import { ScheduledGame } from "../Clients/Strapi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { Logger } from "../Utils/Logger";
 import { Resource } from "../Core/AssetLoader";
+import { EngineContext } from "../Core/Interfaces";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x18215d;
@@ -34,6 +35,10 @@ class AwaitLevel extends Level {
     private currentGame: ScheduledGame;
     private playerLog:LogsLayer;
     
+    constructor(context: EngineContext, name: string = "Default", props: Record<string, any> = {}) {
+        super(context, name, props);
+        this.context.participantDetails.reset();
+    }
 
     async onStart(): Promise<void> {
 

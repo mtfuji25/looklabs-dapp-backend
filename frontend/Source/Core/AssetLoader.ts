@@ -27,7 +27,6 @@ class AssetLoader {
             const url = this.getImageURL(d, d.spritesheet);
             if (!this.assets.has(url)) {
                 this.assets.add(url);
-                console.log(url);
                 this.app.loader.add(d.spritesheet, `${url}?${Random.randString()}`);
             }
         });

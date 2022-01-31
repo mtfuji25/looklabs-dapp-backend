@@ -10,6 +10,10 @@ class ParticipantDetailsModel {
         this.strapi = strapi;
     }
 
+    reset () {
+        this.participants = {};
+    }
+
     async loadPlayerDetails (players:ScheduledGameParticipant[]) {
         await Promise.all(
             players.map( async p => {
@@ -43,6 +47,10 @@ class ParticipantDetailsModel {
         if (attribute.length > 0)
             return attributes.filter ( a => a.trait_type === key)[0].value;
         return null;
+    }
+
+    destroy () {
+        this.participants = {};
     }
 }
 
