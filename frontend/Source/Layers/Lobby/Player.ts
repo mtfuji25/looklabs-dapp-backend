@@ -402,16 +402,16 @@ class PlayerLayer extends Layer {
     }
 
     showWinner () {
-        if (!this.whooping) {
-            this.whooping = true;
-            Object.values(this.players).map((player) => {
-                const transform = player.entity.getTransform();
-                if (transform) {
-                    player.animLayerBg.getAnimSprite().sprite.visible = true;
-                }
-            }
-        );
-        }
+        // if (!this.whooping) {
+        //     this.whooping = true;
+        //     Object.values(this.players).map((player) => {
+        //         const transform = player.entity.getTransform();
+        //         if (transform) {
+        //             player.animLayerBg.getAnimSprite().sprite.visible = true;
+        //         }
+        //     }
+        // );
+        // }
     }
 
     addFixtures () {
