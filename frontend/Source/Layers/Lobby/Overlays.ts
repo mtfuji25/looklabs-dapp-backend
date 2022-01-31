@@ -33,6 +33,9 @@ class OverlayMap extends Layer {
     // Current level's context
     private levelContext: LobbyLevelContext;
 
+    private overlayFixtures:Entity[] = [];
+
+    private fixtureIndexes:Set<number> = new Set([95, 96, 97, 98, 99, 100,101, 102,  103, 104, 105, 106, 107, 108, 109, 110, 111, 112,113, 114,115, 116,117, 118,166, 167,168, 169,187, 188,189, 190,207, 208,209, 210,226, 227,228, 229]);
     // Dimension
     private dim: Vec2 = new Vec2();
 
@@ -78,10 +81,12 @@ class OverlayMap extends Layer {
                     SPRITE_SIZE
                 );
                 this.entities.push(entity);
-                this.mapContainer.addChild(sprite.sprite);
-               
+                if (this.fixtureIndexes.has(currentCell)) {
+                    this.overlayFixtures.push(entity);
+                }
+                if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
+                this.mapContainer.addChild(sprite.sprite);  
             }
-
         }
     }
     
@@ -118,6 +123,13 @@ class OverlayMap extends Layer {
     getContainer ():Container {
         return this.mapContainer;
     }
+
+    hideFixtures () {
+        this.overlayFixtures.forEach( o => {
+            o.getSprite().sprite.visible = false;
+        });
+    }
+
 
 }
 
