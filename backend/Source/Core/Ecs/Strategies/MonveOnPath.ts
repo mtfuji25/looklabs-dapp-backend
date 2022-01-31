@@ -8,7 +8,6 @@ const MIN_DISTANCE = 0.01;
 const strategy_moveOnPath = (entity:Entity, grid:Grid, target?:Entity):void => {
 
     if (entity.getBehavior().colliding.length > 0) {
-        console.log("CLEAR PATH");
         entity.getStrategy().pathData = null;
         return;
     }
