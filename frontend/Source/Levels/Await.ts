@@ -200,8 +200,9 @@ class AwaitLevel extends Level {
     updatePlayerList () {
         Object.values(this.context.participantDetails.participants).forEach( p => {
             if (p.name && p.name !== "undefined") {
-                if (!this.playersInBattle.has(p.name)) {
-                    this.playersInBattle.add(p.name);
+                const playerKey = `${p.name}/${p.edition}`
+                if (!this.playersInBattle.has(playerKey)) {
+                    this.playersInBattle.add(playerKey);
                     this.playerLog.addPlayerToLog(p.name);
                 }
             }

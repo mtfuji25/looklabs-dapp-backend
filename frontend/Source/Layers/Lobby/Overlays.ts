@@ -35,6 +35,7 @@ class OverlayMap extends Layer {
 
     private overlayFixtures:Entity[] = [];
 
+    // these are the texture cells used in the creation of map's tall obstacles (lockers, and clone tubes)
     private fixtureIndexes:Set<number> = new Set([95, 96, 97, 98, 99, 100,101, 102,  103, 104, 105, 106, 107, 108, 109, 110, 111, 112,113, 114,115, 116,117, 118,166, 167,168, 169,187, 188,189, 190,207, 208,209, 210,226, 227,228, 229]);
     // Dimension
     private dim: Vec2 = new Vec2();
@@ -124,6 +125,7 @@ class OverlayMap extends Layer {
         return this.mapContainer;
     }
 
+    //we hide the textures for lockers and test tubes so these can be added inside PlayerLayer and y-sorted
     hideFixtures () {
         this.overlayFixtures.forEach( o => {
             o.getSprite().sprite.visible = false;
