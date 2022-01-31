@@ -4,7 +4,6 @@ import { AwaitLevel } from "./Await";
 
 // Layers imports
 import { TextLayer } from "../Layers/NotFound/Text";
-import { MapLayer } from "../Layers/NotFound/Basemap";
 
 // Utils
 import { v4 as uuidv4 } from "uuid";
