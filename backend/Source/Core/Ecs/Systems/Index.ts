@@ -19,7 +19,7 @@ const startSystems = (ecs: ECS) => {
     // Update dynamic index of grid entities
     ecs.pushContainerSystem(sys_UpdateGrid);
 
-    // Colide and fix all velocitys in grid
+    // Collide and fix all velocitys in grid
     ecs.pushContainerSystem(sys_CheckCollisions);
     
     // Update Behavior requirements
@@ -31,7 +31,7 @@ const startSystems = (ecs: ECS) => {
     // Update Behavior tree
     ecs.pushContainerSystem(sys_UpdateBehavior);
 
-    // Colide and fix all velocitys in grid
+    // Collide and fix all velocitys in grid
     ecs.pushContainerSystem(sys_UpdateCollisions);
 
     // Update all components position

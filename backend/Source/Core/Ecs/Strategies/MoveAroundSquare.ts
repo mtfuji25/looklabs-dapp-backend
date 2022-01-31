@@ -33,7 +33,7 @@ let stuck:boolean = false;
 let stuckTimer:number = 0;
 // let strategyTimer:number = 0;
 
-const strategy_MoveOnPath = (entity:Entity, grid:Grid, target?:Entity):void => {
+const strategy_MoveAroundSquare = (entity:Entity, grid:Grid, target?:Entity):void => {
     
     if (!stuck) return;
     
@@ -199,4 +199,4 @@ const _closeEnough = (pos1:Vec2, pos2:Vec2, minDistance:number):boolean => {
     return dist <= minDistance;
 }
 
-export {strategy_MoveOnPath, finalPlayersAreStuck};
+export {strategy_MoveAroundSquare, finalPlayersAreStuck};

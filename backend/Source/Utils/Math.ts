@@ -110,6 +110,11 @@ class Vec2 {
 		return v;
 	}
 
+    static fromArray (array:number[]):Vec2 {
+        if (array.length < 2) return new Vec2();
+        return new Vec2(array[0], array[1]);
+    }
+
 
 }
 
