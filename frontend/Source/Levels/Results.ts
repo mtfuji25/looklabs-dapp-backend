@@ -21,6 +21,8 @@ class ResultsLevel extends Level {
         
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
         
+        this.context.participantDetails.destroy();
+        
         await this.context.ws.whenReady();
 
         const response = await this.context.ws.request(

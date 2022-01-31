@@ -66,10 +66,6 @@ interface PlayerCommand {
     };
     action: number;
     health: number;
-    maxHealth: number;
-    spritesheet: string;
-    name: string;
-    tier: string;
 }
 
 // Requests types and values

@@ -22,8 +22,9 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Interfaces";
 
 import { Container } from "pixi.js";
-import { StrapiClient } from "../../Clients/Strapi";
 import { PlayerActions } from "./PlayerActions";
+import { ParticipantDetailsModel } from "../../Core/PlayerModel";
+
 
 interface Player {
     entity: Entity;
@@ -38,6 +39,8 @@ interface Player {
 
 class PlayerLayer extends Layer {
 
+    public static MAX_HEALTH:number = 180;
+
     // Entities storage
     private players: Record<string, Player> = {};
 
@@ -50,15 +53,13 @@ class PlayerLayer extends Layer {
 
     // Web clients
     protected wsClient: WSClient;
-    protected strapiClient: StrapiClient;
 
     // Playher container
     private container: Container;
 
     // Lobby level context
     private levelContext: LobbyLevelContext;
-
-    private whooping:boolean = false;
+    private detailsModel:ParticipantDetailsModel;
 
     static lastGamePlayerNames: Record<string, string> = {};
 
@@ -73,9 +74,9 @@ class PlayerLayer extends Layer {
         ecs: ECS,
         levelContext: LobbyLevelContext,
         app: Application,
-        wsClient: WSClient,
-        strapiClient: StrapiClient,
-        resource: Record<string, any>
+        wsClient: WSClient,        
+        resource: Record<string, any>,
+        details:ParticipantDetailsModel,
     ) {
         super("PlayerController", ecs);
 
@@ -87,7 +88,7 @@ class PlayerLayer extends Layer {
         this.listener = this.wsClient.addListener("enemy", (msg) =>
             this.onServerMsg(msg)
         );
-
+        this.detailsModel = details;
         this.container = new Container();
     }
 
@@ -133,9 +134,17 @@ class PlayerLayer extends Layer {
 
     createEnemy(content: PlayerCommand) {
     
-        const { id, pos, spritesheet, name } = content;
+        const { id, pos } = content;
 
         const prevPlayer = this.players[id];
+        if (Object.values(this.detailsModel.participants).length == 0) return;
+
+        const details = this.detailsModel.getDetailsForPlayer(id);
+        if (!details) return;
+
+        const spritesheet = details.spritesheet;
+        const tier = this.detailsModel.getTierFromAttributes(details.attributes);
+        const name = details.name;
 
         if (prevPlayer) {
             delete this.players[id];
@@ -174,15 +183,14 @@ class PlayerLayer extends Layer {
         sprite.sprite.alpha = 0;
         PlayerLayer.lastGamePlayerNames[id] = name;
         
-        if (spritesheet.indexOf("_beta") == -1) {
-            sprite.loadFromConfig(this.app, this.res["player-sheet"], spritesheet, false);
-        } else {
-            sprite.loadFromConfig(this.app, this.res["player-sheet"], `${spritesheet.split("_")[0]}_delta.png`, false);
-        }
+        sprite.loadFromConfig(this.app, this.res["player-sheet"], spritesheet, false);
+        // } else {
+        //     sprite.loadFromConfig(this.app, this.res["player-sheet"], `${spritesheet.split("_")[0]}_delta.png`, false);
+        // }
         
-        if(content.tier == "alpha" || content.tier == "sigma") {
+        if(tier == "alpha" || tier == "sigma") {
             // glow effect
-            animSpriteBg.forceAnimate(`glow-${content.tier}`);
+            animSpriteBg.forceAnimate(`glow-${tier}`);
             animSpriteBg.animSprite.loop = true;
             animSpriteBg.sprite.visible = true;
             animSpriteBg.animSprite.alpha = 0.9;
@@ -197,7 +205,7 @@ class PlayerLayer extends Layer {
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
         const r2 = healthBackground.addColoredRectangle(22, 4, 0x373232);
-        const r3 = health.addColoredRectangle(22,4, content.tier == "alpha" ? 0xDDE9F3 : content.tier == "sigma" ? 0xB4F32D : 0xF32D2D);
+        const r3 = health.addColoredRectangle(22,4, tier == "alpha" ? 0xDDE9F3 : tier == "sigma" ? 0xB4F32D : 0xF32D2D);
         r1.addStage(sprite.sprite);
         r2.addStage(sprite.sprite);
         r3.addStage(sprite.sprite);
@@ -230,7 +238,9 @@ class PlayerLayer extends Layer {
 
     updateEnemy(command: PlayerCommand) {
         
-        const { id, pos, action, health, maxHealth } = command;
+        const { id, pos, action, health } = command;
+        
+        if (Object.values(this.detailsModel.participants).length == 0) return;
         
         pos.x = Math.floor(pos.x);
         pos.y = Math.floor(pos.y);
@@ -241,6 +251,8 @@ class PlayerLayer extends Layer {
 
         const entity = this.players[id].entity;
         const splitId = id.split('/')[1];
+        const details = this.detailsModel.getDetailsForPlayer(id);
+        if (!details) return;
         
 
         if (!entity) {
@@ -256,7 +268,7 @@ class PlayerLayer extends Layer {
         const animLayerOverlay1 = this.players[id].animLayerOverlay1.getAnimSprite();
         const animLayerOverlay2 = this.players[id].animLayerOverlay2.getAnimSprite();
 
-        const lifeRecSize = Math.floor((health / maxHealth) * 22);
+        const lifeRecSize = Math.floor((health / PlayerLayer.MAX_HEALTH) * 22);
         const lifeRectangle = healthBar.getColoredRectangle();
         lifeRectangle.setSize(lifeRecSize, 4);
 
@@ -266,7 +278,8 @@ class PlayerLayer extends Layer {
         
         textTransform.pos.x = Math.floor(pos.x - (splitId.length - 1) * 0.2);
         textTransform.pos.y = Math.floor(pos.y - 20);
-        
+    
+
         // if else generator
         if (health <= 0) {
             // die right

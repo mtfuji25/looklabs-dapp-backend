@@ -41,6 +41,7 @@ interface ParticipantDetails {
     dna: string;
     edition: number;
     date: number;
+    spritesheet: string,
     attributes: DetailAttribute[];
 }
 
@@ -53,7 +54,7 @@ interface DetailAttribute {
 class StrapiClient {
     private host: string;
     private authToken: string;
-
+    public readonly serverRoot: string = "https://token.thepitnft.com/";
     // strapiApi
     private readonly api: AxiosInstance;
 
@@ -74,7 +75,7 @@ class StrapiClient {
 
         // start axios for restApi
         this.restApi = axios.create({
-            baseURL: "https://token.thepitnft.com/"
+            baseURL: this.serverRoot
         });
     }
 

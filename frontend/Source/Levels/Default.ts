@@ -42,14 +42,19 @@ class DefaultLevel extends Level {
     async startLevels(response : GameStatus) {
         switch (response.gameStatus) {
             case "lobby":
-                await this.context.engine.loadLevel(
-                    new LobbyLevel(
-                        this.context, "Lobby",
-                        {
-                            gameId: response.gameId
-                        }
-                    )
-                );
+                if (Object.values(this.context.participantDetails.participants).length == 0) {
+                    await this.loadPlayerDetails(response);
+                } else {
+                    await this.context.engine.loadLevel(
+                        new LobbyLevel(
+                            this.context, "Lobby",
+                            {
+                                gameId: response.gameId
+                            }
+                        )
+                    );
+                }
+                
                 break;
 
             case "awaiting":
@@ -90,6 +95,25 @@ class DefaultLevel extends Level {
     onUpdate(deltaTime: number) {}
 
     onClose(): void {}
+
+    async loadPlayerDetails (response: GameStatus) {
+        
+        try {
+            // Request current player details from strapi
+            const currentGame = await this.context.strapi.getGameById(response.gameId);
+            await this.context.participantDetails.loadPlayerDetails(currentGame.scheduled_game_participants);
+            this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants), () => {
+                this.startLevels(response);
+            });
+            
+        } catch(err) {
+            Logger.fatal("Cannot get game for current game id.");
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
+            this.context.close = true;
+        }
+    }
+
 };
 
 export { DefaultLevel };

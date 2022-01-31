@@ -8,7 +8,6 @@ import { BMPText } from "../../Core/Ecs/Components/BMPText";
 import { Application, Container, IBitmapTextStyle } from "pixi.js";
 import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
-import { sleep, syncSleep } from "../../Utils/Sleep";
 
 
 interface KillLog {
@@ -73,7 +72,6 @@ class LogsLayer extends Layer {
 
     onUpdate(deltaTime: number) {
         if(this.app.view.clientWidth != this.screenX ) {
-            console.log(this.app.view.clientWidth, this.screenX);
             this.screenX = this.app.view.clientWidth;
             this.percentX = this.screenX / 100;
             this.logs.forEach((log, index) => this.renderLog(log, index));

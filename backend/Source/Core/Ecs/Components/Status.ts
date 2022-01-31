@@ -26,6 +26,7 @@ class Status {
     public readonly maxHealth: number;
     public readonly name: string;
     public readonly tier: string;
+    public readonly creature: string;
     
     public critical: boolean = false;
 
@@ -46,6 +47,7 @@ class Status {
         health: number,
         defense: number,
         cooldown: number,
+        creature: string,
         name: string,
         tier: string        
     ) {
@@ -55,6 +57,7 @@ class Status {
         this.defense = defense;
         this.maxHealth = health;
         this.cooldown = cooldown;
+        this.creature = creature;
         this.name = name;
         this.tier = tier;
     }

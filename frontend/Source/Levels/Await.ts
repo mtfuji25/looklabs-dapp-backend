@@ -15,15 +15,30 @@ import { ScheduledGame } from "../Clients/Strapi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { Logger } from "../Utils/Logger";
 import { Resource } from "../Core/AssetLoader";
+import { EngineContext } from "../Core/Interfaces";
 
 // Await level bg color
 const BLACK_BG_COLOR = 0x18215d;
 
 
 class AwaitLevel extends Level {
+    static LOG_REFRESH_TIME:number = 3.0;
 
     private gameStatusListener: Listener;
     private connectionListener: Listener;
+
+    // count that resets every 3 seconds
+    private refreshCount: number = 0.0;
+    private playersInBattle:Set<string> = new Set();
+    // Current Update Promisse
+    private updateRequest: ScheduledGame;
+    private currentGame: ScheduledGame;
+    private playerLog:LogsLayer;
+    
+    constructor(context: EngineContext, name: string = "Default", props: Record<string, any> = {}) {
+        super(context, name, props);
+        this.context.participantDetails.reset();
+    }
 
     async onStart(): Promise<void> {
 
@@ -88,40 +103,17 @@ class AwaitLevel extends Level {
             )
         );
 
-        // Request current game infos from strapi
-        let game: ScheduledGame;
+        // Request current player details from strapi
+        await this.loadPlayerDetails();
 
-        try {
-            
-            game = await this.context.strapi.getGameById(this.props.gameId);
-            /*
-            TODO: When we're ready to load assets from NFT data, do preloading here
-            // load sprite assets here
-            const newAssets:Resource[] = [];
+        this.playerLog = new LogsLayer(
+            this.ecs,
+            this.context.app,
+            this.context
+        );
 
-            game.scheduled_game_participants.forEach( p => {
-                // const url = p. GET IMG URL
-                // const name = p.SPECIAL NFT TYPE OR TIER
-                // newAssets.push( { name: name, url: url } )
-            });
-            // add to asset loader
-            this.context.assetLoader.loadResources(newAssets);
-            */
-
-        } catch(err) {
-            Logger.fatal("Cannot get game for current game id.");
-            Logger.trace(JSON.stringify(err, null, 4));
-            Logger.capture(err);
-            this.context.close = true;
-        }
-    
         this.layerStack.pushOverlay(
-            new LogsLayer(
-                this.ecs,
-                this.context.app,
-                this.context,
-                game
-            )
+            this.playerLog
         );
 
         // Connect infos layer
@@ -129,13 +121,12 @@ class AwaitLevel extends Level {
             this.ecs,
             this.context.app,
             this.context,
-            game
+            this.currentGame
         ));
 
         this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
 
-    onUpdate(deltaTime: number) {}
 
     onClose(): void {
 
@@ -189,6 +180,52 @@ class AwaitLevel extends Level {
         // in the event listeners queue
         return true;
     }
+
+    async loadPlayerDetails () {
+        
+        try {
+            // Request current game infos from strapi
+            this.currentGame = await this.context.strapi.getGameById(this.props.gameId);
+            await this.context.participantDetails.loadPlayerDetails(this.currentGame.scheduled_game_participants);
+            this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants));
+            
+        } catch(err) {
+            Logger.fatal("Cannot get game for current game id.");
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
+            this.context.close = true;
+        }
+    }
+
+    updatePlayerList () {
+        Object.values(this.context.participantDetails.participants).forEach( p => {
+            if (p.name && p.name !== "undefined") {
+                if (!this.playersInBattle.has(p.name)) {
+                    this.playersInBattle.add(p.name);
+                    this.playerLog.addPlayerToLog(p.name);
+                }
+            }
+        });
+    }
+
+    async onUpdate(deltaTime: number) {
+        if (this.refreshCount >= AwaitLevel.LOG_REFRESH_TIME) {
+            try {
+
+                await this.loadPlayerDetails();
+                this.updatePlayerList();
+    
+            } catch(e) {
+                console.log("Failed to request game in strapi");
+                console.log(JSON.stringify(e, null, 4));
+            }           
+
+            this.refreshCount -= AwaitLevel.LOG_REFRESH_TIME;
+        }
+
+        this.refreshCount += deltaTime;
+    }
+
 };
 
 export { AwaitLevel };
