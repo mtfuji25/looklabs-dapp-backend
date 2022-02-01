@@ -59,8 +59,6 @@ class MapLayer extends Layer {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
 
-        const step = SPRITE_SIZE / 2.0;
-
         for (let i = 0; i < rows; ++i) {
     
             for (let j = 0; j < cols; ++j) {
@@ -68,15 +66,17 @@ class MapLayer extends Layer {
                 const currentCell = levelMap["data"][i][j];
                 const entity = this.ecs.createEntity(j * SPRITE_SIZE, i * SPRITE_SIZE, false);
                 const sprite = entity.addSprite();
+                
                 sprite.setCutImg(
                     this.app.loader.resources["map"],
                     // 19 is the number of columns in the sprite sheet 
-                    Math.floor(((currentCell - 1) % 19)) * SPRITE_SIZE,
-                    Math.floor((currentCell - 1) / 19) * SPRITE_SIZE,
+                    Math.floor((currentCell) % 19) * SPRITE_SIZE,
+                    Math.floor((currentCell ) / 19) * SPRITE_SIZE,
                     SPRITE_SIZE,
                     SPRITE_SIZE
                 );
-                if (currentCell == 1) entity.getSprite().sprite.alpha = 0.0;
+                
+                if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
         
