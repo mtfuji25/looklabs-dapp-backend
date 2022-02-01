@@ -16,6 +16,7 @@ import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, Remai
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
+import { DefaultLevel } from "./Default";
 
 
 interface LobbyLevelContext extends ViewContext {
@@ -208,6 +209,14 @@ class LobbyLevel extends Level {
                 this.context.engine.loadLevel(new ResultsLevel(
                     this.context,
                     "Results",
+                    {
+                        gameId: content.gameId,
+                    }
+                ));
+            } else if (content.gameStatus == "restarting") {
+                this.context.engine.loadLevel(new DefaultLevel(
+                    this.context,
+                    "Default",
                     {
                         gameId: content.gameId,
                     }

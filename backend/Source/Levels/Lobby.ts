@@ -323,7 +323,23 @@ class LobbyLevel extends Level {
     async onUpdate(deltaTime: number) {
 
         if (this.gameState != GameStateValues.FIGHT) return;
+        
+        if ( this.participants.length <= 1 ) {
+            const msg: GameStatus = {
+                msgType: "game-status",
+                gameId: this.gameId,
+                lastGameId: 0,
+                gameStatus: "restarting"
+            };
+            this.context.ws.broadcast(msg);
 
+            // Change to await level
+            this.context.engine.loadLevel(new AwaitLevel(this.context, "Await"));
+            Logger.error(`Game ${this.gameId} was loaded with 1 or less players`);
+            return;
+        } 
+
+      
         // Update timer
         if (this.oneSecondCounter >= 1) {
             const { hours, minutes, seconds } = this.getFormatedTime();
