@@ -34,7 +34,7 @@ interface GameStatus {
     msgType: "game-status";
     gameId: number;
     lastGameId: number;
-    gameStatus: "lobby" | "awaiting" | "not-found";
+    gameStatus: "lobby" | "awaiting" | "not-found" | "restarting";
 }
 
 interface GameState {
