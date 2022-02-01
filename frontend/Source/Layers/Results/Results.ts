@@ -66,8 +66,12 @@ class ResultsLayer extends Layer {
             .addStage(this.resContainer);
 
         // renders all the results
-        gameParticipants.map((participant, index) =>
-            this.renderResult(participant, index)
+        let pIndex = 0;
+        gameParticipants.map((participant) => {
+            if (PlayerLayer.lastGamePlayerNames[participant.nft_id])
+                this.renderResult(participant, pIndex);
+                pIndex++;
+            }            
         );
 
         this.app.stage.addChild(this.resContainer);
