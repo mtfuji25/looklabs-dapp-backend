@@ -23,6 +23,7 @@ import { Listener, msgTypes, PlayerCommand, ServerMsg } from "../../Clients/Inte
 
 import { PlayerActions } from "./PlayerActions";
 import { ParticipantDetailsModel } from "../../Core/PlayerModel";
+import { sleep } from "../../Utils/Sleep";
 
 
 interface Player {
@@ -192,7 +193,7 @@ class PlayerLayer extends Layer {
 
         sprite.addStage(this.container);
         animSpriteOverlay1.addStage(sprite.sprite);
-        animSpriteOverlay2.addStage(sprite.sprite);
+        
         
         // Add healthBar
         const r1 = healthOutline.addColoredRectangle(24, 6, 0x000000);
@@ -208,7 +209,8 @@ class PlayerLayer extends Layer {
         r2.sprite.y = -32;
         r3.sprite.x = -12;
         r3.sprite.y = -32;
-    
+       
+
         // Add id text
         const titleText = idNumber.addBMPText(splitId, this.idStyle);      
         titleText.text.anchor.set(0.5);
@@ -216,6 +218,8 @@ class PlayerLayer extends Layer {
         titleText.text.x = 0;
         titleText.text.y = -20;
         
+        //place this layer above entity's ID number
+        animSpriteOverlay2.addStage(sprite.sprite);
 
         this.players[id] = {
             entity: entity,
@@ -344,13 +348,13 @@ class PlayerLayer extends Layer {
     deleteEnemy(command:PlayerCommand) {
         const { id } = command;
 
-        const animLayerOverlay1 = this.players[id].animLayerOverlay1.getAnimSprite();
+        const animSpriteOverlay2 = this.players[id].animLayerOverlay2.getAnimSprite();
                 
         // death animation
         this.players[id].entity.getAnimSprite().forceAnimate(this.res["player-sheet"]["animations"][4]);
 
-        animLayerOverlay1.forceAnimate(this.res["overlay-sheet"]["animations"][0]);
-        animLayerOverlay1.sprite.visible = true;
+        animSpriteOverlay2.forceAnimate(this.res["overlay-sheet"]["animations"][0], 0.3);
+        animSpriteOverlay2.sprite.visible = true;
 
         setTimeout(() => {
             this.players[id].idNumber.destroy();
@@ -362,7 +366,7 @@ class PlayerLayer extends Layer {
             this.players[id].animLayerOverlay1.destroy();
             this.players[id].animLayerOverlay2.destroy();
             delete this.players[id];
-        }, 400);
+        }, 800);
     }
 
     onServerMsg(msg: ServerMsg) {
@@ -401,17 +405,20 @@ class PlayerLayer extends Layer {
         return Object.values(this.players);
     }
 
-    showWinner () {
-        // if (!this.whooping) {
-        //     this.whooping = true;
-        //     Object.values(this.players).map((player) => {
-        //         const transform = player.entity.getTransform();
-        //         if (transform) {
-        //             player.animLayerBg.getAnimSprite().sprite.visible = true;
-        //         }
-        //     }
-        // );
-        // }
+    async showWinner () {
+        if (!this.whooping) {
+            this.whooping = true;
+            await sleep(400);
+            Object.values(this.players).map(async (player) => {
+                const transform = player.entity.getTransform();
+                if (transform) {
+                    player.animLayerBg.getAnimSprite().sprite.visible = true;
+                    await sleep(400);
+                    player.entity.getAnimSprite().forceAnimate(this.res["player-sheet"]["animations"][3]);
+                }
+            }
+        );
+        }
     }
 
     addFixtures () {

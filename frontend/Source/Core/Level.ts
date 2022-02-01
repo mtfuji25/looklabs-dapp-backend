@@ -61,6 +61,7 @@ abstract class Level {
 
     playBackgroundMusic(soundRes:string):void {
         sound.stopAll();
+        sound.volumeAll = 0.4;
         if (this.context.app.loader.resources[soundRes]) {
             sound.play(soundRes, {loop: true});
         }

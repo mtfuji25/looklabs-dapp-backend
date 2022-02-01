@@ -22,7 +22,7 @@ const sys_DipatchDeaths = (data: EcsData, deltaTime: number): void => {
 const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {
     // Iterates through all status in system
     data.status.map((stats) => {
-        stats.survived += deltaTime;
+        stats.survived += deltaTime * 1000;
         stats.critical = false;
         if (stats.health <= 0) {
             if (!stats.lastHit)

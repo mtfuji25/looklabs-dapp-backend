@@ -90,9 +90,10 @@ class AnimSprite {
         }
     }
 
-    forceAnimate(animation: string) {
+    forceAnimate(animation: string, speed:number = 0) {
         if (this.animSprite) {
             this.animSprite.textures = this.sprites[animation];
+            if (speed > 0) this.animSprite.animationSpeed = speed;
             this.animSprite.play();
         }
     }
