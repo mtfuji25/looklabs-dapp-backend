@@ -6,10 +6,8 @@ import { BMPText } from "../../Core/Ecs/Components/BMPText";
 import { ColoredRectangle } from "../../Core/Ecs/Components/ColoredRectangle";
 
 // Pixi imports
-import { Application, Container, IBitmapTextStyle } from "pixi.js";
+import { Application, CompressedTextureLoader, Container, IBitmapTextStyle } from "pixi.js";
 import { EngineContext } from "../../Core/Interfaces";
-import { ScheduledGame } from "../../Clients/Strapi";
-import { Logger } from "../../Utils/Logger";
 
 
 interface JoinLog {
@@ -74,6 +72,13 @@ class LogsLayer extends Layer {
             this.darkOverlay.graphics.width = this.screenX;
             this.darkOverlay.graphics.height = this.app.screen.height;
         }
+
+        // if we're on full screen
+        if( window.innerHeight == this.app.screen.height ) {
+            this.darkOverlay.graphics.width = window.innerWidth;
+            this.darkOverlay.graphics.height = window.innerHeight;
+        }
+      
     
     }
 
