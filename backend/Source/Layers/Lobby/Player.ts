@@ -67,7 +67,15 @@ class PlayerLayer extends Layer {
         this.self.strapiId = strapiID;
         this.strapiID = strapiID;
         this.details = details;
+        
 
+        const tokenId = Number((this.playerID).split('/')[1]);
+        // make necessary adjustments for characters, like Wolf.game, which are loaded from one basic JSON file
+        details.edition = tokenId;
+        if (details.name.indexOf (tokenId.toString()) == -1) {   
+            details.name = `${details.name} #${tokenId}`;
+            this.self.name = details.name;
+        }
         // create a record of mapped attributes, so we can use the attributes returned more easily
         // eg: {speed: 20, torso: 'BeetleTorso, name: 'beetle33'}
 

@@ -186,6 +186,10 @@ class LobbyLevel extends Level {
 
             // Request participant details from strapi
             const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
+            if (details.name.indexOf (tokenId) == -1) {
+                details.name = `${details.name} #${tokenId}`;
+            }
+            details.edition = Number(tokenId);
 
             // Add current player name to the playerNames storage
             LobbyLevel.playerNames[participant.nft_id] = details.name;

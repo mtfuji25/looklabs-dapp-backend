@@ -49,6 +49,10 @@ class ResultsLevel extends Level {
         const address = (participants[0].nft_id).split('/')[0];
 
         const winnerDetails = await this.context.strapi.getParticipantDetails(address, splitId);
+        winnerDetails.edition = splitId;
+        if (winnerDetails.name.indexOf (splitId.toString()) == -1) {
+            winnerDetails.name = `${winnerDetails.name} #${splitId}`;
+        }
 
         this.layerStack.pushLayer(
             new ResultsLayer(this.ecs, this.context.app, participants)

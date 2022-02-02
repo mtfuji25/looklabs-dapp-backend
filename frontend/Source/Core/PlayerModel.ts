@@ -21,6 +21,12 @@ class ParticipantDetailsModel {
                     const tokenId = Number((p.nft_id).split('/')[1]);
                     const tokenAddr = (p.nft_id).split('/')[0];
                     const details = await this.strapi.getParticipantDetails(tokenAddr, tokenId);
+                    details.edition = tokenId;
+                    if (details.name.indexOf (tokenId.toString()) == -1) {
+                        
+                        details.name = `${details.name} #${tokenId}`;
+
+                    }
                     this.addDetailsForPlayer(p.nft_id, details);                    
                 }
             })
