@@ -44,8 +44,10 @@ class Sprite {
         this.sprite.texture = img.texture;
     }
 
-    setFromUrl(url: string) {
-        this.sprite.texture = Texture.from(url);
+    setFromUrl(url: string, onLoad?:(texture:Texture) => void) {
+        this.sprite.texture = Texture.from(url).on("update", ()=> {
+            if (onLoad) onLoad(this.sprite.texture);
+        });
     }
 
     addStage(app: Application | Container) {

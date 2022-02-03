@@ -75,6 +75,8 @@ class ResultsLayer extends Layer {
         );
 
         this.app.stage.addChild(this.resContainer);
+        this.resContainer.x = this.app.view.clientWidth * 0.5;
+
         this.initialResY = this.resContainer.y;
     }
 
@@ -88,13 +90,13 @@ class ResultsLayer extends Layer {
         // if it's the first one(winner) show the star
         if (index === 0) {
             resultIcon = this.ecs
-                .createEntity(this.percentX * 50.23, yOffset)
+                .createEntity(0, yOffset)
                 .addSprite(this.app.loader.resources["purpleStar"]);
 
             resultIcon.setSize(13.333, 13.333);
         } else {
             resultIcon = this.ecs
-                .createEntity(this.percentX * 50.23, yOffset)
+                .createEntity(0, yOffset)
                 .addSprite(this.app.loader.resources["userIcon"]);
         }
 
@@ -103,19 +105,19 @@ class ResultsLayer extends Layer {
 
         // Render the text for the position
         this.ecs
-            .createEntity(this.percentX * 51.944, yOffset)
+            .createEntity(this.percentX * 2, yOffset)
             .addText(`${index + 1}`, this.textStyle)
             .addStage(this.resContainer);
 
         // render the text for participant name
         this.ecs
-            .createEntity(this.percentX * 56.458, yOffset)
+            .createEntity(this.percentX * 6, yOffset)
             .addText(`${PlayerLayer.lastGamePlayerNames[participant.nft_id]}`, this.textStyle)
             .addStage(this.resContainer);
 
         // Render the tombstone icon
         const deathIcon = this.ecs
-            .createEntity(this.percentX * 70.694, yOffset)
+            .createEntity(this.percentX * 20, yOffset)
             .addSprite(this.app.loader.resources["tombstone"]);
 
         deathIcon.addStage(this.resContainer);
@@ -145,7 +147,8 @@ class ResultsLayer extends Layer {
             this.screenX = this.app.view.clientWidth;
             this.screenY = this.app.view.clientHeight;
 
-            // resizes text
+            
+            this.resContainer.x = this.app.view.clientWidth * 0.5;
         }
         
         if (this.scrollAlowed) {
