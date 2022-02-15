@@ -117,10 +117,11 @@ class TextLayer extends Layer {
     
 
         this.subtitle = this.ecs.createEntity().addText("NEXT BATTLE STARTS IN", this.textStyle);
-
-    
+        
+        const maxPlayers = this.currentGame.max_participants ? this.currentGame.max_participants : 100;
+        
         this.entered = this.ecs.createEntity().addText(
-            `ENTERED: ${this.currentGame.scheduled_game_participants.length} (MAX 100)`,
+            `ENTERED: ${this.currentGame.scheduled_game_participants.length} (MAX ${maxPlayers})`,
             this.textStyle
         );
         
@@ -180,7 +181,8 @@ class TextLayer extends Layer {
             this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
             
             this.updateRequest.then((updatedGame) => {
-                this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`);
+                const maxPlayers = updatedGame.max_participants ? updatedGame.max_participants : 100;
+                this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX ${maxPlayers})`);
             });
 
             this.updateRequest.catch((e) => {

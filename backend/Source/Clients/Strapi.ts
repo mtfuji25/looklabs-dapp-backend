@@ -6,6 +6,7 @@ interface ScheduledGame {
     published_at?: string;
     created_at?: string;
     updated_at?: string;
+    max_participants?: number;
     scheduled_game_participants: ScheduledGameParticipant[];
 }
 
@@ -110,6 +111,7 @@ class StrapiClient {
                 created_at: attributes.createdAt,
                 updated_at: attributes.updatedAt,
                 game_date: attributes.game_date,
+                max_participants: attributes.max_participants,
                 scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                     (participant: any) => {
                         const attributes = participant.attributes;
@@ -136,6 +138,7 @@ class StrapiClient {
         return {
             id: response.id,
             game_date: attributes.game_date,
+            max_participants: attributes.max_participants,
             scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                 (participant: any) => {
                     const attributes = participant.attributes;
@@ -147,7 +150,7 @@ class StrapiClient {
                         scheduled_game: response.id,
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
-                        updated_at: attributes.updatedAt
+                        updated_at: attributes.updatedAt   
                     };
                 }
             )

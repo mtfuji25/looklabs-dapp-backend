@@ -31,7 +31,6 @@ class AwaitLevel extends Level {
     private refreshCount: number = 0.0;
     private playersInBattle:Set<string> = new Set();
     // Current Update Promisse
-    private updateRequest: ScheduledGame;
     private currentGame: ScheduledGame;
     private playerLog:LogsLayer;
     
