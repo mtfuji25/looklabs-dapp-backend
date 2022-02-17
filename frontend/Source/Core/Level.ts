@@ -7,6 +7,9 @@ import { LayerStack } from "./LayerStack";
 // Engine imports
 import { EngineContext } from "./Interfaces";
 
+//Pixi Sound
+import { sound } from "@pixi/sound";
+
 abstract class Level {
     
     // Name of the current runnign level
@@ -52,8 +55,26 @@ abstract class Level {
     abstract onStart(): void;
     abstract onUpdate(deltaTime: number): void;
     abstract onClose(): void;
+    
 
     getName() { return this.name; }
+
+    playBackgroundMusic(soundRes:string):void {
+        sound.stopAll();
+        sound.volumeAll = 0.4;
+        if (this.context.app.loader.resources[soundRes]) {
+            sound.play(soundRes, {loop: true});
+        }
+    }
+
+    stopBackgroundMusic ():void {
+        sound.stopAll();
+    }
+
+    static AWAIT_SOUND:string = "lobby_sound";
+    static LOBBY_SOUND:string = "battle_sound";
+    static RESULTS_SOUND:string = "results_sound";
+    static SHOWDOWN_SOUND:string = "showdown_sound";
 };
 
 export { Level };

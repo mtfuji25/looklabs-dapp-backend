@@ -2,26 +2,29 @@ import { Layer } from "../../Core/Layer";
 
 // Ecs and Components imports
 import { ECS } from "../../Core/Ecs/Core/Ecs";
-import { Text } from "../../Core/Ecs/Components/Text";
+import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, Container, IBitmapTextStyle } from "pixi.js";
 import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
-import { sleep, syncSleep } from "../../Utils/Sleep";
+
 
 interface KillLog {
     killer: string;
     action: string;
     killed: string;
     text?: {
-        killer: Text;
-        action: Text;
-        killed: Text;
+        killer: BMPText;
+        action: BMPText;
+        killed: BMPText;
     };
 }
 
 class LogsLayer extends Layer {
+
+    static MAX_LOG:number = 7;
+
     // Current app instance
     private app: Application;
 
@@ -35,19 +38,20 @@ class LogsLayer extends Layer {
 
     private percentX: number;
 
-    private readonly normalStyle: Partial<ITextStyle> = {
-        fontFamily: "Space Mono",
-        fontStyle: "normal",
-        fontWeight: "400",
-        fontSize: 15,
-        fill: 0xffffff,
-        lineHeight: 21,
+    private container:Container;
+
+    private readonly normalStyle: Partial<IBitmapTextStyle> = {
+        fontName: "Rubik-Regular",
+        align: "left",
+        fontSize: 18,
     };
 
-    private readonly boldStyle: Partial<ITextStyle> = {
-        ...this.normalStyle,
-        fontWeight: "700"
+    private readonly boldStyle: Partial<IBitmapTextStyle> = {
+        fontName: "Rubik-Bold",
+        align: "left",
+        fontSize: 18
     };
+    private screenX: number;
 
     constructor(ecs: ECS, app: Application, context: EngineContext) {
         super("TesteLayer", ecs);
@@ -55,14 +59,24 @@ class LogsLayer extends Layer {
         this.app = app;
         this.context = context;
 
-        this.percentX = this.app.screen.width / 100;
+        this.percentX = this.app.view.clientWidth / 100;
+        this.screenX = this.app.view.clientWidth;
+        this.container = new Container();
 
         this.listener = this.context.ws.addListener("kill", msg => this.onKill(msg));
     }
 
-    onAttach() {}
+    onAttach() {
+        this.app.stage.addChild(this.container);
+    }
 
-    onUpdate(deltaTime: number) {}
+    onUpdate(deltaTime: number) {
+        if(this.app.view.clientWidth != this.screenX ) {
+            this.screenX = this.app.view.clientWidth;
+            this.percentX = this.screenX / 100;
+            this.logs.forEach((log, index) => this.renderLog(log, index));
+        }
+    }
 
     // adds log on top of queue
     addLog(log: KillLog) {
@@ -88,9 +102,9 @@ class LogsLayer extends Layer {
     // create result for a specific participant
     renderLog(log: KillLog, index: number) {
         // represents how much the y coordinate is offset, according to current index
-        const yOffset = 30 + index * 25;
-        const initialX = 97.222 * this.percentX;
-        let xOffset = 0;
+        const yOffset = 30 + index * 30;
+        const initialX = 100 * this.percentX;
+        let xOffset = 40;
 
         // if text already exists, just reposition it
         if (log.text) {
@@ -107,29 +121,35 @@ class LogsLayer extends Layer {
             // set killer pos
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
+
+            if (index == LogsLayer.MAX_LOG - 1) {
+                killer.text.alpha = 0.6;
+                action.text.alpha = 0.6;
+                killed.text.alpha = 0.6;
+            }
         } else {
             // Render the text for participants killed
-            const killed = this.ecs.createEntity().addText(`${log.killed}`, this.boldStyle);
+            const killed = this.ecs.createEntity().addBMPText(`${log.killed}`, this.boldStyle);
 
             xOffset += killed.text.width;
             killed.setPos(initialX - xOffset, yOffset);
 
             // render the text for participant name
-            const action = this.ecs.createEntity().addText(`${log.action}`, this.normalStyle);
+            const action = this.ecs.createEntity().addBMPText(`${log.action}`, this.normalStyle);
 
             xOffset += action.text.width + 10;
             action.setPos(initialX - xOffset, yOffset);
 
             // Render the text for the position
-            const killer = this.ecs.createEntity().addText(`${log.killer}`, this.boldStyle);
+            const killer = this.ecs.createEntity().addBMPText(`${log.killer}`, this.boldStyle);
 
             xOffset += killer.text.width + 10;
             killer.setPos(initialX - xOffset, yOffset);
 
             // stage all texts
-            killed.addStage(this.app);
-            action.addStage(this.app);
-            killer.addStage(this.app);
+            killed.addStage(this.container);
+            action.addStage(this.container);
+            killer.addStage(this.container);
 
             log.text = {
                 killed: killed,
@@ -148,9 +168,9 @@ class LogsLayer extends Layer {
                     text.remStage();
                 });
             }
-        })
-
-        this.self.destroy();
+        });
+        this.container.removeChildren();
+        this.app.stage.removeChild(this.container);
     }
 
     // server msg when kill happens
@@ -163,7 +183,7 @@ class LogsLayer extends Layer {
             killed: killed
         });
 
-        if (this.logs.length > 12) {
+        if (this.logs.length > LogsLayer.MAX_LOG) {
             this.remLog();
         }
         // after all operations, render updated logs
@@ -171,6 +191,8 @@ class LogsLayer extends Layer {
 
         return true;
     }
+
+    getContainer():Container { return this.container; }
 }
 
 export { LogsLayer };

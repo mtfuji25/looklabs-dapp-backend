@@ -15,49 +15,58 @@ class ResultsLevel extends Level {
 
     private counter: number = 0.0;
 
-    onStart(): void {
+    async onStart(): Promise<void> {
+
+        this.playBackgroundMusic(Level.RESULTS_SOUND);
+        
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
-        this.connectLayers();
-    }
+        
+        this.context.participantDetails.destroy();
+        
+        await this.context.ws.whenReady();
 
-    connectLayers(): void {
-        const responseParticipant = this.props.responseParticipant;
-        const responseWinner = this.props.responseWinner;
-
-        this.context.ws.onReady(() => {
-            this.context.ws.request({
+        const response = await this.context.ws.request(
+            {
                 uuid: uuidv4(),
                 type: "request",
                 content: {
                     type: "player-names"
                 }
-            }).then((response) => {
-                PlayerLayer.lastGamePlayerNames = {};
+            }
+        );
 
-                const content = response.content as PlayerNames;
+        PlayerLayer.lastGamePlayerNames = {};
 
-                Object.keys(content.names).map((key) => {
-                    PlayerLayer.lastGamePlayerNames[key] = content.names[key];
-                })
+        const content = response.content as PlayerNames;
 
-                this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
-                    let splitId = (participants[0].nft_id).split('/')[1];
-                    let address = (participants[0].nft_id).split('/')[0];
-        
-                    this.layerStack.pushLayer(
-                        new ResultsLayer(this.ecs, this.context.app, participants)
-                    );   
-                    this.layerStack.pushLayer(
-                        new BattleStatusLayer(this.ecs, this.context.app)
-                    );
-                    this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
-                        this.layerStack.pushLayer(
-                            new WinnerLayer(this.ecs, this.context.app, participants[0], participant)
-                        );
-                    })
-                })
-            });
+        Object.keys(content.names).map((key) => {
+            PlayerLayer.lastGamePlayerNames[key] = content.names[key];
         })
+
+        const participants = await this.context.strapi.getGameParticipants(this.props.gameId);
+
+        const splitId = (participants[0].nft_id).split('/')[1];
+        const address = (participants[0].nft_id).split('/')[0];
+
+        const winnerDetails = await this.context.strapi.getParticipantDetails(address, splitId);
+        winnerDetails.edition = splitId;
+        if (winnerDetails.name.indexOf (splitId.toString()) == -1) {
+            winnerDetails.name = `${winnerDetails.name} #${splitId}`;
+        }
+
+        this.layerStack.pushLayer(
+            new ResultsLayer(this.ecs, this.context.app, participants)
+        );
+
+        this.layerStack.pushLayer(
+            new BattleStatusLayer(this.ecs, this.context.app)
+        );
+
+        this.layerStack.pushLayer(
+            new WinnerLayer(this.ecs, this.context.app, participants[0], winnerDetails)
+        );
+
+        this.playBackgroundMusic(Level.RESULTS_SOUND);
     }
 
     onUpdate(deltaTime: number) {
@@ -70,9 +79,7 @@ class ResultsLevel extends Level {
         this.counter += deltaTime;
     }
 
-    onClose(): void {
-        this.layerStack.destroy();
-    }
+    onClose(): void {}
 }
 
 export { ResultsLevel };

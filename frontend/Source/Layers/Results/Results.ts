@@ -52,12 +52,12 @@ class ResultsLayer extends Layer {
         this.resContainer = new Container();
 
         // Set current percents
-        this.percentX = this.app.view.width / 100.0;
-        this.percentY = this.app.view.height / 100.0;
+        this.percentX = this.app.view.clientWidth / 100.0;
+        this.percentY = this.app.view.clientHeight / 100.0;
 
         // sets screen size
-        this.screenX = this.app.view.width;
-        this.screenY = this.app.view.height;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
         // Create results title
         this.ecs
@@ -66,11 +66,17 @@ class ResultsLayer extends Layer {
             .addStage(this.resContainer);
 
         // renders all the results
-        gameParticipants.map((participant, index) =>
-            this.renderResult(participant, index)
+        let pIndex = 0;
+        gameParticipants.map((participant) => {
+            if (PlayerLayer.lastGamePlayerNames[participant.nft_id])
+                this.renderResult(participant, pIndex);
+                pIndex++;
+            }            
         );
 
         this.app.stage.addChild(this.resContainer);
+        this.resContainer.x = this.app.view.clientWidth * 0.5;
+
         this.initialResY = this.resContainer.y;
     }
 
@@ -84,13 +90,13 @@ class ResultsLayer extends Layer {
         // if it's the first one(winner) show the star
         if (index === 0) {
             resultIcon = this.ecs
-                .createEntity(this.percentX * 50.23, yOffset)
+                .createEntity(0, yOffset)
                 .addSprite(this.app.loader.resources["purpleStar"]);
 
             resultIcon.setSize(13.333, 13.333);
         } else {
             resultIcon = this.ecs
-                .createEntity(this.percentX * 50.23, yOffset)
+                .createEntity(0, yOffset)
                 .addSprite(this.app.loader.resources["userIcon"]);
         }
 
@@ -99,19 +105,19 @@ class ResultsLayer extends Layer {
 
         // Render the text for the position
         this.ecs
-            .createEntity(this.percentX * 51.944, yOffset)
+            .createEntity(this.percentX * 2, yOffset)
             .addText(`${index + 1}`, this.textStyle)
             .addStage(this.resContainer);
 
         // render the text for participant name
         this.ecs
-            .createEntity(this.percentX * 56.458, yOffset)
+            .createEntity(this.percentX * 6, yOffset)
             .addText(`${PlayerLayer.lastGamePlayerNames[participant.nft_id]}`, this.textStyle)
             .addStage(this.resContainer);
 
         // Render the tombstone icon
         const deathIcon = this.ecs
-            .createEntity(this.percentX * 70.694, yOffset)
+            .createEntity(this.percentX * 20, yOffset)
             .addSprite(this.app.loader.resources["tombstone"]);
 
         deathIcon.addStage(this.resContainer);
@@ -133,22 +139,23 @@ class ResultsLayer extends Layer {
 
     onUpdate(deltaTime: number) {
         // on window resize 
-        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
             // resets percentages
-            this.percentX = this.app.view.width / 100.0;
-            this.percentY = this.app.view.height / 100.0;
+            this.percentX = this.app.view.clientWidth / 100.0;
+            this.percentY = this.app.view.clientHeight / 100.0;
 
-            this.screenX = this.app.view.width;
-            this.screenY = this.app.view.height;
+            this.screenX = this.app.view.clientWidth;
+            this.screenY = this.app.view.clientHeight;
 
-            // resizes text
+            
+            this.resContainer.x = this.app.view.clientWidth * 0.5;
         }
         
         if (this.scrollAlowed) {
             if (this.firstPass) {
                 this.resContainer.y = lerp(this.initialResY, -(this.resContainer.height + this.initialResY), this.count / 20.0);
             } else {
-                this.resContainer.y = lerp(this.app.view.height, -(this.resContainer.height + this.initialResY), this.count / 20.0);
+                this.resContainer.y = lerp(this.app.view.clientHeight, -(this.resContainer.height + this.initialResY), this.count / 20.0);
             }
         } else {
             if (this.count >= 2.0) {
@@ -165,9 +172,7 @@ class ResultsLayer extends Layer {
             this.count += deltaTime; 
     }
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { ResultsLayer };

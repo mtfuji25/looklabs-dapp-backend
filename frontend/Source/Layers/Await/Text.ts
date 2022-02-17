@@ -13,21 +13,23 @@ import { EngineContext } from "../../Core/Interfaces";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
+import { Logger } from "../../Utils/Logger";
 
 class TextLayer extends Layer {
     private app: Application;
     private title: Sprite;
     private subtitle: Text;
-    private users: Sprite;
     private countdown: Text;
     private entered: Text;
-    private percentX: number;
     private percentY: number;
     private currentGame: ScheduledGame;
     private context: EngineContext;
 
     private screenX: number;
     private screenY: number;
+
+    // Current Update Promisse
+    private updateRequest: Promise<ScheduledGame> = new Promise<ScheduledGame>(() => {});
     
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
@@ -66,114 +68,127 @@ class TextLayer extends Layer {
         this.context = context;
 
         // sets percents
-        this.percentX = this.app.view.width / 100.0;
-        this.percentY = this.app.view.height / 100.0;
+        this.percentY = this.app.screen.height / 100.0;
 
-        this.screenX = this.app.view.width;
-        this.screenY = this.app.view.height;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
         // Add sprite to it
         this.title = this.ecs.createEntity().addSprite(this.app.loader.resources["thepit"]);
-        this.users = this.ecs.createEntity().addSprite(this.app.loader.resources["user"]);
-
+        
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
-        this.users.sprite.anchor.set(0.0);
-
+        
         // Add it to stage
         this.title.addStage(this.app);
-        this.users.addStage(this.app);
     }
 
     renderText(text: Text, y: number) {
         text.setPos(
-            this.percentX * 50 - text.text.width / 2.0,
-            this.percentY * y
+            (this.screenX - text.text.width) * 0.5,
+            y * this.percentY
         );
         text.addStage(this.app);
     }
 
-    onAttach() {
-        this.title.setPos(50 * this.percentX - this.title.sprite.width / 2.0, 8.125 * this.percentY);
-        this.users.setPos(37.5695 * this.percentX, 59.25 * this.percentY);
+    _onResize () {
+        this.title.setPos((this.screenX - this.title.sprite.width) * 0.5, 8.125 * this.percentY);
+        
+        this.countdown.setPos(            
+            (this.screenX - (this.countdown.text.width * 0.95)) * 0.5,
+            this.percentY * 40
+        );
+        this.entered.setPos(                            
+            (this.screenX - this.entered.text.width* 0.95) * 0.5,
+            this.percentY * 59.25
+        );
+        this.subtitle.setPos(            
+            (this.screenX - this.subtitle.text.width* 0.95) * 0.5,
+            this.percentY * 33.375
+        );
+       
+    }
 
+    onAttach() {
+        
         const { hours, minutes, seconds } = this.calculateTimeLeft(
             this.currentGame.game_date
         );
+    
 
         this.subtitle = this.ecs.createEntity().addText("NEXT BATTLE STARTS IN", this.textStyle);
-
-        this.renderText(this.subtitle, 33.375);
-
-        this.context.strapi
-            .getGameById(this.currentGame.id)
-            .then((updatedGame) => {
-                this.entered = this.ecs.createEntity().addText(
-                    `ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`,
-                    this.textStyle
-                );
-                this.renderText(this.entered, 59.25);
-            });
+        
+        const maxPlayers = this.currentGame.max_participants ? this.currentGame.max_participants : 100;
+        
+        this.entered = this.ecs.createEntity().addText(
+            `ENTERED: ${this.currentGame.scheduled_game_participants.length} (MAX ${maxPlayers})`,
+            this.textStyle
+        );
+        
 
         this.countdown = this.ecs.createEntity().addText(
             `${hours}:${minutes}:${seconds}`,
             this.titleStyle
         );
+       
+        this.renderText(this.subtitle, 33.375);
         this.renderText(this.countdown, 40);
+        this.renderText(this.entered, 59.25);
+        
+        this._onResize();
     }
 
     onUpdate(deltaTime: number) {
         // on window resize 
-        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
-            // resets percentages
-            this.percentX = this.app.view.width / 100.0;
-            this.percentY = this.app.view.height / 100.0;
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
+            this.percentY = this.app.view.clientHeight / 100.0;
 
-            this.screenX = this.app.view.width;
-            this.screenY = this.app.view.height;
+            this.screenX = this.app.view.clientWidth;
+            this.screenY = this.app.view.clientHeight;
 
-            // resizes text
-            this.title.setPos(50 * this.percentX - this.title.sprite.width / 2.0, 8.125 * this.percentY);
-            this.users.setPos(37.5695 * this.percentX, 59.25 * this.percentY);
-            this.countdown.setPos(            
-                this.percentX * 50 - this.countdown.text.width / 2.0,
-                this.percentY * 40
-            );
-            this.entered.setPos(            
-                this.percentX * 50 - this.entered.text.width / 2.0,
-                this.percentY * 59.25
-            );
-            this.subtitle.setPos(            
-                this.percentX * 50 - this.subtitle.text.width / 2.0,
-                this.percentY * 33.375
-            );
+            
+            this._onResize();
         }
+   
 
         if (this.oneSecCount >= 1) {
-            const { hours, minutes, seconds } = this.calculateTimeLeft(
+            
+            const { hours, minutes, seconds } = this.calculateTimeLeft(                
                 this.currentGame.game_date
             );
+
             if(!seconds || !minutes || !hours) {
+                
                 // if seconds is undefined, make everything dissapear
                 this.countdown.setText("");     
                 this.subtitle.setText("");
                 this.entered.setText("");       
 
                 this.title.sprite.visible = false;
-                this.users.sprite.visible = false;
 
             } else {
+                
                 this.countdown.setText(`${hours}:${minutes}:${seconds}`);
+                // this.countdown.setPos(            
+                //     (this.screenX - (this.countdown.text.width * 0.95)) * 0.5,
+                //     this.percentY * 40
+                // );
             }
             this.oneSecCount -= - 1.0;
         }
 
         if (this.fiveSecCount >= 5) {
-            this.context.strapi
-                .getGameById(this.currentGame.id)
-                .then((updatedGame) => {
-                    this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX 100)`);
-                });
+            this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
+            
+            this.updateRequest.then((updatedGame) => {
+                const maxPlayers = updatedGame.max_participants ? updatedGame.max_participants : 100;
+                this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX ${maxPlayers})`);
+            });
+
+            this.updateRequest.catch((e) => {
+                Logger.info("Level destroyed while requesting, aborting reponse action...");
+            });
+
             this.fiveSecCount -= 5.0;
         }
 
@@ -181,14 +196,15 @@ class TextLayer extends Layer {
         this.fiveSecCount += deltaTime;
     }
 
-    onDetach() {
-        this.self.destroy();
+    async onDetach() {
+        // Abort possible update request in course
+        await this.updateRequest;
+
         this.countdown.remStage();
         this.subtitle.remStage();
         this.entered.remStage();
 
         this.title.remStage();
-        this.users.remStage();
     }
 
     calculateTimeLeft(targetDate: string): Record<string, number> {
@@ -196,8 +212,9 @@ class TextLayer extends Layer {
             return (n < 10 ? "0" : "") + n;
         };
 
-        const difference = +new Date(targetDate) - +new Date();
-
+        // The + signs return the number representation of date object
+        const difference = (+new Date(targetDate)) - (+new Date());
+        
         let timeLeft = {};
 
         if (difference > 0) {

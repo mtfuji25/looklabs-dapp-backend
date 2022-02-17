@@ -14,10 +14,13 @@ import { Transform } from "../Components/Transform";
 
 // System index imports
 import { startSystems } from "../Systems/Index";
+import { Strategy } from "../Components/Strategy";
+
 
 // Systems functions types
 type EcsSysEntFn = (entity: Entity, deltaTime: number) => (void);
 type EcsSysContFn = (data: EcsData, deltaTime: number) => (void);
+type EcsSysStratFn = (entity: Entity, grid:Grid, target?:Entity) => (void);
 
 // Bit masked id type
 type BitMaskedId = Record<number, number>;
@@ -30,6 +33,7 @@ const masks = {
     rigidbody:  0b000100,
     status:     0b001000,
     behavior:   0b010000,
+    strategy:   0b100000,
 }
 
 // Key of index in identification array
@@ -45,6 +49,7 @@ class ECS {
     public rigidbodyId: number = 0;
     public transformId: number = 0;
     public entitiesId: number = 0;
+    public strategyId: number = 0;
 
     constructor() {
         startSystems(this);
@@ -57,6 +62,7 @@ class ECS {
     public rectangles: Record<number, Rectangle> = {};
     public rigidbodys: Record<number, Rigidbody> = {};
     public transforms: Record<number, Transform> = {};
+    public strategies: Record<number, Strategy> = {};
 
     // Store all entities identifications and layouts
     entities: Record<number, Entity> = {};
@@ -76,6 +82,7 @@ class ECS {
                rectangles: Object.values(this.rectangles),
                rigidbodys: Object.values(this.rigidbodys),
                transforms: Object.values(this.transforms),
+               strategies:  Object.values(this.strategies),
             }, deltaTime);
         });
 
@@ -113,6 +120,8 @@ class ECS {
         entity.remStatus();
         entity.remRigidbody();
         entity.remBehavior();
+        entity.remStrategy();
+        
 
         // Remove the entity itself from the identification array
         delete this.entities[id[EntityKey]];
@@ -212,6 +221,13 @@ class Entity {
         return this.addBehavior();
     }
 
+    getStrategy(): Strategy {
+        if (this.layout & masks.strategy)
+            return this.ecs.strategies[this.id[masks.strategy]];
+
+        return this.addStrategy();
+    }
+
     // Adders
     addGrid(width: number = 0.0, height: number = 0.0): Grid {
         if (this.layout & masks.grid)
@@ -274,12 +290,14 @@ class Entity {
         health: number = 0.0,
         defense: number = 0.0,
         cooldown: number = 0.0,
+        creature: string = "",
         name: string = "",
+        tier: string = "delta",
     ): Status {
         if (this.layout & masks.status)
             return this.getStatus();
 
-        const status = new Status(attack, speed, health, defense, cooldown, name);
+        const status = new Status(attack, speed, health, defense, cooldown, creature, name, tier );
 
         this.id[masks.status] = this.ecs.statusId;
         this.ecs.statusId++;
@@ -335,6 +353,20 @@ class Entity {
         return behavior;
     }
 
+    addStrategy(): Strategy {
+        if (this.layout & masks.strategy)
+            return this.getStrategy();
+
+        
+        const stratetgy = new Strategy(this);
+
+        this.id[masks.strategy] = this.ecs.strategyId;
+        this.ecs.strategyId++;
+        this.layout |= masks.strategy;
+        this.ecs.strategies[this.id[masks.strategy]] = stratetgy;
+        return stratetgy;
+    }
+
     // Removers
     remGrid(): void {
         if (this.layout & masks.grid) {
@@ -371,6 +403,13 @@ class Entity {
         }
     }
 
+    remStrategy() {
+        if (this.layout & masks.strategy) {
+            delete this.ecs.strategies[this.id[masks.strategy]];
+            this.layout &= (~masks.strategy);
+        }
+    }
+    
     destroy(): void {
         this.destroyed = true;
         this.ecs.deleteEntity(this.id);
@@ -378,4 +417,4 @@ class Entity {
 
 };
 
-export { ECS, Entity };
+export { ECS, Entity, EcsSysStratFn };

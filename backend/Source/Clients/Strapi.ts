@@ -6,6 +6,7 @@ interface ScheduledGame {
     published_at?: string;
     created_at?: string;
     updated_at?: string;
+    max_participants?: number;
     scheduled_game_participants: ScheduledGameParticipant[];
 }
 
@@ -38,6 +39,7 @@ interface ParticipantDetails {
     dna: string;
     edition: number;
     date: number;
+    spritesheet: string;
     attributes: DetailAttribute[];
 }
 
@@ -45,14 +47,6 @@ interface ParticipantDetails {
 interface DetailAttribute {
     trait_type: string;
     value: number | string;
-}
-
-interface Log {
-    event: "entrants" | "damage" | "kills" | "winners" | "final_rank";
-    value?: string;
-    timestamp: string;
-    scheduled_game: number;
-    scheduled_game_participant: number;
 }
 
 class StrapiClient {
@@ -117,6 +111,7 @@ class StrapiClient {
                 created_at: attributes.createdAt,
                 updated_at: attributes.updatedAt,
                 game_date: attributes.game_date,
+                max_participants: attributes.max_participants,
                 scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                     (participant: any) => {
                         const attributes = participant.attributes;
@@ -143,6 +138,7 @@ class StrapiClient {
         return {
             id: response.id,
             game_date: attributes.game_date,
+            max_participants: attributes.max_participants,
             scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                 (participant: any) => {
                     const attributes = participant.attributes;
@@ -154,7 +150,7 @@ class StrapiClient {
                         scheduled_game: response.id,
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
-                        updated_at: attributes.updatedAt
+                        updated_at: attributes.updatedAt   
                     };
                 }
             )
@@ -164,13 +160,6 @@ class StrapiClient {
     // get the details for a chosen participant
     async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenAddr}/${tokenId}`)).data;
-    }
-
-    async createLog(log: Log) {
-        // return this.post('logs', {
-        //     data: log
-        // });
-        return new Promise((resolve, reject) => resolve("Success"));
     }
 
     // Default engine start call
@@ -186,6 +175,5 @@ export {
     ScheduledGameParticipant,
     GameParticipantsResult,
     ParticipantDetails,
-    DetailAttribute,
-    Log
+    DetailAttribute
 };

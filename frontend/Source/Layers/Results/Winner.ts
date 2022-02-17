@@ -1,7 +1,7 @@
 import { Layer } from "../../Core/Layer";
 
 // Pixi imports
-import { Application, ITextStyle } from "pixi.js";
+import { Application, Container, ITextStyle } from "pixi.js";
 
 // Ecs and components
 import { ECS } from "../../Core/Ecs/Core/Ecs";
@@ -46,16 +46,8 @@ class WinnerLayer extends Layer {
 
     // Sprites record and constructors
     private readonly sprites: Record<string, Sprite> = {};
-    private readonly spriteConstructors: Record<string, { x: number; y: number }> = {
-        resultCard: { x: 26.25, y: 33 },
-        nameCard: { x: 27.1, y: 60.625 },
-        tombstone: { x: 27.1, y: 66.5 },
-        purpleHeart: { x: 31.71, y: 66.5 },
-        clock: { x: 27.1, y: 69.875 },
-        characterLeft: { x: 27, y: 27.1875 },
-        characterRight: { x: 39, y: 27.1875 }
-    };
-
+    private readonly spriteConstructors: string[] = ["resultCard", "nameCard", "tombstone", "purpleHeart", "clock", "characterLeft", "characterRight"];
+    
     // Texts record and constructors
     private readonly texts: Record<string, Text> = {};
     private readonly textConstructors: Record<string, TextParams> = {
@@ -80,7 +72,7 @@ class WinnerLayer extends Layer {
             pos: { x: 33.2, y: 66.3 }
         },
         survived: {
-            text: "Survived for",
+            text: "Survived",
             style: { ...this.textStyle, fontWeight: "400" },
             pos: { x: 28.611, y: 69.8 }
         },
@@ -91,6 +83,8 @@ class WinnerLayer extends Layer {
         }
     };
 
+    private container:Container;
+    
     constructor(ecs: ECS, 
                 app: Application, 
                 participant: ScheduledGameParticipant, 
@@ -104,50 +98,48 @@ class WinnerLayer extends Layer {
         this.participant = participant;
 
         // sets percents
-        this.percentX = this.app.view.width / 100.0;
-        this.percentY = this.app.view.height / 100.0;
-        this.screenX = this.app.view.width;
-        this.screenY = this.app.view.height;
+        this.percentX = this.app.view.clientWidth / 100.0;
+        this.percentY = this.app.view.clientHeight / 100.0;
+        this.screenX = this.app.view.clientWidth;
+        this.screenY = this.app.view.clientHeight;
 
-        // generate all sprites
-        Object.entries(this.spriteConstructors).map(([key, value]) => {
+        this.container = new Container();
+        this.app.stage.addChild(this.container);
+        this.container.visible = false;
+
+        this.spriteConstructors.map((key) => {
             const component = this.ecs
-                .createEntity(this.percentX * value.x, this.percentY * value.y)
+                .createEntity()
                 .addSprite();
             component.setAnchor(0.0);
             this.sprites[key] = component;
             this.sprites[key].setImg(this.app.loader.resources[key]);
-            this.sprites[key].addStage(this.app);
+            this.container.addChild(this.sprites[key].sprite);
         });
 
-        // generate all texts
         Object.entries(this.textConstructors).map(([key, value]) => {
             const component = this.ecs
-                .createEntity(this.percentX * value.pos.x, this.percentY * value.pos.y)
+            // this.percentX * value.pos.x, this.percentY * value.pos.y
+                .createEntity()
                 .addText(value.text, value.style);
+            
             this.texts[key] = component;
-            this.texts[key].addStage(this.app);
+            this.container.addChild(this.texts[key].text);
+            this.texts[key].text.anchor.set(0.5,0.5);
         });
-
         // initialize winner img
         this.winnerImg = this.ecs
-            .createEntity(27.1 * this.percentX, 34.375 * this.percentY)
+            .createEntity()
             .addSprite();
+        this.container.addChild(this.winnerImg.sprite);
 
-        this.winnerImg.setAnchor(0.0);
-        this.winnerImg.addStage(this.app);
-    }
-
-    onAttach() {
-        // Set cards scales
-        this.scaleImg(this.sprites["resultCard"]);
-        this.scaleImg(this.sprites["nameCard"]);
 
         this.winnerImg.setFromUrl(
-            this.details.image
+            this.details.image, (tx) => {
+                this.renderWinner();
+            }
         );
-
-        // sets texts according to the winner
+        
         this.texts["winnerName"].setText(PlayerLayer.lastGamePlayerNames[this.participant.nft_id]);
         this.texts["kills"].setText(String(this.participant.game_participants_result.kills));
         this.texts["health"].setText(String(this.participant.game_participants_result.health));
@@ -155,43 +147,96 @@ class WinnerLayer extends Layer {
             this.formatTime(this.participant.game_participants_result.survived_for)
         );
 
-        const offsetX = this.texts["winnerName"].text.width / 2;
-        this.texts["winnerName"].setPos((34 * this.percentX) - offsetX, 61.8 * this.percentY);
+    }
+
+    onAttach() {
+        this.renderWinner();
+    }
+
+    renderWinner () {
+        if (!this.winnerImg.sprite || !this.winnerImg.sprite.texture) return;
+
+        const baseHeight = this.app.view.clientHeight * 0.5;
+        const scale = baseHeight/this.sprites["resultCard"].sprite.texture.height;    
+        this.sprites["resultCard"].sprite.anchor.set(0,0);
+        this.sprites["resultCard"].setScale( scale, scale);
+        const baseWidth = this.sprites["resultCard"].sprite.texture.width * scale;
+        
+        const imageScale = (baseWidth * 0.9) / this.winnerImg.sprite.texture.width;
+        this.winnerImg.sprite.anchor.set(0,0);
+        this.winnerImg.setScale(imageScale, imageScale);
+        this.winnerImg.setPos(baseWidth * 0.05, baseWidth * 0.05);
+
+        
+        this.sprites["nameCard"].sprite.anchor.set(0,0);
+        this.sprites["nameCard"].setScale(scale, scale);
+        this.sprites["nameCard"].setPos(baseWidth * 0.06, baseHeight * 0.68);
+
+        this.sprites["tombstone"].sprite.anchor.set(0,0);
+        this.sprites["tombstone"].setScale(scale, scale);
+        this.sprites["tombstone"].setPos(baseWidth * 0.06, baseHeight * 0.82);
+
+        this.sprites["clock"].sprite.anchor.set(0,0);
+        this.sprites["clock"].setScale(scale, scale);
+        this.sprites["clock"].setPos(baseWidth * 0.06, baseHeight * 0.92);
+
+        this.sprites["purpleHeart"].sprite.anchor.set(0,0);
+        this.sprites["purpleHeart"].setScale(scale, scale);
+        this.sprites["purpleHeart"].setPos(baseWidth * 0.7, baseHeight * 0.825);
+
+        this.sprites["characterLeft"].sprite.anchor.set(0,0);
+        this.sprites["characterLeft"].setScale(scale, scale);
+        this.sprites["characterLeft"].setPos(baseWidth * 0.05, baseHeight * -0.12);
+
+        this.sprites["characterRight"].sprite.anchor.set(0,0);
+        this.sprites["characterRight"].setScale(scale, scale);
+        this.sprites["characterRight"].setPos(baseWidth * 0.82, baseHeight * -0.12);
+
+        this.texts["winner"].setScale(scale, scale);
+        this.texts["winner"].setPos(baseWidth * 0.5, baseHeight * -0.08);
+
+        this.texts["winnerName"].setScale(scale * 0.75, scale * 0.75);
+        this.texts["winnerName"].setPos(baseWidth * 0.5, baseHeight * 0.74);
+
+        this.texts["kills"].setScale(scale * 0.7 , scale * 0.7);
+        this.texts["kills"].setPos(baseWidth * 0.18, baseHeight * 0.855);
+
+        this.texts["survived"].setScale(scale * 0.7, scale * 0.7);
+        this.texts["survived"].setPos(baseWidth * 0.28, baseHeight * 0.955);
+
+        this.texts["health"].setScale(scale * 0.7, scale * 0.7);
+        this.texts["health"].setPos(baseWidth * 0.83, baseHeight * 0.855);
+
+        this.texts["survivedTime"].setScale(scale * 0.7, scale * 0.7);
+        this.texts["survivedTime"].setPos(baseWidth * 0.85, baseHeight * 0.955);
+
+        this.container.x = this.app.view.clientWidth * 0.2;
+        this.container.y = this.app.view.clientWidth * 0.1;
+        
+        this.container.visible = true;
     }
 
     onUpdate(deltaTime: number) {
-        this.winnerImg.setSize(200 * this.app.view.width / 1440, 200 * this.app.view.height / 800);
-
-        // on window resize 
-        if(this.app.view.width !== this.screenX || this.app.view.height !== this.screenY) {
-            // resets percentages
-            this.percentX = this.app.view.width / 100.0;
-            this.percentY = this.app.view.height / 100.0;
-
-            this.screenX = this.app.view.width;
-            this.screenY = this.app.view.height;
-
-            // repositions all objects
-            Object.entries(this.spriteConstructors).map(([key, value], index) => {
-                this.sprites[key].setPos(this.percentX * value.x, this.percentY * value.y);
-            });
-    
-            // generate all texts
-            Object.entries(this.textConstructors).map(([key, value]) => {
-                this.texts[key].setPos(this.percentX * value.pos.x, this.percentY * value.pos.y);
-            });    
-        }
         
+        // on window resize 
+        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
+            // resets percentages
+            this.percentX = this.app.view.clientWidth / 100.0;
+            this.percentY = this.app.view.clientHeight / 100.0;
+            this.renderWinner();
+        }
+
     }
 
     onDetach() {
-        this.self.destroy();
+        this.container.removeChildren();
+        this.app.stage.removeChild(this.container);
     }
 
     // scales image according to screen size
     scaleImg(sprite: Sprite) {
-        const xScale = this.app.view.width / 1440;
-        const yScale = this.app.view.height / 800;
+        const xScale = this.app.view.clientWidth / 1440;
+        const yScale = this.app.view.clientHeight / 800;
         sprite.setScale(xScale, yScale);
     }
 
@@ -200,9 +245,9 @@ class WinnerLayer extends Layer {
         const minTwoDigits = (n: number) => {
             return (n < 10 ? "0" : "") + n;
         };
-
-        const minutes = Math.floor(time / 60);
-        const seconds = time - minutes * 60;
+        const total_seconds = time / 1000;
+        const minutes = Math.floor(total_seconds / 60);
+        const seconds = Math.floor(total_seconds - (minutes * 60));
 
         return `${minTwoDigits(minutes)}:${minTwoDigits(seconds)}`;
     }

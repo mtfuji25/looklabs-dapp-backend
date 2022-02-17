@@ -1,6 +1,8 @@
 // Level import
 import { Level } from "../Core/Level";
 
+import { v4 as uuidv4 } from "uuid";
+
 // Constants
 import { MAIN_BG_COLOR } from "../Constants/Constants";
 
@@ -10,9 +12,12 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameStatus, Listener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
+import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
+import { IntroSequence } from "../Layers/Lobby/IntroSequence";
+import { DefaultLevel } from "./Default";
+
 
 interface LobbyLevelContext extends ViewContext {
     // View properties
@@ -21,15 +26,25 @@ interface LobbyLevelContext extends ViewContext {
     offsetY: number;
 }
 
+
+export enum GameStateValues {
+    SPAWN,
+    COUNTDOWN3,
+    COUNTDOWN2,
+    COUNTDOWN1,
+    COUNTDOWN0,
+    FIGHT
+}
+
 class LobbyLevel extends Level {
 
-    private listener: Listener;
-    private listenerRemain: Listener;
-    private conListener: Listener;
+    private gameStatusListener: Listener;
+    private connectionListener: Listener;
+    private gameStateListener: Listener;
+    private remainPlayerlistener: RemainPlayersListener;
+
     private remaining: number = 0;
-    private responseParticipant: any | null = null;
-    private responseWinner: any | null = null;
-    private requested: boolean = false;
+    private showDownStart: boolean = false;
 
     private levelContext: LobbyLevelContext = {
         // View properties
@@ -38,132 +53,224 @@ class LobbyLevel extends Level {
         offsetY: 0.0
     };
 
-    onStart(): void {
+    private introSequence:IntroSequence;
+    private playerLayer:PlayerLayer;    
 
-        this.listener = this.context.ws.addListener("game-status", (msg) => this.onStatus(msg));
-        this.listenerRemain = this.context.ws.addListener("remain-players", (msg) => this.onRemainPlayersMsg(msg));
-        this.conListener = this.context.ws.addListener("connection", (ws) => {
+    async onStart(): Promise<void> {
 
-            this.context.engine.loadLevel(
-                new LobbyLevel(
-                    this.context, "Lobby",
-                    {
-                        gameId: this.props.gameId,
-                        playerNames: this.props.playerNames
-                    }
-                )
-            );
+        // Add listeners
+        this.gameStatusListener = this.context.ws.addListener(
+            "game-status",
+            (msg) => this.onGameStatusMessage(msg)
+        );
 
-            return false;
-        });
+        this.connectionListener = this.context.ws.addListener(
+            "connection",
+            (event) => this.onConnectionEvent(event)
+        );
+
+        this.gameStateListener = this.context.ws.addListener(
+            "game-state",
+            (msg) => this.onGameStateMessage(msg)
+        );
+
+        this.remainPlayerlistener = this.context.ws.addListener(
+            "remain-players", 
+            msg => this.onRemainPlayersMsg(msg)
+        );
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
 
+        const viewLayer = new ViewLayer(this.ecs, this.levelContext, this.context.app, this.context.inputs);
         // Pushs view controller
         this.layerStack.pushLayer(
-            new ViewLayer(this.ecs, this.levelContext, this.context.app, this.context.inputs)
+            viewLayer
         );
 
+        const mapLayer = new MapLayer(
+            this.ecs,
+            this.levelContext,
+            this.context.app,
+            this.context.res
+        );
         // Pushs map generator
         this.layerStack.pushLayer(
-            new MapLayer(
-                this.ecs,
-                this.levelContext,
-                this.context.app,
-                this.context.res
-            )
+            mapLayer
         );
 
+       
+        
+        this.playerLayer = new PlayerLayer(
+            this.ecs,
+            this.levelContext,
+            this.context.app,
+            this.context.ws,
+            this.context.res,
+            this.context.participantDetails,
+        );
         // Pushs the player controller
         this.layerStack.pushLayer(
-            new PlayerLayer(
-                this.ecs,
-                this.levelContext,
-                this.context.app,
-                this.context.ws,
-                this.context.strapi,
-                this.context.res,
-            )
+            this.playerLayer
         );
-
+        
+        const overlayLayer = new OverlayMap(
+            this.ecs,
+            this.levelContext,
+            this.context.app,
+            this.context.res
+        );
         // Load all overlays
         this.layerStack.pushLayer(
-            new OverlayMap(
-                this.ecs,
-                this.levelContext,
-                this.context.app,
-                this.context.res
-            )
+            overlayLayer
+        );
+
+        const statusLayer = new BattleStatusLayer(
+            this.ecs,
+            this.context.app,
+            this.context
         );
 
         this.layerStack.pushOverlay(
-            new BattleStatusLayer(
-                this.ecs,
-                this.context.app,
-                this.context
-            )
+            statusLayer
         );
 
-        this.layerStack.pushOverlay(
-            new LogsLayer(
-                this.ecs,
-                this.context.app,
-                this.context
-            )
+        const logsLayer = new LogsLayer(
+            this.ecs,
+            this.context.app,
+            this.context
         );
+        this.layerStack.pushOverlay(
+          logsLayer  
+        );
+        
+         
+        overlayLayer.hideFixtures();
+        await this.context.ws.whenReady();
+
+        const response = await this.context.ws.request(
+            {
+                uuid: uuidv4(),
+                type: "request",
+                content: {
+                    type: "game-state"
+                }
+            }
+        );    
+
+        const content = response.content as GameState;
+        // create intro sequence controller
+        this.introSequence = new IntroSequence(this.context.app, this.playerLayer, overlayLayer, viewLayer, this.context.res);
+        this.introSequence.updateIntroState(content.gameState);
+        if (content.gameState == "fight")
+            this.playBackgroundMusic(Level.LOBBY_SOUND);
+        
     }
 
-    onUpdate(deltaTime: number) {
-        if (this.remaining == 1 && (!this.requested)) {
-            this.requested = true;
-            this.context.strapi.getGameParticipants(this.props.gameId).then((participants) => {
-                this.responseParticipant = participants;
-                let splitId = (participants[0].nft_id).split('/')[1];
-                let address = (participants[0].nft_id).split('/')[0];
-                if(splitId > 50) splitId -= 50;
-                if(splitId == 0) splitId += 1;
-                this.context.strapi.getParticipantDetails(address, splitId).then((participant) => {
-                    this.responseWinner = participant;
-                })
-            })
+    async onUpdate(deltaTime: number) {
+        if (this.introSequence) {
+            this.introSequence.onUpdate(deltaTime);
+        }
+
+        if (this.remaining == 1) {
+            this.playerLayer.showWinner();
+        }
+
+        if (this.remaining > 0 &&  this.remaining <= 2 && !this.showDownStart) {
+            this.showDownStart = true;
+            // switch BG music to showdown
+            this.playBackgroundMusic(Level.SHOWDOWN_SOUND);
         }
     }
 
     onClose(): void {
-        this.layerStack.destroy();
-        this.conListener.destroy();
-        this.listener.destroy();
-        this.listenerRemain.destroy();
+        this.connectionListener.destroy();
+        this.gameStatusListener.destroy();
+        this.gameStateListener.destroy();
+        this.remainPlayerlistener.destroy();
+        if (this.introSequence) {
+            this.introSequence.destroy();
+        }
+    }
+
+    // Handles all game-status messages from backend
+    onGameStatusMessage(msg: ServerMsg) {
+        let content: GameStatus;
+
+        // Check the veracity of message type
+        if (msg.content.msgType == msgTypes.gameStatus) {
+
+            // Perfom the cast to corret msg type
+            content = msg.content as GameStatus;
+
+            // Checks for the interest type of message
+            if (content.gameStatus == "awaiting") {
+
+                this.context.engine.loadLevel(new ResultsLevel(
+                    this.context,
+                    "Results",
+                    {
+                        gameId: content.gameId,
+                    }
+                ));
+            } else if (content.gameStatus == "restarting") {
+                this.context.engine.loadLevel(new DefaultLevel(
+                    this.context,
+                    "Default",
+                    {
+                        gameId: content.gameId,
+                    }
+                ));
+            }
+        }
+
+        // Doesn't handles the event, allow event propagation
+        // in the event listeners queue
+        return false;
+    }
+
+    // Handles all connection events with backend
+    onConnectionEvent(event: Event) {
+        
+        this.context.engine.loadLevel(
+            new LobbyLevel(
+                this.context, "Lobby",
+                {
+                    gameId: this.props.gameId,
+                    playerNames: this.props.playerNames
+                }
+            )
+        );
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
+    }
+
+    onGameStateMessage (msg:ServerMsg) {
+        let content: GameState;
+
+        // Check the veracity of message type
+        if (msg.content.msgType == msgTypes.gameState) {
+
+            // Perfom the cast to corret msg type
+            if (this.introSequence) {
+                content = msg.content as GameState;
+                if (content.gameState == "fight")
+                    this.playBackgroundMusic(Level.LOBBY_SOUND);
+                this.introSequence.updateIntroState(content.gameState);
+            }
+        }
+        return false;
     }
 
     onRemainPlayersMsg(msg: ServerMsg) {
-        
-        const { totalPlayers, remainingPlayers } = msg.content as RemainPlayersMsg;
-        
-        this.remaining = remainingPlayers;
-
+        const { remainingPlayers } = msg.content as RemainPlayersMsg;
+       this.remaining = remainingPlayers;
         return false;
     }
 
-    onStatus(status: ServerMsg) {
-
-        status.content = status.content as GameStatus;
-
-        if (status.content.gameStatus == "awaiting") {
-            console.log("Running")
-            this.context.engine.loadLevel(new ResultsLevel(
-                this.context, "Results",
-                {
-                    gameId: status.content.gameId,
-                    responseParticipant: this.responseParticipant,
-                    responseWinner: this.responseWinner,
-                }
-            ));
-        }
-
-        return false;
-    }
+    
 }
 
 export { LobbyLevel, LobbyLevelContext };

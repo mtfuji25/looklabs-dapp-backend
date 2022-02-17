@@ -5,17 +5,22 @@ import { Transform } from "./Transform";
 // Pixi imports
 import { Application, Container, BaseTexture, Texture, Rectangle, AnimatedSprite } from "pixi.js";
 
+type Frame = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 type AnimConfig = {
     resource: string;
     speed: number;
+    anchor: number;
     loop: boolean;
     texWidth: number;
     texHeight: number;
-    frameWidth: number;
-    frameHeigth: number;
     animations: Array<string>;
 } & {
-    [animation: string]: Array<Array<number>>;
+    [animation: string]: Array<Frame>;
 };
 
 class AnimSprite {
@@ -27,13 +32,11 @@ class AnimSprite {
     private ssheet: BaseTexture;
     private sprites: Record<string, Array<Texture>> = {};
     
-    public sprite: AnimatedSprite;
+    public sprite: Container;
+    public animSprite:AnimatedSprite;
 
     private texWidth: number = 0;
     private texHeight: number = 0;
-
-    private frameWidth: number = 0;
-    private frameHeight: number = 0;
 
     private app: Application | null = null;
     private container: Container | null = null;
@@ -41,17 +44,21 @@ class AnimSprite {
     constructor(transform: Transform) {
         this.transform = transform;
     }
+    
+    createContainer () {
+        this.sprite = new Container();
+        this.sprite.x = this.transform.pos.x;
+        this.sprite.y = this.transform.pos.y;
+    }
 
-    loadFromConfig(app: Application, config: AnimConfig) {
+    loadFromConfig(app: Application, config: AnimConfig, res:string = null, offset:boolean = false) {
 
-        const url: string = app.loader.resources[config["resource"]].url;
+        const url: string = res === null ? app.loader.resources[config["resource"]].url : res;
         this.ssheet = BaseTexture.from(url);
 
         this.texWidth = config["texWidth"];
         this.texHeight = config["texHeight"];
-        this.frameWidth = config["frameWidth"];
-        this.frameHeight = config["frameHeigth"];
-
+        
         config["animations"].forEach((animation) => {
             config[animation].forEach((frame) => {
                 if (!this.sprites[animation])
@@ -59,53 +66,65 @@ class AnimSprite {
 
                 this.sprites[animation].push(
                     new Texture(this.ssheet, new Rectangle(
-                        frame[1] * this.frameWidth, frame[0] * this.frameHeight,
-                        this.frameWidth, this.frameHeight
+                        frame.x, frame.y, frame.width, frame.height
                     ))
                 );
             });
         });
 
-        this.sprite = new AnimatedSprite(this.sprites[config["animations"][0]]);
-        this.sprite.animationSpeed = config["speed"];
-        this.sprite.loop = config["loop"];
-
-        this.sprite.anchor.set(0.5);
-        this.sprite.x = this.transform.pos.x;
-        this.sprite.y = this.transform.pos.y;
+        this.animSprite = new AnimatedSprite(this.sprites[config["animations"][0]]);
+        this.animSprite.animationSpeed = config["speed"];
+        this.animSprite.loop = config["loop"];
+        this.animSprite.anchor.set(config["anchor"]);
+        if (offset) {
+            this.animSprite.y = -this.animSprite.height * 0.25;
+        }
+        
+        this.sprite.addChild(this.animSprite);
     }
 
     animate(animation: string) {
-        if (!this.sprite.playing) {
-            this.sprite.textures = this.sprites[animation];
-            this.sprite.play();
+        if (this.animSprite && !this.animSprite.playing) {
+            this.animSprite.textures = this.sprites[animation];
+            this.animSprite.play();
         }
     }
 
-    forceAnimate(animation: string) {
-        this.sprite.textures = this.sprites[animation];
-        this.sprite.play();
+    forceAnimate(animation: string, speed:number = 0) {
+        if (this.animSprite) {
+            this.animSprite.textures = this.sprites[animation];
+            if (speed > 0) this.animSprite.animationSpeed = speed;
+            this.animSprite.play();
+        }
     }
 
-    addStage(app: Application | Container) {
+    addStage(app: Application | Container, index:number = -1) {
         if (app instanceof Application) {
             if (!this.app) {
                 this.app = app;
-                app.stage.addChild(this.sprite);
             } else {
                 this.remStage();
                 this.app = app;
+            }
+            if (index >= 0) {
+                app.stage.addChildAt(this.sprite, index);
+            } else {
                 app.stage.addChild(this.sprite);
             }
+            
         } else {
             if (!this.container) {
                 this.container = app;
-                app.addChild(this.sprite);
             } else {
                 this.remStage();
                 this.container = app;
+            }
+            if (index >= 0) {
+                app.addChildAt(this.sprite, index);
+            } else {
                 app.addChild(this.sprite);
             }
+            
         }
     }
 
@@ -131,4 +150,4 @@ class AnimSprite {
 
 }
 
-export { AnimSprite };
+export { AnimSprite, AnimConfig };

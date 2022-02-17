@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { Logger } from "../Utils/Logger";
 
 interface ScheduledGame {
     id: number;
@@ -6,6 +7,7 @@ interface ScheduledGame {
     published_at?: string;
     created_at?: string;
     updated_at?: string;
+    max_participants?: number,
     scheduled_game_participants: ScheduledGameParticipant[];
 }
 
@@ -40,6 +42,7 @@ interface ParticipantDetails {
     dna: string;
     edition: number;
     date: number;
+    spritesheet: string,
     attributes: DetailAttribute[];
 }
 
@@ -52,7 +55,7 @@ interface DetailAttribute {
 class StrapiClient {
     private host: string;
     private authToken: string;
-
+    public readonly serverRoot: string = "https://token.thepitnft.com/";
     // strapiApi
     private readonly api: AxiosInstance;
 
@@ -73,7 +76,7 @@ class StrapiClient {
 
         // start axios for restApi
         this.restApi = axios.create({
-            baseURL: "https://token.thepitnft.com/"
+            baseURL: this.serverRoot
         });
     }
 
@@ -115,6 +118,7 @@ class StrapiClient {
             created_at: attributes.createdAt,
             updated_at: attributes.updatedAt,
             game_date: attributes.game_date,
+            max_participants: attributes.max_participants,
             scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                 (participant: any) => {
                     const attributes = participant.attributes;
@@ -126,7 +130,7 @@ class StrapiClient {
                         scheduled_game: response.id,
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
-                        updated_at: attributes.updatedAt
+                        updated_at: attributes.updatedAt,  
                     };
                 }
             )
@@ -140,6 +144,7 @@ class StrapiClient {
         return {
             id: response.id,
             game_date: attributes.game_date,
+            max_participants: attributes.max_participants,
             scheduled_game_participants: attributes.scheduled_game_participants.data.map(
                 (participant: any) => {
                     const attributes = participant.attributes;
@@ -152,6 +157,7 @@ class StrapiClient {
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
                         updated_at: attributes.updatedAt
+                        
                     };
                 }
             )
@@ -206,7 +212,7 @@ class StrapiClient {
     // Default engine close call
     // closes express server
     close(): void {
-        console.log("Closing express server.");
+        Logger.info("Closing express server.");
         this.expressServer.close();
     }
 }

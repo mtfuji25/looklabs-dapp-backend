@@ -1,0 +1,41 @@
+steps:
+    - name: gcr.io/cloud-builders/docker
+      args:
+          - build
+          - "--no-cache"
+          - "-t"
+          - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+          - "./backend/"
+          - "-f"
+          - backend/Dockerfile
+      id: Build
+
+    - name: gcr.io/cloud-builders/docker
+      args:
+          - push
+          - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+      id: Push
+
+    - name: "gcr.io/cloud-builders/gcloud"
+      entrypoint: gcloud
+      args:
+          - config   
+          - set
+          - compute/zone
+          - "europe-west2-c"
+      id: Config
+
+    - name: "gcr.io/cloud-builders/gcloud"
+      entrypoint: gcloud
+      args: 
+          - compute
+          - instances
+          - update-container
+          - "thepit-backend"
+          - "--container-image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+          - "--container-privileged"
+      id: Deploy
+
+timeout: 3600s
+images:
+    - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"

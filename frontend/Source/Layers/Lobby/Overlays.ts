@@ -8,7 +8,7 @@ import { SPRITE_SIZE } from "../../Constants/Constants";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, Container, filters } from "pixi.js";
+import { Application, Container } from "pixi.js";
 
 // Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
@@ -16,6 +16,7 @@ import { LobbyLevelContext } from "../../Levels/Lobby";
 // Files import
 import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
+
 const levelMap: Record<string, any> = levelMapFile;
 
 class OverlayMap extends Layer {
@@ -32,6 +33,10 @@ class OverlayMap extends Layer {
     // Current level's context
     private levelContext: LobbyLevelContext;
 
+    private overlayFixtures:Entity[] = [];
+
+    // these are the texture cells used in the creation of map's tall obstacles (lockers, and clone tubes)
+    private fixtureIndexes:Set<number> = new Set([95, 96, 97, 98, 99, 100,101, 102,  103, 104, 105, 106, 107, 108, 109, 110, 111, 112,113, 114,115, 116,117, 118,166, 167,168, 169,187, 188,189, 190,207, 208,209, 210,226, 227,228, 229]);
     // Dimension
     private dim: Vec2 = new Vec2();
 
@@ -49,55 +54,49 @@ class OverlayMap extends Layer {
 
         // Creates new pixi container
         this.mapContainer = new Container();
+        
+       
     }
-
+    
+    //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
     loadMap() {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
 
-        const step = SPRITE_SIZE / 2.0;
-
-        let x = 0.0;
-        let y = 0.0;
-
         for (let i = 0; i < rows; ++i) {
-            y += step;
+            
             for (let j = 0; j < cols; ++j) {
-                x += step;
-                // Creates entity and add sprite to it
-                const entity = this.ecs.createEntity(x, y, false)
+                const currentCell = levelMap["data"][i][j];
+                const entity = this.ecs.createEntity(j * SPRITE_SIZE, i * SPRITE_SIZE, false);
                 const sprite = entity.addSprite();
-
-                // Calculates base cuts in spritesheet
-                const pw = j * SPRITE_SIZE;
-                const ph = i * SPRITE_SIZE;
-
-                // Load the cuted image to sprite
                 sprite.setCutImg(
-                    this.app.loader.resources["overlaymap_raw"],
-                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
+                    this.app.loader.resources["map-overlay"],
+                    // 25 is the number of columns in the sprite sheet
+                    Math.floor(((currentCell) % 25)) * SPRITE_SIZE,
+                    Math.floor((currentCell) / 25) * SPRITE_SIZE,
+                    SPRITE_SIZE,
+                    SPRITE_SIZE
                 );
-
                 this.entities.push(entity);
-                this.mapContainer.addChild(sprite.sprite);
-                x += step;
+                if (this.fixtureIndexes.has(currentCell)) {
+                    this.overlayFixtures.push(entity);
+                }
+                if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
+                this.mapContainer.addChild(sprite.sprite);  
             }
-            x = 0;
-            y += step;
         }
     }
+    
 
     onAttach() {
         this.loadMap();
-
-        // Apply a ligth blur on the soil
-        //this.mapContainer.filters = [new filters.BlurFilter(1, 8)];
 
         this.dim.x = this.mapContainer.width;
         this.dim.y = this.mapContainer.height;
 
         // Add layers to render stage
         this.app.stage.addChild(this.mapContainer);
+        this.onUpdate(0);
     }
 
     onUpdate(deltaTime: number) {
@@ -108,19 +107,28 @@ class OverlayMap extends Layer {
             (this.dim.y - this.dim.y * (1 - this.levelContext.zoom)) / 2.0;
             
         // Translate and scale soil
-        this.mapContainer.x = this.levelContext.offsetX + fixFactorX;
-        this.mapContainer.y = this.levelContext.offsetY + fixFactorY;
+        this.mapContainer.x = this.levelContext.offsetX + fixFactorX + SPRITE_SIZE * 0.5;
+        this.mapContainer.y = this.levelContext.offsetY + fixFactorY + SPRITE_SIZE * 0.5;
         this.mapContainer.scale.x = 1 - this.levelContext.zoom;
         this.mapContainer.scale.y = 1 - this.levelContext.zoom;
     }
 
     onDetach() {
-        this.self.destroy();
         this.app.stage.removeChild(this.mapContainer);
-        this.entities.map((entity) => {
-            entity.destroy();
+    }
+
+    getContainer ():Container {
+        return this.mapContainer;
+    }
+
+    //we hide the textures for lockers and test tubes so these can be added inside PlayerLayer and y-sorted
+    hideFixtures () {
+        this.overlayFixtures.forEach( o => {
+            o.getSprite().sprite.visible = false;
         });
     }
+
+
 }
 
 export { OverlayMap };

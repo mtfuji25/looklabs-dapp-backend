@@ -1,7 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
+import { Logger } from "../Utils/Logger";
 import {
     ConnectionLostListener,
     EnemyListener,
+    GameStateListener,
     GameStatusListener,
     GameTimeListener,
     KillListener,
@@ -12,6 +14,7 @@ import {
     OnConnectionListener,
     OnConnectionLostFn,
     OnEnemyFn,
+    OnGameStateFn,
     OnGameStatusFn,
     OnGameTimeFn,
     OnKillFn,
@@ -79,7 +82,16 @@ class WSClient {
                     if ((listener as GameTimeListener).callback(data)) break;
                 }
             }
+        },
+
+        "game-state": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "game-state") {
+                    if ((listener as GameStateListener).callback(data)) break;
+                }
+            }
         }
+
     };
 
     constructor(host: string, port: number) {
@@ -93,7 +105,7 @@ class WSClient {
             );
         }
 
-        console.log("WebSocket client initing in host: ", `${this.host}`);
+        Logger.info("WebSocket client initing in host: ", `${this.host}`);
     }
 
     private handleServerMsg(message: any) {
@@ -174,7 +186,7 @@ class WSClient {
         this.socket = new WebSocket(connectionString);
 
         this.socket.addEventListener("open", (event) => {
-            console.log("Connected to backend.");
+            Logger.info("Connected to backend.");
 
             this.onConnectionReady(event);
         });
@@ -184,7 +196,7 @@ class WSClient {
 
             if (this.reconnect) {
                 setTimeout(() => {
-                    console.log("Trying to reconnect...");
+                    Logger.info("Trying to reconnect...");
                     this.start();
                 }, 1000);
             }
@@ -192,7 +204,7 @@ class WSClient {
     }
 
     close(): void {
-        console.log("WebSocket client closing in host: ", this.host);
+        Logger.info("WebSocket client closing in host: ", this.host);
 
         this.reconnect = false;
         this.socket.close();
@@ -206,9 +218,21 @@ class WSClient {
         }
     }
 
+    async whenReady(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const checkConnection = () => {
+                if (this.connected) {
+                    resolve();
+                } else {
+                    setTimeout(checkConnection, 1000);
+                }
+            };
+            checkConnection();
+        });
+    }
+
     //
     //  Listeners to add and remove ids
-    //
     //
 
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
@@ -218,11 +242,13 @@ class WSClient {
     addListener(type: "kill", fn: OnKillFn): KillListener;
     addListener(type: "enemy", fn: OnEnemyFn): EnemyListener;
     addListener(type: "response", fn: OnResponseFn): ResponseListener;
+    addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
+
     addListener(type: "game-time", fn: OnGameTimeFn): GameTimeListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
-        console.log("Adicionando listener: ", id);
-        console.log("Listeners: ", this.listeners);
+        Logger.info("Adicionando listener: ", id);
+        Logger.info("Listeners: ", this.listeners);
 
         const listener = {
             type: type,
@@ -237,7 +263,7 @@ class WSClient {
     }
 
     remListener(id: string): void {
-        console.log("Removendo Listener: ", id);
+        Logger.info("Removendo Listener: ", id);
         delete this.listeners[id];
     }
 

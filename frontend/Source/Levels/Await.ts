@@ -1,115 +1,231 @@
 import { Level } from "../Core/Level";
+import { LobbyLevel } from "./Lobby";
 
 // Layers imports
 import { TextLayer } from "../Layers/Await/Text";
 import { MapLayer } from "../Layers/Await/Basemap";
+import { OverlayMap } from "../Layers/Await/Overlays";
+import { LogsLayer } from "../Layers/Await/Log";
 
-// Web Clients imports
-import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
-import { ScheduledGameParticipant } from "../Clients/Strapi";
-import { LobbyLevel } from "./Lobby";
+// Utils
 import { v4 as uuidv4 } from "uuid";
 
+// Web Clients imports
+import { ScheduledGame } from "../Clients/Strapi";
+import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { Logger } from "../Utils/Logger";
+import { Resource } from "../Core/AssetLoader";
+import { EngineContext } from "../Core/Interfaces";
+
 // Await level bg color
-const BLACK_BG_COLOR = 0x000;
+const BLACK_BG_COLOR = 0x18215d;
+
 
 class AwaitLevel extends Level {
+    static LOG_REFRESH_TIME:number = 3.0;
 
-    private listener: Listener;
-    private conListener: Listener;
+    private gameStatusListener: Listener;
+    private connectionListener: Listener;
 
-    onStart(): void {
-        // Add msg listener
+    // count that resets every 3 seconds
+    private refreshCount: number = 0.0;
+    private playersInBattle:Set<string> = new Set();
+    // Current Update Promisse
+    private currentGame: ScheduledGame;
+    private playerLog:LogsLayer;
+    
+    constructor(context: EngineContext, name: string = "Default", props: Record<string, any> = {}) {
+        super(context, name, props);
+        this.context.participantDetails.reset();
+    }
 
-        this.context.ws.request({
-            uuid: uuidv4(),
-            type: "request",
-            content: {
-                type: "game-status"
-            }
-        })
-        .then((response) => {
+    async onStart(): Promise<void> {
+
+        try {
+            // Request current game status from backend
+            const response = await this.context.ws.request({
+                uuid: uuidv4(),
+                type: "request",
+                content: {
+                    type: "game-status"
+                }
+            });
+
+            // Cast the response to corret type
             const content = response.content as GameStatus;
+
+            // If in lobby changes to lobby level
             if (content.gameStatus == "lobby") {
-                this.context.engine.loadLevel(new LobbyLevel(
+                await this.context.engine.loadLevel(new LobbyLevel(
                     this.context, "Lobby",
                     {
                         gameId: content.gameId
                     }
                 ))
             }
-        })
-        .catch((err) => {
-            console.log(err);
+
+        } catch(err) {
+            Logger.fatal("Failed to request game status.")
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
             this.context.close = true;
-        });
+        }
 
-        this.listener = this.context.ws.addListener("game-status", (msg) => this.onServerMsg(msg));
-
-        this.conListener = this.context.ws.addListener("connection", (ws) => {
-
-            this.context.engine.loadLevel(
-                new AwaitLevel(
-                    this.context, "Await",
-                    {
-                        gameId: this.props.gameId
-                    }
-                )
-            );
-
-            return true;
-        });
+        // Add backend message listeners
+        this.gameStatusListener = this.context.ws.addListener(
+            "game-status",
+            (msg) => this.onGameStatusMessage(msg)
+        );
+        
+        this.connectionListener = this.context.ws.addListener(
+            "connection",
+            (event) => this.onConnectionEvent(event)
+        );
 
         // Sets bg color of main app
         this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
-        this.connectLayers();
-    }
-
-    connectLayers(): void {
+        // Connect background layer
+        
         this.layerStack.pushLayer(new MapLayer(
             this.ecs,
             this.context.app,
             this.context.res
         ));
 
-        this.context.strapi.getGameById(this.props.gameId)
-            .then((game) => {
-                this.layerStack.pushLayer(new TextLayer(
-                    this.ecs,
-                    this.context.app,
-                    this.context,
-                    game
-                ));
-        });
+        // Load all overlays
+        this.layerStack.pushLayer(
+            new OverlayMap(
+                this.ecs,                
+                this.context.app,
+                this.context.res
+            )
+        );
+
+        // Request current player details from strapi
+        await this.loadPlayerDetails();
+
+        this.playerLog = new LogsLayer(
+            this.ecs,
+            this.context.app,
+            this.context
+        );
+
+        this.layerStack.pushOverlay(
+            this.playerLog
+        );
+
+        // Connect infos layer
+        this.layerStack.pushLayer(new TextLayer(
+            this.ecs,
+            this.context.app,
+            this.context,
+            this.currentGame
+        ));
+
+        this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
 
-    onUpdate(deltaTime: number) {}
 
     onClose(): void {
-        this.listener.destroy()
-        this.conListener.destroy();
-        this.layerStack.destroy();
+
+        // Destroy event and message listeners
+        this.gameStatusListener.destroy();
+        this.connectionListener.destroy();
     }
 
-    onServerMsg(msg: ServerMsg) {
+    // Handles all game-status messages from backend
+    onGameStatusMessage(msg: ServerMsg) {
         let content: GameStatus;
-        console.log("No await", msg)
+
+        // Check the veracity of message type
         if (msg.content.msgType == msgTypes.gameStatus) {
+
+            // Perfom the cast to corret msg type
             content = msg.content as GameStatus;
+
+            // Checks for the interest type of message
             if (content.gameStatus == "lobby") {
+
+                // Changes the level
                 this.context.engine.loadLevel(new LobbyLevel(
                     this.context,
                     "Lobby",
                     {
                         gameId: content.gameId
-                    })
-                )
+                    }
+                ));
             }
         }
-        
+
+        // Doesn't handles the event, allow event propagation
+        // in the event listeners queue
         return false;
     }
+
+    // Handles all connection events with backend
+    onConnectionEvent(event: Event) {
+        
+        this.context.engine.loadLevel(
+            new AwaitLevel(
+                this.context, "Await",
+                {
+                    gameId: this.props.gameId
+                }
+            )
+        );
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
+    }
+
+    async loadPlayerDetails () {
+        
+        try {
+            // Request current game infos from strapi
+            this.currentGame = await this.context.strapi.getGameById(this.props.gameId);
+            await this.context.participantDetails.loadPlayerDetails(this.currentGame.scheduled_game_participants);
+            this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants));
+            
+        } catch(err) {
+            Logger.fatal("Cannot get game for current game id.");
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
+            this.context.close = true;
+        }
+    }
+
+    updatePlayerList () {
+        Object.values(this.context.participantDetails.participants).forEach( p => {
+            if (p.name && p.name !== "undefined") {
+                const playerKey = `${p.name}/${p.edition}`
+                if (!this.playersInBattle.has(playerKey)) {
+                    this.playersInBattle.add(playerKey);
+                    this.playerLog.addPlayerToLog(p.name);
+                }
+            }
+        });
+    }
+
+    async onUpdate(deltaTime: number) {
+        if (this.refreshCount >= AwaitLevel.LOG_REFRESH_TIME) {
+            try {
+
+                await this.loadPlayerDetails();
+                this.updatePlayerList();
+    
+            } catch(e) {
+                console.log("Failed to request game in strapi");
+                console.log(JSON.stringify(e, null, 4));
+            }           
+
+            this.refreshCount -= AwaitLevel.LOG_REFRESH_TIME;
+        }
+
+        this.refreshCount += deltaTime;
+    }
+
 };
 
 export { AwaitLevel };

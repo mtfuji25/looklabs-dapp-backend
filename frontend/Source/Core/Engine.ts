@@ -15,10 +15,13 @@ import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
 
 // Pixi imports
-import { Application } from "pixi.js";
-
+import { Application, SCALE_MODES, settings } from "pixi.js";
+import { Logger } from "../Utils/Logger";
 // Require the resources.json
 import resourceFile from "../Assets/Resources.json";
+import { AssetLoader } from "./AssetLoader";
+import { ParticipantDetailsModel } from "./PlayerModel";
+
 // Cast to something that typescript can understand
 const resources: Record<string, any> = resourceFile;
 
@@ -41,13 +44,17 @@ class Engine {
 
     // Running Level
     private level: Level;
+    private assetLoader:AssetLoader;
+    private participantDetails:ParticipantDetailsModel;
+
 
     constructor(wsClient: WSClient, strapiClient: StrapiClient, app: Application, root: HTMLElement) {
         this.wsClient = wsClient;
         this.strapiClient = strapiClient;
         this.app = app;
         this.root = root;
-
+        this.assetLoader = new AssetLoader(this.app);
+        this.participantDetails = new ParticipantDetailsModel(this.strapiClient);
         initInputs(this.app);
 
         this.context = {
@@ -63,14 +70,16 @@ class Engine {
                 start: Date.now(),
                 dt: 0.0
             },
+            assetLoader: this.assetLoader,
+            participantDetails: this.participantDetails,
             close: false
         };
 
         this.level = new DefaultLevel(this.context); 
     }
 
-    start(asyncStart: () => (void)): void {
-        console.log("Starting backend engine.");
+    async start(): Promise<void> {
+        Logger.info("Starting frontend engine.");
 
         // Configure pixi application
         // Append the base application to the root div of index.html
@@ -79,34 +88,18 @@ class Engine {
         // Make sure that the application is able to listen to events
         this.app.stage.interactive = true;
 
-        // Add all resources to loader queue
-        resources["packs"].forEach((pack: string) => {
-            this.app.loader.add(resources[pack]);
-        });
-
-        this.app.loader.onComplete.add(() => {
-            this.levelStart(asyncStart);
-        });
+        this.assetLoader.loadFromJSON(resources);
 
         // Start engine Web Socket client
         this.wsClient.start();
 
-        // Effectlly load all the resources
-        this.app.loader.load();
-    }
-
-    private levelStart(asyncStart: () => (void)): void {
         // Finally load the default level
-        console.log("Loading level: ", this.level.getName());
-        this.level.onStart();
-
-        asyncStart();
+        Logger.info("Loading level: ", this.level.getName());
+        await this.level.onStart();
     }
 
-    private count = 1000;
-
-    async loop() {
-        console.log("Entering main engine loop");
+    async loop(): Promise<void> {
+        Logger.info("Entering main engine loop");
         
         while (!this.context.close) {
             // Calculates the delta time of the loop
@@ -116,17 +109,17 @@ class Engine {
             this.context.stats.fps = 1.0 / this.context.stats.dt;
 
             // Run update fn of current level
-            this.level.onUpdate(this.context.stats.dt);
+            await this.level.onUpdate(this.context.stats.dt);
 
             // Run systems pendings
-            this.level.runPendings(this.context.stats.dt)
+            await this.level.runPendings(this.context.stats.dt)
 
             await sleep(1);
         }
     }
 
-    close(): void {
-        console.log("Closing backend engine.");
+    async close(): Promise<void> {
+        Logger.info("Closing frontend engine.");
 
         // Close current active level
         this.closeLevel(this.level);
@@ -135,29 +128,29 @@ class Engine {
         this.wsClient.close();
     }
 
-    loadLevel(level: Level): void {
+    async loadLevel(level: Level): Promise<void> {
  
         // First close the current running level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
             
-        console.log("Loading level: ", level.getName());
+        Logger.info("Loading level: ", level.getName());
 
         // Set level as current in context
         this.level = level;
 
         // Start level and put it to run
-        level.onStart();
+        await level.onStart();
     }
 
-    closeLevel(level: Level): void {
+    async closeLevel(level: Level): Promise<void> {
 
-        console.log("Closing level: ", level.getName());
+        Logger.info("Closing level: ", level.getName());
 
         // Close all level's systems
-        level.closeSystems();
+        await level.closeSystems();
 
         // Fire the onClose function on current level
-        level.onClose();
+        await level.onClose();
     }
 };
 

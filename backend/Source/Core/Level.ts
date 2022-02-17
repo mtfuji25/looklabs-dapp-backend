@@ -30,13 +30,13 @@ abstract class Level {
         this.layerStack = new LayerStack();
     }
 
-    runPendings(deltaTime: number) {
+    async runPendings(deltaTime: number) {
         // Update ECS systems
         this.ecs.onUpdate(deltaTime);
 
         // Update all level's layers
-        this.layerStack.layers.map((layer: Layer) => {
-            layer.onUpdate(deltaTime);
+        this.layerStack.layers.map(async (layer: Layer) => {
+            await layer.onUpdate(deltaTime);
         })
     }
 

@@ -10,6 +10,8 @@ import { sleep } from "../Utils/Sleep";
 // Web clients imports
 import { WSClient } from "../Clients/WebSocket";
 import { StrapiClient } from "../Clients/Strapi";
+import { LogStorageClient } from "../Clients/LogStorage";
+import { Logger } from "../Utils/Logger";
 
 class Engine {
 
@@ -19,20 +21,25 @@ class Engine {
     // Strapi client Instance
     private strapiClient: StrapiClient;
 
+    // Log Storage Client Instance
+    private logStorageClient: LogStorageClient;
+
     // Current level instnace
     private level: Level;
 
     // Engine context
     private context: EngineContext;
 
-    constructor(wsClient: WSClient, strapiClient: StrapiClient) {
+    constructor(wsClient: WSClient, strapiClient: StrapiClient, logStorageClient: LogStorageClient) {
         this.wsClient = wsClient;
         this.strapiClient = strapiClient;
+        this.logStorageClient = logStorageClient;
 
         this.context = {
             engine: this,
             ws: this.wsClient,
             strapi: this.strapiClient,
+            logStorage: this.logStorageClient,
             stats: {
                 dt: 0.0,
                 fps: 0.0,
@@ -45,8 +52,9 @@ class Engine {
         this.level = new DefaultLevel(this.context); 
     }
 
-    start(): void {
-        console.log("Starting backend engine.");
+    // Default engine's start method
+    async start() {
+        Logger.info("Starting backend engine.");
 
         // Start engine Web Socket client
         this.wsClient.start();
@@ -54,13 +62,20 @@ class Engine {
         // Start strapi client
         this.strapiClient.start();
 
+        // Start Log storage client
+        await this.logStorageClient.start();
+
         // Finally load the default level
-        console.log("Loading level: ", this.level.getName());
-        this.level.onStart();
+        Logger.info("Loading level: ", this.level.getName());
+
+        // Maybe IDE tells that await has no effect, but is because
+        // it is an abstract method, but it's necessary to await
+        await this.level.onStart();
     }
 
+    // Default engine's loop method
     async loop() {
-        console.log("Entering main engine loop");
+        Logger.info("Entering main engine loop");
         
         while (!this.context.close) {
             // Calculates the delta time of the loop
@@ -70,51 +85,55 @@ class Engine {
             this.context.stats.fps = 1.0 / this.context.stats.dt;
 
             // Run update fn of current level
-            this.level.onUpdate(this.context.stats.dt);
+            await this.level.onUpdate(this.context.stats.dt);
 
             // Run systems pendings
-            this.level.runPendings(this.context.stats.dt)
+            await this.level.runPendings(this.context.stats.dt)
 
             await sleep(15);
         }
     }
 
-    close(): void {
-        console.log("Closing backend engine.");
+    // Default engine's close method
+    async close() {
+        Logger.info("Closing backend engine.");
 
         // Close current active level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
 
         // Close strapi client
         this.strapiClient.close();
 
         // Close engine Web Socket client
         this.wsClient.close();
+
+        // Disconnect log storage client
+        await this.logStorageClient.close();
     }
 
-    loadLevel(level: Level): void {
+    async loadLevel(level: Level) {
  
         // First close the current running level
-        this.closeLevel(this.level);
+        await this.closeLevel(this.level);
             
-        console.log("Loading level: ", level.getName());
+        Logger.info("Loading level: ", level.getName());
 
         // Set level as current in context
         this.level = level;
 
         // Start level and put it to run
-        level.onStart();
+        await level.onStart();
     }
 
-    closeLevel(level: Level): void {
+    async closeLevel(level: Level) {
 
-        console.log("Closing level: ", level.getName());
+        Logger.info("Closing level: ", level.getName());
 
         // Close all level's systems
         level.closeSystems();
 
         // Fire the onClose function on current level
-        level.onClose();
+        await level.onClose();
     }
 };
 

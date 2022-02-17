@@ -120,4 +120,4 @@ class Grid {
     }
 };
 
-export { Grid };
+export { DynamicEntity, Grid };

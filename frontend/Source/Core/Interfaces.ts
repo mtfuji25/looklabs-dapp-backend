@@ -10,6 +10,8 @@ import { Application } from "pixi.js";
 
 // Inputs
 import { Inputs } from "./Inputs/Inputs";
+import { AssetLoader } from "./AssetLoader";
+import { ParticipantDetailsModel } from "./PlayerModel";
 
 interface EngineStats {
     // Level's deltatime
@@ -39,7 +41,8 @@ interface EngineContext {
 
     // Resources
     res: Record<string, any>;
-
+    assetLoader:AssetLoader;
+    participantDetails:ParticipantDetailsModel;
     // Engine control
     stats: EngineStats;
     close: boolean;

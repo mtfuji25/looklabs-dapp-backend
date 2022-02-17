@@ -9,45 +9,56 @@ import { AwaitLevel } from "./Await";
 import { LobbyLevel } from "./Lobby";
 import { NotFoundLevel } from "./NotFound";
 import { ResultsLevel } from "./Results";
+import { Logger } from "../Utils/Logger";
 
 class DefaultLevel extends Level {
 
-    onStart(): void {
-        this.context.ws.onReady(() => {
-            this.context.ws.request({
+    async onStart(): Promise<void> {
+
+        // Waits for the ws client connection be stabilished
+        await this.context.ws.whenReady();
+
+        try {
+            const response = await this.context.ws.request({
                 uuid: uuidv4(),
                 type: "request",
                 content: {
                     type: "game-status"
                 }
-            })
-            .then((response) => {
-                const content = response.content as GameStatus;
-                console.log(response)
-                this.startLevels(content);
-            })
-            .catch((err) => {
-                console.log(err);
-                this.context.close = true;
             });
-        });
+
+            const content = response.content as GameStatus;
+            Logger.trace(JSON.stringify(response, null, 4));
+            await this.startLevels(content);
+
+        } catch(err) {
+            Logger.fatal("Failed to request game status.")
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
+            this.context.close = true;
+        }
     }
 
-    startLevels(response : GameStatus) {
+    async startLevels(response : GameStatus) {
         switch (response.gameStatus) {
             case "lobby":
-                this.context.engine.loadLevel(
-                    new LobbyLevel(
-                        this.context, "Lobby",
-                        {
-                            gameId: response.gameId
-                        }
-                    )
-                );
+                if (Object.values(this.context.participantDetails.participants).length == 0) {
+                    await this.loadPlayerDetails(response);
+                } else {
+                    await this.context.engine.loadLevel(
+                        new LobbyLevel(
+                            this.context, "Lobby",
+                            {
+                                gameId: response.gameId
+                            }
+                        )
+                    );
+                }
+                
                 break;
 
             case "awaiting":
-                this.context.engine.loadLevel(
+                await this.context.engine.loadLevel(
                     new AwaitLevel(
                         this.context, "Awaiting",
                         {
@@ -58,7 +69,7 @@ class DefaultLevel extends Level {
                 break;
 
             case "not-found":
-                this.context.engine.loadLevel(
+                await this.context.engine.loadLevel(
                     new NotFoundLevel(
                         this.context, "Awaiting",
                         {
@@ -69,10 +80,11 @@ class DefaultLevel extends Level {
                 break;
 
             default:
-                console.log(
+                Logger.fatal(
                     "Expected lobby | awaiting | not-found but got: ", 
                     response.gameStatus
                 );
+                Logger.capture(new Error("Unexpected game status response: " + response.gameStatus));
                 // Should show error screen
 
                 this.context.close = true;
@@ -83,6 +95,25 @@ class DefaultLevel extends Level {
     onUpdate(deltaTime: number) {}
 
     onClose(): void {}
+
+    async loadPlayerDetails (response: GameStatus) {
+        
+        try {
+            // Request current player details from strapi
+            const currentGame = await this.context.strapi.getGameById(response.gameId);
+            await this.context.participantDetails.loadPlayerDetails(currentGame.scheduled_game_participants);
+            this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants), () => {
+                this.startLevels(response);
+            });
+            
+        } catch(err) {
+            Logger.fatal("Cannot get game for current game id.");
+            Logger.trace(JSON.stringify(err, null, 4));
+            Logger.capture(err);
+            this.context.close = true;
+        }
+    }
+
 };
 
 export { DefaultLevel };

@@ -17,7 +17,7 @@ class Rigidbody {
         this.velocity = new Vec2();
     }
 
-    colide(other: Rigidbody, deltaTime: number): CollisionResult {
+    collide(other: Rigidbody, deltaTime: number): CollisionResult {
         const results: CollisionResult = {
             contactPoint: new Vec2(),
             contactNormal: new Vec2(),
@@ -29,7 +29,7 @@ class Rigidbody {
         return results;
     }
 
-    colideStatic(other: Rectangle, deltaTime: number): CollisionResult {
+    collideStatic(other: Rectangle, deltaTime: number): CollisionResult {
         const results: CollisionResult = {
             contactPoint: new Vec2(),
             contactNormal: new Vec2(),

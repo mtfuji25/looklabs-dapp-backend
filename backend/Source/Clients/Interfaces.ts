@@ -6,12 +6,13 @@ const msgTypes = {
     kill: "kill",
     enemy: "enemy",
     gameStatus: "game-status",
-    remainPlayer: "remain-players"
+    remainPlayer: "remain-players",
+    gameState: "game-state"
 };
 
-type MsgTypes = "kill" | "enemy" | "game-status" | "remain-players" | "game-time";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | PlayerCommand | GameTimeMsg | PlayerNames;
-
+type MsgTypes = "kill" | "enemy" | "game-status" | "game-state" | "remain-players" | "game-time";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus |  GameState | PlayerCommand | GameTimeMsg | PlayerNames;
+type GameStateTypes = "spawn" | "countdown3" | "countdown2" | "countdown1" | "countdown0" | "fight"
 //
 //  Msgs interfaces
 //
@@ -25,9 +26,9 @@ interface KillMsg {
 
 interface GameTimeMsg {
     msgType: "game-time",
-    hours: number,
-    minutes: number, 
-    seconds: number
+    hours: string,
+    minutes: string, 
+    seconds: string
 }
 
 interface RemainPlayersMsg {
@@ -40,7 +41,13 @@ interface GameStatus {
     msgType: "game-status";
     gameId: number;
     lastGameId: number;
-    gameStatus: "lobby" | "awaiting" | "not-found";
+    gameStatus: "lobby" | "awaiting" | "not-found" | "restarting";
+}
+
+interface GameState {
+    msgType: "game-state";
+    gameId: number;
+    gameState: GameStateTypes;
 }
 
 interface PlayerNames {
@@ -59,25 +66,17 @@ interface PlayerCommand {
     };
     action: number;
     health: number;
-    attack: number;
-    speed: number;
-    defense: number;
-    cooldown: number;
-    maxHealth: number;
-    survived: number;
-    kills: number;
-    char_class: string;
-    name: string;
 }
 
 // Requests types and values
 
 const requests = {
     gameStatus: "game-status",
-    playerNames: "player-names"
+    playerNames: "player-names",
+    gameState: "game-state"
 };
 
-type ListenerTypes = "game-status" | "connection" | "player-names";
+type ListenerTypes = "game-status" | "connection" | "player-names" | "game-state";
 
 // Interfaces
 interface IncomingMsg {
@@ -93,7 +92,7 @@ interface IncomingMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameTimeMsg | PlayerNames;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameState | GameTimeMsg | PlayerNames;
 }
 
 interface ReplyableMsg {
@@ -110,8 +109,9 @@ interface ReplyableMsg {
 type OnConnectionFn = (event: WebSocket) => boolean;
 type OnGameStatusFn = (event: ReplyableMsg) => boolean;
 type OnPlayerNamesFn = (event: ReplyableMsg) => boolean;
+type OnGameStateFn = (event: ReplyableMsg) => boolean;
 
-type OnListenerFns = OnConnectionFn | OnGameStatusFn;
+type OnListenerFns = OnConnectionFn | OnGameStatusFn | OnGameStateFn;
 
 type msgHandlerFn = (data: IncomingMsg, client: WebSocket) => void;
 
@@ -127,6 +127,11 @@ interface GameStatusListener extends Listener {
     callback: OnGameStatusFn;
 }
 
+interface GameStateListener extends Listener {
+    callback: OnGameStateFn;
+}
+
+
 interface PlayerNamesListener extends Listener {
     callback: OnPlayerNamesFn;
 }
@@ -135,6 +140,7 @@ interface OnConnectionListener extends Listener {
     callback: OnConnectionFn;
 }
 
+
 export {
     requests,
     msgTypes,
@@ -142,6 +148,7 @@ export {
     MsgTypes,
     ServerMsg,
     GameStatus,
+    GameState,
     PlayerNames,
     GameTimeMsg,
     PlayerCommand,
@@ -149,12 +156,15 @@ export {
     ReplyableMsg,
     Listener,
     GameStatusListener,
+    GameStateListener,
     PlayerNamesListener,
     OnPlayerNamesFn,
     OnConnectionListener,
     OnListenerFns,
     OnGameStatusFn,
+    OnGameStateFn,
     OnConnectionFn,
     msgHandlerFn,
-    MsgInterfaces
+    MsgInterfaces,
+    GameStateTypes
 };

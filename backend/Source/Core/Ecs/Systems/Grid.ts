@@ -96,7 +96,7 @@ interface StaticCollisionPair {
 }
 
 let collisionsResults: CollisionPair[] = [];
-let staticColide: StaticCollisionPair[] = [];
+let staticCollide: StaticCollisionPair[] = [];
 
 const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
     data.grids.forEach((grid) => {
@@ -105,7 +105,7 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
             const behavior = dynamic.entity.getBehavior();
 
             behavior.colliding = [];
-            dynamic.entity.getBehavior().staticColide = false;
+            dynamic.entity.getBehavior().staticCollide = false;
             dynamic.entity.getBehavior().staticNormal = [];
             dynamic.entity.getBehavior().staticCenter = [];
         });
@@ -120,14 +120,14 @@ const sys_CheckCollisions = (data: EcsData, deltaTime: number): void => {
             otherBehavior.colliding.push(collision.entity);
         });
 
-        staticColide.map((collision) => {
-            collision.entity.getBehavior().staticColide = true;
+        staticCollide.map((collision) => {
+            collision.entity.getBehavior().staticCollide = true;
             collision.entity.getBehavior().staticNormal.push(collision.normal);
             collision.entity.getBehavior().staticCenter.push(collision.center);
         });
 
         collisionsResults = [];
-        staticColide = [];
+        staticCollide = [];
     });
 }
 
@@ -153,9 +153,12 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
             for (let j = i + 1; j < grid.dynamics.length; ++j) {
                 // Get other dynamic entity rigidbody
                 const otherRigidbody = grid.dynamics[j].entity.getRigidbody();
+                const otherIndex = grid.dynamics[j].index;
 
+                if (Math.abs(index.x -  otherIndex.x) > 2 || Math.abs(index.y -  otherIndex.y) > 2)
+                    continue;
                 // Test collision against other entity
-                const result = rigidbody.colide(otherRigidbody, deltaTime);
+                const result = rigidbody.collide(otherRigidbody, deltaTime);
 
                 if (result.intersect) {
                     collisionsResults.push({
@@ -219,7 +222,7 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
                 if (!other)
                     continue;
 
-                const result = rigidbody.colideStatic(other, deltaTime);
+                const result = rigidbody.collideStatic(other, deltaTime);
 
                 if (result.intersect) {
                     sortedStatics.push({
@@ -239,7 +242,7 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
             });
 
             sortedStatics.map((collision) => {
-                staticColide.push({
+                staticCollide.push({
                     entity: entity,
                     normal: collision.result.contactNormal,
                     center: collision.other.getCenter()
@@ -278,9 +281,12 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
             for (let j = i + 1; j < grid.dynamics.length; ++j) {
                 // Get other dynamic entity rigidbody
                 const otherRigidbody = grid.dynamics[j].entity.getRigidbody();
+                const otherIndex = grid.dynamics[j].index;
 
+                if (Math.abs(index.x -  otherIndex.x) > 2 || Math.abs(index.y -  otherIndex.y) > 2)
+                    continue;
                 // Test collision against other entity
-                const result = rigidbody.colide(otherRigidbody, deltaTime);
+                const result = rigidbody.collide(otherRigidbody, deltaTime);
 
                 if (result.intersect) {
                     collisionsResults.push({

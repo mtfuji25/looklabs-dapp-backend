@@ -20,8 +20,10 @@ import {
     STRAPI_SERVER_HOST,
     STRAPI_BEARER_TOKEN,
     WS_HOST,
-    WS_PORT
+    WS_PORT,
+    LOGGER_LEVEL
 } from "./Constants/Constants";
+import { Logger } from "./Utils/Logger";
 
 // Jquery like query selector
 const $ = (name: string) => {
@@ -31,7 +33,7 @@ const $ = (name: string) => {
 // Root div to append engine's view
 const ROOT = $(ROOT_DIV_ID);
 
-const main = () => {
+const main = async () => {
 
     Sentry.init({
         dsn: "https://0310fb88d0254835be8a3d60b9a17bd6@o1091574.ingest.sentry.io/6108697",            
@@ -41,7 +43,8 @@ const main = () => {
         tracesSampleRate: 1.0,
     });
 
-        
+    Logger.start(LOGGER_LEVEL);
+
     // Creates PIXI application
     const app = new Application({
         resolution: devicePixelRatio,
@@ -49,7 +52,6 @@ const main = () => {
         resizeTo: ROOT
     });
 
-    
     // Creates websocket client
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 
@@ -59,15 +61,11 @@ const main = () => {
     // Start engine itself
     const engine = new Engine(wsClient, strapiClient, app, ROOT);
         
+    await engine.start();
 
-    // Start the engine systems
-    engine.start(() => {
-        // Start the engine game loop
-        engine.loop().then(() => {
-            // Properly close the engine
-            engine.close();
-        });
-    });
+    await engine.loop();
+
+    await engine.close();
 };
 
 main();

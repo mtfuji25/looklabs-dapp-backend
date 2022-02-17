@@ -38,9 +38,7 @@ class BattleStatusLayer extends Layer {
 
     onUpdate(deltaTime: number) {}
 
-    onDetach() {
-        this.self.destroy();
-    }
+    onDetach() {}
 }
 
 export { BattleStatusLayer };
