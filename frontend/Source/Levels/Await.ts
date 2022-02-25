@@ -18,7 +18,7 @@ import { Resource } from "../Core/AssetLoader";
 import { EngineContext } from "../Core/Interfaces";
 
 // Await level bg color
-const BLACK_BG_COLOR = 0x18215d;
+const BLACK_BG_COLOR = 0x74C4E5;
 
 
 class AwaitLevel extends Level {
