@@ -89,12 +89,12 @@
     ],
     "dungeon-pack": [   
         {
-            "name": "tubes",
-            "url": "./assets/dungeon-pack/tubes.png"
+            "name": "mapObstacle1",
+            "url": "./assets/dungeon-pack/mapObstacle1.png"
         },
         {
-            "name": "lockers",
-            "url": "./assets/dungeon-pack/lockers.png"
+            "name": "mapObstacle2",
+            "url": "./assets/dungeon-pack/mapObstacle2.png"
         },             
         {
             "name": "map",
