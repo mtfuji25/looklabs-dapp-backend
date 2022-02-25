@@ -62,6 +62,7 @@ class OverlayMap extends Layer {
     loadMap() {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
+        let spriteColumns = levelMap["spriteWidth"]/SPRITE_SIZE;
 
         for (let i = 0; i < rows; ++i) {
             
@@ -71,9 +72,9 @@ class OverlayMap extends Layer {
                 const sprite = entity.addSprite();
                 sprite.setCutImg(
                     this.app.loader.resources["map-overlay"],
-                    // 25 is the number of columns in the sprite sheet
-                    Math.floor(((currentCell) % 25)) * SPRITE_SIZE,
-                    Math.floor((currentCell) / 25) * SPRITE_SIZE,
+                    
+                    Math.floor(((currentCell) % spriteColumns)) * SPRITE_SIZE,
+                    Math.floor((currentCell) / spriteColumns) * SPRITE_SIZE,
                     SPRITE_SIZE,
                     SPRITE_SIZE
                 );

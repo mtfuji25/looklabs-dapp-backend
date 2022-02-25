@@ -53,6 +53,7 @@ class MapLayer extends Layer {
         
         let rows = levelMap["height"];
         let cols = levelMap["width"];
+        let spriteColumns = levelMap["spriteWidth"]/SPRITE_SIZE;
         
         for (let i = 0; i < rows; ++i) {
         
@@ -63,8 +64,8 @@ class MapLayer extends Layer {
                 const sprite = entity.addSprite();
                 sprite.setCutImg(
                     this.app.loader.resources["map"],
-                    Math.floor(((currentCell) % 19)) * SPRITE_SIZE,
-                    Math.floor((currentCell) / 19) * SPRITE_SIZE,
+                    Math.floor(((currentCell) % spriteColumns)) * SPRITE_SIZE,
+                    Math.floor((currentCell) / spriteColumns) * SPRITE_SIZE,
                     SPRITE_SIZE,
                     SPRITE_SIZE
                 );
