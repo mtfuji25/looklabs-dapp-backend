@@ -501,13 +501,15 @@ class LobbyLevel extends Level {
                 Logger.capture(err);
             }
 
+            await sleep(1000);
+
             // Get last player status
             const lastPlayerStatus = lastFigther.getSelf().getStatus();
-
+            
             // Creates the log for the last player
             await this.context.strapi.createParticipantResult({
                 scheduled_game_participant: lastFigther.strapiID,
-                survived_for: Math.floor(lastPlayerStatus.survived),
+                survived_for: Math.floor(lastPlayerStatus.survived + 500 + Math.random() * 1500),
                 kills: Math.floor(lastPlayerStatus.kills),
                 health: Math.ceil(lastPlayerStatus.health)
             });

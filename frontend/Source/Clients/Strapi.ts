@@ -165,12 +165,10 @@ class StrapiClient {
     }
 
     async getGameParticipants(id: number) {
-        // `scheduled-games?filters[game_date][$gte]=${now}&sort=game_date:asc&populate=*`
-        // )).data["data"][0];
-
+        
         const data = (
             await this.get(
-                `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.id:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
+                `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.survived_for:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
             )
         ).data["data"];
 
