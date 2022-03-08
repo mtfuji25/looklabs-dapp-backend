@@ -45,7 +45,7 @@ class PlayerLayer extends Layer {
 
     // Die fn
     public dieFn: (result: GameParticipantsResult, killer: number, nftId: string, details?:ParticipantDetails ) => void;
-    public damageFn: (damage: number, participant: number, nftId: string, details?:ParticipantDetails ) => void;
+    public damageFn: (damage: number, participant: number, nftId: string, health:number, details?:ParticipantDetails ) => void;
 
     constructor(ecs: ECS,
         wsContext: WSClient,
@@ -53,7 +53,7 @@ class PlayerLayer extends Layer {
         strapiID: number,
         grid: Grid,
         dieFn: (result: GameParticipantsResult, killer: number, nftId: string, details?:ParticipantDetails) => void,
-        damageFn: (damage: number, participant: number, nftId: string, details?:ParticipantDetails) => void,
+        damageFn: (damage: number, participant: number, nftId: string, health:number, details?:ParticipantDetails) => void,
         details: ParticipantDetails) {
 
         super(`Player${id}`, ecs);
@@ -241,7 +241,8 @@ class PlayerLayer extends Layer {
 
     // When player takes a hit callback
     onDamage(damage: number) {
-       this.damageFn(damage, this.strapiID, this.playerID, this.details );
+       const status = this.self.getStatus();
+       this.damageFn(damage, this.strapiID, this.playerID, status.health, this.details );
     }
 }
 

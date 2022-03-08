@@ -32,12 +32,11 @@ import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
 
-
 //
 // Types
 //
 type OnDieEvent = { result: GameParticipantsResult, killer: number, nftId:string,  details?:ParticipantDetails };
-type OnDamageEvent = { damage: number, participant: number, nftId:string,   details?:ParticipantDetails };
+type OnDamageEvent = { damage: number, participant: number, nftId:string, health:number,  details?:ParticipantDetails };
 
 interface TimeLeft {
     hours: string;
@@ -236,11 +235,12 @@ class LobbyLevel extends Level {
             };
 
             // Lambda to process when some player dies
-            const onDamageLambda = (damage: number, participant: number, nftId:string, details:ParticipantDetails) => {
+            const onDamageLambda = (damage: number, participant: number, nftId:string, health:number, details:ParticipantDetails) => {
                 this.damageEventQueue.push({
                     damage: damage,
                     participant: participant,
                     nftId: nftId,
+                    health: health,
                     details: details
                 });
             };
@@ -459,7 +459,7 @@ class LobbyLevel extends Level {
                         timestamp: Date.now(),
                         value: event.damage,
                         player_id: event.nftId,
-                        stats: this.getFormattedStats(event.details),
+                        stats: this.getFormattedStats(event.details, event.health),
                         scheduled_game: this.gameId,
                         name: event.details.name,
                         scheduled_game_participant: event.participant
@@ -694,12 +694,18 @@ class LobbyLevel extends Level {
         return false;
     }
 
-    getFormattedStats (details:ParticipantDetails): string {
+    getFormattedStats (details:ParticipantDetails, health?:number): string {
         const attributesMap: Record<string, any> = {};
        details.attributes.map((attribute) => {
             attributesMap[attribute.trait_type] = attribute.value;
         });
-       return `Attack: ${attributesMap['Attack']},Defence: ${attributesMap['Defence']},Speed: ${attributesMap['Speed']}`;
+        if (health) {
+            health = (100 * health) / PlayerLayer.MAX_HEALTH;
+            if (health < 0) health = 0;
+
+            return `Attack: ${attributesMap['Attack']},Defence: ${attributesMap['Defence']},Speed: ${attributesMap['Speed']},Health: ${health}`;
+        }
+        return `Attack: ${attributesMap['Attack']},Defence: ${attributesMap['Defence']},Speed: ${attributesMap['Speed']}`;
     }
 
     getFormatedTime(): TimeLeft {
