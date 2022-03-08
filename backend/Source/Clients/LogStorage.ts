@@ -8,7 +8,7 @@ interface Log {
     timestamp: number;
     scheduled_game: number;
     scheduled_game_participant: number;
-    nft_id: string;
+    player_id: string;
     name?: string;
     stats?: string;
 };
@@ -22,13 +22,12 @@ class LogStorageClient {
     }
 
     async createLog(log: Log) {
-        console.log( log.nft_id, log.stats);
-        // const key = this.connection.key(KEY_KIND);
+         const key = this.connection.key(KEY_KIND);
 
-        // await this.connection.upsert({
-        //     key: key,
-        //     data: log
-        // });
+        await this.connection.upsert({
+            key: key,
+            data: log
+        });
     }
 
     async start() {}
