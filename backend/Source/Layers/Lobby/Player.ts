@@ -35,7 +35,7 @@ class PlayerLayer extends Layer {
     public strapiID: number;
 
     // initial info for player
-    private details: ParticipantDetails;
+    public details: ParticipantDetails;
 
     // Current grid
     private grid: Grid;
@@ -44,16 +44,16 @@ class PlayerLayer extends Layer {
     static playerCount: number = 0;
 
     // Die fn
-    public dieFn: (result: GameParticipantsResult, killer: number) => void;
-    public damageFn: (damage: number, participant: number) => void;
+    public dieFn: (result: GameParticipantsResult, killer: number, nftId: string, details?:ParticipantDetails ) => void;
+    public damageFn: (damage: number, participant: number, nftId: string, details?:ParticipantDetails ) => void;
 
     constructor(ecs: ECS,
         wsContext: WSClient,
         id: string,
         strapiID: number,
         grid: Grid,
-        dieFn: (result: GameParticipantsResult, killer: number) => void,
-        damageFn: (damage: number, participant: number) => void,
+        dieFn: (result: GameParticipantsResult, killer: number, nftId: string, details?:ParticipantDetails) => void,
+        damageFn: (damage: number, participant: number, nftId: string, details?:ParticipantDetails) => void,
         details: ParticipantDetails) {
 
         super(`Player${id}`, ecs);
@@ -236,12 +236,12 @@ class PlayerLayer extends Layer {
             survived_for: Math.floor(status.survived),
             kills: Math.floor(status.kills),
             health: Math.floor(status.health),
-        }, killerId);
+        }, killerId, this.playerID, this.details );
     }
 
     // When player takes a hit callback
     onDamage(damage: number) {
-       this.damageFn(damage, this.strapiID);
+       this.damageFn(damage, this.strapiID, this.playerID, this.details );
     }
 }
 

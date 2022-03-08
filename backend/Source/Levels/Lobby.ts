@@ -5,7 +5,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
@@ -36,8 +36,8 @@ import { Logger } from "../Utils/Logger";
 //
 // Types
 //
-type OnDieEvent = { result: GameParticipantsResult, killer: number };
-type OnDamageEvent = { damage: number, participant: number };
+type OnDieEvent = { result: GameParticipantsResult, killer: number, nftId:string,  details?:ParticipantDetails };
+type OnDamageEvent = { damage: number, participant: number, nftId:string,   details?:ParticipantDetails };
 
 interface TimeLeft {
     hours: string;
@@ -195,7 +195,7 @@ class LobbyLevel extends Level {
             LobbyLevel.playerNames[participant.nft_id] = details.name;
 
             // Lambda to process when some palyer dies
-            const onDieLambda = (result: GameParticipantsResult, killer: number) => {
+            const onDieLambda = (result: GameParticipantsResult, killer: number, nftId: string, details:ParticipantDetails) => {
 
                 // Extracts the player ID to filter in layers
                 const strapId = result.scheduled_game_participant;
@@ -229,15 +229,19 @@ class LobbyLevel extends Level {
 
                 this.dieEventQueue.push({
                     result: result,
-                    killer: killer
+                    killer: killer,
+                    nftId: nftId,
+                    details: details
                 });
             };
 
             // Lambda to process when some player dies
-            const onDamageLambda = (damage: number, participant: number) => {
+            const onDamageLambda = (damage: number, participant: number, nftId:string, details:ParticipantDetails) => {
                 this.damageEventQueue.push({
                     damage: damage,
                     participant: participant,
+                    nftId: nftId,
+                    details: details
                 });
             };
 
@@ -268,6 +272,9 @@ class LobbyLevel extends Level {
                     event: "entrants",
                     timestamp: Date.now(),
                     scheduled_game: this.gameId,
+                    nft_id: participant.nft_id,
+                    stats: this.getFormattedStats(details),
+                    name: details.name,
                     scheduled_game_participant: participant.id,
                 });
             } catch(err) {
@@ -387,6 +394,9 @@ class LobbyLevel extends Level {
                         value: event.result.scheduled_game_participant,
                         scheduled_game: this.gameId,
                         scheduled_game_participant: event.killer,
+                        nft_id: event.nftId,
+                        name: event.details.name,
+                        stats: this.getFormattedStats(event.details),
                     });
                 } catch(err) {
                     Logger.error(
@@ -403,7 +413,10 @@ class LobbyLevel extends Level {
                         event: "final_rank",
                         timestamp: Date.now(),
                         value: this.fighters,
+                        nft_id: event.nftId,
+                        stats: this.getFormattedStats(event.details),
                         scheduled_game: this.gameId,
+                        name: event.details.name,
                         scheduled_game_participant: event.result.scheduled_game_participant,
                     });
                 } catch(err) {
@@ -445,7 +458,10 @@ class LobbyLevel extends Level {
                         event: "damage",
                         timestamp: Date.now(),
                         value: event.damage,
+                        nft_id: event.nftId,
+                        stats: this.getFormattedStats(event.details),
                         scheduled_game: this.gameId,
+                        name: event.details.name,
                         scheduled_game_participant: event.participant
                     });
                 } catch(err) {
@@ -520,6 +536,9 @@ class LobbyLevel extends Level {
                     event: "winners",
                     timestamp: Date.now(),
                     scheduled_game: this.gameId,
+                    nft_id: lastFigther.playerID,
+                    stats: this.getFormattedStats(lastFigther.details),
+                    name: lastFigther.details.name,
                     scheduled_game_participant: lastFigther.strapiID,
                 });
             } catch(err) {
@@ -673,6 +692,14 @@ class LobbyLevel extends Level {
         // Doesn't handles the event, allow event propagation
         // in the event listeners queue
         return false;
+    }
+
+    getFormattedStats (details:ParticipantDetails): string {
+        const attributesMap: Record<string, any> = {};
+       details.attributes.map((attribute) => {
+            attributesMap[attribute.trait_type] = attribute.value;
+        });
+       return `Attack: ${attributesMap['Attack']},Defence: ${attributesMap['Defence']},Speed: ${attributesMap['Speed']}`;
     }
 
     getFormatedTime(): TimeLeft {
