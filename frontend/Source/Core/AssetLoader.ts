@@ -25,8 +25,11 @@ class AssetLoader {
 
         playerDetails.map (d => {
             const url = this.getImageURL(d, d.spritesheet);
-            if (!this.assets.has(url)) {
+            const urlData = url.split("/");
+            const assetName = urlData[urlData.length - 1];
+            if (!this.assets.has(url) && !this.assets.has(assetName)) {
                 this.assets.add(url);
+                this.assets.add(assetName);
                 this.app.loader.add(d.spritesheet, `${url}?${Random.randString()}`);
             }
         });
@@ -51,7 +54,7 @@ class AssetLoader {
             });
         });
 
-              settings.SCALE_MODE = SCALE_MODES.NEAREST;
+        settings.SCALE_MODE = SCALE_MODES.NEAREST;
         this.app.loader.load( (loader: Loader, resources: Dict<LoaderResource>) => {
             Object.assign(this.loadedResources, resources);
             if (callBack) callBack();
