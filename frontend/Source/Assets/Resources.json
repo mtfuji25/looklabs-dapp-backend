@@ -103,6 +103,14 @@
         {
             "name": "map-overlay",
             "url": "./assets/dungeon-pack/overlay-tiles.png"
+        },
+        {
+            "name": "basemap",
+            "url": "./assets/dungeon-pack/basemap.png"
+        },
+        {
+            "name": "mapOverlays",
+            "url": "./assets/dungeon-pack/mapOverlays.png"
         }
     ],
     "enemy-pack": [
