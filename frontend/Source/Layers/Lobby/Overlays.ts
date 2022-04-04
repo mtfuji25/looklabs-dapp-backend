@@ -54,8 +54,6 @@ class OverlayMap extends Layer {
 
         // Creates new pixi container
         this.mapContainer = new Container();
-        
-       
     }
     
     // //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
@@ -101,6 +99,7 @@ class OverlayMap extends Layer {
         for (let i = 0; i < rows; ++i) {
             y += step;
             for (let j = 0; j < cols; ++j) {
+                const currentCell = levelMap["data"][i][j];
                 x += step;
                 // Creates entity and add sprite to it
                 const entity = this.ecs.createEntity(x, y, false)
@@ -117,6 +116,13 @@ class OverlayMap extends Layer {
                 );
 
                 this.entities.push(entity);
+                this.entities.push(entity);
+
+                if (this.fixtureIndexes.has(currentCell)) {
+                    this.overlayFixtures.push(entity);
+                }
+ 
+                //if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
                 this.mapContainer.addChild(sprite.sprite);
                 x += step;
             }
@@ -164,7 +170,7 @@ class OverlayMap extends Layer {
     //we hide the textures for lockers and test tubes so these can be added inside PlayerLayer and y-sorted
     hideFixtures () {
         this.overlayFixtures.forEach( o => {
-            o.getSprite().sprite.visible = false;
+           o.getSprite().sprite.visible = false;
         });
     }
 
