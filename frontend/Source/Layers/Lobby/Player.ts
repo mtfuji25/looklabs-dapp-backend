@@ -422,22 +422,19 @@ class PlayerLayer extends Layer {
     }
 
     addFixtures () {
-        const fix = [
-                    {tex: "mapObstacle1", pos: [
-                        new Vec2(1375, 687), 
-                        new Vec2(1535, 687),
-                        new Vec2(1695, 687),
-                        new Vec2(543, 1293),
-                        new Vec2(351, 1293),
-                        new Vec2( 159, 1293)]}, 
-            
-                    {tex: "mapObstacle2", pos: [
-                                            new Vec2(543, 685), 
-                                            new Vec2(351, 685),
-                                            new Vec2(159, 685),
-                                            new Vec2(1375, 817),
-                                            new Vec2(1535, 817),
-                                            new Vec2(1695, 817)]},    
+        const fix = [{tex: "mapObstacle1", pos: [new Vec2(1375, 687), 
+                                                new Vec2(1535, 687),
+                                                new Vec2(1695, 687),
+                                                new Vec2(1375, 817),
+                                                new Vec2(1535, 817),
+                                                new Vec2(1695, 817)]},
+                     {tex: "mapObstacle2", pos: [new Vec2(543, 685), 
+                                                new Vec2(351, 685),
+                                                new Vec2(159, 685),
+                                                new Vec2(543, 1293),
+                                                new Vec2(351, 1293),
+                                                new Vec2( 159, 1293)]},                                
+
                     ]
         fix.map( f => {
             f.pos.map ( p => {
