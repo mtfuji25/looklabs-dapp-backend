@@ -13,6 +13,7 @@ type Dict<T> = {
 
 class AssetLoader {
 
+
     private app: Application;
     private assets:Set<string> = new Set();
     private loadedResources:Dict<LoaderResource> = {}; 
