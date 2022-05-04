@@ -17,6 +17,7 @@ const sys_DipatchDeaths = (data: EcsData, deltaTime: number): void => {
     });
 
     deads = [];
+    
 }
 
 const sys_UpdateStatus = (data: EcsData, deltaTime: number): void => {

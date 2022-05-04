@@ -29,7 +29,6 @@ class IntroSequence {
         fontName: "DealersSolid",
         align: "center",
         fontSize: 400,
-        tint: 0x000
     };
 
     constructor (app: Application, playerLayer:PlayerLayer, overlay:OverlayMap, viewLayer:ViewLayer, resource: Record<string, any>) {

@@ -16,10 +16,9 @@ import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces
 import { Logger } from "../Utils/Logger";
 import { Resource } from "../Core/AssetLoader";
 import { EngineContext } from "../Core/Interfaces";
-import { MAIN_BG_COLOR } from "../Constants/Constants";
 
 // Await level bg color
-//const BLACK_BG_COLOR = 0x18215d;
+const BLACK_BG_COLOR = 0x18215d;
 
 
 class AwaitLevel extends Level {
@@ -84,7 +83,7 @@ class AwaitLevel extends Level {
         );
 
         // Sets bg color of main app
-        this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
+        this.context.app.renderer.backgroundColor = BLACK_BG_COLOR;
 
         // Connect background layer
         
