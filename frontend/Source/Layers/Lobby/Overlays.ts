@@ -54,39 +54,83 @@ class OverlayMap extends Layer {
 
         // Creates new pixi container
         this.mapContainer = new Container();
-        
-       
     }
     
-    //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
+    // //asset created with http://cache.andre-michelle.com/tools/html/tileset-extractor.html
+    // loadMap() {
+    //     let rows = levelMap["height"];
+    //     let cols = levelMap["width"];
+    //     let spriteColumns = levelMap["spriteWidth"]/SPRITE_SIZE;
+
+    //     for (let i = 0; i < rows; ++i) {
+            
+    //         for (let j = 0; j < cols; ++j) {
+    //             const currentCell = levelMap["data"][i][j];
+                
+    //             const entity = this.ecs.createEntity(j * SPRITE_SIZE, i * SPRITE_SIZE, false);
+    //             const sprite = entity.addSprite();
+
+    //             sprite.setCutImg(
+    //                 this.app.loader.resources["map-overlay"],
+    //                 Math.floor(((currentCell) % spriteColumns)) * SPRITE_SIZE,
+    //                 Math.floor((currentCell) / spriteColumns) * SPRITE_SIZE,
+    //                 SPRITE_SIZE,
+    //                 SPRITE_SIZE
+    //             );
+    //             this.entities.push(entity);
+    //             if (this.fixtureIndexes.has(currentCell)) {
+    //                 this.overlayFixtures.push(entity);
+    //             }
+    //             if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
+    //             this.mapContainer.addChild(sprite.sprite);  
+    //         }
+    //     }
+    // }
+
     loadMap() {
         let rows = levelMap["height"];
         let cols = levelMap["width"];
-        let spriteColumns = levelMap["spriteWidth"]/SPRITE_SIZE;
+
+        const step = SPRITE_SIZE / 2.0;
+
+        let x = 0.0;
+        let y = 0.0;
 
         for (let i = 0; i < rows; ++i) {
-            
+            y += step;
             for (let j = 0; j < cols; ++j) {
                 const currentCell = levelMap["data"][i][j];
-                
-                const entity = this.ecs.createEntity(j * SPRITE_SIZE, i * SPRITE_SIZE, false);
+                x += step;
+                // Creates entity and add sprite to it
+                const entity = this.ecs.createEntity(x, y, false)
                 const sprite = entity.addSprite();
 
+                // Calculates base cuts in spritesheet
+                const pw = j * SPRITE_SIZE;
+                const ph = i * SPRITE_SIZE;
+
+                // Load the cuted image to sprite
                 sprite.setCutImg(
-                    this.app.loader.resources["map-overlay"],
-                    Math.floor(((currentCell) % spriteColumns)) * SPRITE_SIZE,
-                    Math.floor((currentCell) / spriteColumns) * SPRITE_SIZE,
-                    SPRITE_SIZE,
-                    SPRITE_SIZE
+                    this.app.loader.resources["mapOverlays"],
+                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
                 );
+
                 this.entities.push(entity);
+                this.entities.push(entity);
+
                 if (this.fixtureIndexes.has(currentCell)) {
                     this.overlayFixtures.push(entity);
                 }
-                if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
-                this.mapContainer.addChild(sprite.sprite);  
+ 
+                //if (currentCell == 0) entity.getSprite().sprite.alpha = 0.0;
+                this.mapContainer.addChild(sprite.sprite);
+                x += step;
             }
+            x = 0;
+            y += step;
         }
+
+        
     }
     
 
@@ -126,7 +170,7 @@ class OverlayMap extends Layer {
     //we hide the textures for lockers and test tubes so these can be added inside PlayerLayer and y-sorted
     hideFixtures () {
         this.overlayFixtures.forEach( o => {
-            o.getSprite().sprite.visible = false;
+           o.getSprite().sprite.visible = false;
         });
     }
 
