@@ -14,7 +14,8 @@ const LOGGER_LEVEL = Number("0b" + process.env.LOGGER_LEVEL);
 const ROOT_DIV_ID = "#root";
 
 // Default background color
-const MAIN_BG_COLOR = 0x18215d;
+const MAIN_BG_COLOR = 0xFFFFFF;
+
 
 // Container's dimesnsion
 const CONTAINER_DIM_X = 1856;
