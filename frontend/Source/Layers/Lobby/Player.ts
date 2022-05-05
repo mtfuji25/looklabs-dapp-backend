@@ -422,13 +422,13 @@ class PlayerLayer extends Layer {
     }
 
     addFixtures () {
-        const fix = [{tex: "mapObstacle1", pos: [new Vec2(1384, 695), 
+        const fix = [{tex: "mapObstacle2", pos: [new Vec2(1384, 695), 
                                                 new Vec2(1544, 695),
                                                 new Vec2(1704, 695),
                                                 new Vec2(1384, 824),
                                                 new Vec2(1544, 824),
                                                 new Vec2(1704, 824)]},
-                     {tex: "mapObstacle2", pos: [new Vec2(550, 695), 
+                     {tex: "mapObstacle1", pos: [new Vec2(550, 695), 
                                                 new Vec2(358, 695),
                                                 new Vec2(166, 695),
                                                 new Vec2(550, 1302),
