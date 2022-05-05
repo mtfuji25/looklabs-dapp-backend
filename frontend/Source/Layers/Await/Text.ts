@@ -35,7 +35,7 @@ class TextLayer extends Layer {
     private readonly titleStyle: Partial<ITextStyle> = {
         fontFamily: "dealers",
         fontSize: "144px",
-        fill: 0xffffff,
+        fill: 0x000,
         align: "center",
         fontWeight: "400"
     };
@@ -43,7 +43,7 @@ class TextLayer extends Layer {
     private readonly textStyle: Partial<ITextStyle> = {
         fontFamily: "Space Mono",
         fontSize: 25,
-        fill: 0xffffff,
+        fill: 0x000,
         align: "center",
         fontWeight: "700",
         lineHeight: 37
