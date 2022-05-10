@@ -109,6 +109,12 @@ class TextLayer extends Layer {
        
     }
 
+    updatePlayerList (count: number, max : number) {
+        const maxPlayers = max ? max : 100;
+        this.entered.setText(`ENTERED: ${count} (MAX ${maxPlayers})`);
+       
+    }
+
     onAttach() {
         
         const { hours, minutes, seconds } = this.calculateTimeLeft(
@@ -178,16 +184,16 @@ class TextLayer extends Layer {
         }
 
         if (this.fiveSecCount >= 5) {
-            this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
+            //this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
             
-            this.updateRequest.then((updatedGame) => {
-                const maxPlayers = updatedGame.max_participants ? updatedGame.max_participants : 100;
-                this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX ${maxPlayers})`);
-            });
+            // this.updateRequest.then((updatedGame) => {
+            //     const maxPlayers = updatedGame.max_participants ? updatedGame.max_participants : 100;
+            //     this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX ${maxPlayers})`);
+            // });
 
-            this.updateRequest.catch((e) => {
-                Logger.info("Level destroyed while requesting, aborting reponse action...");
-            });
+            // this.updateRequest.catch((e) => {
+            //     Logger.info("Level destroyed while requesting, aborting reponse action...");
+            // });
 
             this.fiveSecCount -= 5.0;
         }

@@ -34,6 +34,7 @@ class AwaitLevel extends Level {
     // Current Update Promisse
     private currentGame: ScheduledGame;
     private playerLog:LogsLayer;
+    private textLayer:TextLayer;
     
     constructor(context: EngineContext, name: string = "Default", props: Record<string, any> = {}) {
         super(context, name, props);
@@ -116,13 +117,15 @@ class AwaitLevel extends Level {
             this.playerLog
         );
 
-        // Connect infos layer
-        this.layerStack.pushLayer(new TextLayer(
+        this.textLayer = new TextLayer(
             this.ecs,
             this.context.app,
             this.context,
             this.currentGame
-        ));
+        );
+
+        // Connect infos layer
+        this.layerStack.pushLayer(this.textLayer);
 
         this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
@@ -188,7 +191,6 @@ class AwaitLevel extends Level {
             this.currentGame = await this.context.strapi.getGameById(this.props.gameId);
             await this.context.participantDetails.loadPlayerDetails(this.currentGame.scheduled_game_participants);
             this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants));
-            
         } catch(err) {
             Logger.fatal("Cannot get game for current game id.");
             Logger.trace(JSON.stringify(err, null, 4));
@@ -207,6 +209,8 @@ class AwaitLevel extends Level {
                 }
             }
         });
+        this.textLayer.updatePlayerList(Object.values(this.context.participantDetails.participants).length, this.currentGame.max_participants);
+        
     }
 
     async onUpdate(deltaTime: number) {
