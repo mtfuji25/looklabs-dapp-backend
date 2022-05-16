@@ -97,14 +97,6 @@
             "url": "./assets/dungeon-pack/mapObstacle2.png"
         },             
         {
-            "name": "map",
-            "url": "./assets/dungeon-pack/map_tiles.png"
-        },
-        {
-            "name": "map-overlay",
-            "url": "./assets/dungeon-pack/overlay-tiles.png"
-        },
-        {
             "name": "basemap",
             "url": "./assets/dungeon-pack/basemap.png"
         },
