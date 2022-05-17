@@ -81,10 +81,13 @@ class PlayerLayer extends Layer {
 
         const attributesMap: Record<string, any> = {};
 
+        const tiers = ["beta", "delta", "sigma", "alpha"];
+
         this.details.attributes.map((attribute) => {
             attributesMap[attribute.trait_type] = attribute.value;
         });
-        if (!attributesMap["Tier"]) attributesMap["Tier"] = "beta";
+        if (!attributesMap["Tier"] || tiers.indexOf(attributesMap["Tier"].toLowerCase()) == -1) attributesMap["Tier"] = "beta";
+     
 
         const status = this.self.addStatus(
             // Attack
