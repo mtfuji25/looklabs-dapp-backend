@@ -29,7 +29,7 @@ class IntroSequence {
         fontName: "DealersSolid",
         align: "center",
         fontSize: 400,
-        tint: 0x000
+        tint: 0xFFF
 
     };
 
