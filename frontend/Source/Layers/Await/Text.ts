@@ -15,6 +15,7 @@ import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { Logger } from "../../Utils/Logger";
 
+
 class TextLayer extends Layer {
     private app: Application;
     private title: Sprite;
@@ -29,8 +30,8 @@ class TextLayer extends Layer {
     private screenY: number;
 
     // Current Update Promisse
-    private updateRequest: Promise<ScheduledGame> = new Promise<ScheduledGame>(() => {});
-    
+    private updateRequest: Promise<ScheduledGame> = new Promise<ScheduledGame>(() => { });
+
     // Styles
     private readonly titleStyle: Partial<ITextStyle> = {
         fontFamily: "dealers",
@@ -39,7 +40,7 @@ class TextLayer extends Layer {
         align: "center",
         fontWeight: "400"
     };
-    
+
     private readonly textStyle: Partial<ITextStyle> = {
         fontFamily: "Space Mono",
         fontSize: 25,
@@ -75,10 +76,10 @@ class TextLayer extends Layer {
 
         // Add sprite to it
         this.title = this.ecs.createEntity().addSprite(this.app.loader.resources["thepit"]);
-        
+
         // Anchor it in 0,0
         this.title.sprite.anchor.set(0.0);
-        
+
         // Add it to stage
         this.title.addStage(this.app);
     }
@@ -91,89 +92,89 @@ class TextLayer extends Layer {
         text.addStage(this.app);
     }
 
-    _onResize () {
+    _onResize() {
         this.title.setPos((this.screenX - this.title.sprite.width) * 0.5, 8.125 * this.percentY);
-        
-        this.countdown.setPos(            
+
+        this.countdown.setPos(
             (this.screenX - (this.countdown.text.width * 0.95)) * 0.5,
             this.percentY * 40
         );
-        this.entered.setPos(                            
-            (this.screenX - this.entered.text.width* 0.95) * 0.5,
+        this.entered.setPos(
+            (this.screenX - this.entered.text.width * 0.95) * 0.5,
             this.percentY * 59.25
         );
-        this.subtitle.setPos(            
-            (this.screenX - this.subtitle.text.width* 0.95) * 0.5,
+        this.subtitle.setPos(
+            (this.screenX - this.subtitle.text.width * 0.95) * 0.5,
             this.percentY * 33.375
         );
-       
+
     }
 
-    updatePlayerList (count: number, max : number) {
+    updatePlayerList(count: number, max: number) {
         const maxPlayers = max ? max : 100;
         this.entered.setText(`ENTERED: ${count} (MAX ${maxPlayers})`);
-       
+
     }
 
     onAttach() {
-        
+
         const { hours, minutes, seconds } = this.calculateTimeLeft(
             this.currentGame.game_date
         );
-    
+
 
         this.subtitle = this.ecs.createEntity().addText("NEXT BATTLE STARTS IN", this.textStyle);
-        
+
         const maxPlayers = this.currentGame.max_participants ? this.currentGame.max_participants : 100;
-        
+
         this.entered = this.ecs.createEntity().addText(
             `ENTERED: ${this.currentGame.scheduled_game_participants.length} (MAX ${maxPlayers})`,
             this.textStyle
         );
-        
+
 
         this.countdown = this.ecs.createEntity().addText(
             `${hours}:${minutes}:${seconds}`,
             this.titleStyle
         );
-       
+
         this.renderText(this.subtitle, 33.375);
         this.renderText(this.countdown, 40);
         this.renderText(this.entered, 59.25);
-        
+
         this._onResize();
     }
 
     onUpdate(deltaTime: number) {
         // on window resize 
-        if(this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
+        if (this.app.view.clientWidth !== this.screenX || this.app.view.clientHeight !== this.screenY) {
             this.percentY = this.app.view.clientHeight / 100.0;
 
             this.screenX = this.app.view.clientWidth;
             this.screenY = this.app.view.clientHeight;
 
-            
+
             this._onResize();
         }
-   
+
 
         if (this.oneSecCount >= 1) {
-            
-            const { hours, minutes, seconds } = this.calculateTimeLeft(                
+
+            const { hours, minutes, seconds } = this.calculateTimeLeft(
                 this.currentGame.game_date
             );
 
-            if(!seconds || !minutes || !hours) {
-                
+            if (!seconds || !minutes || !hours) {
+
                 // if seconds is undefined, make everything dissapear
-                this.countdown.setText("");     
+                this.countdown.setText("");
                 this.subtitle.setText("");
-                this.entered.setText("");       
+                this.entered.setText("");
 
                 this.title.sprite.visible = false;
 
             } else {
-                
+
                 this.countdown.setText(`${hours}:${minutes}:${seconds}`);
                 // this.countdown.setPos(            
                 //     (this.screenX - (this.countdown.text.width * 0.95)) * 0.5,
@@ -185,7 +186,7 @@ class TextLayer extends Layer {
 
         if (this.fiveSecCount >= 5) {
             //this.updateRequest = this.context.strapi.getGameById(this.currentGame.id);
-            
+
             // this.updateRequest.then((updatedGame) => {
             //     const maxPlayers = updatedGame.max_participants ? updatedGame.max_participants : 100;
             //     this.entered.setText(`ENTERED: ${updatedGame.scheduled_game_participants.length} (MAX ${maxPlayers})`);
@@ -220,7 +221,7 @@ class TextLayer extends Layer {
 
         // The + signs return the number representation of date object
         const difference = (+new Date(targetDate)) - (+new Date());
-        
+
         let timeLeft = {};
 
         if (difference > 0) {
