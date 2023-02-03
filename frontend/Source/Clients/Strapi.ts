@@ -9,6 +9,7 @@ export class StrapiClient extends GameApi{
         return this.post("game-participants-results", result);
     }
 
+    // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
         // get current time
         const now = new Date().toISOString();
@@ -40,13 +41,14 @@ export class StrapiClient extends GameApi{
                         scheduled_game: response.id,
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
-                        updated_at: attributes.updatedAt
+                        updated_at: attributes.updatedAt,
                     };
                 }
             )
         };
     }
 
+    // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
@@ -66,6 +68,7 @@ export class StrapiClient extends GameApi{
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
                         updated_at: attributes.updatedAt
+
                     };
                 }
             )
@@ -73,6 +76,7 @@ export class StrapiClient extends GameApi{
     }
 
     async getGameParticipants(id: number) {
+
         const data = (
             await this.get(
                 `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.survived_for:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
@@ -103,6 +107,7 @@ export class StrapiClient extends GameApi{
         return returnValue;
     }
 
+    // get the details for a chosen participant
     async getParticipantDetails(
         tokenAddress: string,
         tokenId: number

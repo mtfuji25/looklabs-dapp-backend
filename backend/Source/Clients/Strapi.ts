@@ -11,8 +11,8 @@ export class StrapiClient extends GameApi {
         });
     }
 
+    // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
-
         // get current time
         const now = new Date().toISOString();
 
@@ -53,8 +53,8 @@ export class StrapiClient extends GameApi {
         } else return null;
     }
 
+    // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
         return {
@@ -79,6 +79,7 @@ export class StrapiClient extends GameApi {
         };
     }
 
+    // get the details for a chosen participant
     async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenAddr}/${tokenId}`)).data;
     }

@@ -64,9 +64,8 @@ const _seekNearestInRange = (entity:Entity, grid:Grid, prioritize:boolean = fals
 
 const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
 
-    
-
     const status = entity.getStatus();
+
     const transform = entity.getTransform();
     const rigidbody = entity.getRigidbody();
     const enemy = target.getTransform();

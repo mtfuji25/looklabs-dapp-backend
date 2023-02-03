@@ -67,7 +67,6 @@ class AwaitLevel extends Level {
         // Request nearest game for strapi
         try {
             game = await this.context.strapi.getNearestGame();
-
         } catch(err) {
             Logger.warn(`Failed while seraching game in strapi. Will try again in ${GAME_SEARCH_INTERVAL}s`);
             Logger.trace(JSON.stringify(err, null, 4));

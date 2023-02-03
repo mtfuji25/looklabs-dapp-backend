@@ -88,6 +88,7 @@ class PlayerLayer extends Layer {
         });
         if (!attributesMap["Tier"] || tiers.indexOf(attributesMap["Tier"].toLowerCase()) == -1) attributesMap["Tier"] = "beta";
 
+        
         const status = this.self.addStatus(
             // Attack
             // 20 * (attributesMap["Attack"] / 100.0),

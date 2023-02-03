@@ -180,7 +180,6 @@ class WSClient {
     }
 
     start(): void {
-
         // In production PORT is not required due to load balancing check if port is set
         const connectionString = this.port ? `${this.host}:${this.port}` : `${this.host}`;
 

@@ -26,7 +26,6 @@ class AssetLoader {
 
         playerDetails.map (d => {
             const url = this.getImageURL(d, d.spritesheet);
-
             const urlData = url.split("/");
             const assetName = urlData[urlData.length - 1];
             if (!this.assets.has(url) && !this.assets.has(assetName)) {

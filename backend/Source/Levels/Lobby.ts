@@ -162,6 +162,7 @@ class LobbyLevel extends Level {
     }
 
     async startGame(): Promise<void> {
+
         // Creates game map layer
         const mapCollider = new MapColliderLayer(this.ecs);
 
@@ -184,7 +185,6 @@ class LobbyLevel extends Level {
 
             // Request participant details from strapi
             const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
-
             if (details.name.indexOf (tokenId) == -1) {
                 details.name = `${details.name} #${tokenId}`;
             }

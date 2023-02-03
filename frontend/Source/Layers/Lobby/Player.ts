@@ -247,9 +247,7 @@ class PlayerLayer extends Layer {
         }
 
         const entity = this.players[id].entity;
-
         const splitId = id.split('/')[1];
-
         const details = this.detailsModel.getDetailsForPlayer(id);
         if (!details) return;
         

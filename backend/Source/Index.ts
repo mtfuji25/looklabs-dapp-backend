@@ -6,7 +6,6 @@ import { Logger } from "./Utils/Logger";
 import { LogStorageClient } from "./Clients/LogStorage";
 
 import * as dotenv from "dotenv";
-
 dotenv.config({ path: "../.env" });
 
 const STRAPI_SERVER_HOST = String(process.env.STRAPI_SERVER_HOST);
