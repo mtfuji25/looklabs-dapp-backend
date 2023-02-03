@@ -12,7 +12,7 @@ export function mockGame(): ScheduledGame {
                 id: 1,
                 nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/1",
                 name: "1",
-                user_address: "0xb960d6b39023cec0e9c22bcf43e46705b5ddb572",
+                user_address: "0x53003bBF47F25efE299211F523D6ed57518Fbb8F",
                 scheduled_game: 1,
                 image_address: "",
                 game_participants_result: {
@@ -26,7 +26,7 @@ export function mockGame(): ScheduledGame {
                 id: 2,
                 nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/2",
                 name: "2",
-                user_address: "0xb960d6b39023cec0e9c22bcf43e46705b5ddb572",
+                user_address: "0x53003bBF47F25efE299211F523D6ed57518Fbb8F",
                 scheduled_game: 1,
                 image_address: "",
                 game_participants_result: {
@@ -42,34 +42,39 @@ export function mockGame(): ScheduledGame {
 
 export function mockParticipantDetails(): ParticipantDetails {
     return {
-        name: "1",
-        description: "1",
-        image: "/assets/enemy-pack/delta_sheep.png",
-        dna: "1",
+        dna: "27010153d2c576e664ca2f565c047afd83ffb2365bd9ab0eee1c62741fdf85d9",
+        name: "Wolf Passport",
+        description:
+            "The PIT is the first game of its kind, and will provide a competitive environment for wagering NFTs against each other in simulated battle, The Kodoku curse ensnares wretched and once human souls before twisting and reshaping them in beastly forms, Avians, Hounds, Insectoids and Serpents are immortalised as NFTs and PITTED against each other in eternal combat, These PIT Creatures are forced to fight for both glory and survival in THE PIT - an infernal Neo-Colosseum floating through the empty and endless void.",
+        image: "https://token.thepitnft.com/wolfgame/image.png",
         edition: 1,
-        date: 1,
-        spritesheet: "delta_sheep.png",
+        date: 1638910137238,
         attributes: [
             {
-                trait_type: "Speed",
-                value: 2
-            },
-            {
-                trait_type: "Attack",
-                value: 2
-            },
-            {
-                trait_type: "Defence",
-                value: 1
+                trait_type: "Collection",
+                value: "Wolf.game"
             },
             {
                 trait_type: "Creature",
-                value: "sheep"
+                value: "Wolf"
             },
             {
-                trait_type: "Tier",
-                value: "beta"
+                trait_type: "Attack",
+                value: 58
+            },
+            {
+                trait_type: "Defence",
+                value: 56
+            },
+            {
+                trait_type: "Speed",
+                value: 58
+            },
+            {
+                trait_type: "Health",
+                value: 100
             }
-        ]
+        ],
+        spritesheet: "blackwolf.png"
     };
 }
