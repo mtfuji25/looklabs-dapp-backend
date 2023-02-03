@@ -163,9 +163,6 @@ class LobbyLevel extends Level {
     }
 
     async startGame(): Promise<void> {
-
-        console.log("START GAME")
-
         // Creates game map layer
         const mapCollider = new MapColliderLayer(this.ecs);
 
@@ -274,15 +271,15 @@ class LobbyLevel extends Level {
 
             // Create player entrant log in strapi
             try {
-                // await this.context.logStorage.createLog({
-                //     event: "entrants",
-                //     timestamp: Date.now(),
-                //     scheduled_game: this.gameId,
-                //     player_id: participant.nft_id,
-                //     stats: this.getFormattedStats(details),
-                //     name: details.name,
-                //     scheduled_game_participant: participant.id,
-                // });
+                await this.context.logStorage.createLog({
+                    event: "entrants",
+                    timestamp: Date.now(),
+                    scheduled_game: this.gameId,
+                    player_id: participant.nft_id,
+                    stats: this.getFormattedStats(details),
+                    name: details.name,
+                    scheduled_game_participant: participant.id,
+                });
             } catch(err) {
                 Logger.error(
                     "Failed to create game entrant log for player: ",

@@ -92,8 +92,6 @@ class StrapiClient {
 
     // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
-
-        console.log("Mocked getNearestGame")
         return mockGame();
 
         // get current time
@@ -138,9 +136,6 @@ class StrapiClient {
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-
-        console.log("Mocked getGameById")
-
         return mockGame();
 
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];

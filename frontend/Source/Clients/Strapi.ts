@@ -142,8 +142,6 @@ class StrapiClient {
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-        console.log("Mocked getGameById");
-
         return mockGame();
 
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
@@ -206,7 +204,6 @@ class StrapiClient {
         tokenAddress: string,
         tokenId: number
     ): Promise<ParticipantDetails> {
-        console.log("mocked getParticipantDetails");
         return mockParticipantDetails();
 
         return (await this.restApi.get(`${tokenAddress}/${tokenId}`)).data;

@@ -53,16 +53,11 @@ class AwaitLevel extends Level {
                 }
             });
 
-            console.log("REQUESTING")
-
             // Cast the response to corret type
             const content = response.content as GameStatus;
 
             // If in lobby changes to lobby level
             if (content.gameStatus == "lobby") {
-
-                console.log("If in lobby changes to lobby level")
-
                 await this.context.engine.loadLevel(new LobbyLevel(
                     this.context, "Lobby",
                     {
