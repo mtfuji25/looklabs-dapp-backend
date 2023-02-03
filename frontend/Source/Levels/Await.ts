@@ -53,11 +53,16 @@ class AwaitLevel extends Level {
                 }
             });
 
+            console.log("REQUESTING")
+
             // Cast the response to corret type
             const content = response.content as GameStatus;
 
             // If in lobby changes to lobby level
             if (content.gameStatus == "lobby") {
+
+                console.log("If in lobby changes to lobby level")
+
                 await this.context.engine.loadLevel(new LobbyLevel(
                     this.context, "Lobby",
                     {
@@ -188,7 +193,7 @@ class AwaitLevel extends Level {
         
         try {
             // Request current game infos from strapi
-            this.currentGame = await this.context.strapi.getGameById(this.props.gameId);
+            this.currentGame = await this.context.strapi.getGameById(1 || this.props.gameId);
             await this.context.participantDetails.loadPlayerDetails(this.currentGame.scheduled_game_participants);
             this.context.assetLoader.loadSpriteSheets(Object.values(this.context.participantDetails.participants));
         } catch(err) {

@@ -146,7 +146,9 @@ class PlayerLayer extends Layer {
             delete this.players[id];
         }
 
-        const splitId = id.split('/')[1];
+        // const splitId = id.split('/')[1];
+        // mocked
+        const splitId = "aasd";
 
         // Creates and stores entity
         const idNumber = this.ecs.createEntity(pos.x - (splitId.length - 1) * 0.2, pos.y - 60, false);  
@@ -247,7 +249,11 @@ class PlayerLayer extends Layer {
         }
 
         const entity = this.players[id].entity;
-        const splitId = id.split('/')[1];
+
+        // const splitId = id.split('/')[1];
+        // mocked
+        const splitId = "aasd";
+
         const details = this.detailsModel.getDetailsForPlayer(id);
         if (!details) return;
         

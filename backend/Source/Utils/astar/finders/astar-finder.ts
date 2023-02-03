@@ -205,7 +205,7 @@ export class AStarFinder {
   }
 
   private isValidPosition (position:IPoint):boolean {
-    if (position.x == NaN || position.y == NaN) return false;
+    if (isNaN(position.x) || isNaN(position.y)) return false;
     if (Math.floor(position.x) != position.x || Math.floor(position.y) != position.y ) return false;
     return true;
   }

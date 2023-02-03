@@ -30,14 +30,14 @@ const rayIntersectRec = (rayOrigin: Vec2, rayDir: Vec2, recTarget: Rectangle, re
         (lu.y - rayOrigin.y) * invdir.y
     );
 
-    if (tNear.x == NaN || tNear.y == NaN) return false;
+    if (isNaN(tNear.x) || isNaN(tNear.y)) return false;
 
     const tFar = new Vec2(
         (rd.x - rayOrigin.x) * invdir.x, 
         (rd.y - rayOrigin.y) * invdir.y
     );
-
-    if (tFar.x == NaN || tFar.y == NaN) return false; 
+    
+    if (isNaN(tFar.x) || isNaN(tFar.y)) return false;
 
     if (tNear.x > tFar.x)
         [ tNear.x, tFar.x ] = [ tFar.x, tNear.x ];

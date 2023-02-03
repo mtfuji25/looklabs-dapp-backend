@@ -163,6 +163,8 @@ class LobbyLevel extends Level {
 
     async startGame(): Promise<void> {
 
+        console.log("START GAME")
+
         // Creates game map layer
         const mapCollider = new MapColliderLayer(this.ecs);
 
@@ -184,7 +186,23 @@ class LobbyLevel extends Level {
             const tokenAddr = (participant.nft_id).split('/')[0];
 
             // Request participant details from strapi
-            const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
+            // const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
+
+            const details = 
+                {
+                    name: "adsad1",
+                description: "1",
+                image: "1",
+                dna: "1",
+                edition: 1,
+                date: 1,
+                spritesheet: "1",
+                attributes: [{
+                    trait_type: "a",
+                    value: 1
+                }]
+                }
+
             if (details.name.indexOf (tokenId) == -1) {
                 details.name = `${details.name} #${tokenId}`;
             }
@@ -268,15 +286,15 @@ class LobbyLevel extends Level {
 
             // Create player entrant log in strapi
             try {
-                await this.context.logStorage.createLog({
-                    event: "entrants",
-                    timestamp: Date.now(),
-                    scheduled_game: this.gameId,
-                    player_id: participant.nft_id,
-                    stats: this.getFormattedStats(details),
-                    name: details.name,
-                    scheduled_game_participant: participant.id,
-                });
+                // await this.context.logStorage.createLog({
+                //     event: "entrants",
+                //     timestamp: Date.now(),
+                //     scheduled_game: this.gameId,
+                //     player_id: participant.nft_id,
+                //     stats: this.getFormattedStats(details),
+                //     name: details.name,
+                //     scheduled_game_participant: participant.id,
+                // });
             } catch(err) {
                 Logger.error(
                     "Failed to create game entrant log for player: ",

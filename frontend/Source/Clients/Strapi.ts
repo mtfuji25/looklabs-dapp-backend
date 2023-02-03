@@ -100,6 +100,8 @@ class StrapiClient {
 
     // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
+        console.log("GETTING NEAREST GAME")
+
         // get current time
         const now = new Date().toISOString();
 
@@ -139,6 +141,33 @@ class StrapiClient {
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
+
+        console.log("Mocked getGameById")
+
+        return {
+            id: 1,
+            game_date: new Date().toISOString(),
+            published_at: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            scheduled_game_participants: [
+                {
+                    id: 1,
+                    nft_id: "1",
+                    name: "1",
+                    user_address: "1",
+                    scheduled_game: 1,
+                    image_address: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fplayer&psig=AOvVaw2M2226oc41lTE18-Zrpo3W&ust=1675449515310000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMiwwfu99_wCFQAAAAAdAAAAABBl",
+                    game_participants_result: {
+                        scheduled_game_participant: 1,
+                        survived_for: 1,
+                        kills: 1,
+                        health: 1
+                    },
+                },
+            ]
+        }
+
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
         return {
@@ -201,6 +230,22 @@ class StrapiClient {
         tokenAddress: string,
         tokenId: number
     ): Promise<ParticipantDetails> {
+
+        console.log("mocked getParticipantDetails")
+        return   {
+            name: "adsad1",
+            description: "1",
+            image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fplayer&psig=AOvVaw2M2226oc41lTE18-Zrpo3W&ust=1675449515310000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMiwwfu99_wCFQAAAAAdAAAAABBl",
+            dna: "1",
+            edition: 1,
+            date: 1,
+            spritesheet: "1",
+            attributes: [{
+                trait_type: "a",
+                value: 1
+            }]
+        }
+
         return (await this.restApi.get(`${tokenAddress}/${tokenId}`)).data;
     }
 

@@ -60,6 +60,7 @@ class TextLayer extends Layer {
     }
 
     onAttach() {
+        console.log("sadasdas")
         this.subtitle = this.ecs.createEntity().addText("NEXT BATTLE SOON", this.titleStyle);
 
         this.renderText(this.subtitle, 50);
