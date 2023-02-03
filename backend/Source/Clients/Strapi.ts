@@ -1,24 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
-
-const MOCKED_NEAREST_GAME = {
-    id: 1,
-    game_date: new Date().toISOString(),
-    published_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    scheduled_game_participants: [
-        {
-            id: 1,
-            nft_id: "1",
-            user_address: "1",
-            name: "test",
-            scheduled_game: 1,
-            published_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        }
-    ]
-}
+import { mockGame } from "./Mock";
 
 interface ScheduledGame {
     id: number;
@@ -113,7 +94,7 @@ class StrapiClient {
     async getNearestGame(): Promise<ScheduledGame> {
 
         console.log("Mocked getNearestGame")
-        return MOCKED_NEAREST_GAME;
+        return mockGame();
 
         // get current time
         const now = new Date().toISOString();

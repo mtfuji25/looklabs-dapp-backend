@@ -31,6 +31,7 @@ import {
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
+import { mockParticipantDetails } from "../Clients/Mock";
 
 //
 // Types
@@ -188,20 +189,7 @@ class LobbyLevel extends Level {
             // Request participant details from strapi
             // const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
 
-            const details = 
-                {
-                    name: "adsad1",
-                description: "1",
-                image: "1",
-                dna: "1",
-                edition: 1,
-                date: 1,
-                spritesheet: "1",
-                attributes: [{
-                    trait_type: "a",
-                    value: 1
-                }]
-                }
+            const details = mockParticipantDetails();
 
             if (details.name.indexOf (tokenId) == -1) {
                 details.name = `${details.name} #${tokenId}`;

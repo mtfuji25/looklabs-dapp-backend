@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { Logger } from "../Utils/Logger";
+import { mockGame, mockParticipantDetails } from "./Mock";
 
 interface ScheduledGame {
     id: number;
@@ -7,7 +8,7 @@ interface ScheduledGame {
     published_at?: string;
     created_at?: string;
     updated_at?: string;
-    max_participants?: number,
+    max_participants?: number;
     scheduled_game_participants: ScheduledGameParticipant[];
 }
 
@@ -42,7 +43,7 @@ interface ParticipantDetails {
     dna: string;
     edition: number;
     date: number;
-    spritesheet: string,
+    spritesheet: string;
     attributes: DetailAttribute[];
 }
 
@@ -100,7 +101,7 @@ class StrapiClient {
 
     // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
-        console.log("GETTING NEAREST GAME")
+        console.log("GETTING NEAREST GAME");
 
         // get current time
         const now = new Date().toISOString();
@@ -132,7 +133,7 @@ class StrapiClient {
                         scheduled_game: response.id,
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
-                        updated_at: attributes.updatedAt,  
+                        updated_at: attributes.updatedAt
                     };
                 }
             )
@@ -141,32 +142,9 @@ class StrapiClient {
 
     // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
+        console.log("Mocked getGameById");
 
-        console.log("Mocked getGameById")
-
-        return {
-            id: 1,
-            game_date: new Date().toISOString(),
-            published_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            scheduled_game_participants: [
-                {
-                    id: 1,
-                    nft_id: "1",
-                    name: "1",
-                    user_address: "1",
-                    scheduled_game: 1,
-                    image_address: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fplayer&psig=AOvVaw2M2226oc41lTE18-Zrpo3W&ust=1675449515310000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMiwwfu99_wCFQAAAAAdAAAAABBl",
-                    game_participants_result: {
-                        scheduled_game_participant: 1,
-                        survived_for: 1,
-                        kills: 1,
-                        health: 1
-                    },
-                },
-            ]
-        }
+        return mockGame();
 
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
@@ -186,7 +164,6 @@ class StrapiClient {
                         published_at: attributes.publishedAt,
                         created_at: attributes.createdAt,
                         updated_at: attributes.updatedAt
-                        
                     };
                 }
             )
@@ -194,7 +171,6 @@ class StrapiClient {
     }
 
     async getGameParticipants(id: number) {
-        
         const data = (
             await this.get(
                 `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.survived_for:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`
@@ -230,21 +206,8 @@ class StrapiClient {
         tokenAddress: string,
         tokenId: number
     ): Promise<ParticipantDetails> {
-
-        console.log("mocked getParticipantDetails")
-        return   {
-            name: "adsad1",
-            description: "1",
-            image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fplayer&psig=AOvVaw2M2226oc41lTE18-Zrpo3W&ust=1675449515310000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMiwwfu99_wCFQAAAAAdAAAAABBl",
-            dna: "1",
-            edition: 1,
-            date: 1,
-            spritesheet: "1",
-            attributes: [{
-                trait_type: "a",
-                value: 1
-            }]
-        }
+        console.log("mocked getParticipantDetails");
+        return mockParticipantDetails();
 
         return (await this.restApi.get(`${tokenAddress}/${tokenId}`)).data;
     }
