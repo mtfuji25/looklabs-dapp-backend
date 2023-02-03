@@ -5,7 +5,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/GameApi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
@@ -31,7 +31,6 @@ import {
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
-import { mockParticipantDetails } from "../Clients/Mock";
 
 //
 // Types
@@ -184,9 +183,7 @@ class LobbyLevel extends Level {
             const tokenAddr = (participant.nft_id).split('/')[0];
 
             // Request participant details from strapi
-            // const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
-
-            const details = mockParticipantDetails();
+            const details = await this.context.strapi.getParticipantDetails(tokenAddr, tokenId);
 
             if (details.name.indexOf (tokenId) == -1) {
                 details.name = `${details.name} #${tokenId}`;

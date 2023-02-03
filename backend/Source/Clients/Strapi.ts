@@ -1,99 +1,17 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
-import { mockGame } from "./Mock";
+import { GameApi, GameParticipantsResult, ParticipantDetails, ScheduledGame } from "./GameApi";
 
-interface ScheduledGame {
-    id: number;
-    game_date: string;
-    published_at?: string;
-    created_at?: string;
-    updated_at?: string;
-    max_participants?: number;
-    scheduled_game_participants: ScheduledGameParticipant[];
-}
-
-interface ScheduledGameParticipant {
-    id: number;
-    nft_id: string;
-    user_address: string;
-    name: string;
-    scheduled_game: number;
-    published_at?: string;
-    created_at?: string;
-    updated_at?: string;
-}
-
-interface GameParticipantsResult {
-    scheduled_game_participant: number;
-    survived_for: number;
-    kills: number;
-    health: number;
-    published_at?: string;
-    created_at?: string;
-    updated_at?: string;
-}
-
-// Return value for rest api
-interface ParticipantDetails {
-    name: string;
-    description: string;
-    image: string;
-    dna: string;
-    edition: number;
-    date: number;
-    spritesheet: string;
-    attributes: DetailAttribute[];
-}
-
-// Attributes of a detail
-interface DetailAttribute {
-    trait_type: string;
-    value: number | string;
-}
-
-class StrapiClient {
-    private host: string;
-
-    // strapiApi
-    private readonly api: AxiosInstance;
-
-    // restApi for player attributes
-    private readonly restApi: AxiosInstance;
-    private readonly authToken: string;
-
-    constructor(host: string, token: string) {
-        this.host = host;
-        this.authToken = token;
-        // start axios instance
-        this.api = axios.create({
-            baseURL: host
-        });
-
-        // start axios for restApi
-        this.restApi = axios.create({
-            baseURL: "https://token.thepitnft.com/"
-        });
-    }
-
-    private async get(url: string): Promise<AxiosResponse> {
-        return this.api.get(url, { headers: { Authorization: `bearer ${this.authToken}` } });
-    }
-
-    private async post(url: string, data: any): Promise<AxiosResponse> {
-        return this.api.post(url, data, { headers: { Authorization: `bearer ${this.authToken}` } });
-    }
+export class StrapiClient extends GameApi {
 
     // Creates a result for a participant on strapi. Takes a player and it's result enum(string)
     // async because consistency is not needed immediately
     async createParticipantResult(result: GameParticipantsResult): Promise<AxiosResponse> {
-        return; // commented for now
         return this.post("game-participants-results", {
             data: result
         });
     }
 
-    // gets the nearest game
     async getNearestGame(): Promise<ScheduledGame> {
-        return mockGame();
 
         // get current time
         const now = new Date().toISOString();
@@ -135,9 +53,7 @@ class StrapiClient {
         } else return null;
     }
 
-    // get chosen game
     async getGameById(id: number): Promise<ScheduledGame> {
-        return mockGame();
 
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
@@ -163,23 +79,7 @@ class StrapiClient {
         };
     }
 
-    // get the details for a chosen participant
     async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
         return (await this.restApi.get(`${tokenAddr}/${tokenId}`)).data;
     }
-
-    // Default engine start call
-    start(): void {}
-
-    // Default engine close call
-    close(): void {}
 }
-
-export {
-    StrapiClient,
-    ScheduledGame,
-    ScheduledGameParticipant,
-    GameParticipantsResult,
-    ParticipantDetails,
-    DetailAttribute
-};

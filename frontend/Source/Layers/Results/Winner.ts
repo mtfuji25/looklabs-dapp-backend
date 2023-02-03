@@ -7,7 +7,7 @@ import { Application, Container, ITextStyle } from "pixi.js";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Text } from "../../Core/Ecs/Components/Text";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
-import { ParticipantDetails, ScheduledGameParticipant } from "../../Clients/Strapi";
+import { ParticipantDetails, ScheduledGameParticipant } from "../../Clients/GameApi";
 import { PlayerLayer } from "../Lobby/Player";
 
 interface TextParams {

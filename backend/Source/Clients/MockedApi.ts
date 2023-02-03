@@ -1,6 +1,30 @@
-import { ParticipantDetails, ScheduledGame } from "./Strapi";
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import { GameApi, GameParticipantsResult, ParticipantDetails, ScheduledGame } from "./GameApi";
 
-export function mockGame(): ScheduledGame {
+export class MockedApi extends GameApi {
+
+    protected async get(url: string): Promise<AxiosResponse> {
+        return this.api.get(url, { headers: { Authorization: `bearer ${this.authToken}` } });
+    }
+
+    protected async post(url: string, data: any): Promise<AxiosResponse> {
+        return this.api.post(url, data, { headers: { Authorization: `bearer ${this.authToken}` } });
+    }
+
+    async getNearestGame(): Promise<ScheduledGame> {
+        return mockGame();
+    }
+
+    async getGameById(id: number): Promise<ScheduledGame> {
+        return mockGame();
+    }
+
+    async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
+        return mockParticipantDetails();
+    }
+}
+
+function mockGame(): ScheduledGame {
     const gameDate = new Date();
     gameDate.setSeconds(gameDate.getSeconds() + 15);
 
@@ -26,7 +50,7 @@ export function mockGame(): ScheduledGame {
     };
 }
 
-export function mockParticipantDetails(): ParticipantDetails {
+function mockParticipantDetails(): ParticipantDetails {
     return {
         dna: "27010153d2c576e664ca2f565c047afd83ffb2365bd9ab0eee1c62741fdf85d9",
         name: "Wolf Passport",

@@ -1,10 +1,12 @@
 import { Engine } from "./Core/Engine";
 import { WSClient } from "./Clients/WebSocket";
+import { MockedApi } from "./Clients/MockedApi";
 import { StrapiClient } from "./Clients/Strapi";
 import { Logger } from "./Utils/Logger";
 import { LogStorageClient } from "./Clients/LogStorage";
 
 import * as dotenv from "dotenv";
+
 dotenv.config({ path: "../.env" });
 
 const STRAPI_SERVER_HOST = String(process.env.STRAPI_SERVER_HOST);
@@ -23,7 +25,8 @@ const main = async () => {
     Logger.start(LOGGER_LEVEL);
 
     // Start strapi client
-    const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    // const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    const strapiClient = new MockedApi(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
     // Start websocket client
     const wsClient = new WSClient(WS_HOST, WS_PORT);

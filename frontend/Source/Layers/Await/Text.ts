@@ -4,7 +4,7 @@ import { Layer } from "../../Core/Layer";
 import { Application, ITextStyle } from "pixi.js";
 
 // Web clients
-import { ScheduledGame } from "../../Clients/Strapi";
+import { ScheduledGame } from "../../Clients/GameApi";
 
 // Interfaces
 import { EngineContext } from "../../Core/Interfaces";

@@ -11,7 +11,7 @@ import { LogsLayer } from "../Layers/Await/Log";
 import { v4 as uuidv4 } from "uuid";
 
 // Web Clients imports
-import { ScheduledGame } from "../Clients/Strapi";
+import { ScheduledGame } from "../Clients/GameApi";
 import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { Logger } from "../Utils/Logger";
 import { Resource } from "../Core/AssetLoader";

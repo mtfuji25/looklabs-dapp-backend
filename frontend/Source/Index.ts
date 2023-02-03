@@ -3,6 +3,7 @@ import { Engine } from "./Core/Engine";
 // Web clients imports
 import { WSClient } from "./Clients/WebSocket";
 import { StrapiClient } from "./Clients/Strapi";
+import { MockedApi } from "./Clients/MockedApi";
 
 // Pixi imports
 import { Application } from "pixi.js";
@@ -56,7 +57,8 @@ const main = async () => {
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 
     // Creates strapi client
-    const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    // const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    const strapiClient = new MockedApi(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
     // Start engine itself
     const engine = new Engine(wsClient, strapiClient, app, ROOT);
