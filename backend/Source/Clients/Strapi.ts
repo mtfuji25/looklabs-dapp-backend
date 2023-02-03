@@ -85,6 +85,7 @@ class StrapiClient {
     // Creates a result for a participant on strapi. Takes a player and it's result enum(string)
     // async because consistency is not needed immediately
     async createParticipantResult(result: GameParticipantsResult): Promise<AxiosResponse> {
+        return; // commented for now
         return this.post("game-participants-results", {
             data: result
         });

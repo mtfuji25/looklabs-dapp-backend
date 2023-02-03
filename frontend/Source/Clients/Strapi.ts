@@ -169,6 +169,9 @@ class StrapiClient {
     }
 
     async getGameParticipants(id: number) {
+
+        return mockGame().scheduled_game_participants;
+
         const data = (
             await this.get(
                 `scheduled-game-participants?filters[scheduled_game][id][$eq]=${id}&sort=game_participants_result.survived_for:desc&populate=*&pagination[page]=1&pagination[pageSize]=100`

@@ -34,7 +34,7 @@ export function mockParticipantDetails(): ParticipantDetails {
         dna: "1",
         edition: 1,
         date: 1,
-        spritesheet: "1",
+        spritesheet: "delta_sheep.png",
         attributes: [
             {
                 trait_type: "Speed",
@@ -50,7 +50,7 @@ export function mockParticipantDetails(): ParticipantDetails {
             },
             {
                 trait_type: "Creature",
-                value: "goat"
+                value: "sheep"
             },
             {
                 trait_type: "Tier",
