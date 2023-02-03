@@ -87,7 +87,6 @@ class PlayerLayer extends Layer {
             attributesMap[attribute.trait_type] = attribute.value;
         });
         if (!attributesMap["Tier"] || tiers.indexOf(attributesMap["Tier"].toLowerCase()) == -1) attributesMap["Tier"] = "beta";
-     
 
         const status = this.self.addStatus(
             // Attack

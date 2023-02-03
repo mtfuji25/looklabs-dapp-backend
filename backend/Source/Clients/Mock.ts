@@ -12,8 +12,15 @@ export function mockGame(): ScheduledGame {
                 id: 1,
                 nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/1",
                 user_address: "1",
-                name: "test",
-                scheduled_game: 1,
+                name: "1",
+                scheduled_game: 1
+            },
+            {
+                id: 2,
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/2",
+                user_address: "2",
+                name: "2",
+                scheduled_game: 1
             }
         ]
     };
@@ -30,8 +37,24 @@ export function mockParticipantDetails(): ParticipantDetails {
         spritesheet: "1",
         attributes: [
             {
-                trait_type: "a",
+                trait_type: "Speed",
+                value: 2
+            },
+            {
+                trait_type: "Attack",
+                value: 2
+            },
+            {
+                trait_type: "Defence",
                 value: 1
+            },
+            {
+                trait_type: "Creature",
+                value: "goat"
+            },
+            {
+                trait_type: "Tier",
+                value: "beta"
             }
         ]
     };
