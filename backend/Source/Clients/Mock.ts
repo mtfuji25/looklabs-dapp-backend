@@ -2,24 +2,18 @@ import { ParticipantDetails, ScheduledGame } from "./Strapi";
 
 export function mockGame(): ScheduledGame {
     const gameDate = new Date();
-    gameDate.setSeconds(gameDate.getSeconds() + 300);
+    gameDate.setSeconds(gameDate.getSeconds() + 15);
 
     return {
         id: 1,
         game_date: gameDate.toISOString(),
-        published_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         scheduled_game_participants: [
             {
                 id: 1,
-                nft_id: "1",
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/1",
                 user_address: "1",
                 name: "test",
                 scheduled_game: 1,
-                published_at: new Date().toISOString(),
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
             }
         ]
     };
