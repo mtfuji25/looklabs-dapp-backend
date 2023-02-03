@@ -141,25 +141,7 @@ class StrapiClient {
 
         console.log("Mocked getGameById")
 
-        return {
-            id: 1,
-            game_date: new Date().toISOString(),
-            published_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            scheduled_game_participants: [
-                {
-                    id: 1,
-                    nft_id: "1",
-                    user_address: "1",
-                    name: "test",
-                    scheduled_game: 1,
-                    published_at: new Date().toISOString(),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                }
-            ]
-        }
+        return mockGame();
 
         const response = (await this.get(`scheduled-games/${id}?populate=*`)).data["data"];
         const attributes = response.attributes;
