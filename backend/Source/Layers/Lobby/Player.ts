@@ -13,7 +13,7 @@ import { OnConnectionListener, PlayerCommand } from "../../Clients/Interfaces";
 
 // Kill feed actions
 import killFeed from "../../Assets/KillFeed.json";
-import { GameParticipantsResult, ParticipantDetails } from "../../Clients/GameApi";
+import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi";
 
 import { Logger } from "../../Utils/Logger";
 import { PlayerActions } from "./PlayerActions";

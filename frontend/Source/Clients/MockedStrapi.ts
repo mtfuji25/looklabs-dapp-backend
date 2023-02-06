@@ -1,6 +1,7 @@
-import { GameApi, ParticipantDetails, ScheduledGame } from "./GameApi";
+import { AxiosResponse } from "axios";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGame, StrapiClient } from "./Strapi";
 
-export class MockedApi extends GameApi{
+export class MockedStrapi extends StrapiClient {
     async getNearestGame(): Promise<ScheduledGame> {
         return mockGame();
     }
@@ -18,6 +19,11 @@ export class MockedApi extends GameApi{
         tokenId: number
     ): Promise<ParticipantDetails> {
         return mockParticipantDetails();
+    }
+
+    async createParticipantResult(result: GameParticipantsResult): Promise<AxiosResponse> {
+        // Mocked
+        return null;
     }
 }
 

@@ -1,6 +1,6 @@
 import { BaseTextureCache } from "@pixi/utils";
 import { Application, BaseRenderTexture, Loader, LoaderResource, SCALE_MODES, settings } from "pixi.js";
-import { ParticipantDetails } from "../Clients/GameApi";
+import { ParticipantDetails } from "../Clients/Strapi";
 import { Random } from "../Utils/Math";
 
 type Resource = {

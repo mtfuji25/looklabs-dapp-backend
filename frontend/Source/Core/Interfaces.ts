@@ -3,7 +3,7 @@ import { Engine } from "./Engine";
 
 // Web clients imports
 import { WSClient } from "../Clients/WebSocket";
-import { StrapiClient } from "../Clients/Strapi";
+import { StrapiClient } from "../Clients/Strapi2";
 
 // Pixi import
 import { Application } from "pixi.js";

@@ -1,5 +1,4 @@
-import { DetailAttribute, ParticipantDetails, ScheduledGameParticipant } from "../Clients/GameApi";
-import { StrapiClient } from "../Clients/Strapi";
+import { StrapiClient, DetailAttribute, ParticipantDetails, ScheduledGameParticipant } from "../Clients/Strapi";
 
 class ParticipantDetailsModel {
 

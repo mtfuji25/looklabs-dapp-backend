@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
-import { GameApi, GameParticipantsResult, ParticipantDetails, ScheduledGame } from "./GameApi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGame } from "./Strapi";
+import { StrapiClient } from "./Strapi";
 
-export class MockedApi extends GameApi {
-
+export class MockedStrapi extends StrapiClient {
     protected async get(url: string): Promise<AxiosResponse> {
         return this.api.get(url, { headers: { Authorization: `bearer ${this.authToken}` } });
     }
@@ -21,6 +21,11 @@ export class MockedApi extends GameApi {
 
     async getParticipantDetails(tokenAddr: string, tokenId: string): Promise<ParticipantDetails> {
         return mockParticipantDetails();
+    }
+
+    async createParticipantResult(result: GameParticipantsResult): Promise<AxiosResponse> {
+        // Mocked
+        return null;
     }
 }
 

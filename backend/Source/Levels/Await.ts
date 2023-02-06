@@ -15,7 +15,7 @@ import {
 } from "../Clients/Interfaces";
 
 // Strapi related imports
-import { ScheduledGame } from "../Clients/GameApi";
+import { ScheduledGame } from "../Clients/Strapi";
 import { Logger } from "../Utils/Logger";
 
 //

@@ -5,7 +5,7 @@ import { Level } from "../Core/Level";
 import { AwaitLevel } from "./Await";
 
 // Web clients imports
-import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/GameApi";
+import { GameParticipantsResult, ParticipantDetails, ScheduledGame, ScheduledGameParticipant } from "../Clients/Strapi";
 
 // Interfaces imports
 import { EngineContext } from "../Core/Interfaces";
