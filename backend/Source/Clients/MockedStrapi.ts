@@ -3,14 +3,6 @@ import { GameParticipantsResult, ParticipantDetails, ScheduledGame } from "./Str
 import { StrapiClient } from "./Strapi";
 
 export class MockedStrapi extends StrapiClient {
-    protected async get(url: string): Promise<AxiosResponse> {
-        return this.api.get(url, { headers: { Authorization: `bearer ${this.authToken}` } });
-    }
-
-    protected async post(url: string, data: any): Promise<AxiosResponse> {
-        return this.api.post(url, data, { headers: { Authorization: `bearer ${this.authToken}` } });
-    }
-
     async getNearestGame(): Promise<ScheduledGame> {
         return mockGame();
     }
@@ -49,6 +41,13 @@ function mockGame(): ScheduledGame {
                 nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/2",
                 user_address: "2",
                 name: "2",
+                scheduled_game: 1
+            },
+            {
+                id: 3,
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/3",
+                user_address: "3",
+                name: "3",
                 scheduled_game: 1
             }
         ]
