@@ -5,7 +5,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
 import { Application, ITextStyle, Container } from "pixi.js";
-import { ScheduledGameParticipant } from "../../Clients/Strapi2";
+import { ScheduledGameParticipant } from "../../Clients/Strapi";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { lerp } from "../../Utils/Math";
 import { PlayerLayer } from "../Lobby/Player";

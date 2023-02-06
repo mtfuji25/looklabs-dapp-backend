@@ -12,7 +12,7 @@ import { initInputs, inputs } from "./Inputs/Inputs";
 
 // Web clients imports
 import { WSClient } from "../Clients/WebSocket";
-import { StrapiClient } from "../Clients/Strapi2";
+import { StrapiClient } from "../Clients/Strapi";
 
 // Pixi imports
 import { Application, SCALE_MODES, settings } from "pixi.js";
