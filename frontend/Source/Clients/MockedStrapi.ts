@@ -57,7 +57,21 @@ function mockGame(): ScheduledGame {
                 scheduled_game: 1,
                 image_address: "",
                 game_participants_result: {
-                    scheduled_game_participant: 1,
+                    scheduled_game_participant: 2,
+                    survived_for: 1,
+                    kills: 1,
+                    health: 1
+                }
+            },
+            {
+                id: 3,
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/3",
+                name: "3",
+                user_address: "0x53003bBF47F25efE299211F523D6ed57518Fbb8F",
+                scheduled_game: 1,
+                image_address: "",
+                game_participants_result: {
+                    scheduled_game_participant: 3,
                     survived_for: 1,
                     kills: 1,
                     health: 1
