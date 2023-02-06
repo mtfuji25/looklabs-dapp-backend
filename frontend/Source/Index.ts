@@ -57,8 +57,9 @@ const main = async () => {
     const wsClient = new WSClient(WS_HOST, WS_PORT);
 
     // Creates strapi client
-    // const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
-    const strapiClient = new MockedStrapi(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    const strapiClient = process.env.USE_MOCK_DATA === "true" ?
+        new MockedStrapi(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN) :
+        new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
     // Start engine itself
     const engine = new Engine(wsClient, strapiClient, app, ROOT);
