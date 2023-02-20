@@ -12,7 +12,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameState, GameStatus, Listener, msgTypes, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
+import { GameState, GameStatus, Listener, MapData, msgTypes, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
@@ -88,11 +88,16 @@ class LobbyLevel extends Level {
             viewLayer
         );
 
+        const mapDataResponse = await this.getMapData();
+        const mapDataContent = mapDataResponse.content as MapData;
+        const {levelCollider, levelMap, levelOverlays} = mapDataContent.mapData;
+
         const mapLayer = new MapLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
-            this.context.res
+            this.context.res,
+            levelMap
         );
         // Pushs map generator
         this.layerStack.pushLayer(
@@ -191,6 +196,18 @@ class LobbyLevel extends Level {
         if (this.introSequence) {
             this.introSequence.destroy();
         }
+    }
+
+    async getMapData() {
+        const response = await this.context.ws.request({
+            uuid: uuidv4(),
+            type: "request",
+            content: {
+                type: "map-data"
+            }
+        });
+
+        return response;
     }
 
     // Handles all game-status messages from backend

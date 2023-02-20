@@ -7,6 +7,7 @@ import {
     IncomingMsg,
     ServerMsg,
     ReplyableMsg,
+    MapData,
     GameStatus,
     Listener,
     GameStatusListener,
@@ -21,7 +22,9 @@ import {
     PlayerNames,
     GameState,
     GameStateListener,
-    OnGameStateFn
+    OnGameStateFn,
+    MapDataListener,
+    OnMapDataFn
 } from "./Interfaces";
 import { Logger } from "../Utils/Logger";
 
@@ -35,6 +38,37 @@ class WSClient {
 
     // handles incoming messages of corresponding types
     private readonly msgHandlers: Record<string, msgHandlerFn> = {
+        "map-data": (data: IncomingMsg, client: WebSocket): void => {
+            // Just allow one response
+            let replied = false;
+
+            // Generates replyable msg
+            const replyable: ReplyableMsg = {
+                content: data.content,
+                reply: (msg: MapData) => {
+                    if (!replied) {
+                        const serverMsg: ServerMsg = {
+                            uuid: data.uuid,
+                            type: "response",
+                            content: msg
+                        };
+
+                        console.log("serverMsg", serverMsg)
+
+                        client.send(JSON.stringify(serverMsg));
+
+                        replied = true;
+                    }
+                }
+            };
+
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "map-data") {
+                    if ((listener as GameStatusListener).callback(replyable)) break;
+                }
+            }
+        },
+
         "game-status": (data: IncomingMsg, client: WebSocket): void => {
             // Just allow one response
             let replied = false;
@@ -49,6 +83,8 @@ class WSClient {
                             type: "response",
                             content: msg
                         };
+
+                        console.log("serverMsg", serverMsg)
 
                         client.send(JSON.stringify(serverMsg));
 
@@ -185,6 +221,7 @@ class WSClient {
         this.server.close();
     }
 
+    addListener(type: "map-data", fn: OnMapDataFn): MapDataListener;
     addListener(type: "game-status", fn: OnGameStatusFn): GameStatusListener;
     addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
     addListener(type: "player-names", fn: OnPlayerNamesFn): PlayerNamesListener;

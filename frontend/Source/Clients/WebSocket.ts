@@ -9,6 +9,7 @@ import {
     KillListener,
     Listener,
     ListenerTypes,
+    MapDataListener,
     msgHandlerFn,
     OnConnectionFn,
     OnConnectionListener,
@@ -47,6 +48,13 @@ class WSClient {
 
     // msg handler record for each msg type
     private readonly msgHandlers: Record<string, msgHandlerFn> = {
+        "map-data": (data: ServerMsg): void => {
+            for (let listener of Object.values(this.listeners)) {
+                if (listener.type == "map-data") {
+                    if ((listener as MapDataListener).callback(data)) break;
+                }
+            }
+        },
         "game-status": (data: ServerMsg): void => {
             for (let listener of Object.values(this.listeners)) {
                 if (listener.type == "game-status") {

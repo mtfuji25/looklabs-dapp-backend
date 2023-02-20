@@ -11,7 +11,7 @@ const msgTypes = {
 };
 
 type MsgTypes = "kill" | "enemy" | "game-status" | "game-state" | "remain-players" | "game-time";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus |  GameState | PlayerCommand | GameTimeMsg | PlayerNames;
+type MsgInterfaces = KillMsg | RemainPlayersMsg | MapData | GameStatus |  GameState | PlayerCommand | GameTimeMsg | PlayerNames;
 type GameStateTypes = "spawn" | "countdown3" | "countdown2" | "countdown1" | "countdown0" | "fight"
 //
 //  Msgs interfaces
@@ -35,6 +35,12 @@ interface RemainPlayersMsg {
     msgType: "remain-players";
     totalPlayers: number;
     remainingPlayers: number;
+}
+
+interface MapData {
+    msgType: "map-data";
+    gameId: number;
+    mapData: any;
 }
 
 interface GameStatus {
@@ -71,12 +77,13 @@ interface PlayerCommand {
 // Requests types and values
 
 const requests = {
+    mapData: "map-data",
     gameStatus: "game-status",
     playerNames: "player-names",
     gameState: "game-state"
 };
 
-type ListenerTypes = "game-status" | "connection" | "player-names" | "game-state";
+type ListenerTypes = "map-data" | "game-status" | "connection" | "player-names" | "game-state";
 
 // Interfaces
 interface IncomingMsg {
@@ -92,7 +99,7 @@ interface IncomingMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameState | GameTimeMsg | PlayerNames;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | MapData | GameStatus | GameState | GameTimeMsg | PlayerNames;
 }
 
 interface ReplyableMsg {
@@ -107,6 +114,7 @@ interface ReplyableMsg {
 // Listeners
 // Callback types
 type OnConnectionFn = (event: WebSocket) => boolean;
+type OnMapDataFn = (event: ReplyableMsg) => boolean;
 type OnGameStatusFn = (event: ReplyableMsg) => boolean;
 type OnPlayerNamesFn = (event: ReplyableMsg) => boolean;
 type OnGameStateFn = (event: ReplyableMsg) => boolean;
@@ -121,6 +129,10 @@ interface Listener {
     callback: OnListenerFns;
     destroy: () => void;
     id: string;
+}
+
+interface MapDataListener extends Listener {
+    callback: OnMapDataFn;
 }
 
 interface GameStatusListener extends Listener {
@@ -147,6 +159,7 @@ export {
     ListenerTypes,
     MsgTypes,
     ServerMsg,
+    MapData,
     GameStatus,
     GameState,
     PlayerNames,
@@ -155,12 +168,14 @@ export {
     IncomingMsg,
     ReplyableMsg,
     Listener,
+    MapDataListener,
     GameStatusListener,
     GameStateListener,
     PlayerNamesListener,
     OnPlayerNamesFn,
     OnConnectionListener,
     OnListenerFns,
+    OnMapDataFn,
     OnGameStatusFn,
     OnGameStateFn,
     OnConnectionFn,

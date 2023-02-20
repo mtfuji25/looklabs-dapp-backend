@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // Web Clients imports
 import { ScheduledGame } from "../Clients/Strapi";
-import { GameStatus, Listener, msgTypes, ServerMsg } from "../Clients/Interfaces";
+import { GameStatus, Listener, MapData, msgTypes, ServerMsg } from "../Clients/Interfaces";
 import { Logger } from "../Utils/Logger";
 import { Resource } from "../Core/AssetLoader";
 import { EngineContext } from "../Core/Interfaces";
@@ -88,11 +88,16 @@ class AwaitLevel extends Level {
         this.context.app.renderer.backgroundColor = MAIN_BG_COLOR;
 
         // Connect background layer
+
+        const mapDataResponse = await this.getMapData();
+        const mapDataContent = mapDataResponse.content as MapData;
+        const {levelCollider, levelMap, levelOverlays} = mapDataContent.mapData;
         
         this.layerStack.pushLayer(new MapLayer(
             this.ecs,
             this.context.app,
-            this.context.res
+            this.context.res,
+            levelMap
         ));
 
         // Load all overlays
@@ -130,6 +135,17 @@ class AwaitLevel extends Level {
         this.playBackgroundMusic(Level.AWAIT_SOUND);
     }
 
+    async getMapData() {
+        const response = await this.context.ws.request({
+            uuid: uuidv4(),
+            type: "request",
+            content: {
+                type: "map-data"
+            }
+        });
+
+        return response;
+    }
 
     onClose(): void {
 

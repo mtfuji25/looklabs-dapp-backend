@@ -27,10 +27,17 @@ import {
     GameStateListener,
     GameState,
     GameStateTypes,
+    MapData,
+    MapDataListener,
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
+
+// Map
+import levelCollider from "../Assets/level_collider.json";
+import levelMap from "../Assets/level_map.json";
+import levelOverlays from "../Assets/level_overlays.json";
 
 //
 // Types
@@ -87,6 +94,7 @@ class LobbyLevel extends Level {
     private initialDate: number;
 
     // WebSockets listeners
+    private mapDataListener: MapDataListener;
     private gameNamesListener: PlayerNamesListener;
     private gameStatusListener: GameStatusListener;
     private wsConnectionListener: OnConnectionListener;
@@ -118,6 +126,10 @@ class LobbyLevel extends Level {
         LobbyLevel.playerNames = {};
 
         // Adding WebSockets listeners
+        this.mapDataListener = this.context.ws.addListener(
+            "map-data", (msg) => this.onMapDataMsg(msg)
+        );
+
         this.gameStatusListener = this.context.ws.addListener(
             "game-status", (msg) => this.onGameStatusMsg(msg)
         );
@@ -601,6 +613,33 @@ class LobbyLevel extends Level {
         this.gameStatusListener.destroy();
         this.wsConnectionListener.destroy();
         this.gameStateListener.destroy();
+    }
+
+    onMapDataMsg(msg: ReplyableMsg): boolean {
+
+        console.log("onMapDataMsg");
+
+        // Check the veracity of message type
+        if (msg.content.type === requests.mapData) {
+
+            // Generates the reply
+            const reply: MapData = {
+                msgType: "map-data",
+                gameId: this.gameId,
+                mapData: {
+                    levelCollider,
+                    levelMap,
+                    levelOverlays
+                }
+            };
+
+            // Send the reply to the author of request
+            msg.reply(reply);
+        }
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
     }
 
     // Handles all requests from frontends that relate with current game-status

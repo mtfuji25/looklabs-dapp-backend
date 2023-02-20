@@ -14,10 +14,7 @@ import { Application, Container } from "pixi.js";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
-import levelMapFile from "../../Assets/level_map.json"
 import { Vec2 } from "../../Utils/Math";
-
-const levelMap: Record<string, any> = levelMapFile;
 
 class MapLayer extends Layer {
     // Entities storage
@@ -29,11 +26,11 @@ class MapLayer extends Layer {
     // Application related
     protected app: Application;
     protected res: Record<string, any>;
+    private levelMap: Record<string, any>;
 
     // Current level's context
     private levelContext: LobbyLevelContext;
     
-
     // Dimension
     private dim: Vec2 = new Vec2();
 
@@ -41,7 +38,8 @@ class MapLayer extends Layer {
         ecs: ECS,
         levelContext: LobbyLevelContext,
         app: Application,
-        resource: Record<string, any>
+        resource: Record<string, any>,
+        levelMap: Record<string, any>
     ) {
         super("Basemap", ecs);
 
@@ -49,14 +47,16 @@ class MapLayer extends Layer {
         this.res = resource;
         this.levelContext = levelContext;
 
+        this.levelMap = levelMap;
+
         // Creates new pixi container
         this.mapContainer = new Container();
     }
 
 
     loadMap() {
-        let rows = levelMap["height"];
-        let cols = levelMap["width"];
+        let rows = this.levelMap["height"];
+        let cols = this.levelMap["width"];
 
         const step = SPRITE_SIZE / 2.0;
 
