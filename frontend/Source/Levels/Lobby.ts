@@ -104,8 +104,6 @@ class LobbyLevel extends Level {
             mapLayer
         );
 
-       
-        
         this.playerLayer = new PlayerLayer(
             this.ecs,
             this.levelContext,
@@ -123,7 +121,8 @@ class LobbyLevel extends Level {
             this.ecs,
             this.levelContext,
             this.context.app,
-            this.context.res
+            this.context.res,
+            levelOverlays
         );
         // Load all overlays
         this.layerStack.pushLayer(

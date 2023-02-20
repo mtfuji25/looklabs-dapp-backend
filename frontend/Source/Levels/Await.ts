@@ -105,7 +105,8 @@ class AwaitLevel extends Level {
             new OverlayMap(
                 this.ecs,                
                 this.context.app,
-                this.context.res
+                this.context.res,
+                levelOverlays
             )
         );
 
