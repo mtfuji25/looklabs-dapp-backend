@@ -109,28 +109,12 @@ interface ServerMsg {
 // WebSocket Listeners
 type OnConnectionFn = (event: Event) => boolean;
 type OnConnectionLostFn = (event: Event) => boolean;
-type OnKillFn = (msg: ServerMsg) => boolean;
-type OnRemainPlayersFn = (msg: ServerMsg) => boolean;
-type OnMapDataFn = (msg: ServerMsg) => boolean;
-type OnGameStatusFn = (msg: ServerMsg) => boolean;
-type OnGameStateFn = (msg: ServerMsg) => boolean;
-type OnReadyFn = (msg: ServerMsg) => boolean;
-type OnEnemyFn = (msg: ServerMsg) => boolean;
-type OnResponseFn = (msg: ServerMsg) => boolean;
-type OnGameTimeFn = (msg: ServerMsg) => boolean;
+type OnServerMsgFn = (msg: ServerMsg) => boolean;
 
 type OnListenerFns =
     | OnConnectionFn
-    | OnKillFn
-    | OnRemainPlayersFn
-    | OnMapDataFn
-    | OnGameStatusFn
     | OnConnectionLostFn
-    | OnEnemyFn
-    | OnResponseFn
-    | OnGameTimeFn
-    | OnGameStateFn
-    | OnReadyFn;
+    | OnServerMsgFn;
 
 type msgHandlerFn = (data: ServerMsg) => void;
 
@@ -142,44 +126,15 @@ interface Listener {
     id: string;
 }
 
-interface KillListener extends Listener {
-    callback: OnKillFn;
-}
-
-interface RemainPlayersListener extends Listener {
-    callback: OnRemainPlayersFn;
-}
-
 interface ConnectionLostListener extends Listener {
     callback: OnConnectionLostFn;
 }
-
-interface MapDataListener extends Listener {
-    callback: OnMapDataFn;
-}
-
-interface GameStatusListener extends Listener {
-    callback: OnGameStatusFn;
-}
-
-interface GameStateListener extends Listener {
-    callback: OnGameStateFn;
-}
-
 interface OnConnectionListener extends Listener {
     callback: OnConnectionFn;
 }
 
-interface EnemyListener extends Listener {
-    callback: OnEnemyFn;
-}
-
-interface GameTimeListener extends Listener {
-    callback: OnGameTimeFn;
-}
-
-interface ResponseListener extends Listener {
-    callback: OnResponseFn;
+interface ServerMsgListener extends Listener {
+    callback: (msg: ServerMsg) => boolean;
 }
 
 export {
@@ -197,27 +152,14 @@ export {
     RemainPlayersMsg,
     GameTimeMsg,
     Listener,
-    MapDataListener,
-    GameStatusListener,
-    GameStateListener,
+    OnServerMsgFn,
+    ServerMsgListener,
     OnConnectionListener,
     ConnectionLostListener,
-    ResponseListener,
-    EnemyListener,
-    KillListener,
-    RemainPlayersListener,
-    GameTimeListener,
     OnListenerFns,
-    OnEnemyFn,
     OnConnectionFn,
     PlayerNames,
     OnConnectionLostFn,
-    OnGameStatusFn,
-    OnGameStateFn,
-    OnResponseFn,
-    OnGameTimeFn,
-    OnKillFn,
-    OnRemainPlayersFn,
     ServerMsg,
     msgHandlerFn,
     GameStateTypes

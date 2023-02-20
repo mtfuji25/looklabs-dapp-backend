@@ -10,10 +10,8 @@ import {
     requests,
     GameStatus,
     PlayerNames,
-    GameStatusListener,
-    PlayerNamesListener,
-    MapDataListener,
     MapData,
+    ReplyableMsgListener,
 } from "../Clients/Interfaces";
 
 // Strapi related imports
@@ -43,9 +41,9 @@ const GAME_VALID_INTERVAL: number = 120000;
 class AwaitLevel extends Level {
 
     // WebSockets listeners
-    private mapDataListener: MapDataListener;
-    private gameNamesListener: PlayerNamesListener;
-    private gameStatusListener: GameStatusListener;
+    private mapDataListener: ReplyableMsgListener;
+    private gameNamesListener: ReplyableMsgListener;
+    private gameStatusListener: ReplyableMsgListener;
 
     // Current game id
     private gameId: number = 0;

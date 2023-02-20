@@ -7,24 +7,16 @@ import {
     IncomingMsg,
     ServerMsg,
     ReplyableMsg,
-    MapData,
-    GameStatus,
     Listener,
-    GameStatusListener,
     OnConnectionListener,
-    PlayerNamesListener,
-    OnGameStatusFn,
     OnConnectionFn,
-    OnPlayerNamesFn,
     OnListenerFns,
     msgHandlerFn,
     MsgInterfaces,
     PlayerNames,
     GameState,
-    GameStateListener,
-    OnGameStateFn,
-    MapDataListener,
-    OnMapDataFn
+    ReplyableMsgListener,
+    OnReplyableMsgFn,
 } from "./Interfaces";
 import { Logger } from "../Utils/Logger";
 
@@ -37,131 +29,51 @@ class WSClient {
     private listeners: Record<string, Listener> = {};
 
     // handles incoming messages of corresponding types
-    private readonly msgHandlers: Record<string, msgHandlerFn> = {
-        "map-data": (data: IncomingMsg, client: WebSocket): void => {
-            // Just allow one response
-            let replied = false;
-
-            // Generates replyable msg
-            const replyable: ReplyableMsg = {
-                content: data.content,
-                reply: (msg: MapData) => {
-                    if (!replied) {
-                        const serverMsg: ServerMsg = {
-                            uuid: data.uuid,
-                            type: "response",
-                            content: msg
-                        };
-
-                        client.send(JSON.stringify(serverMsg));
-
-                        replied = true;
-                    }
-                }
-            };
-
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "map-data") {
-                    if ((listener as GameStatusListener).callback(replyable)) break;
-                }
-            }
-        },
-
-        "game-status": (data: IncomingMsg, client: WebSocket): void => {
-            // Just allow one response
-            let replied = false;
-
-            // Generates replyable msg
-            const replyable: ReplyableMsg = {
-                content: data.content,
-                reply: (msg: GameStatus) => {
-                    if (!replied) {
-                        const serverMsg: ServerMsg = {
-                            uuid: data.uuid,
-                            type: "response",
-                            content: msg
-                        };
-
-                        client.send(JSON.stringify(serverMsg));
-
-                        replied = true;
-                    }
-                }
-            };
-
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "game-status") {
-                    if ((listener as GameStatusListener).callback(replyable)) break;
-                }
-            }
-        },
-
-        "player-names": (data: IncomingMsg, client: WebSocket): void => {
-            // Just allow one response
-            let replied = false;
-
-            // Generates replyable msg
-            const replyable: ReplyableMsg = {
-                content: data.content,
-                reply: (msg: PlayerNames) => {
-                    if (!replied) {
-                        const serverMsg: ServerMsg = {
-                            uuid: data.uuid,
-                            type: "response",
-                            content: msg
-                        };
-
-                        client.send(JSON.stringify(serverMsg));
-
-                        replied = true;
-                    }
-                }
-            };
-
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "player-names") {
-                    if ((listener as PlayerNamesListener).callback(replyable)) break;
-                }
-            }
-        },
-
-        "game-state": (data: IncomingMsg, client: WebSocket): void => {
-            // Just allow one response
-            let replied = false;
-
-            // Generates replyable msg
-            const replyable: ReplyableMsg = {
-                content: data.content,
-                reply: (msg: GameState) => {
-                    if (!replied) {
-                        const serverMsg: ServerMsg = {
-                            uuid: data.uuid,
-                            type: "response",
-                            content: msg
-                        };
-
-                        client.send(JSON.stringify(serverMsg));
-
-                        replied = true;
-                    }
-                }
-            };
-
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "game-state") {
-                    if ((listener as GameStateListener).callback(replyable)) break;
-                }
-            }
-        }
-
-    };
+    private msgHandlers: Record<string, msgHandlerFn> = {}
 
     constructor(host: string, port: number) {
         this.host = host;
         this.port = port;
 
+        this.setListeners();
+
         this.server = new WebSocketServer({
             port: this.port
+        });
+    }
+
+    private setListeners() {
+        const msgs = ["map-data", "game-status", "player-names", "game-state"];
+
+        msgs.forEach(msg => {
+            this.msgHandlers[msg] = (data: IncomingMsg, client: WebSocket): void => {
+                // Just allow one response
+                let replied = false;
+    
+                // Generates replyable msg
+                const replyable: ReplyableMsg = {
+                    content: data.content,
+                    reply: (msg: MsgInterfaces) => {
+                        if (!replied) {
+                            const serverMsg: ServerMsg = {
+                                uuid: data.uuid,
+                                type: "response",
+                                content: msg
+                            };
+    
+                            client.send(JSON.stringify(serverMsg));
+    
+                            replied = true;
+                        }
+                    }
+                };
+    
+                for (let listener of Object.values(this.listeners)) {
+                    if (listener.type == msg) {
+                        if ((listener as ReplyableMsgListener).callback(replyable)) break;
+                    }
+                }
+            }
         });
     }
 
@@ -217,10 +129,10 @@ class WSClient {
         this.server.close();
     }
 
-    addListener(type: "map-data", fn: OnMapDataFn): MapDataListener;
-    addListener(type: "game-status", fn: OnGameStatusFn): GameStatusListener;
-    addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
-    addListener(type: "player-names", fn: OnPlayerNamesFn): PlayerNamesListener;
+    addListener(type: "map-data", fn: OnReplyableMsgFn): ReplyableMsgListener;
+    addListener(type: "game-status", fn: OnReplyableMsgFn): ReplyableMsgListener;
+    addListener(type: "game-state", fn: OnReplyableMsgFn): ReplyableMsgListener;
+    addListener(type: "player-names", fn: OnReplyableMsgFn): ReplyableMsgListener;
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();

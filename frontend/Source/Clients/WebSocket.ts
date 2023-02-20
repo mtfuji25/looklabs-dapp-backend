@@ -2,30 +2,17 @@ import { v4 as uuidv4 } from "uuid";
 import { Logger } from "../Utils/Logger";
 import {
     ConnectionLostListener,
-    EnemyListener,
-    GameStateListener,
-    GameStatusListener,
-    GameTimeListener,
-    KillListener,
     Listener,
     ListenerTypes,
-    MapDataListener,
     msgHandlerFn,
     OnConnectionFn,
     OnConnectionListener,
     OnConnectionLostFn,
-    OnEnemyFn,
-    OnGameStateFn,
-    OnGameStatusFn,
-    OnGameTimeFn,
-    OnKillFn,
     OnListenerFns,
-    OnRemainPlayersFn,
-    OnResponseFn,
-    RemainPlayersListener,
+    OnServerMsgFn,
     RequestMsg,
-    ResponseListener,
-    ServerMsg
+    ServerMsg,
+    ServerMsgListener
 } from "./Interfaces";
 
 // Server callbacks types
@@ -47,64 +34,13 @@ class WSClient {
     private onReadyListeners: OnReadyFn[] = [];
 
     // msg handler record for each msg type
-    private readonly msgHandlers: Record<string, msgHandlerFn> = {
-        "map-data": (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "map-data") {
-                    if ((listener as MapDataListener).callback(data)) break;
-                }
-            }
-        },
-        "game-status": (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "game-status") {
-                    if ((listener as GameStatusListener).callback(data)) break;
-                }
-            }
-        },
-        kill: (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "kill") {
-                    if ((listener as KillListener).callback(data)) break;
-                }
-            }
-        },
-        "remain-players": (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "remain-players") {
-                    if ((listener as RemainPlayersListener).callback(data)) break;
-                }
-            }
-        },
-        enemy: (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "enemy") {
-                    if ((listener as EnemyListener).callback(data)) break;
-                }
-            }
-        },
-
-        "game-time": (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "game-time") {
-                    if ((listener as GameTimeListener).callback(data)) break;
-                }
-            }
-        },
-
-        "game-state": (data: ServerMsg): void => {
-            for (let listener of Object.values(this.listeners)) {
-                if (listener.type == "game-state") {
-                    if ((listener as GameStateListener).callback(data)) break;
-                }
-            }
-        }
-
-    };
+    private msgHandlers: Record<string, msgHandlerFn> = {}
 
     constructor(host: string, port: number) {
         this.host = host;
         this.port = port;
+
+        this.setListeners();
 
         if (process.env.NODE_ENV != "production" && !this.port) {
             console.warn(
@@ -116,6 +52,20 @@ class WSClient {
         Logger.info("WebSocket client initing in host: ", `${this.host}`);
     }
 
+    private setListeners() {
+        const msgs = ["map-data", "game-status", "kill", "remain-players", "enemy", "game-time", "game-state"];
+
+        msgs.forEach(msg => {
+            this.msgHandlers[msg] = (data: ServerMsg): void => {
+                for (let listener of Object.values(this.listeners)) {
+                    if (listener.type == msg) {
+                        if ((listener as ServerMsgListener).callback(data)) break;
+                    }
+                }
+            }
+        });
+    }
+
     private handleServerMsg(message: any) {
         const data = JSON.parse(message.data) as ServerMsg;
 
@@ -124,7 +74,7 @@ class WSClient {
         } else {
             for (let listener of Object.values(this.listeners)) {
                 if (listener.type == "response") {
-                    if ((listener as ResponseListener).callback(data)) break;
+                    if ((listener as ServerMsgListener).callback(data)) break;
                 }
             }
         }
@@ -245,17 +195,17 @@ class WSClient {
 
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
     addListener(type: "connection-lost", fn: OnConnectionLostFn): ConnectionLostListener;
-    addListener(type: "game-status", fn: OnGameStatusFn): GameStatusListener;
-    addListener(type: "remain-players", fn: OnRemainPlayersFn): RemainPlayersListener;
-    addListener(type: "kill", fn: OnKillFn): KillListener;
-    addListener(type: "enemy", fn: OnEnemyFn): EnemyListener;
-    addListener(type: "response", fn: OnResponseFn): ResponseListener;
-    addListener(type: "game-state", fn: OnGameStateFn): GameStateListener;
+    addListener(type: "game-status", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: "remain-players", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: "kill", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: "enemy", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: "response", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: "game-state", fn: OnServerMsgFn): ServerMsgListener;
 
-    addListener(type: "game-time", fn: OnGameTimeFn): GameTimeListener;
+    addListener(type: "game-time", fn: OnServerMsgFn): ServerMsgListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
-        Logger.info("Adicionando listener: ", id);
+        Logger.info("Adding listener: ", id);
         Logger.info("Listeners: ", this.listeners);
 
         const listener = {
@@ -271,7 +221,7 @@ class WSClient {
     }
 
     remListener(id: string): void {
-        Logger.info("Removendo Listener: ", id);
+        Logger.info("Removing Listener: ", id);
         delete this.listeners[id];
     }
 

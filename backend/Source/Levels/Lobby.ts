@@ -21,14 +21,11 @@ import {
     requests, 
     GameStatus,
     PlayerNames,
-    GameStatusListener,
-    PlayerNamesListener,
     OnConnectionListener,
-    GameStateListener,
     GameState,
     GameStateTypes,
     MapData,
-    MapDataListener,
+    ReplyableMsgListener,
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
@@ -94,11 +91,11 @@ class LobbyLevel extends Level {
     private initialDate: number;
 
     // WebSockets listeners
-    private mapDataListener: MapDataListener;
-    private gameNamesListener: PlayerNamesListener;
-    private gameStatusListener: GameStatusListener;
+    private mapDataListener: ReplyableMsgListener;
+    private gameNamesListener: ReplyableMsgListener;
+    private gameStatusListener: ReplyableMsgListener;
     private wsConnectionListener: OnConnectionListener;
-    private gameStateListener: GameStateListener;
+    private gameStateListener: ReplyableMsgListener;
 
     // Event Dispatchers queue
     private dieEventQueue: OnDieEvent[] = [];

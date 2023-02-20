@@ -114,12 +114,9 @@ interface ReplyableMsg {
 // Listeners
 // Callback types
 type OnConnectionFn = (event: WebSocket) => boolean;
-type OnMapDataFn = (event: ReplyableMsg) => boolean;
-type OnGameStatusFn = (event: ReplyableMsg) => boolean;
-type OnPlayerNamesFn = (event: ReplyableMsg) => boolean;
-type OnGameStateFn = (event: ReplyableMsg) => boolean;
+type OnReplyableMsgFn = (event: ReplyableMsg) => boolean;
 
-type OnListenerFns = OnConnectionFn | OnGameStatusFn | OnGameStateFn;
+type OnListenerFns = OnConnectionFn | OnReplyableMsgFn;
 
 type msgHandlerFn = (data: IncomingMsg, client: WebSocket) => void;
 
@@ -131,21 +128,8 @@ interface Listener {
     id: string;
 }
 
-interface MapDataListener extends Listener {
-    callback: OnMapDataFn;
-}
-
-interface GameStatusListener extends Listener {
-    callback: OnGameStatusFn;
-}
-
-interface GameStateListener extends Listener {
-    callback: OnGameStateFn;
-}
-
-
-interface PlayerNamesListener extends Listener {
-    callback: OnPlayerNamesFn;
+interface ReplyableMsgListener extends Listener {
+    callback: OnReplyableMsgFn;
 }
 
 interface OnConnectionListener extends Listener {
@@ -168,16 +152,10 @@ export {
     IncomingMsg,
     ReplyableMsg,
     Listener,
-    MapDataListener,
-    GameStatusListener,
-    GameStateListener,
-    PlayerNamesListener,
-    OnPlayerNamesFn,
+    ReplyableMsgListener,
     OnConnectionListener,
     OnListenerFns,
-    OnMapDataFn,
-    OnGameStatusFn,
-    OnGameStateFn,
+    OnReplyableMsgFn,
     OnConnectionFn,
     msgHandlerFn,
     MsgInterfaces,
