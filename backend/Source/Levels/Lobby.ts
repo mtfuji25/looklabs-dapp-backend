@@ -617,8 +617,6 @@ class LobbyLevel extends Level {
 
     onMapDataMsg(msg: ReplyableMsg): boolean {
 
-        console.log("onMapDataMsg");
-
         // Check the veracity of message type
         if (msg.content.type === requests.mapData) {
 

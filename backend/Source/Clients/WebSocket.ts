@@ -53,8 +53,6 @@ class WSClient {
                             content: msg
                         };
 
-                        console.log("serverMsg", serverMsg)
-
                         client.send(JSON.stringify(serverMsg));
 
                         replied = true;
@@ -83,8 +81,6 @@ class WSClient {
                             type: "response",
                             content: msg
                         };
-
-                        console.log("serverMsg", serverMsg)
 
                         client.send(JSON.stringify(serverMsg));
 
