@@ -129,11 +129,8 @@ class WSClient {
         this.server.close();
     }
 
-    addListener(type: "map-data", fn: OnReplyableMsgFn): ReplyableMsgListener;
-    addListener(type: "game-status", fn: OnReplyableMsgFn): ReplyableMsgListener;
-    addListener(type: "game-state", fn: OnReplyableMsgFn): ReplyableMsgListener;
-    addListener(type: "player-names", fn: OnReplyableMsgFn): ReplyableMsgListener;
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
+    addListener(type: ListenerTypes, fn: OnReplyableMsgFn): ReplyableMsgListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
 

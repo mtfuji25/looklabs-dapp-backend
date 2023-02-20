@@ -6,7 +6,7 @@ import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
 // Pixi imports
 import { Application, Container, IBitmapTextStyle } from "pixi.js";
-import { KillListener, KillMsg, ServerMsg } from "../../Clients/Interfaces";
+import { KillMsg, Listener, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 
 
@@ -34,7 +34,7 @@ class LogsLayer extends Layer {
     //  queue for storing the kills
     private logs: Array<KillLog> = [];
 
-    private listener: KillListener;
+    private listener: Listener;
 
     private percentX: number;
 

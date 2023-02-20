@@ -195,14 +195,7 @@ class WSClient {
 
     addListener(type: "connection", fn: OnConnectionFn): OnConnectionListener;
     addListener(type: "connection-lost", fn: OnConnectionLostFn): ConnectionLostListener;
-    addListener(type: "game-status", fn: OnServerMsgFn): ServerMsgListener;
-    addListener(type: "remain-players", fn: OnServerMsgFn): ServerMsgListener;
-    addListener(type: "kill", fn: OnServerMsgFn): ServerMsgListener;
-    addListener(type: "enemy", fn: OnServerMsgFn): ServerMsgListener;
-    addListener(type: "response", fn: OnServerMsgFn): ServerMsgListener;
-    addListener(type: "game-state", fn: OnServerMsgFn): ServerMsgListener;
-
-    addListener(type: "game-time", fn: OnServerMsgFn): ServerMsgListener;
+    addListener(type: ListenerTypes, fn: OnServerMsgFn): ServerMsgListener;
     addListener(type: ListenerTypes, fn: OnListenerFns): Listener {
         const id = uuidv4();
         Logger.info("Adding listener: ", id);

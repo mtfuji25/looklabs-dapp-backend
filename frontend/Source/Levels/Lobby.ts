@@ -12,7 +12,7 @@ import { PlayerLayer } from "../Layers/Lobby/Player";
 import { ViewContext, ViewLayer } from "../Layers/Lobby/View";
 import { BattleStatusLayer } from "../Layers/Lobby/Status";
 import { LogsLayer } from "../Layers/Lobby/Log";
-import { GameState, GameStatus, Listener, MapData, msgTypes, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
+import { GameState, GameStatus, Listener, MapData, msgTypes, RemainPlayersMsg, ServerMsg } from "../Clients/Interfaces";
 import { ResultsLevel } from "./Results";
 import { OverlayMap } from "../Layers/Lobby/Overlays";
 import { IntroSequence } from "../Layers/Lobby/IntroSequence";
@@ -41,7 +41,7 @@ class LobbyLevel extends Level {
     private gameStatusListener: Listener;
     private connectionListener: Listener;
     private gameStateListener: Listener;
-    private remainPlayerlistener: RemainPlayersListener;
+    private remainPlayerlistener: Listener;
 
     private remaining: number = 0;
     private showDownStart: boolean = false;
