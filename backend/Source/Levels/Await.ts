@@ -19,9 +19,7 @@ import { ScheduledGame } from "../Clients/Strapi";
 import { Logger } from "../Utils/Logger";
 
 // Map
-import levelCollider from "../Assets/level_collider.json";
-import levelMap from "../Assets/level_map.json";
-import levelOverlays from "../Assets/level_overlays.json";
+import { levelCollider, levelMap, levelOverlays } from "../Core/MapData";
 
 //
 // Constants
