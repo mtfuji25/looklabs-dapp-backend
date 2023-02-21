@@ -1,5 +1,5 @@
 {
-    "packs": [ "enemy-pack", "dungeon-pack", "await-pack", "results-pack", "lobby-pack", "sound-pack" ],
+    "packs": [ "enemy-pack", "mountain-pack", "await-pack", "results-pack", "lobby-pack", "sound-pack" ],
     "lobby-pack": [
         {
             "name": "infoCard",
@@ -85,6 +85,32 @@
         {
             "name": "characterLeft",
             "url": "./assets/results-pack/character-left.svg"
+        }
+    ],
+    "mountain-pack": [   
+        {
+            "name": "mapObstacle1",
+            "url": "./assets/mountain-pack/overlaysweedpot.png"
+        },
+        {
+            "name": "mapObstacle2",
+            "url": "./assets/mountain-pack/overlaysweedpot.png"
+        },             
+        {
+            "name": "basemap",
+            "url": "./assets/mountain-pack/basemap.png"
+        },
+        {
+            "name": "mapOverlays",
+            "url": "./assets/mountain-pack/overlays.png"
+        },
+        {
+            "name": "floor",
+            "url": "./assets/mountain-pack/floor.png"
+        },
+        {
+            "name": "border",
+            "url": "./assets/mountain-pack/border.png"
         }
     ],
     "dungeon-pack": [   

@@ -90,14 +90,15 @@ class LobbyLevel extends Level {
 
         const mapDataResponse = await this.getMapData();
         const mapDataContent = mapDataResponse.content as MapData;
-        const {levelCollider, levelMap, levelOverlays} = mapDataContent.mapData;
+        const { levelCollider, levelMap, levelOverlays } = mapDataContent.mapData;
 
         const mapLayer = new MapLayer(
             this.ecs,
             this.levelContext,
             this.context.app,
             this.context.res,
-            levelMap
+            levelMap,
+            levelCollider
         );
         // Pushs map generator
         this.layerStack.pushLayer(

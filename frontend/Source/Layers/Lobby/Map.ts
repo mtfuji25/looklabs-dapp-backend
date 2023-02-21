@@ -27,6 +27,7 @@ class MapLayer extends Layer {
     protected app: Application;
     protected res: Record<string, any>;
     private levelMap: Record<string, any>;
+    private levelCollider: Record<string, any>;
 
     // Current level's context
     private levelContext: LobbyLevelContext;
@@ -39,7 +40,8 @@ class MapLayer extends Layer {
         levelContext: LobbyLevelContext,
         app: Application,
         resource: Record<string, any>,
-        levelMap: Record<string, any>
+        levelMap: Record<string, any>,
+        levelCollider: Record<string, any>,
     ) {
         super("Basemap", ecs);
 
@@ -48,6 +50,7 @@ class MapLayer extends Layer {
         this.levelContext = levelContext;
 
         this.levelMap = levelMap;
+        this.levelCollider = levelCollider;
 
         // Creates new pixi container
         this.mapContainer = new Container();
@@ -77,10 +80,14 @@ class MapLayer extends Layer {
                 const ph = i * SPRITE_SIZE;
 
                 // Load the cuted image to sprite
-                sprite.setCutImg(
-                    this.app.loader.resources["basemap"],
-                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
+                sprite.sprite.width = SPRITE_SIZE;
+                sprite.sprite.height = SPRITE_SIZE;
+                sprite.setImg(
+                    this.levelCollider.data[j][i] ?
+                    this.app.loader.resources["border"] :
+                    this.app.loader.resources["floor"]
                 );
+                
 
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
