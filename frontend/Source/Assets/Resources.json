@@ -109,6 +109,10 @@
             "url": "./assets/mountain-pack/floor.png"
         },
         {
+            "name": "voidfloor",
+            "url": "./assets/mountain-pack/voidfloor.png"
+        },
+        {
             "name": "border",
             "url": "./assets/mountain-pack/border.png"
         }

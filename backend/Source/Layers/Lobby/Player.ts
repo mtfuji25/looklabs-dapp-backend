@@ -121,7 +121,12 @@ class PlayerLayer extends Layer {
             grid.intervalY * 1.7,
         );
 
-        //make position wrap around, in case of too many players
+        // make position wrap around, in case of too many players
+        // this.self.getTransform().setPos(
+        //     spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
+        //     spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
+
+        // );
         const spawnPos = getSpawnPos(grid);
         this.self.getTransform().setPos(spawnPos.x, spawnPos.y);
         PlayerLayer.playerCount++;

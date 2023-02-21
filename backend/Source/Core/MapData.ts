@@ -7,9 +7,14 @@ import { Vec2 } from "../Utils/Math";
 import SimplexNoise from "../Utils/SimplexNoise";
 import { Grid } from "./Ecs/Components/Grid";
 
-const simplexNoise = new SimplexNoise();
+const randFn = Math.random;
+const simplexNoise = new SimplexNoise(randFn);
 const depth = 20;
 const floorRate = 0.25;
+const statueCollider = {
+    from: {x: 47, y: 47},
+    to: {x: 70, y: 70}
+}
 
 levelCollider.data.forEach((dy: number[], y: number) => {
     dy.forEach((dx: number, x: number) => {
@@ -19,6 +24,12 @@ levelCollider.data.forEach((dy: number[], y: number) => {
     });
 });
 
+for (let i = statueCollider.from.y; i <= statueCollider.to.y; i++) {
+    for (let j = statueCollider.from.x; j <= statueCollider.to.x; j++) {
+        levelCollider.data[i][j] = 2;
+    }
+}
+
 /**
  * Returns a position to spawn where there is floor
  */
@@ -26,8 +37,8 @@ const getSpawnPos = (grid: Grid) => {
     let x, y, cell;
     do {
         // Number between -1 and 1
-        x = Math.random() * 2 - 1;
-        y = Math.random() * 2 - 1;
+        x = randFn() * 2 - 1;
+        y = randFn() * 2 - 1;
 
         cell = GridUtils.convertPosToCell(
             GridUtils.convertFromNDC(new Vec2(x, y)
