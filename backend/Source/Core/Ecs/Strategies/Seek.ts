@@ -31,6 +31,7 @@ const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => 
         behavior.staticCollide = false;
     } else {
         _seekNearest(entity, grid, target);
+        _seekNearestWithA(entity, grid, target);
     }
 }
 
@@ -240,7 +241,9 @@ const _getPathFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Gr
 
 const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec2, grid:Grid):Vec2 => {
     let dir: Vec2 | null = null;
+    
     sources = sources.filter( s => GridUtils.getCellWalkable(s.y, s.x) == 0);
+    
     sources.map((source, index) => {
         if (!dir)
             dir = new Vec2();
@@ -251,7 +254,8 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
 
         if (!path || path.length < 2) {
             return;
-        }    
+        }
+
         entity.getStrategy().pathData = (
         {   entity : entity,
             pathIndex : 0,
@@ -259,13 +263,14 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
             path : GridUtils.convertPathToVec2(path)
         }
         );
-        const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
+        
         const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
+        const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
 
         if (!dest.equal(origin)){
             dir = dir.add(dest.sub(origin));
             // assert(!(isNaN(dir.x) || isNaN(dir.y)), `Behavior 41: ${rigidbody} Is NaN`);
-        }    
+        }
         
     });
 
@@ -313,4 +318,4 @@ const _unstuck = (dynamic:DynamicEntity):Vec2 => {
     
 }
 
-export { strategy_Seek, strategy_SeekNearest }
+export { strategy_Seek, strategy_SeekNearest, _getPathFinderDirection }

@@ -60,15 +60,13 @@ class MapLayer extends Layer {
         let rows = this.levelMap["height"];
         let cols = this.levelMap["width"];
 
-        const step = SPRITE_SIZE / 2.0;
+        const step = SPRITE_SIZE;
 
         let x = 0.0;
         let y = 0.0;
 
-        for (let i = 0; i < rows; ++i) {
-            y += step;
-            for (let j = 0; j < cols; ++j) {
-                x += step;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
 
                 // Creates entity and add sprite to it
                 const entity = this.ecs.createEntity(x, y, false);
