@@ -18,6 +18,7 @@ import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi
 import { Logger } from "../../Utils/Logger";
 import { PlayerActions } from "./PlayerActions";
 import spawnPos from "../../Assets/SpawnPositions.json";
+import { getSpawnPos } from "../../Core/MapData";
 
 class PlayerLayer extends Layer {
 
@@ -87,8 +88,8 @@ class PlayerLayer extends Layer {
             attributesMap[attribute.trait_type] = attribute.value;
         });
         if (!attributesMap["Tier"] || tiers.indexOf(attributesMap["Tier"].toLowerCase()) == -1) attributesMap["Tier"] = "beta";
-     
 
+        
         const status = this.self.addStatus(
             // Attack
             // 20 * (attributesMap["Attack"] / 100.0),
@@ -120,12 +121,14 @@ class PlayerLayer extends Layer {
             grid.intervalY * 1.7,
         );
 
-        //make position wrap around, in case of too many players
-        this.self.getTransform().setPos(
-            spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
-            spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
+        // make position wrap around, in case of too many players
+        // this.self.getTransform().setPos(
+        //     spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
+        //     spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
 
-        );
+        // );
+        const spawnPos = getSpawnPos(grid);
+        this.self.getTransform().setPos(spawnPos.x, spawnPos.y);
         PlayerLayer.playerCount++;
 
         this.self.addBehavior();

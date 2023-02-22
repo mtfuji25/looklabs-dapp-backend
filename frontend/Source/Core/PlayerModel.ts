@@ -1,7 +1,7 @@
-import { DetailAttribute, ParticipantDetails, ScheduledGameParticipant, StrapiClient } from "../Clients/Strapi";
+import { StrapiClient, DetailAttribute, ParticipantDetails, ScheduledGameParticipant } from "../Clients/Strapi";
 
 class ParticipantDetailsModel {
-    
+
     
     public participants:Record<string, ParticipantDetails> = {};
     private strapi:StrapiClient;

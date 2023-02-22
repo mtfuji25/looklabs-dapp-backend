@@ -14,10 +14,7 @@ import { Application, Container } from "pixi.js";
 import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
-import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
-
-const levelMap: Record<string, any> = levelMapFile;
 
 class OverlayMap extends Layer {
     // Entities storage
@@ -29,6 +26,7 @@ class OverlayMap extends Layer {
     // Application related
     protected app: Application;
     protected res: Record<string, any>;
+    private levelOverlays: Record<string, any>;
 
     // Current level's context
     private levelContext: LobbyLevelContext;
@@ -44,13 +42,15 @@ class OverlayMap extends Layer {
         ecs: ECS,
         levelContext: LobbyLevelContext,
         app: Application,
-        resource: Record<string, any>
+        resource: Record<string, any>,
+        levelOverlays: Record<string, any>,
     ) {
         super("Basemap", ecs);
 
         this.app = app;
         this.res = resource;
         this.levelContext = levelContext;
+        this.levelOverlays = levelOverlays;
 
         // Creates new pixi container
         this.mapContainer = new Container();
@@ -59,8 +59,8 @@ class OverlayMap extends Layer {
     }
     
     loadMap() {
-        let rows = levelMap["height"];
-        let cols = levelMap["width"];
+        let rows = this.levelOverlays["height"];
+        let cols = this.levelOverlays["width"];
 
         const step = SPRITE_SIZE / 2.0;
 
@@ -70,7 +70,7 @@ class OverlayMap extends Layer {
         for (let i = 0; i < rows; ++i) {
             y += step;
             for (let j = 0; j < cols; ++j) {
-                const currentCell = levelMap["data"][i][j];
+                const currentCell = this.levelOverlays["data"][i][j];
                 x += step;
                 // Creates entity and add sprite to it
                 const entity = this.ecs.createEntity(x, y, false)

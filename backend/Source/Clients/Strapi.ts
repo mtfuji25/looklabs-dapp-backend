@@ -50,14 +50,14 @@ interface DetailAttribute {
 }
 
 class StrapiClient {
-    private host: string;
+    protected host: string;
 
     // strapiApi
-    private readonly api: AxiosInstance;
+    protected readonly api: AxiosInstance;
 
     // restApi for player attributes
-    private readonly restApi: AxiosInstance;
-    private readonly authToken: string;
+    protected readonly restApi: AxiosInstance;
+    protected readonly authToken: string;
 
     constructor(host: string, token: string) {
         this.host = host;
@@ -73,11 +73,11 @@ class StrapiClient {
         });
     }
 
-    private async get(url: string): Promise<AxiosResponse> {
+    protected async get(url: string): Promise<AxiosResponse> {
         return this.api.get(url, { headers: { Authorization: `bearer ${this.authToken}` } });
     }
 
-    private async post(url: string, data: any): Promise<AxiosResponse> {
+    protected async post(url: string, data: any): Promise<AxiosResponse> {
         return this.api.post(url, data, { headers: { Authorization: `bearer ${this.authToken}` } });
     }
 

@@ -53,17 +53,17 @@ interface DetailAttribute {
 }
 
 class StrapiClient {
-    private host: string;
-    private authToken: string;
+    protected host: string;
+    protected authToken: string;
     public readonly serverRoot: string = "https://token.thepitnft.com/";
     // strapiApi
-    private readonly api: AxiosInstance;
+    protected readonly api: AxiosInstance;
 
     // restApi for player attributes
-    private readonly restApi: AxiosInstance;
+    protected readonly restApi: AxiosInstance;
 
     // any type because ts complains if I use http.server, the correct type
-    private expressServer: any;
+    protected expressServer: any;
 
     constructor(host: string, token: string) {
         this.host = host;
@@ -80,15 +80,15 @@ class StrapiClient {
         });
     }
 
-    private async get(url: string): Promise<AxiosResponse> {
+    protected async get(url: string): Promise<AxiosResponse> {
         return this.api.get(url);
     }
 
-    private async post(url: string, data: any): Promise<AxiosResponse> {
+    protected async post(url: string, data: any): Promise<AxiosResponse> {
         return this.api.post(url, data);
     }
 
-    private async put(url: string): Promise<AxiosResponse> {
+    protected async put(url: string): Promise<AxiosResponse> {
         return this.api.put(url);
     }
 

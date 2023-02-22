@@ -1,5 +1,6 @@
 import { Engine } from "./Core/Engine";
 import { WSClient } from "./Clients/WebSocket";
+import { MockedStrapi } from "./Clients/MockedStrapi";
 import { StrapiClient } from "./Clients/Strapi";
 import { Logger } from "./Utils/Logger";
 import { LogStorageClient } from "./Clients/LogStorage";
@@ -23,7 +24,9 @@ const main = async () => {
     Logger.start(LOGGER_LEVEL);
 
     // Start strapi client
-    const strapiClient = new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
+    const strapiClient = process.env.USE_MOCK_DATA === "true" ?
+        new MockedStrapi(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN) :
+        new StrapiClient(STRAPI_SERVER_HOST, STRAPI_BEARER_TOKEN);
 
     // Start websocket client
     const wsClient = new WSClient(WS_HOST, WS_PORT);
