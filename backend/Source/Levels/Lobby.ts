@@ -21,16 +21,18 @@ import {
     requests, 
     GameStatus,
     PlayerNames,
-    GameStatusListener,
-    PlayerNamesListener,
     OnConnectionListener,
-    GameStateListener,
     GameState,
     GameStateTypes,
+    MapData,
+    ReplyableMsgListener,
 } from "../Clients/Interfaces";
 import { WebSocket } from "ws";
 import { sleep } from "../Utils/Sleep";
 import { Logger } from "../Utils/Logger";
+
+// Map
+import { levelCollider, levelMap, levelOverlays } from "../Core/MapData";
 
 //
 // Types
@@ -87,10 +89,11 @@ class LobbyLevel extends Level {
     private initialDate: number;
 
     // WebSockets listeners
-    private gameNamesListener: PlayerNamesListener;
-    private gameStatusListener: GameStatusListener;
+    private mapDataListener: ReplyableMsgListener;
+    private gameNamesListener: ReplyableMsgListener;
+    private gameStatusListener: ReplyableMsgListener;
     private wsConnectionListener: OnConnectionListener;
-    private gameStateListener: GameStateListener;
+    private gameStateListener: ReplyableMsgListener;
 
     // Event Dispatchers queue
     private dieEventQueue: OnDieEvent[] = [];
@@ -118,6 +121,10 @@ class LobbyLevel extends Level {
         LobbyLevel.playerNames = {};
 
         // Adding WebSockets listeners
+        this.mapDataListener = this.context.ws.addListener(
+            "map-data", (msg) => this.onMapDataMsg(msg)
+        );
+
         this.gameStatusListener = this.context.ws.addListener(
             "game-status", (msg) => this.onGameStatusMsg(msg)
         );
@@ -601,6 +608,31 @@ class LobbyLevel extends Level {
         this.gameStatusListener.destroy();
         this.wsConnectionListener.destroy();
         this.gameStateListener.destroy();
+    }
+
+    onMapDataMsg(msg: ReplyableMsg): boolean {
+
+        // Check the veracity of message type
+        if (msg.content.type === requests.mapData) {
+
+            // Generates the reply
+            const reply: MapData = {
+                msgType: "map-data",
+                gameId: this.gameId,
+                mapData: {
+                    levelCollider,
+                    levelMap,
+                    levelOverlays
+                }
+            };
+
+            // Send the reply to the author of request
+            msg.reply(reply);
+        }
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
     }
 
     // Handles all requests from frontends that relate with current game-status

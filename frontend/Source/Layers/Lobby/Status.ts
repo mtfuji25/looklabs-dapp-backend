@@ -4,7 +4,7 @@ import { ECS } from "../../Core/Ecs/Core/Ecs";
 import { Application, IBitmapTextStyle, ITextStyle } from "pixi.js";
 import { Sprite } from "../../Core/Ecs/Components/Sprite";
 import { Panel } from "../../Core/Ecs/Components/Panel";
-import { GameTimeListener, GameTimeMsg, RemainPlayersListener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
+import {  GameTimeMsg, Listener, RemainPlayersMsg, ServerMsg } from "../../Clients/Interfaces";
 import { EngineContext } from "../../Core/Interfaces";
 import { BMPText } from "../../Core/Ecs/Components/BMPText";
 
@@ -18,9 +18,9 @@ class BattleStatusLayer extends Layer {
     // context
     private context: EngineContext;
 
-    private listener: RemainPlayersListener;
+    private listener: Listener;
 
-    private gameTimeListener: GameTimeListener;
+    private gameTimeListener: Listener;
 
     private readonly textStyle: Partial<IBitmapTextStyle> = {
         fontName: "SpaceMono-Bold",

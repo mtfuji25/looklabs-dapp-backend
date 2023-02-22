@@ -1,23 +1,26 @@
 import { Vec2 } from "../Utils/Math";
 
 const requests = {
+    mapData: "map-data",
     gameStatus: "game-status",
     playerNames: "player-names",
     gameState: "game-state"
 };
 
 const msgTypes = {
+    mapData: "map-data",
     enemy: "enemy",
     gameStatus: "game-status",
     remainPlayers: "remain-players",
     gameState: "game-state"
 };
 
-type MsgTypes = "kill" | "enemy" | "game-status" | "game-state"  | "remain-players" | "game-time" | "player-names";
-type MsgInterfaces = KillMsg | RemainPlayersMsg | GameStatus | GameState | PlayerCommand | GameTimeMsg | PlayerNames;
+type MsgTypes = "kill" | "enemy" | "map-data" | "game-status" | "game-state"  | "remain-players" | "game-time" | "player-names";
+type MsgInterfaces = KillMsg | RemainPlayersMsg | MapData | GameStatus | GameState | PlayerCommand | GameTimeMsg | PlayerNames;
 type GameStateTypes = "spawn" | "countdown3" |  "countdown2" |  "countdown1" | "countdown0" | "fight"
 
 type ListenerTypes =
+    | "map-data"
     | "game-status"
     | "connection"
     | "connection-lost"
@@ -30,6 +33,12 @@ type ListenerTypes =
     | "player-names";
 
 // Ws messages
+interface MapData {
+    msgType: "map-data";
+    gameId: number;
+    mapData: any;
+}
+
 interface GameStatus {
     msgType: "game-status";
     gameId: number;
@@ -94,32 +103,18 @@ interface RequestMsg {
 interface ServerMsg {
     uuid: string;
     type: "response" | "broadcast" | "send";
-    content: KillMsg | PlayerCommand | RemainPlayersMsg | GameStatus | GameState | GameTimeMsg | PlayerNames;
+    content: KillMsg | PlayerCommand | RemainPlayersMsg | MapData | GameStatus | GameState | GameTimeMsg | PlayerNames;
 }
 
 // WebSocket Listeners
 type OnConnectionFn = (event: Event) => boolean;
 type OnConnectionLostFn = (event: Event) => boolean;
-type OnKillFn = (msg: ServerMsg) => boolean;
-type OnRemainPlayersFn = (msg: ServerMsg) => boolean;
-type OnGameStatusFn = (msg: ServerMsg) => boolean;
-type OnGameStateFn = (msg: ServerMsg) => boolean;
-type OnReadyFn = (msg: ServerMsg) => boolean;
-type OnEnemyFn = (msg: ServerMsg) => boolean;
-type OnResponseFn = (msg: ServerMsg) => boolean;
-type OnGameTimeFn = (msg: ServerMsg) => boolean;
+type OnServerMsgFn = (msg: ServerMsg) => boolean;
 
 type OnListenerFns =
     | OnConnectionFn
-    | OnKillFn
-    | OnRemainPlayersFn
-    | OnGameStatusFn
     | OnConnectionLostFn
-    | OnEnemyFn
-    | OnResponseFn
-    | OnGameTimeFn
-    | OnGameStateFn
-    | OnReadyFn;
+    | OnServerMsgFn;
 
 type msgHandlerFn = (data: ServerMsg) => void;
 
@@ -131,45 +126,21 @@ interface Listener {
     id: string;
 }
 
-interface KillListener extends Listener {
-    callback: OnKillFn;
-}
-
-interface RemainPlayersListener extends Listener {
-    callback: OnRemainPlayersFn;
-}
-
 interface ConnectionLostListener extends Listener {
     callback: OnConnectionLostFn;
 }
-
-interface GameStatusListener extends Listener {
-    callback: OnGameStatusFn;
-}
-
-interface GameStateListener extends Listener {
-    callback: OnGameStateFn;
-}
-
 interface OnConnectionListener extends Listener {
     callback: OnConnectionFn;
 }
 
-interface EnemyListener extends Listener {
-    callback: OnEnemyFn;
-}
-
-interface GameTimeListener extends Listener {
-    callback: OnGameTimeFn;
-}
-
-interface ResponseListener extends Listener {
-    callback: OnResponseFn;
+interface ServerMsgListener extends Listener {
+    callback: (msg: ServerMsg) => boolean;
 }
 
 export {
     requests,
     msgTypes,
+    MapData,
     GameStatus,
     GameState,
     PlayerCommand,
@@ -181,26 +152,14 @@ export {
     RemainPlayersMsg,
     GameTimeMsg,
     Listener,
-    GameStatusListener,
-    GameStateListener,
+    OnServerMsgFn,
+    ServerMsgListener,
     OnConnectionListener,
     ConnectionLostListener,
-    ResponseListener,
-    EnemyListener,
-    KillListener,
-    RemainPlayersListener,
-    GameTimeListener,
     OnListenerFns,
-    OnEnemyFn,
     OnConnectionFn,
     PlayerNames,
     OnConnectionLostFn,
-    OnGameStatusFn,
-    OnGameStateFn,
-    OnResponseFn,
-    OnGameTimeFn,
-    OnKillFn,
-    OnRemainPlayersFn,
     ServerMsg,
     msgHandlerFn,
     GameStateTypes

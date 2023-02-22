@@ -10,13 +10,16 @@ import {
     requests,
     GameStatus,
     PlayerNames,
-    GameStatusListener,
-    PlayerNamesListener,
+    MapData,
+    ReplyableMsgListener,
 } from "../Clients/Interfaces";
 
 // Strapi related imports
 import { ScheduledGame } from "../Clients/Strapi";
 import { Logger } from "../Utils/Logger";
+
+// Map
+import { levelCollider, levelMap, levelOverlays } from "../Core/MapData";
 
 //
 // Constants
@@ -36,8 +39,9 @@ const GAME_VALID_INTERVAL: number = 120000;
 class AwaitLevel extends Level {
 
     // WebSockets listeners
-    private gameNamesListener: PlayerNamesListener;
-    private gameStatusListener: GameStatusListener;
+    private mapDataListener: ReplyableMsgListener;
+    private gameNamesListener: ReplyableMsgListener;
+    private gameStatusListener: ReplyableMsgListener;
 
     // Current game id
     private gameId: number = 0;
@@ -48,6 +52,10 @@ class AwaitLevel extends Level {
     // Default level's start method, called when engine loads the level
     async onStart(): Promise<void> {
         // Create WebSockets listeners
+        this.mapDataListener = this.context.ws.addListener(
+            "map-data", (msg) => this.onMapDataMsg(msg)
+        );
+
         this.gameStatusListener = this.context.ws.addListener(
             "game-status", (msg) => this.onGameStatusMsg(msg)
         );
@@ -130,6 +138,31 @@ class AwaitLevel extends Level {
         // Removes current levels related listeners
         this.gameNamesListener.destroy()
         this.gameStatusListener.destroy()
+    }
+
+    onMapDataMsg(msg: ReplyableMsg): boolean {
+
+        // Check the veracity of message type
+        if (msg.content.type === requests.mapData) {
+
+            // Generates the reply
+            const reply: MapData = {
+                msgType: "map-data",
+                gameId: this.gameId,
+                mapData: {
+                    levelCollider,
+                    levelMap,
+                    levelOverlays
+                }
+            };
+
+            // Send the reply to the author of request
+            msg.reply(reply);
+        }
+
+        // Handles the event, doesn't allow event propagation
+        // in the event listeners queue
+        return true;
     }
 
     // Handles all requests from frontends that relate with current game-status

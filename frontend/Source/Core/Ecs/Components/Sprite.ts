@@ -105,6 +105,10 @@ class Sprite {
     setAnchor(x: number, y?: number) {
         y ? this.sprite.anchor.set(x, y) : this.sprite.anchor.set(x);
     }
+
+    setVisibility(visibility: boolean) {
+        this.sprite.visible = visibility;
+    }
 }
 
 export { Sprite };

@@ -11,10 +11,7 @@ import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 import { Application, Container, filters, Graphics } from "pixi.js";
 
 // Files import
-import levelMapFile from "../../Assets/level_overlays.json"
 import { Vec2 } from "../../Utils/Math";
-
-const levelMap: Record<string, any> = levelMapFile;
 
 class OverlayMap extends Layer {
     // Entities storage
@@ -28,6 +25,7 @@ class OverlayMap extends Layer {
     protected res: Record<string, any>;
     private screenX: number;
     private screenY: number;
+    private levelOverlays: Record<string, any>;
     // Dimension
     private dim: Vec2 = new Vec2();
     
@@ -35,7 +33,8 @@ class OverlayMap extends Layer {
     constructor(
         ecs: ECS,
         app: Application,
-        resource: Record<string, any>
+        resource: Record<string, any>,
+        levelOverlays: Record<string, any>
     ) {
         super("Basemap", ecs);
 
@@ -43,14 +42,15 @@ class OverlayMap extends Layer {
         this.res = resource;
         this.screenX = this.app.view.clientWidth;
         this.screenY = this.app.view.clientHeight;
+        this.levelOverlays = levelOverlays;
 
         // Creates new pixi container
         this.mapContainer = new Container();
     }
 
     loadMap() {
-        let rows = levelMap["height"];
-        let cols = levelMap["width"];
+        let rows = this.levelOverlays["height"];
+        let cols = this.levelOverlays["width"];
 
         const step = SPRITE_SIZE / 2.0;
 

@@ -1,6 +1,6 @@
 // Map importing
 import { AStarFinder } from "../Utils/astar/astar";
-import levelCollider from "../Assets/level_collider.json";
+import { levelCollider } from "../Core/MapData";
 import { Grid } from "../Core/Ecs/Components/Grid";
 import { Vec2 } from "./Math";
 

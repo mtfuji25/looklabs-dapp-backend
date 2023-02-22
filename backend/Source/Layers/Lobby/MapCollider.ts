@@ -5,7 +5,7 @@ import { Layer } from "../../Core/Layer";
 import { ECS } from "../../Core/Ecs/Core/Ecs";
 
 // Map importing
-import levelCollider from "../../Assets/level_collider.json";
+import { levelCollider } from "../../Core/MapData";
 
 class MapColliderLayer extends Layer {
 
