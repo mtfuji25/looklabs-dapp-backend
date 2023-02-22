@@ -102,6 +102,7 @@ const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
     // Sources and direction vectors
     const sources: Vec2[] = _getPathFinderOrigins(behavior, dynamic, grid);
     let dir: Vec2 | null = _getPathFinderDirection(entity, sources, other.index, grid);
+
     if (!dir) {
         rigidbody.velocity = _unstuck(dynamic);
     } else {
@@ -241,7 +242,7 @@ const _getPathFinderOrigins = (behavior:Behavior, dynamic:DynamicEntity, grid:Gr
 
 const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex:Vec2, grid:Grid):Vec2 => {
     let dir: Vec2 | null = null;
-    
+
     sources = sources.filter( s => GridUtils.getCellWalkable(s.y, s.x) == 0);
     
     sources.map((source, index) => {
@@ -318,4 +319,4 @@ const _unstuck = (dynamic:DynamicEntity):Vec2 => {
     
 }
 
-export { strategy_Seek, strategy_SeekNearest, _getPathFinderDirection }
+export { strategy_Seek, strategy_SeekNearest }

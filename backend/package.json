@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "jest --verbose ./Source",
+    "test:watch": "jest --verbose --watch ./Source",
     "start": "nodemon",
     "start:log": "nohup npm run start > output.log &",
     "build": "tsc",

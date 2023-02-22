@@ -10,24 +10,24 @@ export class Grid {
   // The node grid
   private gridNodes: Node[][];
 
-  constructor(aParams: IGridConstructor) {
+  constructor({ width, height, matrix, densityOfObstacles }: IGridConstructor) {
     // Set the general properties
-    if (aParams.width && aParams.height) {
-      this.width = aParams.width;
-      this.height = aParams.height;
+    if (width && height) {
+      this.width = width;
+      this.height = height;
       this.numberOfFields = this.width * this.height;
-    } else if (aParams.matrix) {
-      this.width = aParams.matrix[0].length;
-      this.height = aParams.matrix.length;
+    } else if (matrix) {
+      this.width = matrix[0].length;
+      this.height = matrix.length;
       this.numberOfFields = this.width * this.height;
     }
 
     // Create and generate the matrix
     this.gridNodes = this.buildGridWithNodes(
-      aParams.matrix || undefined,
+      matrix || undefined,
       this.width,
       this.height,
-      aParams.densityOfObstacles || 0
+      densityOfObstacles || 0
     );
   }
 
