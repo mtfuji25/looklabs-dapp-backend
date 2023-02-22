@@ -10,9 +10,9 @@ import { Grid } from "./Ecs/Components/Grid";
 const randFn = Math.random;
 const simplexNoise = new SimplexNoise(randFn);
 const depth = 20;
-const floorRate = 0.25;
+const floorRate = 0.3;
 const statueCollider = {
-    from: {x: 47, y: 47},
+    from: {x: 47, y: 30},
     to: {x: 70, y: 70}
 }
 
@@ -24,9 +24,9 @@ levelCollider.data.forEach((dy: number[], y: number) => {
     });
 });
 
-for (let i = statueCollider.from.y; i <= statueCollider.to.y; i++) {
-    for (let j = statueCollider.from.x; j <= statueCollider.to.x; j++) {
-        levelCollider.data[i][j] = 2;
+for (let y = statueCollider.from.y; y <= statueCollider.to.y; y++) {
+    for (let x = statueCollider.from.x; x <= statueCollider.to.x; x++) {
+        levelCollider.data[y][x] = 1;
     }
 }
 
@@ -45,7 +45,7 @@ const getSpawnPos = (grid: Grid) => {
         ), grid);
         
         // Y must be between -0.5 to 0.5 and it must not be on a collider
-    } while (y > 0.5 || y < -0.5 || levelCollider.data[cell.x][cell.y]);
+    } while (y > 0.5 || y < -0.5 || levelCollider.data[cell.y][cell.x]);
 
     return { x, y };
 };

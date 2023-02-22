@@ -10,7 +10,7 @@ export class Grid {
   // The node grid
   private gridNodes: Node[][];
 
-  constructor({ width, height, matrix, densityOfObstacles }: IGridConstructor) {
+  constructor({ width, height, matrix, densityOfObstacles = 0 }: IGridConstructor) {
     // Set the general properties
     if (width && height) {
       this.width = width;
@@ -27,7 +27,7 @@ export class Grid {
       matrix || undefined,
       this.width,
       this.height,
-      densityOfObstacles || 0
+      densityOfObstacles
     );
   }
 

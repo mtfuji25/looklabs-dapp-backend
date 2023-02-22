@@ -14,12 +14,11 @@ for (let i = 0; i < levelCollider["height"]; ++i) {
     transposedCollider.push(row);
 }
 
-
 class GridUtils {
 
     static finder:AStarFinder = new AStarFinder({
         grid: {
-            matrix: transposedCollider
+            matrix: levelCollider.data
         },
         diagonalAllowed: false,
         includeStartNode: true,
@@ -28,10 +27,11 @@ class GridUtils {
     
 
     static getCellWalkable (row:number,column:number):number {
+        // Previously it used transposedCollider instead of levelCollider.data
         if (row < 0 || column < 0) return 1;
-        if (transposedCollider.length <= row) return 1;
-        if (transposedCollider[row].length <= column) return 1;
-        return transposedCollider[row][column];
+        if (levelCollider.data.length <= row) return 1;
+        if (levelCollider.data[row].length <= column) return 1;
+        return levelCollider.data[row][column];
     }
 
     static convertFromNDC  (pos: Vec2): Vec2  {

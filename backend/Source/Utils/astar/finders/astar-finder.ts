@@ -59,6 +59,7 @@ export class AStarFinder {
     }
 
     public findPath(startPosition: IPoint, endPosition: IPoint): number[][] {
+
         // Reset lists
         this.closedList = [];
         this.openList = [];

@@ -85,7 +85,7 @@ class MapLayer extends Layer {
                     1: this.app.loader.resources["border"],
                     2: this.app.loader.resources["voidfloor"]
                 };
-                sprite.setImg(imgMap[this.levelCollider.data[j][i]]);
+                sprite.setImg(imgMap[this.levelCollider.data[i][j]]);
 
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);

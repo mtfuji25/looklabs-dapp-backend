@@ -15,7 +15,7 @@ const strategy_Seek = (entity:Entity, grid:Grid, target?:Entity):void => {
         _seekNearestInRangeWithA(entity, grid);
         behavior.staticCollide = false;
     } else {
-        if (entitiesAlive < 6 || Math.random() > 0.7) {//the higher the value here, the longer the game            
+        if (entitiesAlive < 6 || Math.random() > 0.7) {//the higher the value here, the longer the game
             _seekNearestInRange(entity, grid, entitiesAlive > 20);
         } else {
             strategy_Explore(entity, grid);
@@ -64,7 +64,6 @@ const _seekNearestInRange = (entity:Entity, grid:Grid, prioritize:boolean = fals
 }
 
 const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
-
     const status = entity.getStatus();
 
     const transform = entity.getTransform();
@@ -80,10 +79,10 @@ const _seekTarget = (target:Entity, entity:Entity, grid:Grid):void => {
 }
 
 const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
-    
     let nearest:Entity =  _getNearest(entity, target);
     
     if (!nearest) {
+
         if (entity.getBehavior().inRange.length > 0) {
             _seekNearestInRangeWithA(entity, grid);
         } else {
@@ -162,6 +161,7 @@ const _getNearest  = (entity:Entity, target?:Entity) => {
         const priorityTarget = Strategy.pickNearestTarget(entity, priorities);
         if (priorityTarget !== null) nearest = priorityTarget;
     }
+
     return nearest;
 
 }
@@ -252,6 +252,13 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
         const path = GridUtils.finder.findPath(
             source, destinationIndex
         );
+
+        path.forEach(s => {
+            const v = Vec2.fromArray(s);
+            if (GridUtils.getCellWalkable(v.y, v.x) !== 0) {
+                console.log("Not walkable in path", v)
+            }
+        })
 
         if (!path || path.length < 2) {
             return;
