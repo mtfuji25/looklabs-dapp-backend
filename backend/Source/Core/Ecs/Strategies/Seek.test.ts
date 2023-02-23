@@ -7,11 +7,7 @@ import { strategy_SeekNearest } from "./Seek";
 const tests = [
     {
         path: [
-            [0, 0],
-            [1, 0],
-            [2, 0],
-            [2, 1],
-            [2, 2]
+            [0, 0], [1, 0], [2, 0], [2, 1], [2, 2]
         ],
         cells: { x: 5, y: 5 },
         entityCell: { x: 0, y: 0 },
@@ -69,6 +65,9 @@ describe("Seek", () => {
 
                 // Needed to add speed to the entity to be able to move
                 entity.addStatus(1, 1, 1, 1, 1, "wolf", "wolf", "tier");
+
+                // Check why this is necessary
+                entity.getBehavior().staticCollide = true;
 
                 strategy_SeekNearest(entity, grid, target);
 
