@@ -9,9 +9,9 @@ import SimplexNoise from "../Utils/SimplexNoise";
 import spawnPos from "../Assets/SpawnPositions.json";
 import { PlayerLayer } from "../Layers/Lobby/Player";
 
-const USE_RANDOM_MAP = false;
-const USE_SQUARES = false;
-const USE_RANDOM_SPAWN_POS = false;
+const USE_RANDOM_MAP = false; // True to generate a random map
+const USE_SQUARES = false; // True to generate squares in the map as obstacles
+const USE_RANDOM_SPAWN_POS = false; // True to make the players spawn in random positions
 
 const randFn = Math.random;
 
