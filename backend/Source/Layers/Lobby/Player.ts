@@ -18,6 +18,7 @@ import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi
 import { Logger } from "../../Utils/Logger";
 import { PlayerActions } from "./PlayerActions";
 import spawnPos from "../../Assets/SpawnPositions.json";
+import { getSpawnPos } from "../../Core/MapData";
 
 class PlayerLayer extends Layer {
 
@@ -121,10 +122,12 @@ class PlayerLayer extends Layer {
         );
 
         //make position wrap around, in case of too many players
+        const sPos = getSpawnPos(grid);
         this.self.getTransform().setPos(
-            spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
-            spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
-
+            //spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
+            //spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
+            sPos.x,
+            sPos.y,
         );
         PlayerLayer.playerCount++;
 

@@ -82,6 +82,7 @@ const sys_UpdateBehavior = (data: EcsData, deltaTime: number): void => {
                 }                
             }
             // execute behavior
+            //behavior.changeBehavior(strategy_SeekNearest);
             behavior.current(entity, grid);
         });
     });

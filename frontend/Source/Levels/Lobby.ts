@@ -97,7 +97,8 @@ class LobbyLevel extends Level {
             this.levelContext,
             this.context.app,
             this.context.res,
-            levelMap
+            levelMap,
+            levelCollider
         );
         // Pushs map generator
         this.layerStack.pushLayer(

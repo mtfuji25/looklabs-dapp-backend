@@ -8,7 +8,7 @@ import { SPRITE_SIZE } from "../../Constants/Constants";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, Container } from "pixi.js";
+import { Application, Container, LoaderResource } from "pixi.js";
 
 // Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
@@ -27,6 +27,7 @@ class MapLayer extends Layer {
     protected app: Application;
     protected res: Record<string, any>;
     private levelMap: Record<string, any>;
+    private levelCollider: Record<string, any>;
 
     // Current level's context
     private levelContext: LobbyLevelContext;
@@ -39,7 +40,8 @@ class MapLayer extends Layer {
         levelContext: LobbyLevelContext,
         app: Application,
         resource: Record<string, any>,
-        levelMap: Record<string, any>
+        levelMap: Record<string, any>,
+        levelCollider: Record<string, any>,
     ) {
         super("Basemap", ecs);
 
@@ -48,6 +50,7 @@ class MapLayer extends Layer {
         this.levelContext = levelContext;
 
         this.levelMap = levelMap;
+        this.levelCollider = levelCollider;
 
         // Creates new pixi container
         this.mapContainer = new Container();
@@ -63,6 +66,17 @@ class MapLayer extends Layer {
         let x = 0.0;
         let y = 0.0;
 
+        // Reverses the collider matrix
+        const transposedCollider: Array<Array<number>> = [];        
+        for (let i = 0; i < this.levelCollider["height"]; ++i) {
+            const row: number[] = [];
+            for (let j = 0; j < this.levelCollider["width"]; ++j) {
+                const collider = this.levelCollider["data"][j][i];
+                row.push(collider);
+            }
+            transposedCollider.push(row);
+        }
+
         for (let i = 0; i < rows; ++i) {
             y += step;
             for (let j = 0; j < cols; ++j) {
@@ -77,10 +91,17 @@ class MapLayer extends Layer {
                 const ph = i * SPRITE_SIZE;
 
                 // Load the cuted image to sprite
-                sprite.setCutImg(
-                    this.app.loader.resources["basemap"],
-                    pw, ph, SPRITE_SIZE, SPRITE_SIZE
-                );
+                // sprite.setCutImg(
+                //     this.app.loader.resources["basemap"],
+                //     pw, ph, SPRITE_SIZE, SPRITE_SIZE
+                // );
+                const imgMap: { [index: number]: LoaderResource } = {
+                    0: this.app.loader.resources["floor"],
+                    1: this.app.loader.resources["border"],
+                };
+                sprite.sprite.width = SPRITE_SIZE;
+                sprite.sprite.height = SPRITE_SIZE;
+                sprite.setImg(imgMap[transposedCollider[i][j]]);
 
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
