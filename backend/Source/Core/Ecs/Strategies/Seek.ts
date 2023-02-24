@@ -26,7 +26,11 @@ const strategy_Seek = (entity:Entity, grid:Grid, target?:Entity):void => {
 const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
 
+    // Added to debug
+    return _seekNearestWithA(entity, grid, target);
+
     if (behavior.staticCollide) {
+        // When the entity collide with a wall, it'll use the path finder
         _seekNearestWithA(entity, grid, target);
         behavior.staticCollide = false;
     } else {
@@ -35,6 +39,7 @@ const strategy_SeekNearest = (entity:Entity, grid:Grid, target?:Entity):void => 
 }
 
 const _seekNearest = (entity:Entity, grid:Grid, target?:Entity) => {
+
     let nearest:Entity =  _getNearest(entity, target);
     
     if (!nearest) {
@@ -101,9 +106,20 @@ const _seekNearestWithA = (entity: Entity, grid: Grid, target?:Entity) => {
     // Sources and direction vectors
     const sources: Vec2[] = _getPathFinderOrigins(behavior, dynamic, grid);
     let dir: Vec2 | null = _getPathFinderDirection(entity, sources, other.index, grid);
+
+    // Added to debug
+    // console.log("Dir:", dir)
+
     if (!dir) {
         rigidbody.velocity = _unstuck(dynamic);
     } else {
+        // Added to debug
+        // const currentPos = entity.getTransform().pos;
+        // const currentCell = GridUtils.convertPosToCell(GridUtils.convertFromNDC(currentPos), grid);
+        // console.log("currentCell", currentCell.x, "/", currentCell.y);
+        // const nextPos = dir.add(currentPos);
+        // const nextCell = GridUtils.convertPosToCell(GridUtils.convertFromNDC(nextPos), grid);
+        // console.log("nextCell", nextCell.x, "/", nextCell.y);
         rigidbody.velocity = dir;
     }
     assert(!(isNaN(rigidbody.velocity.x) || isNaN(rigidbody.velocity.y)), `Behavior 4: ${rigidbody} Is NaN, dir was ${dir}`);
@@ -251,7 +267,8 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
 
         if (!path || path.length < 2) {
             return;
-        }    
+        }
+
         entity.getStrategy().pathData = (
         {   entity : entity,
             pathIndex : 0,
@@ -259,8 +276,12 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
             path : GridUtils.convertPathToVec2(path)
         }
         );
-        const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
-        const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
+
+        // Changed to "fromArray", works in the same way
+        // const origin = GridUtils.convertCellToPos(new Vec2(path[0][0], path[0][1]), grid);
+        // const dest = GridUtils.convertCellToPos(new Vec2(path[1][0], path[1][1]), grid);
+        const origin = GridUtils.convertCellToPos(Vec2.fromArray(path[0]), grid);
+        const dest = GridUtils.convertCellToPos(Vec2.fromArray(path[1]), grid);
 
         if (!dest.equal(origin)){
             dir = dir.add(dest.sub(origin));
@@ -272,6 +293,8 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
     const speed = entity.getStatus().speed;
     
     if (dir && (!dir.equal(new Vec2(0, 0)))) {
+        // If it's not converted to NDC the sprites 
+        // will move away from each other on the Y axis.
         dir = GridUtils.convertToNDC(dir).normalize().muls(speed);
         return dir;
     }

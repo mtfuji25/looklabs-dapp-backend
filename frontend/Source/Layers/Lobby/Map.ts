@@ -8,13 +8,15 @@ import { SPRITE_SIZE } from "../../Constants/Constants";
 import { ECS, Entity } from "../../Core/Ecs/Core/Ecs";
 
 // Pixi imports
-import { Application, Container, LoaderResource } from "pixi.js";
+import { Application, Container, LoaderResource, Text } from "pixi.js";
 
 // Lobby level context
 import { LobbyLevelContext } from "../../Levels/Lobby";
 
 // Files import
 import { Vec2 } from "../../Utils/Math";
+
+const SHOW_MAP_COORDS = true;
 
 class MapLayer extends Layer {
     // Entities storage
@@ -76,6 +78,7 @@ class MapLayer extends Layer {
             }
             transposedCollider.push(row);
         }
+        
 
         for (let i = 0; i < rows; ++i) {
             y += step;
@@ -102,6 +105,19 @@ class MapLayer extends Layer {
                 sprite.sprite.width = SPRITE_SIZE;
                 sprite.sprite.height = SPRITE_SIZE;
                 sprite.setImg(imgMap[transposedCollider[i][j]]);
+
+                if (SHOW_MAP_COORDS) {
+                    // Shows the tile coords
+                    const coords = new Text(`${j}\n${i}`, {
+                        fontFamily: 'Arial',
+                        fontSize: 12,
+                        fill: 0x000000,
+                        align: 'center'
+                    });
+                    coords.x = -12;
+                    coords.y = -12;
+                    sprite.sprite.addChild(coords);
+                }
 
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);

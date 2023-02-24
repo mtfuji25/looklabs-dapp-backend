@@ -252,6 +252,7 @@ const sys_UpdateCollisions = (data: EcsData, deltaTime: number): void => {
             // Solves the collison
             sortedStatics.forEach((result) => {
                 // Fix for current entity
+                // Check this
                 rigidbody.velocity.x += (result.result.contactNormal.x * Math.abs(rigidbody.velocity.x) * (1.0 - result.result.contactTime)) * 1.001;
                 rigidbody.velocity.y += (result.result.contactNormal.y * Math.abs(rigidbody.velocity.y) * (1.0 - result.result.contactTime)) * 1.001;
                 if (result.result.contactNormal.x == 0 && result.result.contactNormal.y == 0) {

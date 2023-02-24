@@ -32,7 +32,8 @@ const startSystems = (ecs: ECS) => {
     ecs.pushContainerSystem(sys_UpdateBehavior);
 
     // Collide and fix all velocitys in grid
-    ecs.pushContainerSystem(sys_UpdateCollisions);
+    // Commented at the moment to avoid players get blocked with the walls
+    // ecs.pushContainerSystem(sys_UpdateCollisions);
 
     // Update all components position
     ecs.pushContainerSystem(sys_UpdatePos);

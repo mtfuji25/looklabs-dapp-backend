@@ -1,39 +1,56 @@
 // Map
-import levelCollider from "../Assets/level_collider.json";
+import levelCollider from "../Assets/level_collider.json"; // XY sorted
 import levelMap from "../Assets/level_map.json";
 import levelOverlays from "../Assets/level_overlays.json";
-import { GridUtils } from "../Utils/GridUtils";
 import { Vec2 } from "../Utils/Math";
-import { Grid } from "./Ecs/Components/Grid";
 import SimplexNoise from "../Utils/SimplexNoise";
-import spawnPos from "../Assets/SpawnPositions.json";
-import { PlayerLayer } from "../Layers/Lobby/Player";
 
-const USE_RANDOM_MAP = false; // True to generate a random map
-const USE_SQUARES = false; // True to generate squares in the map as obstacles
-const USE_RANDOM_SPAWN_POS = false; // True to make the players spawn in random positions
+// True to generate a random map
+const USE_RANDOM_MAP = false;
+
+// True to generate squares in the map as obstacles
+const USE_SQUARES = true;
+
+// True to make the players spawn in random positions
+// (Not working correctly, spawns the players in walls)
+const USE_RANDOM_SPAWN_POS = false;
 
 const randFn = Math.random;
 
 if (USE_RANDOM_MAP) {
     const simplexNoise = new SimplexNoise(randFn);
     const depth = 20;
-    const floorRate = 0.3;
+    const floorRate = 0.5;
     // Generates random map
-    for (let y = 0; y < levelCollider.data.length; y++) {
-        for (let x = 0; x < levelCollider.data[y].length; x++) {
+    for (let x = 0; x < levelCollider.data.length; x++) {
+        for (let y = 0; y < levelCollider.data[x].length; y++) {
             const n = simplexNoise.noise2d(x / depth, y / depth);
-            levelCollider.data[y][x] = n > floorRate ? 1 : 0;
+
+            if (n > floorRate) {
+                // Puts wall
+                levelCollider.data[x][y] = 1;
+            } else {
+                // Puts floor
+                // levelCollider.data[x][y] = 0;
+            }
         }
     }
 }
 
 if (USE_SQUARES) {
     // Puts squares in the map
-    for (let y = 0; y < levelCollider.data.length; y++) {
-        for (let x = 0; x < levelCollider.data[y].length; x++) {
-            //levelCollider.data[y][x] = 0;
-            if (x % 4 === 0 && y % 4 === 0) levelCollider.data[y][x] = 1;
+    for (let x = 0; x < levelCollider.data.length; x++) {
+        for (let y = 0; y < levelCollider.data[x].length; y++) {
+            // levelCollider.data[y][x] = 0;
+            if (x % 8 === 0 && y % 8 === 0) {
+                levelCollider.data[x][y] = 1;
+                levelCollider.data[x][y + 1] = 1;
+                levelCollider.data[x][y + 2] = 1;
+
+                levelCollider.data[x + 1][y] = 1;
+                levelCollider.data[x + 1][y + 1] = 1;
+                levelCollider.data[x + 1][y + 2] = 1;
+            }
         }
     }
 }
@@ -41,24 +58,19 @@ if (USE_SQUARES) {
 /**
  * Returns a position to spawn where there is floor
  */
-const getSpawnPos = (grid: Grid) => {
-    if (!USE_RANDOM_SPAWN_POS) {
-        return {
-            x: spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
-            y: spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
-        };
-    }
-
+const getSpawnCell = (matrix = levelCollider.data): Vec2 => {
     let x, y;
     do {
-        x = Math.floor(randFn() * levelCollider.data[0].length);
-        y = Math.floor(randFn() * levelCollider.data.length);
+        x = Math.floor(randFn() * matrix.length);
+        y = Math.floor(randFn() * matrix[0].length);
         // it must not be on a collider
-    } while (levelCollider.data[y][x]);
+    } while (matrix[x][y] !== 0);
 
-    const pos = GridUtils.convertCellToPos(new Vec2(x, y), grid);
+    const cell = new Vec2(x, y);
 
-    return { x: pos.x, y: pos.y };
+    console.log("spawn cell", x, y, "is", matrix[x][y]);
+
+    return cell;
 };
 
-export { levelCollider, levelMap, levelOverlays, getSpawnPos };
+export { levelCollider, levelMap, levelOverlays, getSpawnCell, USE_RANDOM_SPAWN_POS };

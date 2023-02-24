@@ -622,7 +622,7 @@ class LobbyLevel extends Level {
                 mapData: {
                     levelCollider,
                     levelMap,
-                    levelOverlays
+                    levelOverlays,
                 }
             };
 

@@ -18,7 +18,8 @@ import { GameParticipantsResult, ParticipantDetails } from "../../Clients/Strapi
 import { Logger } from "../../Utils/Logger";
 import { PlayerActions } from "./PlayerActions";
 import spawnPos from "../../Assets/SpawnPositions.json";
-import { getSpawnPos } from "../../Core/MapData";
+import { getSpawnCell, USE_RANDOM_SPAWN_POS } from "../../Core/MapData";
+import { GridUtils } from "../../Utils/GridUtils";
 
 class PlayerLayer extends Layer {
 
@@ -116,19 +117,26 @@ class PlayerLayer extends Layer {
         status.setOnDamage((damage) => this.onDamage(damage));
 
         // Add rigibody for current entity
+        const spriteSizeMultiplier = 1.7; // It was 1.7
         this.self.addRigidbody(
-            grid.intervalX * 1.7,
-            grid.intervalY * 1.7,
+            grid.intervalX * spriteSizeMultiplier, // Width of player
+            grid.intervalY * spriteSizeMultiplier, // Height of player
         );
 
         //make position wrap around, in case of too many players
-        const sPos = getSpawnPos(grid);
-        this.self.getTransform().setPos(
-            //spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
-            //spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
-            sPos.x,
-            sPos.y,
-        );
+        if (USE_RANDOM_SPAWN_POS) {
+            const sCell = getSpawnCell();
+            const sPos = GridUtils.convertCellToPos(sCell, grid);
+            this.self.getTransform().setPos(
+                sPos.x,
+                sPos.y,
+            );
+        } else {
+            this.self.getTransform().setPos(
+                spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,
+                spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].y
+            );
+        }
         PlayerLayer.playerCount++;
 
         this.self.addBehavior();

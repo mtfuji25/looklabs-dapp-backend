@@ -49,6 +49,20 @@ function mockGame(): ScheduledGame {
                 user_address: "3",
                 name: "3",
                 scheduled_game: 1
+            },
+            {
+                id: 4,
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/4",
+                user_address: "4",
+                name: "4",
+                scheduled_game: 1
+            },
+            {
+                id: 5,
+                nft_id: "0x03dE5D4eA3c9a899F09C56dDD3b1FCAb68af9FED/5",
+                user_address: "5",
+                name: "5",
+                scheduled_game: 1
             }
         ]
     };

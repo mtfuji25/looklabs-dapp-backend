@@ -1,9 +1,10 @@
 // Map importing
 import { AStarFinder } from "../Utils/astar/astar";
-import { levelCollider } from "../Core/MapData";
 import { Grid } from "../Core/Ecs/Components/Grid";
 import { Vec2 } from "./Math";
+import { levelCollider } from "../Core/MapData";
 
+// Reverses the matrix from XY to YX
 const transposedCollider: Array<Array<number>> = [];        
 for (let i = 0; i < levelCollider["height"]; ++i) {
     const row: number[] = [];
@@ -16,6 +17,8 @@ for (let i = 0; i < levelCollider["height"]; ++i) {
 
 
 class GridUtils {
+
+    static transposedCollider = transposedCollider;
 
     static finder:AStarFinder = new AStarFinder({
         grid: {
@@ -50,6 +53,11 @@ class GridUtils {
     }
 
     static convertCellToPos (cell: Vec2, grid: Grid): Vec2{
+
+        // intervalX = 0.4
+        // intervalY = 0.4
+        // (2 * 0.4 / 2) - (0.4 / 4) = 0.3
+
         const position = new Vec2(
             (cell.x * grid.intervalX / 2.0) - (grid.intervalX / 4.0),
             (cell.y * grid.intervalY / 2.0) - (grid.intervalY / 4.0)
@@ -70,9 +78,17 @@ class GridUtils {
         return result;
     }
     static convertPosToCell  (pos: Vec2, grid: Grid): Vec2 {
+        
+        // Old code
+        // const index = new Vec2(
+        //     Math.floor(pos.x / (grid.intervalX / 2.0)),
+        //     Math.floor(pos.y / (grid.intervalY / 2.0)),
+        // );
+
+        // This has been modified to return the inverse of convertCellToPos
         const index = new Vec2(
-            Math.floor(pos.x / (grid.intervalX / 2.0)),
-            Math.floor(pos.y / (grid.intervalY / 2.0)),
+            Math.floor((pos.x + (grid.intervalX / 4.0)) * 2.0 / grid.intervalX),
+            Math.floor((pos.y + (grid.intervalY / 4.0)) * 2.0 / grid.intervalY)
         );
 
         return index;
@@ -220,4 +236,4 @@ class GridUtils {
     
 }
 
-export {GridUtils}
+export { GridUtils }
