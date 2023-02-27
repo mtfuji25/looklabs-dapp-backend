@@ -377,6 +377,7 @@ class PlayerLayer extends Layer {
             return false;
         }
 
+        // Converts the float position to pixels position
         const { x, y } = wordToView(new Vec2(content.pos.x, content.pos.y))
         content.pos.x = x;
         content.pos.y = y;
