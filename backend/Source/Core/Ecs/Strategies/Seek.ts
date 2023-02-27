@@ -11,6 +11,9 @@ import { Strategy } from "../Components/Strategy";
 const strategy_Seek = (entity:Entity, grid:Grid, target?:Entity):void => {
     const behavior = entity.getBehavior();
 
+    // Added to debug
+    return _seekNearestInRangeWithA(entity, grid);
+
     if (behavior.staticCollide) {
         _seekNearestInRangeWithA(entity, grid);
         behavior.staticCollide = false;

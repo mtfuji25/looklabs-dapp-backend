@@ -60,55 +60,29 @@ class MapLayer extends Layer {
 
 
     loadMap() {
-        let rows = this.levelMap["height"];
-        let cols = this.levelMap["width"];
-
         const step = SPRITE_SIZE / 2.0;
 
-        let x = 0.0;
-        let y = 0.0;
-
-        // Reverses the collider matrix
-        const transposedCollider: Array<Array<number>> = [];        
-        for (let i = 0; i < this.levelCollider["height"]; ++i) {
-            const row: number[] = [];
-            for (let j = 0; j < this.levelCollider["width"]; ++j) {
-                const collider = this.levelCollider["data"][j][i];
-                row.push(collider);
-            }
-            transposedCollider.push(row);
-        }
-        
-
-        for (let i = 0; i < rows; ++i) {
-            y += step;
-            for (let j = 0; j < cols; ++j) {
-                x += step;
+        for (let x = 0; x < this.levelMap["width"]; x++) {
+            for (let y = 0; y < this.levelMap["width"]; y++) {
 
                 // Creates entity and add sprite to it
-                const entity = this.ecs.createEntity(x, y, false)
+                const entity = this.ecs.createEntity(
+                    x * SPRITE_SIZE + step,
+                    y * SPRITE_SIZE + step,
+                    false)
                 const sprite = entity.addSprite();
 
-                // Calculates base cuts in spritesheet
-                const pw = j * SPRITE_SIZE;
-                const ph = i * SPRITE_SIZE;
-
-                // Load the cuted image to sprite
-                // sprite.setCutImg(
-                //     this.app.loader.resources["basemap"],
-                //     pw, ph, SPRITE_SIZE, SPRITE_SIZE
-                // );
                 const imgMap: { [index: number]: LoaderResource } = {
                     0: this.app.loader.resources["floor"],
                     1: this.app.loader.resources["border"],
                 };
                 sprite.sprite.width = SPRITE_SIZE;
                 sprite.sprite.height = SPRITE_SIZE;
-                sprite.setImg(imgMap[transposedCollider[i][j]]);
+                sprite.setImg(imgMap[this.levelCollider.data[x][y]]);
 
                 if (SHOW_MAP_COORDS) {
                     // Shows the tile coords
-                    const coords = new Text(`${j}\n${i}`, {
+                    const coords = new Text(`${x}\n${y}`, {
                         fontFamily: 'Arial',
                         fontSize: 12,
                         fill: 0x000000,
@@ -121,11 +95,70 @@ class MapLayer extends Layer {
 
                 this.entities.push(entity);
                 this.mapContainer.addChild(sprite.sprite);
-                x += step;
+
             }
-            x = 0;
-            y += step;
         }
+        
+        // let rows = this.levelMap["height"];
+        // let cols = this.levelMap["width"];
+        
+        // Reverses the collider matrix
+        // const transposedCollider: Array<Array<number>> = [];        
+        // for (let i = 0; i < this.levelCollider["height"]; ++i) {
+        //     const row: number[] = [];
+        //     for (let j = 0; j < this.levelCollider["width"]; ++j) {
+        //         const collider = this.levelCollider["data"][j][i];
+        //         row.push(collider);
+        //     }
+        //     transposedCollider.push(row);
+        // }
+
+        // for (let i = 0; i < rows; ++i) {
+        //     y += step;
+        //     for (let j = 0; j < cols; ++j) {
+        //         x += step;
+
+        //         // Creates entity and add sprite to it
+        //         const entity = this.ecs.createEntity(x, y, false)
+        //         const sprite = entity.addSprite();
+
+        //         // Calculates base cuts in spritesheet
+        //         const pw = j * SPRITE_SIZE;
+        //         const ph = i * SPRITE_SIZE;
+
+        //         // Load the cuted image to sprite
+        //         // sprite.setCutImg(
+        //         //     this.app.loader.resources["basemap"],
+        //         //     pw, ph, SPRITE_SIZE, SPRITE_SIZE
+        //         // );
+        //         const imgMap: { [index: number]: LoaderResource } = {
+        //             0: this.app.loader.resources["floor"],
+        //             1: this.app.loader.resources["border"],
+        //         };
+        //         sprite.sprite.width = SPRITE_SIZE;
+        //         sprite.sprite.height = SPRITE_SIZE;
+        //         sprite.setImg(imgMap[transposedCollider[i][j]]);
+
+        //         if (SHOW_MAP_COORDS) {
+        //             // Shows the tile coords
+        //             const coords = new Text(`${j}\n${i}`, {
+        //                 fontFamily: 'Arial',
+        //                 fontSize: 12,
+        //                 fill: 0x000000,
+        //                 align: 'center'
+        //             });
+        //             coords.x = -12;
+        //             coords.y = -12;
+        //             sprite.sprite.addChild(coords);
+        //         }
+
+        //         this.entities.push(entity);
+        //         this.mapContainer.addChild(sprite.sprite);
+        //         x += step;
+        //     }
+        //     x = 0;
+        //     y += step;
+        // }
     }
 
     onAttach() {

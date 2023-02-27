@@ -128,8 +128,9 @@ class PlayerLayer extends Layer {
             const sCell = getSpawnCell();
             const sPos = GridUtils.convertCellToPos(sCell, grid);
             this.self.getTransform().setPos(
-                sPos.x,
-                sPos.y,
+                // Converted from a [0,1] number to [-1,1]
+                sPos.x * 2 - 1, 
+                sPos.y * 2 - 1,
             );
         } else {
             this.self.getTransform().setPos(

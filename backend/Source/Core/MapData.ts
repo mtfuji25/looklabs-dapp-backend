@@ -13,7 +13,7 @@ const USE_SQUARES = true;
 
 // True to make the players spawn in random positions
 // (Not working correctly, spawns the players in walls)
-const USE_RANDOM_SPAWN_POS = false;
+const USE_RANDOM_SPAWN_POS = true;
 
 const randFn = Math.random;
 
@@ -46,10 +46,21 @@ if (USE_SQUARES) {
                 levelCollider.data[x][y] = 1;
                 levelCollider.data[x][y + 1] = 1;
                 levelCollider.data[x][y + 2] = 1;
+                levelCollider.data[x][y + 3] = 1;
 
                 levelCollider.data[x + 1][y] = 1;
                 levelCollider.data[x + 1][y + 1] = 1;
                 levelCollider.data[x + 1][y + 2] = 1;
+                levelCollider.data[x + 1][y + 3] = 1;
+
+                if (levelCollider.data[x - 1]) {
+                    levelCollider.data[x - 1][y + 1] = 1;
+                    levelCollider.data[x - 1][y + 2] = 1;
+                }
+                if (levelCollider.data[x + 2]) {
+                    levelCollider.data[x + 2][y + 1] = 1;
+                    levelCollider.data[x + 2][y + 2] = 1;
+                }
             }
         }
     }
