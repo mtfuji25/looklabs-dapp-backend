@@ -17,8 +17,7 @@ const sys_UpdatePos = (data: EcsData, deltaTime: number): void => {
 
         const nextPosition = new Vec2(transform.pos.x + rigidbody.velocity.x * deltaTime, transform.pos.y + rigidbody.velocity.y * deltaTime);
         
-        const position = nextPosition.adds(1.0).divs(2.0);
-        position.y = 1 - position.y;
+        const position = GridUtils.convertFromNDC(nextPosition);
 
         // Find new index of entity
         const nextIndex = new Vec2(

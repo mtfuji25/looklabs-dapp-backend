@@ -24,20 +24,25 @@ describe("GridUtils", () => {
         });
     });
 
-    // describe("convertToNDC & convertFromNDC", () => {
-    //     test("A pos converted to NDC and then converted from NDC again should be equal as before.", () => {
-    //         const positions = [
-    //             new Vec2(0.1, 0.3),
-    //             new Vec2(0.7, 0.2),
-    //             new Vec2(0.4, 0.4),
-    //             new Vec2(0.9, 0.8),
-    //         ];
+    describe("convertToNDC & convertFromNDC", () => {
+        test("A pos converted to NDC and then converted from NDC again should be equal as before.", () => {
+            const positions = [
+                new Vec2(0.1, 0.3),
+                new Vec2(0.7, 0.2),
+                new Vec2(0.4, 0.4),
+                new Vec2(0.9, 0.8),
+            ];
 
-    //         positions.forEach((pos) => {
-    //             const ndc = GridUtils.convertToNDC(pos);
-    //             const noNdc = GridUtils.convertFromNDC(ndc);
-    //             expect(noNdc).toEqual(pos);
-    //         });
-    //     });
-    // });
+            positions.forEach((pos) => {
+                const ndc = GridUtils.convertToNDC(pos);
+                const noNdc = GridUtils.convertFromNDC(ndc);
+
+                // It uses toBeCloseTo instead of toBe because for the first
+                // case it receives (0.09999999999999998, 0.30000000000000004)
+                // instead of (0.1, 0.3)
+                expect(noNdc.x).toBeCloseTo(pos.x, 0.0001);
+                expect(noNdc.y).toBeCloseTo(pos.y, 0.0001);
+            });
+        });
+    });
 });

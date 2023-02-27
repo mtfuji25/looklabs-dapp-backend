@@ -37,19 +37,33 @@ class GridUtils {
         return transposedCollider[row][column];
     }
 
+    /**
+     * Converts from a [-1,1] position to a [0,1] one.
+     * Then inverts the Y axis.
+     * So you'll get a normalized left-upper origin.
+     */
     static convertFromNDC  (pos: Vec2): Vec2  {
         const position = pos.adds(1.0).divs(2.0);
         position.y = 1 - position.y;
-
         return position;
     }
 
+    /**
+     * Converts from a [0,1] position to a [-1,1] one.
+     * Then inverts the Y axis.
+     */
     static convertToNDC (pos: Vec2): Vec2 {
-        const position = new Vec2(
-            pos.x,
-            0 - pos.y
-        );
-        return position;
+        // const position = new Vec2(
+        //     pos.x,
+        //     0 - pos.y
+        // );
+        // return position;
+        const position = new Vec2(pos.x, 1 - pos.y);
+        return position.muls(2.0).subs(1.0);
+    }
+
+    static invertY(pos: Vec2) {
+        return new Vec2(pos.x, 0 - pos.y);
     }
 
     static convertCellToPos (cell: Vec2, grid: Grid): Vec2{

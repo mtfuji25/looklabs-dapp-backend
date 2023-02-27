@@ -12,6 +12,7 @@ import { EcsData } from "../Interfaces";
 import { Entity } from "../Core/Ecs";
 import { Rectangle } from "../Components/Rectangle";
 import { assert } from "console";
+import { GridUtils } from "../../../Utils/GridUtils";
 
 interface SortedCollision {
     other: Rigidbody;
@@ -30,13 +31,12 @@ const offsetY = [ -1, -1, -1,  0,  1,  1,  1,  0];
 const sys_UpdateGrid = (data: EcsData, deltaTime: number): void => {
     // Iterates through all grids in system
     data.grids.forEach((grid) => {
-        // Just dynamics entitys should be checked
+        // Just dynamics entities should be checked
         grid.dynamics.forEach((dynamic) => {
             const transform = dynamic.entity.getTransform();
             const rectangle = dynamic.entity.getRectangle();
-            // Changes coordinate sistem from ndc to normalized left-upper origin
-            const position = transform.pos.adds(1.0).divs(2.0);
-            position.y = 1 - position.y;
+            // Changes coordinate system from ndc to normalized left-upper origin
+            const position = GridUtils.convertFromNDC(transform.pos);
 
             // Find new index of entity
             const index = new Vec2(

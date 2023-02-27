@@ -1,4 +1,5 @@
 // Math imports
+import { GridUtils } from "../../../Utils/GridUtils";
 import { Vec2 } from "../../../Utils/Math";
 
 // ECS imports
@@ -48,8 +49,7 @@ class Grid {
         const rectangle = entity.getRectangle();
 
         // Changes coordinate sistem from ndc to normalized left-upper origin
-        const position = transform.pos.adds(1.0).divs(2.0);
-        position.y = 1 - position.y;
+        const position = GridUtils.convertFromNDC(transform.pos);
 
         // Find new index of entity
         const index = new Vec2(

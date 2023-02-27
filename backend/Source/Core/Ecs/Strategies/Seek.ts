@@ -298,7 +298,11 @@ const _getPathFinderDirection = (entity:Entity, sources:Vec2[], destinationIndex
     if (dir && (!dir.equal(new Vec2(0, 0)))) {
         // If it's not converted to NDC the sprites 
         // will move away from each other on the Y axis.
-        dir = GridUtils.convertToNDC(dir).normalize().muls(speed);
+        // dir = GridUtils.convertToNDC(dir).normalize().muls(speed);
+
+        // Check this, before it was using the commented version of convertToNDC.
+        // It was put invertY instead.
+        dir = GridUtils.invertY(dir).normalize().muls(speed);
         return dir;
     }
 

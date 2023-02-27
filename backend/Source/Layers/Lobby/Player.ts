@@ -127,11 +127,8 @@ class PlayerLayer extends Layer {
         if (USE_RANDOM_SPAWN_POS) {
             const sCell = getSpawnCell();
             const sPos = GridUtils.convertCellToPos(sCell, grid);
-            this.self.getTransform().setPos(
-                // Converted from a [0,1] number to [-1,1]
-                sPos.x * 2 - 1, 
-                sPos.y * 2 - 1,
-            );
+            const ndcPos = GridUtils.convertToNDC(sPos);
+            this.self.getTransform().setPos(ndcPos.x, ndcPos.y);
         } else {
             this.self.getTransform().setPos(
                 spawnPos.pos[PlayerLayer.playerCount % spawnPos.pos.length].x,

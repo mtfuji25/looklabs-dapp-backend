@@ -60,8 +60,7 @@ const sys_CheckOverlap = (data: EcsData, deltaTime: number): void => {
 };
 
 const updateTransform = (rigidbody:Rigidbody, nextPosition:Vec2, grid:Grid) => {
-    const position = nextPosition.adds(1.0).divs(2.0);
-    position.y = 1 - position.y;
+    const position = GridUtils.convertFromNDC(nextPosition);
 
     // Find new index of entity
     const nextIndex = new Vec2(
@@ -81,8 +80,7 @@ const sys_CheckIndex = (data: EcsData, deltaTime: number): void => {
 
         if (transform) {
             
-            const position = transform.pos.adds(1.0).divs(2.0);
-            position.y = 1 - position.y;
+            const position = GridUtils.convertFromNDC(transform.pos);
     
             // Find new index of entity
             const index = new Vec2(
