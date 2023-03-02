@@ -1,4 +1,4 @@
-# The Pit Game
+Goat Wars Game
 
 ## Environment Setup
 
